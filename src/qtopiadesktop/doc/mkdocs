@@ -1,0 +1,151 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use File::Path;
+use File::Basename;
+use lib ( dirname($0)."/../../build/bin" );
+use Qtopia::Paths;
+use Qtopia::File;
+use Qtopia::Vars;
+
+if ( !defined($QPEDIR) ) {
+    # Try to get the paths from the build system first
+    eval { Qtopia::Paths::get_paths(); };
+    if ( $@ ) {
+        # We must be getting run from mkdocs (when building a package)
+        # Use the environment variables
+        $QPEDIR = $ENV{QPEDIR};
+        $depotpath = $ENV{QPEDIR};
+        $qt_depot_path = $ENV{QT_DEPOT_PATH};
+    }
+}
+
+my $print_usage = 0;
+
+my @variables = qw(SOURCEDIR DESTDIR GENDIR SRC_BUILD QDROOT QDSYNC CONF QPEDIR QTOPIA_DEPOT_PATH DQTDIR qdoc PWD);
+my %vars;
+for my $varname ( @variables ) {
+    $_ = shift(@ARGV);
+    if ( !defined($_) ) {
+        $print_usage = 1;
+        last;
+    }
+    $vars{$varname} = $_;
+}
+
+if ( $print_usage ) {
+    usage();
+}
+
+rmrf($vars{DESTDIR});
+mkpath($vars{DESTDIR});
+mkpath($vars{GENDIR});
+for ( glob("$vars{GENDIR}/*.qdocpp") ) {
+    unlink($_);
+}
+my @data;
+
+my $qtopia_index_in = "$vars{QPEDIR}/doc/html/qtopia.index";
+my $qtopia_index_out = "$vars{GENDIR}/qtopia.index";
+if ( -f $qtopia_index_in ) {
+    open IN, "$qtopia_index_in" or die "Can't read $qtopia_index_in";
+    @data = <IN>;
+    close IN;
+
+    my @tmp = @data;
+    @data = ();
+    my $skipto;
+    for ( @tmp ) {
+        if ( defined($skipto) ) {
+            if ( /$skipto/ ) {
+                $skipto = undef;
+            }
+            next;
+        }
+
+        s/^(<INDEX.*url=")[^"]+/${1}../;
+
+        # These pages conflict with Qtopia Desktop's pages.
+        if ( /<page.*\"(Functions)\"/ ) {
+            $skipto = "<\/page>";
+            next;
+        }
+
+        push(@data, $_);
+    }
+
+    open OUT, ">$qtopia_index_out" or die "Can't write $qtopia_index_out";
+    print OUT @data;
+    close OUT;
+} else {
+    open OUT, ">$qtopia_index_out" or die "Can't write $qtopia_index_out";
+    close OUT;
+}
+
+my $qt_index_in = "$vars{DQTDIR}/doc/html/qt.index";
+my $qt_index_out = "$vars{GENDIR}/qt.index";
+if ( -f $qt_index_in ) {
+    open IN, "$qt_index_in" or die "Can't read $qt_index_in";
+    @data = <IN>;
+    close IN;
+
+    for ( @data ) {
+        s/^(<INDEX.*url=")[^"]+/${1}../;
+    }
+
+    open OUT, ">$qt_index_out" or die "Can't write $qt_index_out";
+    print OUT @data;
+    close OUT;
+} else {
+    open OUT, ">$qt_index_out" or die "Can't write $qt_index_out";
+    close OUT;
+}
+
+for my $varname ( @variables ) {
+    $ENV{$varname} = $vars{$varname};
+}
+chdir $vars{PWD};
+my @files = glob("$vars{SOURCEDIR}/*.qdoc");
+for ( @files ) {
+    $_ = fixpath($_);
+}
+my $qdocpp = fixpath("$vars{PWD}/qdocpp");
+if ( $isWindows ) {
+    $qdocpp = fixpath("$qbs_bin/runsyncqt")." $qdocpp";
+}
+my $cmd = "$qdocpp $vars{GENDIR} ".join(" ", @files);
+system($cmd);
+if ( configopt("depot") ) {
+    # Rebuild the .png files if they're out of date
+    for my $file ( glob("$vars{SOURCEDIR}/*.dia") ) {
+        my $outfile = "$vars{SOURCEDIR}/images/".basename($file);
+        $outfile =~ s/\.dia$/.png/;
+        if ( needCopy($file, $outfile) ) {
+            if ( ! -e $outfile || -w $outfile ) {
+                $cmd = "dia -e $outfile $file";
+                system($cmd);
+            } else {
+                # The file exists but it's not writeable.
+                # You need to p4 edit it to stop the warning.
+                print "WARNING: $outfile is out of date.\n";
+            }
+        }
+    }
+}
+$cmd = "$vars{qdoc} ".fixpath("$vars{SOURCEDIR}/$vars{CONF}.qdocconf");
+system($cmd);
+Qtopia::File::cpR(fixpath("$vars{SOURCEDIR}/images"), $vars{DESTDIR});
+
+# Copy into the Qtopia docs area
+rmrf("$vars{QPEDIR}/doc/html/$vars{CONF}");
+Qtopia::File::cpR("$vars{DESTDIR}", fixpath("$vars{QPEDIR}/doc/html/$vars{CONF}"));
+
+exit 0;
+
+sub usage
+{
+    print "Usage:  ".basename($0)." ".join(" ", @variables)."\n";
+    exit 2;
+}
+

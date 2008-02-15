@@ -1,0 +1,22 @@
+<!--#if expr="$BLUETOOTH"-->
+<html>
+<head><title>Bluetooth FTP</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Bluetooth FTP Client</h2>
+<!--#endif-->
+<!--#include file="device-name.html"-->
+<p><img src=":icon/btsettings/BTSettings"></p>
+
+<p>Bluetooth FTP client allows to transfer files over the bluetooth link between your <!--#echo var="device-name" --> and other Bluetooth devices that support the Bluetooth FTP profile.</p>
+
+<p>If you're not connected to a device, you can choose to connect to a device by using the <b>Browse</b> action.  This will bring up a list of nearby devices that you can connect to.  Selecting a device from this screenwill attempt to connect to the remote device's Bluetooth FTP service.</p>
+
+<p>Once you're connected, you can create new directories and put new files onto the remote device by using the context menu actions.  Deleting files or directories can be accomplished by using the <b>Delete</b> context action.  You can also choose to disconnect from the remote device by using the <b>Disconnect</b> context action.</p>
+
+<p>Browsing the directory structure of the remote device is accomplished by using the <img src=":image/help/dpad">up/down arrow keys. To switch to a new directory on the remote device, use the <img src=":image/help/dpad"><b>Select</b> button.</p>
+<p>To obtain files from the remote device and transfer them to your local device, highlight a file and press the <img src=":icon/select"><b>Select</b> button.</p>
+
+</body>
+</html>
+<!--#endif-->

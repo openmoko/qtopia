@@ -1,0 +1,32 @@
+$Id: README,v 1.1 2002/12/03 09:24:52 telka Exp $
+
+srcconf
+=======
+
+srcconf is a software package which enables user friendly configuration of
+software source code packages. srcconf is based on lxdialog and kconfig
+(a.k.a. lkc) extracted from linux kernel 2.5.50.
+
+srcconf should run on all POSIX operating systems (including Linux
+and MS Windows with Cygwin installed).
+
+http://openwince.sourceforge.net/srcconf/
+
+
+Build and install instructions
+------------------------------
+
+1. Download and unpack srcconf sources.
+2. Run `./configure --prefix=/usr`.
+3. Run `make` and `make install`.
+
+Running srcconf
+---------------
+
+To configure your software source code package please read documentation
+for the package. In general, you should run either `conf', or `mconf', or
+`qconf' (qconf is optional, requires qt) program with a parameter (this
+parameter is dependent by configured package).
+
+Note: `conf', `mconf', and `qconf' are only different front-ends for
+srcconf (lkc) engine with different look, but with same results.

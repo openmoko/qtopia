@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Locally turn off LIDS for this script and all child processes.
+# LIDS only supports 1 LFS, so we must first disable anyother LFS.
+lidsadm -S -- +LIDS < /etc/lids/lids.secret
+lidsadm -S -- -LIDS < /etc/lids/lids.secret
+
+lidsconf -U
+lidsadm -S -- +RELOAD_CONF < /etc/lids/lids.secret
+
+lidsadm -S -- +LIDS < /etc/lids/lids.secret

@@ -1,0 +1,13 @@
+Example Trusted Package template
+
+To build this example:
+
+export QPEDIR=/path/to/qtopia
+export PATH=$QPEDIR/bin:$PATH
+
+qtopiamake
+make
+make packages
+
+mkdir -p /path/to/http_root/feed
+/path/to/qtopia-source/bin/mkPackages /path/to/http_root/feed

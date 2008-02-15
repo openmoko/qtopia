@@ -1,0 +1,32 @@
+<!--#if expr="$VOIP"-->
+<html>
+<head><title>VoIP</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>VoIP</h2>
+<!--#endif-->
+<p><img src=":image/sipsettings/SIP"></p>
+<p>Shows the current configuration of VoIP networks and allows the user to modify it.</p>
+<p><b>Identity</b>: create or edit a VoIP identity.</p>
+<ul>
+<li>User ID: user login id to the SIP server</li>
+<li>Host: address of the SIP server</li>
+<li>Name: full name of the user</li>
+<li>Password: password for the SIP server</li>
+<li>Auto Register: automactic registration with the SIP server when the phone starts</li>
+</ul>
+<p><b>Proxy</b>: set the proxy SIP server information.</p>
+<ul>
+<li>Host: address of the proxy SIP server</li>
+<li>Port: port number on the proxy SIP server to connect to</li>
+<li>User ID: login id to the proxy SIP server</li> 
+</ul>
+<p><b>Advanced</b>: configure the advanced options.</p>
+<ul>
+<li>Registration Timeout: timeout in seconds for registration request</li>
+<li>Presence Timeout: timeout in seconds for presence subscription</li>
+<li>Codec: preferred codec for the audio</li>
+</ul>
+</body>
+</html>
+<!--#endif-->

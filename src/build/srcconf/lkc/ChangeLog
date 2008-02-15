@@ -1,0 +1,30 @@
+2002-12-02  Marcel Telka  <marcel@telka.sk>
+
+	* confdata.c: Removed .config.cmd file generation.
+
+2002-12-02  Marcel Telka  <marcel@telka.sk>
+
+	* confdata.c, mconf.c, zconf.y: Removed Linux Kernel dependency.
+
+2002-12-02  Marcel Telka  <marcel@telka.sk>
+
+	* Makefile.am: Completed `make dist` support.
+
+2002-12-02  Marcel Telka  <marcel@telka.sk>
+
+	* configure.ac: Fixed QCONF conditional.
+	* Makefile.am: Excluded qconf.moc from targets if QCONF is not defined.
+
+2002-12-02  Marcel Telka  <marcel@telka.sk>
+
+	* Makefile.am, configure.ac: Added dynamic qt detection.
+
+2002-11-30  Marcel Telka  <marcel@telka.sk>
+
+	* Makefile.am, configure.ac: Added build framework.
+
+2002-11-29  Marcel Telka  <marcel@telka.sk>
+
+	* conf.c confdata.c expr.c expr.h images.c kconfig_load.c lkc.h
+	  lkc_proto.h mconf.c menu.c qconf.cc qconf.h symbol.c zconf.l zconf.y:
+	  	Extracted from linux kernel version 2.5.50.

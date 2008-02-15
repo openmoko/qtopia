@@ -1,0 +1,55 @@
+/*!
+  \headerfile <qlog.h>
+  \title <qlog.h>
+  \ingroup headers
+  \brief The <qlog.h> header enables categorized logging.
+
+  The <qlog.h> header enables categorized logging.
+  \sa <qtopiadesktoplog.h>
+*/
+
+/*!
+  \macro qLog(CATEGORY)
+  \relates <qlog.h>
+
+  Perform categorized logging against \a CATEGORY.
+  Note that \a CATEGORY should have been defined using QLOG_ENABLE, QLOG_OPTION or QLOG_OPTION_VOLATILE.
+*/
+
+/*!
+  \macro qLog()
+  \relates <qlog.h>
+
+  Perform uncategorized logging.
+  Note that the QLOG_UNCATEGORIZED macro must have been used to enable this.
+*/
+
+/*!
+  \macro QLOG_UNCATEGORIZED()
+  \relates <qlog.h>
+
+  Enable the qLog() macro.
+*/
+
+/*!
+  \macro QLOG_ENABLE(CATEGORY)
+  \relates <qlog.h>
+
+  Register a category for unconditional logging. This enables qLog(\a{CATEGORY}).
+*/
+
+/*!
+  \macro QLOG_OPTION(CATEGORY, FUNCTION)
+  \relates <qlog.h>
+
+  Register a category for conditional logging. This enables qLog(\a{CATEGORY}) but
+  the log messages are not displayed unless \a CATEGORY is enabled (as determined by \a FUNCTION.
+
+  It is typical to avoid using this macro directly, instead relying on a wrapper define.
+
+  \code
+    bool myCheckFunction( const char *category );
+    #define MYLOG_OPTION(CATEGORY) QLOG_OPTION(CATEGORY,myCheckFunction(#CATEGORY))
+  \endcode
+*/
+

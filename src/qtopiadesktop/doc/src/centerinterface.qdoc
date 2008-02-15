@@ -1,0 +1,42 @@
+/*!
+  \class CenterInterface
+  \brief The CenterInterface class provides access to Qtopia Sync Agent's internals.
+
+  The CenterInterface struct is the interface that plugins use to access Qtopia Sync Agent's internals.
+  It can be retieved using the QDPlugin::centerInterface() function.
+
+  \sa QDPlugin::centerInterface()
+*/
+
+/*!
+  \fn QDDevPlugin *CenterInterface::currentDevice()
+  Return the current device plugin that Qtopia Sync Agent is connected to.
+*/
+
+/*!
+  \fn const QDLinkPluginList CenterInterface::linkPlugins()
+  Return the available link plugins.
+*/
+
+/*!
+  \fn const QDDevPluginList CenterInterface::devicePlugins()
+  Return the available device plugins.
+*/
+
+/*!
+  \fn QDPlugin *CenterInterface::getPlugin( const QString &id )
+  Return a plugin instance based on it's \a id. If the requested plugin does not exist returns 0.
+*/
+
+/*!
+  \fn QObject *CenterInterface::syncObject()
+  Returns an object that exists for as long as the sync does.
+
+  The object is deleted after QDLinkPluginList::finishSync() is called but
+  before control returns from the sync process.
+
+  Resources shared by multiple sync objects can be assigned this object as a parent
+  so that they are cleaned up when the sync ends.
+
+  \sa QObject::destroyed()
+*/
