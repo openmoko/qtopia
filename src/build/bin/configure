@@ -367,11 +367,11 @@ set_optvar( "qws", +{
     "set" => [ "qws", "Use the Qtopia Core windowing system." ],
     "unset" => [ "x11", "Use the X11 windowing system." ],
     "setaliases" => [ "no-x11" ],
-    "default" => 1,
+    "default" => 0,
     "visible" => sub { configopt("depot") && &$qtopia_visref() },
     "autodep" => $qtopia_autoref,
     "config_pri" => [ "(!)CONFIG+=x11", "CONFIG+=qws" ],
-    "force_default" => 1,
+    "force_default" => 0,
 });
 # not visible for now because this doesn't come close to working
 set_optvar( "keypad_navigation", +{
@@ -2474,7 +2474,7 @@ if ( opt("edition") && !opt("qte_config") ) {
         $args .= " -depths 8,16,18,24,32 -qconfig $qconfig".
                  " -DQT_NO_PLUGIN_CHECK -DQT_EXTERNAL_SOUND_SERVER -DQT_QWS_KEYEVENT_SINGLECLIENT";
     } else {
-        $args .= " --enable-x11";
+        #$args .= " --enable-x11";
     }
     map { $args .= " -no-sql-".basename($_) if ( basename($_) ne "tmp" && -d $_ ); } glob("$qt_depot_path/src/plugins/sqldrivers/*");
     $args .= " -qt-sql-sqlite";

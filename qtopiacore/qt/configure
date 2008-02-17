@@ -118,7 +118,7 @@ elif [ -f "$relpath"/src/gui/kernel/qapplication_qws.cpp ]; then
     # ~ src/gui/base/qapplication_qws.cpp is present
     # ~ this is the free or commercial edition
     # ~ this is the internal edition and Qtopia Core is explicitly enabled
-    PLATFORM_QWS=maybe
+    PLATFORM_QWS=nope
 fi
 
 #-----------------------------------------------------------------------------
