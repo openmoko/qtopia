@@ -746,6 +746,23 @@ extern bool qt_sm_blockUserInput;
 #define XF86XK_LaunchF          0x1008FF4F
 // end of XF86keysyms.h
 
+// Special keys used by Qtopia, mapped into the X11 private keypad range.
+#define QTOPIAXK_Select         0x11000601
+#define QTOPIAXK_Yes            0x11000602
+#define QTOPIAXK_No             0x11000603
+#define QTOPIAXK_Cancel         0x11000604
+#define QTOPIAXK_Printer        0x11000605
+#define QTOPIAXK_Execute        0x11000606
+#define QTOPIAXK_Sleep          0x11000607
+#define QTOPIAXK_Play           0x11000608
+#define QTOPIAXK_Zoom           0x11000609
+#define QTOPIAXK_Context1       0x1100060A
+#define QTOPIAXK_Context2       0x1100060B
+#define QTOPIAXK_Context3       0x1100060C
+#define QTOPIAXK_Context4       0x1100060D
+#define QTOPIAXK_Call           0x1100060E
+#define QTOPIAXK_Hangup         0x1100060F
+#define QTOPIAXK_Flip           0x11000610
 
 
 // keyboard mapping table
@@ -959,6 +976,24 @@ static const unsigned int KeyTbl[] = {
     XF86XK_LaunchB,             Qt::Key_LaunchD,
     XF86XK_LaunchC,             Qt::Key_LaunchE,
     XF86XK_LaunchD,             Qt::Key_LaunchF,
+
+    // Qtopia keys
+    QTOPIAXK_Select,            Qt::Key_Select,
+    QTOPIAXK_Yes,               Qt::Key_Yes,
+    QTOPIAXK_No,                Qt::Key_No,
+    QTOPIAXK_Cancel,            Qt::Key_Cancel,
+    QTOPIAXK_Printer,           Qt::Key_Printer,
+    QTOPIAXK_Execute,           Qt::Key_Execute,
+    QTOPIAXK_Sleep,             Qt::Key_Sleep,
+    QTOPIAXK_Play,              Qt::Key_Play,
+    QTOPIAXK_Zoom,              Qt::Key_Zoom,
+    QTOPIAXK_Context1,          Qt::Key_Context1,
+    QTOPIAXK_Context2,          Qt::Key_Context2,
+    QTOPIAXK_Context3,          Qt::Key_Context3,
+    QTOPIAXK_Context4,          Qt::Key_Context4,
+    QTOPIAXK_Call,              Qt::Key_Call,
+    QTOPIAXK_Hangup,            Qt::Key_Hangup,
+    QTOPIAXK_Flip,              Qt::Key_Flip,
 
     0,                          0
 };
