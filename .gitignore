@@ -1,0 +1,4 @@
+Makefile
+qtopiacore/qt/include
+qtopiacore/qt/src/corelib/global/qconfig-qpe.h
+
