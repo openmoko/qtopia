@@ -1,0 +1,46 @@
+Qtopia on X11. Most of it was done by Trolltech already:
+
+=== Building ===
+ mkdir build-dir
+ cd build-dir
+ export QPEDIR=$PWD
+ qtopia-source-dir/configure -prefix $PWD/image -build-examples  -no-drm -no-sxe -displaysize 480x640 -dbus
+ make
+ make install
+
+=== Running ===
+ ./bin/phonesim -p 12345 qtopia-source-dir/src/tools/phonesim/troll.xml
+ export QTOPIA_PHONE_DEVICE=sim:localhost
+ Xephyr -screen 480x640 -dpi 300 -ac :1 &
+ DISPLAY=:1 xmodmap -e "keycode 223 = 0x11000601"
+ DISPLAY=:1 xmodmap -e "keycode 224 = 0x11000602"
+ DISPLAY=:1 xmodmap -e "keycode 225 = 0x11000603"
+ DISPLAY=:1 xmodmap -e "keycode 226 = 0x11000604"
+ DISPLAY=:1 xmodmap -e "keycode 227 = 0x11000605"
+ DISPLAY=:1 xmodmap -e "keycode 228 = 0x11000606"
+ DISPLAY=:1 xmodmap -e "keycode 229 = 0x11000607"
+ DISPLAY=:1 xmodmap -e "keycode 230 = 0x11000608"
+ DISPLAY=:1 xmodmap -e "keycode 231 = 0x11000609"
+ DISPLAY=:1 xmodmap -e "keycode 232 = 0x1100060A"
+ DISPLAY=:1 xmodmap -e "keycode 232 = 0x1100060B"
+ DISPLAY=:1 xmodmap -e "keycode 233 = 0x1100060B"
+ DISPLAY=:1 xmodmap -e "keycode 232 = 0x1100060A"
+ DISPLAY=:1 xmodmap -e "keycode 234 = 0x1100060C"
+ DISPLAY=:1 xmodmap -e "keycode 235 = 0x1100060D"
+ DISPLAY=:1 xmodmap -e "keycode 236 = 0x1100060E"
+ DISPLAY=:1 xmodmap -e "keycode 237 = 0x1100060F"
+ DISPLAY=:1 xmodmap -e "keycode 238 = 0x11000610"
+ DISPLAY=:1 xmodmap -e "keycode 239 = 0x1008ff26"
+ DISPLAY=:1 metacity|kwin|matchbox|foo
+ DISPLAY=:1 ./image/bin/qpe
+
+=== Issues ===
+ -XRender complains on the console
+ -Redrawing issues
+ -Artefacts
+ -Old content
+ -Not being able to launch any other X11
+ -Input methods not tested (assuming it is using XTest to send key events, try XIM?)
+ -DBUS
+ -freedesktop.org standard, e.g launch non X11 apps
+ -Window Management, pick a wm and test it. Show no decoration, raise the window properly!
