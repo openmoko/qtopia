@@ -19,10 +19,13 @@
 **
 ****************************************************************************/
 
+
 #include "ficgta01kbddriverplugin.h"
 #include "ficgta01kbdhandler.h"
 
 #include <qtopiaglobal.h>
+
+#ifdef Q_WS_QWS
 
 Ficgta01KbdDriverPlugin::Ficgta01KbdDriverPlugin( QObject *parent )
     : QKbdDriverPlugin( parent )
@@ -52,3 +55,5 @@ QStringList Ficgta01KbdDriverPlugin::keys() const
 }
 
 QTOPIA_EXPORT_QT_PLUGIN(Ficgta01KbdDriverPlugin)
+
+#endif

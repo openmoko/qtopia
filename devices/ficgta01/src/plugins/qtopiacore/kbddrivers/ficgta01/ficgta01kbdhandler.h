@@ -25,7 +25,6 @@
 #ifdef QT_QWS_FICGTA01
 
 #include <QObject>
-#include <QWSKeyboardHandler>
 #include <QDebug>
 
 #include <QValueSpaceItem>
@@ -33,6 +32,8 @@
 #include <QtopiaIpcAdaptor>
 #include <QTimer>
 
+#ifdef Q_WS_QWS
+#include <QWSKeyboardHandler>
 
 
 class QSocketNotifier;
@@ -60,6 +61,7 @@ private Q_SLOTS:
     void timerUpdate();
 
 };
+#endif
 
 
 #endif // QT_QWS_FICGTA01

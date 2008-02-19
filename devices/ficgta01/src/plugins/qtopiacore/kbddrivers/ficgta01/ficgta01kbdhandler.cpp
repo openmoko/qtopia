@@ -21,7 +21,7 @@
 
 #include "ficgta01kbdhandler.h"
 
-#ifdef QT_QWS_FICGTA01
+#if defined(QT_QWS_FICGTA01) && defined(Q_WS_QWS)
 #include <QFile>
 #include <QTextStream>
 #include <QScreen>

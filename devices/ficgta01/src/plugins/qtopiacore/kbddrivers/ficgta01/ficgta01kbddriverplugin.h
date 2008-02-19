@@ -22,6 +22,10 @@
 #ifndef FICGTA01KBDDRIVERPLUGIN_H
 #define FICGTA01KBDDRIVERPLUGIN_H
 
+#include <qglobal.h>
+
+#ifdef Q_WS_QWS
+
 #include <QtGui/QWSKeyboardHandlerFactoryInterface>
 
 class Ficgta01KbdDriverPlugin : public QKbdDriverPlugin {
@@ -34,5 +38,7 @@ public:
     QWSKeyboardHandler* create(const QString& driver);
     QStringList keys()const;
 };
+
+#endif
 
 #endif // FICGTA01KBDDRIVERPLUGIN_H
