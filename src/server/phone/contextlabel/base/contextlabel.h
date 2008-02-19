@@ -41,6 +41,8 @@ public:
 
     QSize reservedSize() const;
 
+    void closeEvent(QCloseEvent*);
+
 protected:
     void updateLabels();
     virtual bool filter(int unicode, int keycode, int modifiers, bool press,
