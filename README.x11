@@ -4,7 +4,7 @@ Qtopia on X11. Most of it was done by Trolltech already:
  mkdir build-dir
  cd build-dir
  export QPEDIR=$PWD
- qtopia-source-dir/configure -prefix $PWD/image -build-examples  -no-drm -no-sxe -displaysize 480x640 -dbus
+ qtopia-source-dir/configure -prefix $PWD/image -build-examples  -no-drm -no-sxe -displaysize 480x640 -dbus -device ficgta01
  make
  make install
 
