@@ -28,6 +28,7 @@
 #include <QStyle>
 #include <QPixmapCache>
 #include <QDebug>
+#include <QCloseEvent>
 #include <QApplication>
 #include <QTimer>
 #include "qsoftmenubarprovider.h"
@@ -262,5 +263,13 @@ void ContextLabel::updateLabels()
             buttons[idx].changed = false;
         }
     }
+}
+
+/*
+ * Never close this window, even if it might got active
+ */
+void ContextLabel::closeEvent(QCloseEvent* e)
+{
+    e->ignore();
 }
 
