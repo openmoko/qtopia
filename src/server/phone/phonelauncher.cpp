@@ -1176,6 +1176,7 @@ void PhoneLauncher::initializeCallHistory()
 #if defined(QTOPIA_TELEPHONY)
     if ( !mCallHistory ) {
         mCallHistory = new CallHistory(DialerControl::instance()->callList(), 0);
+        mCallHistory->setWindowFlags(Qt::FramelessWindowHint|mCallHistory->windowFlags());
         connect(callHistory(), SIGNAL(viewedMissedCalls()),
                 this, SLOT(resetMissedCalls()) );
         connect(callHistory(), SIGNAL(viewedMissedCalls()),

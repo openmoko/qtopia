@@ -746,6 +746,8 @@ QString PhoneBrowserStack::currentName() const
 PhoneBrowserScreen::PhoneBrowserScreen(QWidget *parent, Qt::WFlags flags)
 : QAbstractBrowserScreen(parent, flags), m_stack(0)
 {
+    setWindowFlags(Qt::FramelessWindowHint|windowFlags());
+
     QVBoxLayout *layout = new QVBoxLayout(this);
     setLayout(layout);
     layout->setSpacing(0);

@@ -3414,6 +3414,9 @@ static void markQtopiaWindow(QWidget *w)
         XChangeProperty(dpy, wId, atom, XA_CARDINAL, 32, PropModeReplace,
                         (unsigned char *)&flag, 1);
     }
+
+    // Assume the applications are ran within the launcher, do not show a frame
+    w->setWindowFlags(Qt::FramelessWindowHint|w->windowFlags());
 }
 
 #else
