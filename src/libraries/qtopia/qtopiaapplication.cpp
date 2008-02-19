@@ -139,6 +139,7 @@ bool mousePreferred = false;
 #define QTOPIA_USE_TEST_SLAVE 1
 #endif
 
+static void markQtopiaWindow(QWidget *w);
 enum QPEWidgetFlagsEnum {
     MenuLikeDialog = 0x01,
 } QPEWidgetFlags;
@@ -4399,6 +4400,11 @@ void QtopiaApplication::updateDialogGeometry()
     }
 }
 
+
+void QtopiaApplication::prepareMainWidget( QWidget* w )
+{
+    markQtopiaWindow(w);
+}
 
 
 /*!

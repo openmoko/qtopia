@@ -1143,6 +1143,7 @@ void PhoneLauncher::initializeCallHistory()
 #if defined(QTOPIA_TELEPHONY)
     if ( !m_callHistory ) {
         m_callHistory = new CallHistory(DialerControl::instance()->callList(), 0);
+        QtopiaApplication::prepareMainWidget(m_callHistory);
         connect(callHistory(), SIGNAL(viewedMissedCalls()),
                 this, SLOT(resetMissedCalls()) );
         connect(callHistory(), SIGNAL(viewedMissedCalls()),
@@ -1715,6 +1716,8 @@ QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
             qLog(UI) << "Unable to create the Dialer Screen";
             return 0;
         }
+
+        QtopiaApplication::prepareMainWidget(m_dialer);
         m_dialer->move(QApplication::desktop()->screenGeometry().topLeft());
 
         connect(m_dialer,

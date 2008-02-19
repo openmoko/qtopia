@@ -1030,6 +1030,8 @@ AbFullEditor::AbFullEditor(QWidget *parent, Qt::WFlags fl)
     : AbEditor(parent, fl),
     abName(0)
 {
+    QtopiaApplication::prepareMainWidget(this);
+
     setObjectName("edit");
     setModal(true);
 
@@ -2611,7 +2613,7 @@ void parseEmailTo( const QString &strDefaultEmail,
 #ifdef QTOPIA_CELL
 
 AbSimEditor::AbSimEditor(QWidget *parent, Qt::WFlags fl)
-    : AbEditor(parent, fl)
+    : AbEditor(parent, fl|Qt::FramelessWindowHint)
 {
     setObjectName("edit");
     setModal(true);

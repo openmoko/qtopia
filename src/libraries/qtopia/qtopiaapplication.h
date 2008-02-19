@@ -114,6 +114,7 @@ public:
 
     void showMainWidget( QWidget*, bool nomax=false );
     void showMainDocumentWidget( QWidget*, bool nomax=false );
+    static void prepareMainWidget( QWidget* );
     static void showDialog( QDialog*, bool nomax=false );
     static int execDialog( QDialog*, bool nomax=false );
     static void setMenuLike( QDialog *, bool );

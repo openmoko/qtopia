@@ -93,6 +93,8 @@ SimApp::SimApp(QWidget *parent, Qt::WFlags f)
       hasStk(false), simToolkitAvailable(false), eventList(0), idleModeMsgId(0),
       failLabel(0), commandOutsideMenu(false), hasSustainedDisplayText(false)
 {
+    QtopiaApplication::prepareMainWidget(this);
+
     status = new QValueSpaceObject("/Telephony/Status", this);
 
     setWindowTitle(tr("SIM Applications"));

@@ -61,6 +61,8 @@ QDSync::QDSync( QWidget *parent, Qt::WFlags /*f*/ )
     , selectDown( false ), connected( false ), syncing( false )
     , selectLabelState( Blank )
 {
+    QtopiaApplication::prepareMainWidget(this);
+
     TRACE(QDSync) << "QDSync::QDSync";
     setHtml("Synchronization communicates with Qtopia Sync Agent."
             "<hr>");
