@@ -333,6 +333,10 @@ void WindowManagementPrivate::activeChanged(WId w)
         // This is used by quicklauncher.
         if (caption == QLatin1String("_ignore_"))   // No tr
             return;
+
+        if (QWidget::find(w) && caption == QLatin1String("_decoration_")) { // No tr
+            caption = QString();
+        }
     }
 
     // Caption should only be emitted when a normal full-screen window
@@ -389,6 +393,7 @@ void WindowManagement::protectWindow(QWidget *window)
     Q_ASSERT(window->isWindow());
 
     window->setWindowFlags(window->windowFlags() | Qt::WindowStaysOnTopHint);
+    window->setFocusPolicy(Qt::NoFocus);
 }
 
 void WindowManagement::dockWindow
@@ -546,6 +551,7 @@ bool WindowManagement::supportsSoftMenus(WId winId)
     XSetErrorHandler(oldHandler);
     return usesSoftMenus;
 }
+
 
 void WindowManagement::closeWindow(WId winId)
 {
