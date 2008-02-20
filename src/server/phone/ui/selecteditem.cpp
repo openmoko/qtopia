@@ -1031,3 +1031,7 @@ void SelectedItem::paletteChanged()
     update(boundingRect());
 }
 
+void SelectedItem::resetMovedByKeyPress()
+{
+    sawMoveByKeyPress = false;
+}

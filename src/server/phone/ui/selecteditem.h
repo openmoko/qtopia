@@ -91,6 +91,8 @@ public:
 
     void paletteChanged();
 
+    void resetMovedByKeyPress();
+
 protected:
 
     void keyPressEvent(QKeyEvent *event);
