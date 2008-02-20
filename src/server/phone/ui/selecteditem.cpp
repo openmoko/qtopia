@@ -88,6 +88,7 @@ SelectedItem::SelectedItem(const QString &_backgroundFileName,
     , movie(0)
     , active(false)
     , pressed(false)
+    , sawMoveByKeyPress(false)
     , moveTimeLine(0)
     , playTimeLine(0)
     , slideTimeInterval(_slideTimeInterval)
@@ -333,7 +334,7 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
         return;
     }
 
-    if (!Qtopia::mousePreferred() || active)
+    if (!Qtopia::mousePreferred() || active || sawMoveByKeyPress)
         drawBackground(painter);
 
     if ( animationState() == Animating ) {
@@ -367,7 +368,7 @@ void SelectedItem::paint(QPainter *painter,const QStyleOptionGraphicsItem *,QWid
             draw(painter,destItem->selectedPic(),destX,destY);
         } else {
             // We're not sliding, we're just drawing 'item' as the selected item.
-            if (!Qtopia::mousePreferred() || active)
+            if (!Qtopia::mousePreferred() || active || sawMoveByKeyPress)
                 draw(painter,currentItem->selectedPic(),static_cast<int>(rect().x()),static_cast<int>(rect().y()));
         }
     }
@@ -680,6 +681,8 @@ void SelectedItem::keyReleaseEvent(QKeyEvent *event)
 */
 void SelectedItem::moveRequested(Direction direction)
 {
+    sawMoveByKeyPress = true;
+
     int row;
     int col;
     if ( destItem ) {
@@ -1028,3 +1031,7 @@ void SelectedItem::paletteChanged()
     update(boundingRect());
 }
 
+void SelectedItem::resetMovedByKeyPress()
+{
+    sawMoveByKeyPress = false;
+}

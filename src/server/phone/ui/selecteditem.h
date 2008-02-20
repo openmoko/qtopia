@@ -91,6 +91,8 @@ public:
 
     void paletteChanged();
 
+    void resetMovedByKeyPress();
+
 protected:
 
     void keyPressEvent(QKeyEvent *event);
@@ -185,6 +187,8 @@ private:
     bool active;
     // Used by keyPressEvent(...) and keyReleaseEvent(...).
     bool pressed;
+
+    bool sawMoveByKeyPress;
 
     // Used to move the SelectedItem from the current GridItem object to a destination object.
     // The amount of time it takes to move an item is determine by the ctor's 'slideTimeInterval'

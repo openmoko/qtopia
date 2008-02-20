@@ -513,6 +513,9 @@ void PhoneLauncherView::itemSelectedHandler(GridItem *item)
 void PhoneLauncherView::itemPressedHandler(GridItem *item)
 {
     if ( item && item->content() && !(item->content()->name().isEmpty()) ) {
+        if ( selectedItem )
+            selectedItem->resetMovedByKeyPress();
+
         emit pressed(*(item->content()));
     }
 }
