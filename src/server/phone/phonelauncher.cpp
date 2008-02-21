@@ -1740,7 +1740,7 @@ QAbstractHomeScreen *PhoneLauncher::homeScreen() const
 QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
 {
     if(create && !m_dialer) {
-        m_dialer = qtopiaWidget<QAbstractDialerScreen>(0);
+        m_dialer = qtopiaWidget<QAbstractDialerScreen>(0, Qt::FramelessWindowHint);
         if (!m_dialer) {
             qLog(UI) << "Unable to create the Dialer Screen";
             return 0;
