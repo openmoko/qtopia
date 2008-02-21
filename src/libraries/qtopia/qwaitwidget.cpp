@@ -22,6 +22,7 @@
 #include "qwaitwidget.h"
 #include <QLabel>
 #include <QTimer>
+#include <QBitmap>
 #include <QPixmap>
 #include <QVBoxLayout>
 #include <QHideEvent>
@@ -130,6 +131,7 @@ void ClockLabel::loadImage()
     }
 
     waitIcon = QPixmap::fromImage(img);
+    setMask(waitIcon.mask());
 }
 
 //===========================================================================
