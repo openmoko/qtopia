@@ -60,7 +60,7 @@ public slots:
     virtual void setMessage( const QMailMessage& mail ) = 0;
     virtual void clear() = 0;
     virtual void setText( const QString &text, const QString &type );
-    virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction );
+    virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
     virtual void setSignature( const QString &sig );
 
 signals:

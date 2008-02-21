@@ -23,6 +23,7 @@
 
 #include <qvaluespace.h>
 #include <qglobal.h>
+#include <QPhoneProfileManager>
 
 #include <private/qunixsocketserver_p.h>
 #include <private/qunixsocket_p.h>
@@ -507,6 +508,8 @@ void QAbstractCommDeviceManager_Private::doPreOpenSession(int id)
 
     // Check that we can create a session
     if (!m_parent->shouldStartSession(conn->sock())) {
+        qWarning("Failed to start device session because plane mode is active");
+        conn->sessionCallback(true);
         QTimer::singleShot(0, this, SLOT(doPending()));
         return;
     }
@@ -955,11 +958,20 @@ const QByteArray &QAbstractCommDeviceManager::deviceId() const
     utilizing the device.  The \a socket parameter holds the socket of
     the peer.
 
-    The default implementation always returns true.
+    The default implementation returns false if Qtopia is in plane mode;
+    otherwise, it returns true.
+
+    \sa QPhoneProfileManager::planeMode()
 */
 bool QAbstractCommDeviceManager::shouldStartSession(QUnixSocket *socket) const
 {
     Q_UNUSED(socket);
+
+    // don't allow session to start in flight mode
+    QPhoneProfileManager mgr;
+    if (mgr.planeMode())
+        return false;
+
     return true;
 }
 

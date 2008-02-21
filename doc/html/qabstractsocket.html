@@ -370,6 +370,7 @@
  if (socket-&gt;waitForConnected(1000))
      qDebug(&quot;Connected!&quot;);</pre>
 <p>If msecs is -1, this function will not time out.</p>
+<p>Note: This function may wait slightly longer than <i>msecs</i>, depending on the time it takes to complete the host lookup.</p>
 <p>See also <a href="qabstractsocket.html#connectToHost">connectToHost</a>() and <a href="qabstractsocket.html#connected">connected</a>().</p>
 <h3 class="fn"><a name="waitForDisconnected"></a>bool QAbstractSocket::waitForDisconnected ( int <i>msecs</i> = 30000 )</h3>
 <p>Waits until the socket has disconnected, up to <i>msecs</i> milliseconds. If the connection has been disconnected, this function returns true; otherwise it returns false. In the case where it returns false, you can call <a href="qabstractsocket.html#error">error</a>() to determine the cause of the error.</p>
@@ -387,8 +388,8 @@
 <p>See also <a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

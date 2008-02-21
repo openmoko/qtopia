@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/xml/qxmlstream.cpp -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/src/xml/qxmlstream.cpp -->
 <head>
   <title>Qt 4.3: QXmlStreamReader Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -69,7 +69,7 @@
 <li><div class="fn"/>QStringRef <b><a href="qxmlstreamreader.html#name">name</a></b> () const</li>
 <li><div class="fn"/>QXmlStreamNamespaceDeclarations <b><a href="qxmlstreamreader.html#namespaceDeclarations">namespaceDeclarations</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qxmlstreamreader.html#namespaceProcessing-prop">namespaceProcessing</a></b> () const</li>
-<li><div class="fn"/>QStringRef <b><a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a></b> () const</li>
+<li><div class="fn"/>QStringRef <b><a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a></b> () const</li>
 <li><div class="fn"/>QXmlStreamNotationDeclarations <b><a href="qxmlstreamreader.html#notationDeclarations">notationDeclarations</a></b> () const</li>
 <li><div class="fn"/>QStringRef <b><a href="qxmlstreamreader.html#processingInstructionData">processingInstructionData</a></b> () const</li>
 <li><div class="fn"/>QStringRef <b><a href="qxmlstreamreader.html#processingInstructionTarget">processingInstructionTarget</a></b> () const</li>
@@ -104,7 +104,7 @@
 <p>The <a href="xml-streambookmarks.html">QXmlStream Bookmarks Example</a> illustrates how to use the recursive descent technique with a subclassed stream reader to read an XML bookmark file (XBEL).</p>
 <a name="namespaces"></a>
 <h3>Namespaces</h3>
-<p>QXmlStream understands and resolves XML namespaces. E.g&#x2e; in case of a <a href="qxmlstreamreader.html#TokenType-enum">StartElement</a>, <a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a>() returns the namespace the element is in, and <a href="qxmlstreamreader.html#name">name</a>() returns the element's <i>local</i> name. The combination of namespaceUri and name uniquely identifies an element. If a namespace prefix was not declared in the XML entities parsed by the reader, the namespaceUri is empty.</p>
+<p>QXmlStream understands and resolves XML namespaces. E.g&#x2e; in case of a <a href="qxmlstreamreader.html#TokenType-enum">StartElement</a>, <a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a>() returns the namespace the element is in, and <a href="qxmlstreamreader.html#name">name</a>() returns the element's <i>local</i> name. The combination of namespaceUri and name uniquely identifies an element. If a namespace prefix was not declared in the XML entities parsed by the reader, the namespaceUri is empty.</p>
 <p>If you parse XML data that does not utilize namespaces according to the XML specification or doesn't use namespaces at all, you can use the element's <a href="qxmlstreamreader.html#qualifiedName">qualifiedName</a>() instead. A qualified name is the element's <i>prefix</i> followed by colon followed by the element's local name - exactly like the element appears in the raw XML data. Since the mapping namespaceUri to prefix is neither unique nor universal, <a href="qxmlstreamreader.html#qualifiedName">qualifiedName</a>() should be avoided for namespace-compliant XML data.</p>
 <p>In order to parse standalone documents that do use undeclared namespace prefixes, you can turn off namespace processing completely with the <a href="qxmlstreamreader.html#namespaceProcessing-prop">namespaceProcessing</a> property.</p>
 <a name="incremental-parsing"></a>
@@ -134,8 +134,8 @@
 <tr><td valign="top"><tt>QXmlStreamReader::Invalid</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">An error has occurred, reported in <a href="qxmlstreamreader.html#error">error</a>() and <a href="qxmlstreamreader.html#errorString">errorString</a>().</td></tr>
 <tr><td valign="top"><tt>QXmlStreamReader::StartDocument</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The reader reports the start of the document. If the document is declared standalone, <a href="qxmlstreamreader.html#isStandaloneDocument">isStandaloneDocument</a>() returns true; otherwise it returns false.</td></tr>
 <tr><td valign="top"><tt>QXmlStreamReader::EndDocument</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The reader reports the end of the document.</td></tr>
-<tr><td valign="top"><tt>QXmlStreamReader::StartElement</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The reader reports the start of an element with <a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a>() and <a href="qxmlstreamreader.html#name">name</a>(). Empty elements are also reported as StartElement, followed directly by EndElement. The convenience function <a href="qxmlstreamreader.html#readElementText">readElementText</a>() can be called to concatenate all content until the corresponding EndElement. Attributes are reported in <a href="qxmlstreamreader.html#attributes">attributes</a>(), namespace declarations in <a href="qxmlstreamreader.html#namespaceDeclarations">namespaceDeclarations</a>().</td></tr>
-<tr><td valign="top"><tt>QXmlStreamReader::EndElement</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The reader reports the end of an element with <a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a>() and <a href="qxmlstreamreader.html#name">name</a>().</td></tr>
+<tr><td valign="top"><tt>QXmlStreamReader::StartElement</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The reader reports the start of an element with <a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a>() and <a href="qxmlstreamreader.html#name">name</a>(). Empty elements are also reported as StartElement, followed directly by EndElement. The convenience function <a href="qxmlstreamreader.html#readElementText">readElementText</a>() can be called to concatenate all content until the corresponding EndElement. Attributes are reported in <a href="qxmlstreamreader.html#attributes">attributes</a>(), namespace declarations in <a href="qxmlstreamreader.html#namespaceDeclarations">namespaceDeclarations</a>().</td></tr>
+<tr><td valign="top"><tt>QXmlStreamReader::EndElement</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">The reader reports the end of an element with <a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a>() and <a href="qxmlstreamreader.html#name">name</a>().</td></tr>
 <tr><td valign="top"><tt>QXmlStreamReader::Characters</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">The reader reports characters in <a href="qxmlstreamreader.html#text">text</a>(). If the characters are all white-space, <a href="qxmlstreamreader.html#isWhitespace">isWhitespace</a>() returns true. If the characters stem from a CDATA section, <a href="qxmlstreamreader.html#isCDATA">isCDATA</a>() returns true.</td></tr>
 <tr><td valign="top"><tt>QXmlStreamReader::Comment</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">The reader reports a comment in <a href="qxmlstreamreader.html#text">text</a>().</td></tr>
 <tr><td valign="top"><tt>QXmlStreamReader::DTD</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The reader reports a DTD in <a href="qxmlstreamreader.html#text">text</a>(), notation declarations in <a href="qxmlstreamreader.html#notationDeclarations">notationDeclarations</a>().</td></tr>
@@ -249,11 +249,11 @@
 <p>See also <a href="qxmlstreamreader.html#columnNumber">columnNumber</a>() and <a href="qxmlstreamreader.html#characterOffset">characterOffset</a>().</p>
 <h3 class="fn"><a name="name"></a><a href="qstringref.html">QStringRef</a> QXmlStreamReader::name () const</h3>
 <p>Returns the local name of a <a href="qxmlstreamreader.html#TokenType-enum">StartElement</a>, <a href="qxmlstreamreader.html#TokenType-enum">EndElement</a>, or an <a href="qxmlstreamreader.html#TokenType-enum">EntityReference</a>.</p>
-<p>See also <a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a>() and <a href="qxmlstreamreader.html#qualifiedName">qualifiedName</a>().</p>
+<p>See also <a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a>() and <a href="qxmlstreamreader.html#qualifiedName">qualifiedName</a>().</p>
 <h3 class="fn"><a name="namespaceDeclarations"></a><a href="qxmlstreamnamespacedeclaration.html#QXmlStreamNamespaceDeclarations-typedef">QXmlStreamNamespaceDeclarations</a> QXmlStreamReader::namespaceDeclarations () const</h3>
 <p>If the state() is <a href="qxmlstreamreader.html#TokenType-enum">StartElement</a>, this function returns the element's namespace declarations. Otherwise an empty vector is returned.</p>
 <p>The <a href="qxmlstreamnamespacedeclaration.html">QXmlStreamNamespaceDeclaration</a> class is defined to be a <a href="qvector.html">QVector</a> of <a href="qxmlstreamnamespacedeclaration.html">QXmlStreamNamespaceDeclaration</a>.</p>
-<h3 class="fn"><a name="namespaceUrix"></a><a href="qstringref.html">QStringRef</a> QXmlStreamReader::namespaceUri () const</h3>
+<h3 class="fn"><a name="namespaceUri"></a><a href="qstringref.html">QStringRef</a> QXmlStreamReader::namespaceUri () const</h3>
 <p>Returns the namespaceUri of a <a href="qxmlstreamreader.html#TokenType-enum">StartElement</a> or <a href="qxmlstreamreader.html#TokenType-enum">EndElement</a>.</p>
 <p>See also <a href="qxmlstreamreader.html#name">name</a>() and <a href="qxmlstreamreader.html#qualifiedName">qualifiedName</a>().</p>
 <h3 class="fn"><a name="notationDeclarations"></a><a href="qxmlstreamnotationdeclaration.html#QXmlStreamNotationDeclarations-typedef">QXmlStreamNotationDeclarations</a> QXmlStreamReader::notationDeclarations () const</h3>
@@ -265,8 +265,8 @@
 <p>Returns the target of a <a href="qxmlstreamreader.html#TokenType-enum">ProcessingInstruction</a>.</p>
 <h3 class="fn"><a name="qualifiedName"></a><a href="qstringref.html">QStringRef</a> QXmlStreamReader::qualifiedName () const</h3>
 <p>Returns the qualified name of a <a href="qxmlstreamreader.html#TokenType-enum">StartElement</a> or <a href="qxmlstreamreader.html#TokenType-enum">EndElement</a>;</p>
-<p>A qualified name is the raw name of an element in the XML data. It consists of the namespace prefix, followed by colon, followed by the element's local name. Since the namespace prefix is not unique (the same prefix can point to different namespaces and different prefixes can point to the same namespace), you shouldn't use qualifiedName(), but the resolved <a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a>() and the attribute's local <a href="qxmlstreamreader.html#name">name</a>().</p>
-<p>See also <a href="qxmlstreamreader.html#name">name</a>() and <a href="qxmlstreamreader.html#namespaceUrix">namespaceUri</a>().</p>
+<p>A qualified name is the raw name of an element in the XML data. It consists of the namespace prefix, followed by colon, followed by the element's local name. Since the namespace prefix is not unique (the same prefix can point to different namespaces and different prefixes can point to the same namespace), you shouldn't use qualifiedName(), but the resolved <a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a>() and the attribute's local <a href="qxmlstreamreader.html#name">name</a>().</p>
+<p>See also <a href="qxmlstreamreader.html#name">name</a>() and <a href="qxmlstreamreader.html#namespaceUri">namespaceUri</a>().</p>
 <h3 class="fn"><a name="raiseError"></a>void QXmlStreamReader::raiseError ( const <a href="qstring.html">QString</a> &amp; <i>message</i> = QString() )</h3>
 <p>Raises a custom error with an optional error <i>message</i>.</p>
 <p>See also <a href="qxmlstreamreader.html#error">error</a>() and <a href="qxmlstreamreader.html#errorString">errorString</a>().</p>
@@ -292,8 +292,8 @@
 <p>See also <a href="qxmlstreamreader.html#tokenString">tokenString</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

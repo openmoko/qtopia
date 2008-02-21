@@ -1,8 +1,10 @@
+                    GNU GENERAL PUBLIC LICENSE
 
- The Qt GUI Toolkit is Copyright (C) 1994-2007 Trolltech ASA.
+ The Qtopia Environment is Copyright (C) 2000-2008 TROLLTECH ASA and
+  other authors as specified in the file headers.
 
- You may use, distribute and copy the Qt GUI Toolkit under the terms of
- GNU General Public License version 2, which is displayed below.
+ You may use, distribute and copy the Qtopia Environment under the terms
+ of GNU General Public License version 2, which is displayed below.
 
 -------------------------------------------------------------------------
 
@@ -10,7 +12,7 @@
 		       Version 2, June 1991
 
  Copyright (C) 1989, 1991 Free Software Foundation, Inc.
-                       51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 

@@ -1,18 +1,57 @@
-# This file contains projects that are eligable for inclusion in the Free Edition.
+# This file contains projects that are eligable for inclusion in the Opensource Edition.
 
-# Qtopia Platform files
+# Qtopia Platform projects (required for every edition)
 PROJECTS*=\
     # A placeholder for installing Qt files
-    qt\
-    server\
-    libraries/qtopiabase\
-    libraries/qtopia\
-    libraries/qtopiacomm\
-    libraries/qtopiaaudio\
-    tools/qdsync/common\
-    tools/qdsync/app\
-    tools/qdsync/base\
-    tools/qdsync/pim\
+    qt \
+    server \
+    applications/helpbrowser \
+    libraries/handwriting \
+    libraries/qtopiabase \
+    libraries/qtopia \
+    libraries/qtopiaaudio \
+    libraries/qtopiacomm \
+    libraries/qtopiapim \
+    libraries/qtopiaprinting \
+    settings/appearance \
+    settings/handwriting \
+    settings/homescreen \
+    settings/language \
+    settings/light-and-power \
+    settings/logging \
+    settings/network \
+    settings/packagemanager \
+    settings/security \
+    settings/systemtime \
+    settings/worldtime \
+    tools/content_installer \
+    tools/dbmigrate \
+    tools/device_updater \
+    tools/printserver \
+    tools/qcop \
+    tools/qdawggen \
+    tools/qdsync/app \
+    tools/qdsync/base \
+    tools/qdsync/common \
+    tools/qdsync/pim \
+    tools/vsexplorer \
+    plugins/network/lan \
+    plugins/network/dialing \
+    plugins/qtopiacore/iconengines/qtopiaiconengine \
+    plugins/qtopiacore/iconengines/qtopiasvgiconengine \
+    plugins/qtopiacore/iconengines/qtopiapiciconengine \
+    plugins/qtopiacore/imageformats/picture \
+    3rdparty/applications/micro_httpd \
+    3rdparty/applications/sqlite \
+    3rdparty/libraries/alsa \
+    3rdparty/libraries/crypt \
+    3rdparty/libraries/inputmatch \
+    3rdparty/libraries/md5 \
+    3rdparty/libraries/openobex \
+    3rdparty/libraries/pthread \
+    3rdparty/libraries/sqlite \
+    3rdparty/libraries/tar \
+    3rdparty/libraries/zlib
 
 # Dummy entries (finegrained dependencies, retained in case libqtopiacomm is ever split up)
 PROJECTS*=\
@@ -23,32 +62,88 @@ PROJECTS*=\
     libraries/qtopiacomm/serial\
     libraries/qtopiacomm/vpn
 
-# 3rdparty stuff
-PROJECTS*=\
-    3rdparty/libraries/zlib\
-    3rdparty/libraries/alsa\
-    3rdparty/libraries/md5\
-    3rdparty/libraries/tar\
-    3rdparty/libraries/crypt\
-    3rdparty/libraries/pthread\
-    #obex
-    3rdparty/libraries/openobex\
-    3rdparty/libraries/inputmatch\
-    3rdparty/libraries/sqlite\
-    3rdparty/applications/sqlite
+# Projects used in all non-platform builds
+!platform {
+    PROJECTS*=\
+        applications/addressbook \
+        applications/calculator \
+        applications/camera \
+        applications/clock \
+        applications/datebook \
+        applications/mediarecorder \
+        applications/photoedit \
+        applications/sysinfo \
+        applications/textedit \
+        applications/todo \
+        games/qasteroids \
+        games/fifteen \
+        games/snake \
+        games/minesweep \
+        settings/words \
+        plugins/content/id3 \
+        plugins/content/exif \
+        plugins/content/threegpp \
+        # Qtmail stuff
+        applications/qtmail \
+        libraries/qtopiamail \
+        plugins/composers/email \
+        plugins/composers/generic \
+        plugins/composers/mms \
+        plugins/viewers/generic
+
+    enable_modem:PROJECTS*=\    
+        plugins/viewers/smil
+}
+
+# Projects used in phone builds
+phone {
+    PROJECTS*=\
+        libraries/qtopiaphone \
+        settings/ringprofile \
+        settings/speeddial \
+        tools/atinterface \
+        3rdparty/libraries/gsm \
+        plugins/codecs/wavrecord
+
+    enable_modem {
+        PROJECTS*=\
+            libraries/qtopiaphonemodem \
+            libraries/qtopiasmil
+        for(p,PHONEVENDORS) {
+            exists(plugins/phonevendors/$$p/$$tail($$p).pro):PROJECTS*=plugins/phonevendors/$$p
+        }
+        for(m,MULTIPLEXERS) {
+            exists(plugins/multiplexers/$$m/$$tail($$m).pro):PROJECTS*=plugins/multiplexers/$$m
+        }
+    }
+
+    enable_cell {
+        PROJECTS*=\
+            settings/callforwarding\
+            settings/phonenetworks\
+            settings/phonesettings
+    }
+
+    # This isn't supported but it's included anyway
+    PROJECTS*=tools/phonesim tools/phonesim/lib tools/phonesim_target
+    CONFIG+=qtopiatest_use_phonesim
+
+    enable_voip:PROJECTS*=\
+        3rdparty/libraries/dissipate2\
+        tools/sipagent \
+        settings/sipsettings
+}
 
 !x11 {
-    # input methods that are available in all editions
+    # input methods that are available in all editions, except X11
     PROJECTS*=\
-        plugins/inputmethods/predictivekeyboard\
-        plugins/inputmethods/keyboard\
-        plugins/inputmethods/dockedkeyboard
+        plugins/inputmethods/predictivekeyboard \
+        plugins/inputmethods/keyboard \
+        plugins/inputmethods/dockedkeyboard \
+        3rdparty/plugins/inputmethods/pkim
     
     contains(LANGUAGES,zh_CN):PROJECTS*=plugins/inputmethods/pinyin
 }
-
-!media:PROJECTS*=\
-    libraries/qtopiapim
 
 # qtopiatest
 !x11:qtopiatest {
@@ -78,46 +173,7 @@ PROJECTS*=\
         plugins/qtopiacore/gfxdrivers/perftestlinuxfb
 }
 
-# non-platform stuff
-!platform:!media {
-    PROJECTS*=\
-        applications/addressbook \
-        applications/datebook \
-        applications/todo\
-	applications/calculator \
-	applications/camera \
-	applications/clock \
-	applications/mediarecorder \
-	applications/photoedit \
-	applications/sysinfo \
-	applications/textedit \
-	games/qasteroids\
-	games/fifteen\
-        games/snake\
-        games/minesweep\
-        plugins/content/id3 \
-        plugins/content/exif \
-        plugins/content/threegpp
-}
-
-PROJECTS*=\
-    settings/appearance\
-    settings/language \
-    settings/logging \
-    settings/network \
-    settings/systemtime \
-    settings/worldtime \
-    settings/light-and-power \
-    settings/packagemanager\
-    settings/homescreen \
-    applications/helpbrowser \
-    tools/qcop \
-    tools/vsexplorer \
-    tools/qdawggen \
-    tools/dbmigrate \
-    tools/device_updater \
-    3rdparty/applications/micro_httpd
-
+# Projects used in media-enabled builds
 enable_qtopiamedia {
     PROJECTS*=\
         libraries/qtopiamedia \
@@ -162,61 +218,26 @@ enable_qtopiamedia {
     }
 }
 
+# Basic sound capability for non-media-enabled builds
 !enable_qtopiamedia:!x11 {
     PROJECTS*=\
         tools/qss
 }
 
-!media:PROJECTS*=\
-    settings/security
-
 !no_quicklaunch|enable_singleexec:PROJECTS*=tools/quicklauncher
-
-PROJECTS*=tools/content_installer
 
 build_libamr:PROJECTS*=\
     3rdparty/libraries/amr\
     3rdparty/plugins/codecs/libamr
 
-PROJECTS*=\
-    plugins/network/lan \
-    plugins/network/dialing \
-    plugins/qtopiacore/iconengines/qtopiaiconengine \
-    plugins/qtopiacore/iconengines/qtopiasvgiconengine \
-    plugins/qtopiacore/iconengines/qtopiapiciconengine \
-    plugins/qtopiacore/imageformats/picture
-
-media {
-    PROJECTS*=\
-	applications/camera \
-	applications/clock \
-	applications/mediarecorder \
-	applications/photoedit \
-        plugins/content/id3 \
-        plugins/content/threegpp
-
-    build_helix {
-        PROJECTS*=\
-            3rdparty/libraries/helix \
-            libraries/qtopiamedia \
-            applications/mediaplayer
-    }
-}
-
-PROJECTS*=\
-    libraries/qtopiaprinting \
-    tools/printserver
-
 enable_bluetooth:PROJECTS*=\
+    settings/btsettings \
+    applications/bluetooth \
+    plugins/network/bluetooth \
     plugins/qtopiaprinting/bluetooth
 
 enable_infrared:PROJECTS*=\
     settings/beaming
-
-enable_bluetooth:PROJECTS*=\
-    settings/btsettings \
-    applications/bluetooth \
-    plugins/network/bluetooth
 
 enable_dbus {
     PROJECTS*=\
@@ -230,88 +251,15 @@ enable_dbusipc {
     tools/qtopia-dbus-launcher
 }
 
-PROJECTS*=\
-    libraries/handwriting\
-    settings/handwriting
-
-!x11 {
-    PROJECTS*=\
-        3rdparty/plugins/inputmethods/pkim
-}
-
 THEMES *= smart
 
-phone {
-    PROJECTS*=\
-        3rdparty/libraries/gsm\
-        settings/ringprofile\
-        settings/speeddial\
-        plugins/codecs/wavrecord\
-
-    enable_modem:PROJECTS*=\    
-        libraries/qtopiasmil
-
-    enable_infrared:PROJECTS*=\
-        settings/beaming
-
-    # Phone Themes
-    THEMES*= \
-        classic \
-        crisp \
-        finxi \
-        qtopia
-}
-
-!platform {
-    PROJECTS*=settings/words
-
-    # Qtmail stuff
-    !media:PROJECTS*=\
-        libraries/qtopiamail\
-        applications/qtmail\
-        plugins/composers/email\
-        plugins/composers/generic\
-        plugins/composers/mms\
-        plugins/viewers/generic
-
-    !media:enable_modem:PROJECTS*=\    
-        plugins/viewers/smil
-}
+phone:THEMES*=\
+    classic \
+    crisp \
+    finxi \
+    qtopia
 
 enable_samples:PROJECTS+=settings/serverwidgets
-
-phone {
-    PROJECTS*=\
-        libraries/qtopiaphone\
-        tools/atinterface
-
-    enable_cell {
-        PROJECTS*=\
-            settings/callforwarding\
-            settings/phonenetworks\
-            settings/phonesettings
-    }
-
-    enable_modem {
-        PROJECTS*=\
-            libraries/qtopiaphonemodem
-        for(p,PHONEVENDORS) {
-            exists(plugins/phonevendors/$$p/$$tail($$p).pro):PROJECTS*=plugins/phonevendors/$$p
-        }
-        for(m,MULTIPLEXERS) {
-            exists(plugins/multiplexers/$$m/$$tail($$m).pro):PROJECTS*=plugins/multiplexers/$$m
-        }
-    }
-
-    # This isn't supported but it's included anyway
-    PROJECTS*=tools/phonesim tools/phonesim/lib tools/phonesim_target
-    CONFIG+=qtopiatest_use_phonesim
-
-    enable_voip:PROJECTS*=\
-        3rdparty/libraries/dissipate2\
-        tools/sipagent \
-        settings/sipsettings
-}
 
 drmagent {
     PROJECTS*=\

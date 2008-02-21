@@ -328,6 +328,39 @@ void QContentCache::remove( QContentId contentId )
     m_cache.remove( contentId );
 }
 
+void QContentCache::cacheMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType, int key )
+{
+    m_mimeIdCache.insert( qMakePair( mimeType, databaseId ), new int( key ) );
+}
+
+void QContentCache::cacheLocationKey( QtopiaDatabaseId databaseId, const QString &location, int key )
+{
+    m_locationIdCache.insert( qMakePair( location, databaseId ), new int( key ) );
+}
+
+int QContentCache::lookupMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType )
+{
+    int *key = m_mimeIdCache.object( qMakePair( mimeType, databaseId ) );
+
+    return key ? *key : -1;
+}
+
+int QContentCache::lookupLocationKey( QtopiaDatabaseId databaseId, const QString &location )
+{
+    int *key = m_locationIdCache.object( qMakePair( location, databaseId ) );
+
+    return key ? *key : -1;
+}
+
+void QContentCache::clear()
+{
+    QWriteLocker locker( &m_lock );
+
+    m_cache.clear();
+    m_mimeIdCache.clear();
+    m_locationIdCache.clear();
+}
+
 QContentCache *QContentCache::instance()
 {
     return g_contentCache();

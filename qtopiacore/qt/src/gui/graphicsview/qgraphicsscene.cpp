@@ -1,33 +1,40 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
 ** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://trolltech.com/products/qt/licenses/licensing/opensource/
+** License versions 2.0 or 3.0 as published by the Free Software
+** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file.  Alternatively you may (at
+** your option) use any later version of the GNU General Public
+** License if such license has been publicly approved by Trolltech ASA
+** (or its successors, if any) and the KDE Free Qt Foundation. In
+** addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.1, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
 **
-** If you are unsure which license is appropriate for your use, please
+** Please review the following information to ensure GNU General
+** Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
+** you are unsure which license is appropriate for your use, please
 ** review the following information:
 ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
 ** or contact the sales department at sales@trolltech.com.
 **
-** In addition, as a special exception, Trolltech gives you certain
-** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.0, which can be found at
-** http://www.trolltech.com/products/qt/gplexception/ and in the file
-** GPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Trolltech, as the sole
+** copyright holder for Qt Designer, grants users of the Qt/Eclipse
+** Integration plug-in the right for the Qt/Eclipse Integration to
+** link to functionality provided by Qt Designer and its related
+** libraries.
 **
-** In addition, as a special exception, Trolltech, as the sole copyright
-** holder for Qt Designer, grants users of the Qt/Eclipse Integration
-** plug-in the right for the Qt/Eclipse Integration to link to
-** functionality provided by Qt Designer and its related libraries.
-**
-** Trolltech reserves all rights not expressly granted herein.
+** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
+** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
+** granted herein.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -73,8 +80,12 @@ static const int QGRAPHICSSCENE_INDEXTIMER_TIMEOUT = 2000;
     object. Then, you have two options: either add your existing QGraphicsItem
     objects by calling addItem(), or you can call one of the convenience
     functions addEllipse(), addLine(), addPath(), addPixmap(), addPolygon(),
-    addRect(), or addText(), which all return a pointer to the newly added
-    item. You can then visualize the scene using QGraphicsView. When the scene
+    addRect(), or addText(), which all return a pointer to the newly added item.
+    The dimensions of the items added with these functions are relative to the
+    item's coordinate system, and the items position is initialized to (0,
+    0) in the scene.
+
+    You can then visualize the scene using QGraphicsView. When the scene
     changes, (e.g., when an item moves or is transformed) QGraphicsScene emits
     the changed() signal. To remove an item, call removeItem().
 
@@ -1956,7 +1967,9 @@ QGraphicsPolygonItem *QGraphicsScene::addPolygon(const QPolygonF &polygon,
     and brush are initialized to \a pen and \a brush.
 
     Note that the item's geometry is provided in item coordinates, and its
-    position is initialized to (0, 0).
+    position is initialized to (0, 0). For example, if a QRect(50, 50, 100,
+    100) is added, its top-left corner will be at (50, 50) relative to the
+    origin in the items coordinate system.
 
     If the item is visible (i.e., QGraphicsItem::isVisible() returns true),
     QGraphicsScene will emit changed() once control goes back to the event

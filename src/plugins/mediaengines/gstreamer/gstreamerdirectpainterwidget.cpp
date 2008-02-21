@@ -51,6 +51,9 @@ DirectPainterWidget::DirectPainterWidget(QWidget* parent):
 
 DirectPainterWidget::~DirectPainterWidget()
 {
+#ifndef QTOPIA_NO_MEDIAVIDEOSCALING
+    delete m_frameBufferImage;
+#endif
     g_object_unref(m_sink);
 }
 
@@ -91,22 +94,23 @@ void DirectPainterWidget::paint(QImage const& frame)
 
         QRegion paintRegion = allocatedRegion();
 
-        if (m_black != 0)
-        {
+        if (m_black != 0) {
             qt_screen->solidFill(Qt::black, paintRegion & m_blackRegion);
             --m_black;
         }
 
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-        qt_screen->blit(frame.scaled(m_destSize),
-                        m_destTopLeft,
-                        paintRegion);
+        QPainter    p(m_frameBufferImage);
+        p.setClipRegion(paintRegion);
+        p.setWindow(0, 0, frame.width(), frame.height());
+        p.setViewport(m_destRect);
+        p.drawImage(0, 0, frame);
 #else
         qt_screen->blit(frame, m_destTopLeft, paintRegion);
 #endif
         endPainting();
 
-        qt_screen->setDirty(m_destRect);
+        qt_screen->setDirty(paintRegion.boundingRect());
     }
 
     m_painting = false;
@@ -122,24 +126,34 @@ void DirectPainterWidget::calc(QRegion const& region)
 {
     m_isVisible = false;
 
-    if (!region.isEmpty() && m_videoSize.isValid())
-    {
-        if (m_firstPaintCalc)   // XXX: Assume original exposed region is max widget size!
-        {
-            QRect bounds = region.boundingRect();
-            QRect imageRect = QRect(QPoint(0, 0), m_videoSize);
+    if (!region.isEmpty() && m_videoSize.isValid()) {
+        if (m_firstPaintCalc) {
+            QRect bounds = geometry();
+            m_destRect = QRect(QPoint(0, 0), m_videoSize);
 
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-            m_destSize = m_videoSize;
-            m_destSize.scale(bounds.size(), Qt::KeepAspectRatio);
+            m_frameBufferImage = new QImage(frameBuffer(),
+                                            screenWidth(),
+                                            screenHeight(),
+                                            screenDepth() == 16 ? QImage::Format_RGB16 :
+                                                                  QImage::Format_RGB32);
 
-            imageRect.setSize(m_destSize);
+            const double fourfifths = double(4) / 5;
+            if ((m_destRect.width() < fourfifths * bounds.width() &&
+                 m_destRect.height() < fourfifths * bounds.height()) ||
+                (m_destRect.width() > bounds.width() ||
+                 m_destRect.height() > bounds.height()))
+            {
+                QSize scaled = m_videoSize;
+                scaled.scale(bounds.size(), Qt::KeepAspectRatio);
+                m_destRect.setSize(scaled);
+            }
+            m_destRect.moveCenter(bounds.center());
+#else
+            m_destRect.moveCenter(bounds.center());
+            m_destTopLeft = m_destRect.topLeft();
 #endif
-            imageRect.moveCenter(bounds.center());
-
-            m_destRect = bounds;
-            m_destTopLeft = imageRect.topLeft();
-            m_blackRegion = region ^ QRegion(imageRect);
+            m_blackRegion = requestedRegion() ^ QRegion(m_destRect);
 
             m_firstPaintCalc = false;
         }

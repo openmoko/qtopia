@@ -40,7 +40,7 @@
 <li><div class="fn"/>QString <b><a href="qtimezone.html#standardAbbreviation">standardAbbreviation</a></b> () const</li>
 <li><div class="fn"/>QDateTime <b><a href="qtimezone.html#toCurrent">toCurrent</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
 <li><div class="fn"/>uint <b><a href="qtimezone.html#toTime_t">toTime_t</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
-<li><div class="fn"/>QDateTime <b><a href="qtimezone.html#toUtcx">toUtc</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
+<li><div class="fn"/>QDateTime <b><a href="qtimezone.html#toUtc">toUtc</a></b> ( const QDateTime &amp; <i>dt</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qtimezone.html#operator-not-eq">operator!=</a></b> ( const QTimeZone &amp; <i>c</i> ) const</li>
 <li><div class="fn"/>QTimeZone &amp; <b><a href="qtimezone.html#operator-eq">operator=</a></b> ( const QTimeZone &amp; <i>from</i> )</li>
 <li><div class="fn"/>bool <b><a href="qtimezone.html#operator-eq-eq">operator==</a></b> ( const QTimeZone &amp; <i>c</i> ) const</li>
@@ -61,7 +61,7 @@
 <p>QTimeZone provides access to timezone data and conversion between dates and times in different time zones.</p>
 <p>A time zone is a region of the world that has adopted the same standard time, including conventions on Daylight Saving or Summer time adjustments.</p>
 <p>Each time zone is specified by a unique identifier. A set of such identifiers is known to the system, and can be found using <a href="qtimezone.html#ids">ids</a>().</p>
-<p>Conversions between time zones can either be done via UTC, using <a href="qtimezone.html#fromUtc">fromUtc</a>() and <a href="qtimezone.html#toUtcx">toUtc</a>(), or directly with <a href="qtimezone.html#convert">convert</a>(), <a href="qtimezone.html#fromCurrent">fromCurrent</a>(), or <a href="qtimezone.html#toCurrent">toCurrent</a>().</p>
+<p>Conversions between time zones can either be done via UTC, using <a href="qtimezone.html#fromUtc">fromUtc</a>() and <a href="qtimezone.html#toUtc">toUtc</a>(), or directly with <a href="qtimezone.html#convert">convert</a>(), <a href="qtimezone.html#fromCurrent">fromCurrent</a>(), or <a href="qtimezone.html#toCurrent">toCurrent</a>().</p>
 <p>Each time zone is in a greater <a href="qtimezone.html#area">area</a>() and has an associated <a href="qtimezone.html#city">city</a>() that observes the standard. This city is not necessarily the capital, just a well-known city in the area. More than one city in an area may observe identical standards, yet they will appear as distinct time zones. The countyCode() of the country containing the time zone is also available.</p>
 <p>A QTimeZone either <a href="qtimezone.html#isValid">isValid</a>() or is not valid. The default constructor creates an invalid QTimeZone.</p>
 <p>Note that some features of QTimeZone may not be available on non-POSIX platforms.</p>
@@ -121,7 +121,7 @@
 <p>See also <a href="qtimezone.html#current">current</a>().</p>
 <h3 class="fn"><a name="toTime_t"></a><a href="./qtglobal.html#uint-typedef">uint</a> QTimeZone::toTime_t ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone, as the number of seconds since 1 January 1970.</p>
-<h3 class="fn"><a name="toUtcx"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::toUtc ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
+<h3 class="fn"><a name="toUtc"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::toUtc ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone as a date and time in UTC.</p>
 <h3 class="fn"><a name="utc"></a>QTimeZone QTimeZone::utc ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return a time zone located at the UTC reference.</p>
@@ -137,6 +137,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

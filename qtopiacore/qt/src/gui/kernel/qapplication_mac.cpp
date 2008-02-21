@@ -1,33 +1,40 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
 ** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://trolltech.com/products/qt/licenses/licensing/opensource/
+** License versions 2.0 or 3.0 as published by the Free Software
+** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file.  Alternatively you may (at
+** your option) use any later version of the GNU General Public
+** License if such license has been publicly approved by Trolltech ASA
+** (or its successors, if any) and the KDE Free Qt Foundation. In
+** addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.1, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
 **
-** If you are unsure which license is appropriate for your use, please
+** Please review the following information to ensure GNU General
+** Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
+** you are unsure which license is appropriate for your use, please
 ** review the following information:
 ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
 ** or contact the sales department at sales@trolltech.com.
 **
-** In addition, as a special exception, Trolltech gives you certain
-** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.0, which can be found at
-** http://www.trolltech.com/products/qt/gplexception/ and in the file
-** GPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Trolltech, as the sole
+** copyright holder for Qt Designer, grants users of the Qt/Eclipse
+** Integration plug-in the right for the Qt/Eclipse Integration to
+** link to functionality provided by Qt Designer and its related
+** libraries.
 **
-** In addition, as a special exception, Trolltech, as the sole copyright
-** holder for Qt Designer, grants users of the Qt/Eclipse Integration
-** plug-in the right for the Qt/Eclipse Integration to link to
-** functionality provided by Qt Designer and its related libraries.
-**
-** Trolltech reserves all rights not expressly granted herein.
+** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
+** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
+** granted herein.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -749,6 +756,20 @@ static void qt_mac_update_intersected_gl_widgets(QWidget *widget)
     }
 }
 
+/*
+    Posts a kEventQtRequestWindowChange event to the main Carbon event queue.
+*/
+static EventRef request_window_change_pending = 0;
+Q_GUI_EXPORT void qt_event_request_window_change()
+{
+    if(request_window_change_pending)
+        return;
+
+    CreateEvent(0, kEventClassQt, kEventQtRequestWindowChange, GetCurrentEventTime(),
+                kEventAttributeUserEvent, &request_window_change_pending);
+    PostEventToQueue(GetMainEventQueue(), request_window_change_pending, kEventPriorityHigh);
+}
+
 /* window changing. This is a hack around Apple's missing functionality, pending the toolbox
    team fix. --Sam */
 Q_GUI_EXPORT void qt_event_request_window_change(QWidget *widget)
@@ -756,6 +777,10 @@ Q_GUI_EXPORT void qt_event_request_window_change(QWidget *widget)
     if (!widget)
         return;
 
+    // Post a kEventQtRequestWindowChange event. This event is semi-public,
+    // don't remove this line!
+    qt_event_request_window_change();
+    
     // Send update request on gl widgets unconditionally. 
     if (qt_widget_private(widget)->isGLWidget == true) {
         qt_send_window_change_event(widget);
@@ -764,10 +789,6 @@ Q_GUI_EXPORT void qt_event_request_window_change(QWidget *widget)
 
     qt_mac_update_child_gl_widgets(widget);
     qt_mac_update_intersected_gl_widgets(widget);
-}
-
-Q_GUI_EXPORT void qt_event_request_window_change()
-{
 }
 
 /* activation */
@@ -933,6 +954,7 @@ struct QMacAppleEventTypeSpec {
 /* watched events */
 static EventTypeSpec app_events[] = {
     { kEventClassQt, kEventQtRequestTimer },
+    { kEventClassQt, kEventQtRequestWindowChange },
     { kEventClassQt, kEventQtRequestSelect },
     { kEventClassQt, kEventQtRequestShowSheet },
     { kEventClassQt, kEventQtRequestContext },
@@ -1373,6 +1395,8 @@ QApplicationPrivate::globalEventProcessor(EventHandlerCallRef er, EventRef event
                 if(just_show) //at least the window will be visible, but the sheet flag doesn't work sadly (probalby too many sheets)
                     ShowHide(window, true);
             }
+        } else if(ekind == kEventQtRequestWindowChange) {
+            qt_mac_event_release(request_window_change_pending);
         } else if(ekind == kEventQtRequestMenubarUpdate) {
             qt_mac_event_release(request_menubarupdate_pending);
             QMenuBar::macUpdateMenuBar();
@@ -2171,7 +2195,8 @@ OSStatus QApplicationPrivate::globalAppleEventProcessor(const AppleEvent *ae, Ap
     if(aeClass == kCoreEventClass) {
         switch(aeID) {
         case kAEQuitApplication: {
-            if(!QApplicationPrivate::modalState() && IsMenuCommandEnabled(NULL, kHICommandQuit)) {
+            extern bool qt_mac_quit_menu_item_enabled; // qmenu_mac.cpp
+            if(!QApplicationPrivate::modalState() && qt_mac_quit_menu_item_enabled) {
                 QCloseEvent ev;
                 QApplication::sendSpontaneousEvent(app, &ev);
                 if(ev.isAccepted()) {

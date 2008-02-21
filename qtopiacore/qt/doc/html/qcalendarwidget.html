@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/widgets/qcalendarwidget.cpp -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/src/gui/widgets/qcalendarwidget.cpp -->
 <head>
   <title>Qt 4.3: QCalendarWidget Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -72,7 +72,6 @@
 <li><div class="fn"/>SelectionMode <b><a href="qcalendarwidget.html#selectionMode-prop">selectionMode</a></b> () const</li>
 <li><div class="fn"/>void <b><a href="qcalendarwidget.html#dateEditAcceptDelay-prop">setDateEditAcceptDelay</a></b> ( int <i>delay</i> )</li>
 <li><div class="fn"/>void <b><a href="qcalendarwidget.html#dateEditEnabled-prop">setDateEditEnabled</a></b> ( bool <i>enable</i> )</li>
-<li><div class="fn"/>void <b><a href="qcalendarwidget.html#setDateTextFormat">setDateTextFormat</a></b> ( const QDate &amp; <i>date</i>, const QTextCharFormat &amp; <i>format</i> )</li>
 <li><div class="fn"/>void <b><a href="qcalendarwidget.html#firstDayOfWeek-prop">setFirstDayOfWeek</a></b> ( Qt::DayOfWeek <i>dayOfWeek</i> )</li>
 <li><div class="fn"/>void <b><a href="qcalendarwidget.html#setHeaderTextFormat">setHeaderTextFormat</a></b> ( const QTextCharFormat &amp; <i>format</i> )</li>
 <li><div class="fn"/>void <b><a href="qcalendarwidget.html#horizontalHeaderFormat-prop">setHorizontalHeaderFormat</a></b> ( HorizontalHeaderFormat <i>format</i> )</li>
@@ -328,7 +327,6 @@
 <p>See also <a href="qcalendarwidget.html#setCurrentPage">setCurrentPage</a>().</p>
 <h3 class="fn"><a name="dateTextFormat"></a><a href="qmap.html">QMap</a>&lt;<a href="qdate.html">QDate</a>, <a href="qtextcharformat.html">QTextCharFormat</a>&gt; QCalendarWidget::dateTextFormat () const</h3>
 <p>Returns a <a href="qmap.html">QMap</a> from <a href="qdate.html">QDate</a> to <a href="qtextcharformat.html">QTextCharFormat</a> showing all dates that use a special format that alters their rendering.</p>
-<p>See also <a href="qcalendarwidget.html#setDateTextFormat">setDateTextFormat</a>().</p>
 <h3 class="fn"><a name="dateTextFormat-2"></a><a href="qtextcharformat.html">QTextCharFormat</a> QCalendarWidget::dateTextFormat ( const <a href="qdate.html">QDate</a> &amp; <i>date</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a <a href="qtextcharformat.html">QTextCharFormat</a> for <i>date</i>. The char format can be be empty if the date is not renderd specially.</p>
@@ -361,9 +359,6 @@
  calendar-&gt;setMaximumDate(max);</pre>
 <p>If either the <i>min</i> or <i>max</i> parameters are not valid <a href="qdate.html">QDate</a> objects, this function does nothing.</p>
 <p>See also <a href="qcalendarwidget.html#minimumDate-prop">setMinimumDate</a>() and <a href="qcalendarwidget.html#maximumDate-prop">setMaximumDate</a>().</p>
-<h3 class="fn"><a name="setDateTextFormat"></a>void QCalendarWidget::setDateTextFormat ( const <a href="qdate.html">QDate</a> &amp; <i>date</i>, const <a href="qtextcharformat.html">QTextCharFormat</a> &amp; <i>format</i> )</h3>
-<p>Sets <i>format</i> to render <i>date</i>.</p>
-<p>See also <a href="qcalendarwidget.html#dateTextFormat">dateTextFormat</a>().</p>
 <h3 class="fn"><a name="setHeaderTextFormat"></a>void QCalendarWidget::setHeaderTextFormat ( const <a href="qtextcharformat.html">QTextCharFormat</a> &amp; <i>format</i> )</h3>
 <p>Sets the text char format for rendering the header to <i>format</i>. If you also set a weekday text format, this format's foreground and background color will take precedence over the header's format. The other formatting information will still be decided by the header's format.</p>
 <p>See also <a href="qcalendarwidget.html#headerTextFormat">headerTextFormat</a>().</p>
@@ -396,8 +391,8 @@
 <p>See also <a href="qcalendarwidget.html#monthShown">monthShown</a>() and <a href="qcalendarwidget.html#setCurrentPage">setCurrentPage</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

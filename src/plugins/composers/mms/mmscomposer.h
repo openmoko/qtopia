@@ -273,7 +273,7 @@ public:
 public slots:
     void setMessage( const QMailMessage &mail );
     void clear();
-    virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction action );
+    virtual void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
 
 private:
     MMSComposer *m_composer;

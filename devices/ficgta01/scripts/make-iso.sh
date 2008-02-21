@@ -8,7 +8,7 @@ QPE_VERSION=`cat $QTOPIA_DEPOT_PATH/src/libraries/qtopiabase/version.h | grep QP
 BUILDDIR=`pwd`
 
 # CHANGENO=
-# QPE_URL_VERSION=
+QPE_URL_VERSION=`echo $QPE_VERSION | sed 's/\.[0-9]*$//g'`
 
 # put your own url here where your vmdk's zip files are
 URL=http://qtopiaweb.trolltech.com.au:/dist/input/qtopia/sdk
@@ -19,21 +19,23 @@ function fix_versions
 {
 
 echo "Fix version in docs"
-  sed -n 's/!CHANGENO!/$CHANGENO(Qtopia) &/p' isofs/sdk.nsi
-  perl -i.bak -pe "s/!CHANGENO!/$CHANGENO(Qtopia)/;"isofs/sdk.nsi
-  perl -i.bak -pe "s/!QPE_VERSION!/$QPE_VERSION/;" isofs/sdk.nsi
+echo $QPE_VERSION
+
+  sed -n 's/!CHANGENO!/$CHANGENO &/p' isofs/sdk.nsi
+  perl -i.bak -pe "s/\!CHANGENO\!/$CHANGENO/;" isofs/sdk.nsi
+  perl -i.bak -pe "s/\!QPE_VERSION\!/$QPE_VERSION/;" isofs/sdk.nsi
 #  type $QPE_DEPOT_DIR/scripts/greenphone-sdk/windows/greenphone-sdk.nsi
 
 
   chmod +w isofs/release.txt
-  perl -i.bak -pe "s/!CHANGENO!/$CHANGENO(Qtopia)/;" isofs/release.txt
-  perl -i.bak -pe "s/!QPE_VERSION!/$QPE_VERSION/;" isofs/release.txt
-  perl -i.bak -pe "s/!QPE_URL_VERSION!/$QPE_URL_VERSION/;" isofs/release.txt
+  perl -i.bak -pe "s/\!CHANGENO\!/$CHANGENO/;" isofs/release.txt
+  perl -i.bak -pe "s/\!QPE_VERSION\!/$QPE_VERSION/;" isofs/release.txt
+  perl -i.bak -pe "s/\!QPE_URL_VERSION\!/$QPE_URL_VERSION/;" isofs/release.txt
 
   chmod +w isofs/release.html
-  perl -i.bak -pe "s/!CHANGENO!/$CHANGENO(Qtopia)/;" isofs/release.html
-  perl -i.bak -pe "s/!QPE_VERSION!/$QPE_VERSION/;" isofs/release.html
-  perl -i.bak -pe "s/!QPE_URL_VERSION!/$QPE_URL_VERSION/;" isofs/release.html
+  perl -i.bak -pe "s/\!CHANGENO\!/$CHANGENO/;" isofs/release.html
+  perl -i.bak -pe "s/\!QPE_VERSION\!/$QPE_VERSION/;" isofs/release.html
+  perl -i.bak -pe "s/\!QPE_URL_VERSION\!/$QPE_URL_VERSION/;" isofs/release.html
   rm -f isofs/*.bak
 
 }
@@ -87,6 +89,9 @@ mkdir -p $BUILDDIR/"$DEVICE"_sdk_build/
 rm -rf $BUILDDIR/"$DEVICE"_sdk_build/*
 cd $BUILDDIR/"$DEVICE"_sdk_build
 
+# Copy the pdf docs into the sdk
+cp $QTOPIA_DEPOT_PATH/devices/$DEVICE/sdk/docs/*.pdf /opt/Qtopia/SDK/.
+
 #create qtopia.tar.bz2
 cd /opt/Qtopia
 echo "Create Qtopia sdk and extras zip file"
@@ -129,7 +134,7 @@ if ! tar -cjf $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/extras.tar.bz2 *; then
 fi
 
 
-cp -f $QTOPIA_DEPOT_PATH/scripts/sdk/manual-install.sh $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/
+cp -f $QTOPIA_DEPOT_PATH/scripts/sdk/windows/manual-install.sh $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/
 chmod +x $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/manual-install.sh
 
 
@@ -177,7 +182,7 @@ echo "displayName = \"$DEVICENAME\"">> isofs/sdk.vmx
 mv isofs/sdk.vmx isofs/Qtopia.vmx
 
 
-#fix_versions
+fix_versions
 
 
 rm -f isofs/sdk.nsi
@@ -188,6 +193,7 @@ mv *.dat isofs
 mv *.iso isofs
 
 ## SDK documents here
+cp $QTOPIA_DEPOT_PATH/devices/$DEVICE/sdk/docs/*.pdf isofs
 
 # FIXME
 # cp $QTOPIA_DEPOT_PATH/doc/src/$DEVICE/*.pdf isofs

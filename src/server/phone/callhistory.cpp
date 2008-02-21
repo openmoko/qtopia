@@ -352,21 +352,17 @@ void CallHistoryView::contactsChanged()
 
 void CallHistoryView::sendMessage()
 {
-    if( mHaveContact
-            && (mPhoneType == QContactModel::HomeMobile
-                || mPhoneType == QContactModel::BusinessMobile) ) {
-        QString name = mContact.label();
-        QString number;
-        if (mPhoneType == QContactModel::HomeMobile)
-            number = mContact.homeMobile();
-        else
-            number = mContact.businessMobile();
+    QString name = mName->text();
+    if( mHaveContact )
+        name = mContact.label();
 
-        if (!number.isEmpty()) {
-            QtopiaServiceRequest req( "SMS", "writeSms(QString,QString)");
-            req << name << number;
-            req.send();
-        }
+    // ugly hack - send to the number recorded in this entry.
+    QString number = mNumber->text();
+
+    if (!number.isNull() && !number.isEmpty()) {
+        QtopiaServiceRequest req( "SMS", "writeSms(QString,QString)");
+        req << name << number;
+        req.send();
     }
 }
 
@@ -374,13 +370,15 @@ void CallHistoryView::updateMenu()
 {
     mMenu->clear();
     if( mHaveContact ) {
-        if( mPhoneType == QContactModel::HomeMobile ||
-            mPhoneType == QContactModel::BusinessMobile )
-            mMenu->addAction(mSendMessage);
+        // allow send sms regardless of type of phone number.
+        mMenu->addAction(mSendMessage);
         mMenu->addAction(mOpenContact);
     } else {
-        if ( !mCallListItem.number().trimmed().isEmpty() )
+        if ( !mCallListItem.number().trimmed().isEmpty() ) {
+            // allow send sms regardless of type of phone number.
+            mMenu->addAction(mSendMessage);
             mMenu->addAction(mAddContact);
+        }
     }
     if( mDeleteAction )
         mMenu->addAction(mDeleteAction);

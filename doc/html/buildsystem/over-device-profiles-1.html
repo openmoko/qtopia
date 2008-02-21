@@ -44,8 +44,6 @@
 <pre>    -edition phone -xplatform mydev -arch arm -no-qvfb
     -release -displaysize 240x320 -quicklaunch
     -defaultbuttons phone
-    -extra-qtopiacore-config -plugin-kbd-mydev
-    -extra-qtopiacore-config -plugin-mouse-mydev
     -prefix /opt/Qtopia</pre>
 <p>The ordering of arguments is significant. Anything specified before -device can be overridden by the device profile while anything after -device can override the device profile.</p>
 <p>For example, the sample file above specifies -release. Here's what would happen if you passed -debug before and after -device foo.</p>
@@ -157,9 +155,9 @@
 <li>etc/sxe_qtopia/sxe_qtopia</li>
 <li>etc/sxe_qtopia/sxe_sandbox</li>
 <li>etc/sxe_qtopia/sxe_unsandbox</li>
-<li>etc/sxe_domains/*</li>
+<li>etc/<a href="../sxe-pkgmgr-profiles.html">sxe_domains</a>/*</li>
 </ul>
-<p>The server will use <tt>server/scomisc.cpp</tt> instead of it's own <tt>bluetooth/scomisc.cpp</tt>. It will also include <tt>server/*.h</tt> and <tt>server/*.cpp</tt>.</p>
+<p>The server will use <tt>server/scomisc.cpp</tt> instead of it's own <tt>bluetooth/scomisc/scomisc.cpp</tt>. It will also include <tt>server/*.h</tt> and <tt>server/*.cpp</tt>.</p>
 <p>The camera will disable it's built-in drivers if <tt>camera/*.cpp</tt> exists. It also pulls in <tt>camera/*.h</tt>.</p>
 <a name="limitations"></a>
 <h3>Limitations</h3>

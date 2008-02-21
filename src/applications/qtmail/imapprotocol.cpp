@@ -29,6 +29,36 @@
 #include <longstring_p.h>
 #include <QMailMessage>
 
+#ifndef QT_NO_OPENSSL
+#include <QSslError>
+#endif
+
+
+class ImapTransport : public MailTransport
+{
+public:
+    ImapTransport(const char* name) :
+        MailTransport(name)
+    {
+    }
+
+#ifndef QT_NO_OPENSSL
+protected:
+    virtual bool ignoreCertificateErrors(const QList<QSslError>& errors)
+    {
+        MailTransport::ignoreCertificateErrors(errors);
+
+        // Because we can't ask the user (due to string freeze), let's default
+        // to ignoring these errors...
+        foreach (const QSslError& error, errors)
+            if (error.error() == QSslError::NoSslSupport)
+                return false;
+
+        return true;
+    }
+#endif
+};
+
 
 // Ensure a string is quoted, if required for IMAP transmission
 static QString quoteImapString(const QString& input)
@@ -97,7 +127,7 @@ bool ImapProtocol::open( const QMailAccount& account )
     d->reset();
 
     if (!transport) {
-        transport = new MailTransport("IMAP");
+        transport = new ImapTransport("IMAP");
 
         connect(transport, SIGNAL(updateStatus(QString)),
                 this, SIGNAL(updateStatus(QString)));
@@ -151,6 +181,20 @@ QStringList ImapProtocol::mailboxUidList()
 QString ImapProtocol::selected()
 {
     return _name;
+}
+
+void ImapProtocol::capability()
+{
+    QString cmd = "CAPABILITY\r\n";
+    status = IMAP_Capability;
+    sendCommand( cmd );
+}
+
+void ImapProtocol::startTLS()
+{
+    QString cmd = "STARTTLS\r\n";
+    status = IMAP_StartTLS;
+    sendCommand( cmd );
 }
 
 /*  Type ignored for now    */
@@ -289,9 +333,11 @@ void ImapProtocol::expunge()
 void ImapProtocol::connected(QMailAccount::EncryptType encryptType)
 {
 #ifndef QT_NO_OPENSSL
-    if (encryptType == QMailAccount::Encrypt_NONE)
+    if (encryptType == QMailAccount::Encrypt_TLS)
     {
-        // TODO - TLS support not yet added!
+        ImapCommand cmd = IMAP_StartTLS;
+        OperationState state = OpOk;
+        emit finished(cmd, state);
     }
 #endif
 }
@@ -401,6 +447,25 @@ void ImapProtocol::nextAction()
             _lastError += QLatin1String("\n") + tr( "This server does not provide a complete "
                               "IMAP4rev1 implementation." );
         emit finished(status, operationState);
+        response = "";
+        read = 0;
+        return;
+    }
+
+    if (status == IMAP_Capability) {
+        parseCapability();
+
+        emit finished(status, operationState);
+        response = "";
+        read = 0;
+        return;
+    }
+
+    if (status == IMAP_StartTLS) {
+#ifndef QT_NO_OPENSSL
+        // Switch to encrypted comms mode
+        transport->switchToEncrypted();
+#endif
         response = "";
         read = 0;
         return;
@@ -548,6 +613,15 @@ void ImapProtocol::parseList( QString in )
     }
 
     emit mailboxListed( flags, delimiter, name );
+}
+
+void ImapProtocol::parseCapability()
+{
+    for (QString str = d->first(); str != QString::null; str = d->next()) {
+        if (str.startsWith("* CAPABILITY")) {
+            _capabilities = str.mid(12).trimmed().split(" ", QString::SkipEmptyParts);
+        }
+    }
 }
 
 void ImapProtocol::parseSelect()
@@ -805,6 +879,11 @@ QString ImapProtocol::token( QString str, QChar c1, QChar c2, int *index )
     *index = stop + (c2 == QMailMessage::CarriageReturn ? 2 : 1);
 
     return str.mid( start, stop - start );
+}
+
+bool ImapProtocol::supportsCapability(const QString& name) const
+{
+    return _capabilities.contains(name);
 }
 
 void ImapProtocol::createMail( const QByteArray& msg, QString& id, int size, uint flags )

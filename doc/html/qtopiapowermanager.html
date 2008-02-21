@@ -25,7 +25,7 @@
 <li><div class="fn"/>virtual void <b><a href="qtopiapowermanager.html#restore">restore</a></b> ()</li>
 <li><div class="fn"/>virtual bool <b><a href="qtopiapowermanager.html#save">save</a></b> ( int <i>level</i> ) = 0</li>
 <li><div class="fn"/>void <b><a href="qtopiapowermanager.html#setDefaultIntervals">setDefaultIntervals</a></b> ()</li>
-<li><div class="fn"/>virtual void <b><a href="qtopiapowermanager.html#setIntervals">setIntervals</a></b> ( int * <i>v</i>, int <i>size</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qtopiapowermanager.html#setIntervals">setIntervals</a></b> ( int * <i>v</i>, int <i>size</i> )</li>
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
@@ -92,13 +92,13 @@
 <p>Activates or deactivates the power manager given the flag <i>on</i>. When activated, power management is enabled. When deactivated, power management is completely disabled.</p>
 <h3 class="fn"><a name="setDefaultIntervals"></a>void QtopiaPowerManager::setDefaultIntervals ()</h3>
 <p>Resets the intervals to the default configuration for the power manager. The default values are defined in configuration files and can be edited by the user using the Power Management application.</p>
-<h3 class="fn"><a name="setIntervals"></a>void QtopiaPowerManager::setIntervals ( int * <i>v</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="setIntervals"></a>void QtopiaPowerManager::setIntervals ( int * <i>v</i>, int <i>size</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This function sets the internal timeouts for the power manager. It expects an array <i>v</i> containing the timeout values and <i>size</i> being the number of entries in <i>v</i>. This allows any arbitrary number of power saving levels.</p>
 <p>This function needs to be reimplemented by subclasses. However any overriding function should call QtopiaPowerManager::setIntervals() as part of its implementation.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

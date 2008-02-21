@@ -409,7 +409,10 @@ QSqlError QtopiaSql::exec(QSqlQuery &query, QSqlDatabase& db, bool inTransaction
 QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
 {
     if( id == quint32(-1) )
+    {
+        qWarning() << "Database requested for invalid handle";
         return d()->nullDatabase;
+    }
 
     QMutexLocker guard(&d()->guardMutex);
     if (!d()->dbs.contains(QThread::currentThreadId())) {
@@ -444,15 +447,26 @@ QSqlDatabase &QtopiaSql::database(const QtopiaDatabaseId& id)
         db.setHostName(from.hostName());
         db.setPort(from.port());
         db.setConnectOptions(from.connectOptions());
-        db.open();
-        d()->installSorting(db);
-        QSqlQuery xsql( db );
+        if (db.open() )
+        {
+            d()->installSorting(db);
+            QSqlQuery xsql( db );
 #if defined(Q_USE_SQLITE)
-        xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
-        xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
+            xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
+            xsql.exec(QLatin1String("PRAGMA temp_store = memory"));
 #endif
-        dbs.insert(id, db);
-        d()->connectionNames[QThread::currentThreadId()].insert(id, connName);
+            dbs.insert(id, db);
+            d()->connectionNames[QThread::currentThreadId()].insert(id, connName);
+
+            qLog(Sql) << "Connected database" << db.databaseName() << "for database id" << id << "with connection name" << connName;
+        }
+        else
+        {
+            qWarning() << "Failed to open database" << db.databaseName() << "for database id" << id << "with connection name" << connName;
+            qWarning() << db.lastError().text();
+
+            return d()->nullDatabase;
+        }
     }
 
     return dbs[id];
@@ -592,21 +606,21 @@ void QtopiaSql::detachDB(const QString& path)
         d()->masterAttachedConns.remove(dbid);
         d()->dbPaths.remove(dbid);
 
-        QHash<QtopiaDatabaseId, QSqlDatabase> hash;
-        foreach(hash, d()->dbs)
+        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QSqlDatabase> >::iterator hash;
+        for( hash = d()->dbs.begin(); hash != d()->dbs.end(); hash++ )
         {
-            if(hash.keys().contains(dbid))
+            if(hash->keys().contains(dbid))
             {
-                hash.take(dbid).close();
+                hash->take(dbid).close();
             }
         }
-        
-        QHash<QtopiaDatabaseId, QString> hash2;
-        foreach(hash2, d()->connectionNames)
+
+        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QString> >::iterator hash2;
+        for( hash2 = d()->connectionNames.begin(); hash2 != d()->connectionNames.end(); hash2++ )
         {
-            if(hash2.keys().contains(dbid))
+            if(hash2->keys().contains(dbid))
             {
-                QSqlDatabase::removeDatabase(hash2.take(dbid));
+                QSqlDatabase::removeDatabase(hash2->take(dbid));
             }
         }
         // todo: if database itself is located in the temp directory, then delete it.

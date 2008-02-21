@@ -466,12 +466,14 @@ TaskDialog::~TaskDialog()
 
 void TaskDialog::startDateChanged( const QDate& date )
 {
+    todo.setStartedDate(date);
     if ( date > completedEdit->date() )
         completedEdit->setDate( date );
 }
 
 void TaskDialog::endDateChanged( const QDate& date )
 {
+    todo.setCompletedDate(date);
     if ( date < startedEdit->date() )
         startedEdit->setDate( date );
 }

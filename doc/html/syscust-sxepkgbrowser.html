@@ -31,7 +31,7 @@
 <p>While this approach works well, it binds a user to the pre-configured web server offered by the provider. The browser integration enables the user to visit any web site and install packages from there.</p>
 <p>The process is simplified to:</p>
 <ol type="1">
-<li>A web page offers a list of links to Qtopia package file descriptors which are text files containing information about a package as well as an exact URL indicating the download location.</li>
+<li>A web page offers a list of links to Qtopia package file <a href="sxe-pkgmgr-ctlfile.html#qpd-descriptor">descriptors</a> which are text files containing information about a package as well as an exact URL indicating the download location.</li>
 <li>The user clicks the required link and the descriptor is downloaded and passed to the <tt>PackageManager</tt>.</li>
 <li>The user reads the package requirements.</li>
 <li>The user clicks the install button and the package is downloaded and installed.</li>
@@ -42,7 +42,7 @@
 <p>To make a Qtopia packages available via a web page a Qtopia package descriptor file needs to be provided for each package. A minor change of the web server configuration with regard to the mime types is required and is described <a href="#webconfig">below</a>.</p>
 <a name="qtopia-package-descriptor-and-web-page-configuration"></a>
 <h3>Qtopia Package Descriptor and Web Page Configuration</h3>
-<p>For every package offered for download a Qtopia package descriptor file must be provided. This file has the extension <tt>.qpd</tt> and contains the same information about the single package as is found in the <tt>packages.list</tt> file, together with a URL indicating the package download location.</p>
+<p>For every package offered for download a Qtopia package descriptor file must be provided. This file has the extension <a href="sxe-pkgmgr-ctlfile.html#qpd-descriptor"><tt>.qpd</tt></a> and contains the same information about the single package as is found in the <a href="sxe-pkgmgr-ctlfile.html#packages-list"><tt>packages.list</tt></a> file, together with a URL indicating the package download location.</p>
 <p>The link on the web page points to the descriptor file and is processed by the <tt>PackageManager</tt> which extracts the URL and, upon confirmation by the user, downloads and installs the package.</p>
 <p>If support for different architectures is required, for example, <tt>ARM</tt> or <tt>i386</tt> a package and descriptor needs to be created for each supported architecture. The <tt>PackageManager</tt> will not download and install a package if it does not match the architecture of the device on which it is to run.</p>
 <a name="webconfig"></a><a name="web-server-configuration"></a>
@@ -60,10 +60,10 @@
 </ul>
 </td></tr>
 </table></p>
-<p align="center"><img src="images/packagemanager.png" /></p><p /><address><hr /><div align="center">
+<p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

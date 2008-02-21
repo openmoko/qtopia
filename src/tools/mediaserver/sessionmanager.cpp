@@ -28,6 +28,9 @@
 #include "mediaagent.h"
 #include "domainmanager.h"
 #include "sessionmanagersession.h"
+#ifdef QTOPIA_TELEPHONY
+#include "callmonitor.h"
+#endif
 
 #include "sessionmanager.h"
 
@@ -116,6 +119,7 @@ public:
 public slots:
     void sessionStateChange(QtopiaMedia::State state);
     void domainStatusChange(QStringList const& newDomains, QStringList const& oldDomains);
+    void callActivityChanged(bool active);
 
 public:
     int                 activePlayingSessions;
@@ -138,6 +142,11 @@ SessionManagerPrivate::SessionManagerPrivate(SessionManager* manager):
 
     connect(domainManager, SIGNAL(domainStatusChange(QStringList,QStringList)),
             this, SLOT(domainStatusChange(QStringList,QStringList)));
+
+#ifdef QTOPIA_TELEPHONY
+    CallMonitor* monitor = new CallMonitor(this);
+    connect(monitor, SIGNAL(callActivityChanged(bool)), SLOT(callActivityChanged(bool)));
+#endif
 }
 
 SessionManagerPrivate::~SessionManagerPrivate()
@@ -195,6 +204,14 @@ void SessionManagerPrivate::domainStatusChange
 
     Q_UNUSED(activeDomains);
     Q_UNUSED(inactiveDomains);
+}
+
+void SessionManagerPrivate::callActivityChanged(bool active)
+{
+    if (active)
+        domainManager->activateDomain("RingTone");
+    else
+        domainManager->deactivateDomain("RingTone");
 }
 
 SessionManager* SessionManager::instance()

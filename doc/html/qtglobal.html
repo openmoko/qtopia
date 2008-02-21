@@ -314,7 +314,7 @@
 <p>Converts <i>src</i> from little-endian byte order and returns the number in host byte order representation of that number. On CPU architectures where the host byte order is big-endian (such as PowerPC) this will return <i>src</i> with the byte order swapped; otherwise it will return <i>src</i> unmodified.</p>
 <p>This function was introduced in Qt 4.3.</p>
 <h3 class="fn"><a name="qInstallMsgHandler"></a><a href="qtglobal.html#QtMsgHandler-typedef">QtMsgHandler</a> qInstallMsgHandler ( <a href="qtglobal.html#QtMsgHandler-typedef">QtMsgHandler</a> <i>handler</i> )</h3>
-<p>Installs a Qt message <i>handler</i> which has been defined previously. Returns a pointer to the message <i>handler</i>.</p>
+<p>Installs a Qt message <i>handler</i> which has been defined previously. Returns a pointer to the previous message handler (which may be 0).</p>
 <p>The message handler is a function that prints out debug messages, warnings, critical and fatal error messages. The Qt library (debug version) contains hundreds of warning messages that are printed when internal errors (usually invalid function arguments) occur. If you implement your own message handler, you get total control of these messages.</p>
 <p>The default message handler prints the message to the standard output under X11 or to the debugger under Windows. If it is a fatal message, the application aborts immediately.</p>
 <p>Only one message handler can be defined, since this is usually done on an application-wide basis to control debug output.</p>
@@ -756,8 +756,8 @@
 <p>See also <a href="qtglobal.html#qDebug">qDebug</a>(), <a href="qtglobal.html#qWarning">qWarning</a>(), <a href="qtglobal.html#qCritical">qCritical</a>(), and <a href="qtglobal.html#qFatal">qFatal</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

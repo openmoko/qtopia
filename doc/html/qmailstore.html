@@ -143,9 +143,9 @@
 <p>Signal that is emitted when the messages in the list <i>ids</i> are updated within the mail store.</p>
 <p>See also <a href="qmailstore.html#messagesAdded">messagesAdded</a>() and <a href="qmailstore.html#messagesRemoved">messagesRemoved</a>().</p>
 <h3 class="fn"><a name="queryFolders"></a>QMailIdList QMailStore::queryFolders ( const <a href="qmailfolderkey.html">QMailFolderKey</a> &amp; <i>key</i> = QMailFolderKey(), const <a href="qmailfoldersortkey.html">QMailFolderSortKey</a> &amp; <i>sortKey</i> = QMailFolderSortKey() ) const</h3>
-<p>Returns the <a href="qmailid.html">QMailId</a>'s of folders in the message store. If <b>is</b> not empty only folders matching the parameters set by <i>key</i> will be returned, otherwise all folder id's will be returned. If <i>sortKey</i> is not empty, the id's will be sorted by the parameters set by <i>sortKey</i>.</p>
+<p>Returns the <a href="qmailid.html">QMailId</a>s of folders in the message store. If <i>key</i> is not empty only folders matching the parameters set by <i>key</i> will be returned, otherwise all folder identifiers will be returned. If <i>sortKey</i> is not empty, the identifiers will be sorted by the parameters set by <i>sortKey</i>.</p>
 <h3 class="fn"><a name="queryMessages"></a>QMailIdList QMailStore::queryMessages ( const <a href="qmailmessagekey.html">QMailMessageKey</a> &amp; <i>key</i> = QMailMessageKey(), const <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> &amp; <i>sortKey</i> = QMailMessageSortKey() ) const</h3>
-<p>Returns the <a href="qmailid.html">QMailId</a>'s of messages in the message store. If <b>is</b> not empty only messages matching the parameters set by <i>key</i> will be returned, otherwise all message id's will be returned. If <i>sortKey</i> is not empty, the id's will be sorted by the parameters set by <i>sortKey</i>.</p>
+<p>Returns the <a href="qmailid.html">QMailId</a>s of messages in the message store. If <i>key</i> is not empty only messages matching the parameters set by <i>key</i> will be returned, otherwise all message identifiers will be returned. If <i>sortKey</i> is not empty, the identifiers will be sorted by the parameters set by <i>sortKey</i>.</p>
 <h3 class="fn"><a name="removeFolder"></a>bool QMailStore::removeFolder ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )</h3>
 <p>Removes a <a href="qmailfolder.html">QMailFolder</a> with <a href="qmailid.html">QMailId</a> <i>id</i> from the message store. This action also removes the sub-folder and messages of the folder. Returns <tt>true</tt> if the operation completed successfully, <tt>false</tt> otherwise.</p>
 <h3 class="fn"><a name="removeMessage"></a>bool QMailStore::removeMessage ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> )</h3>
@@ -165,6 +165,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

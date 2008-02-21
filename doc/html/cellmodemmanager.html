@@ -27,7 +27,6 @@
 <ul>
 <li><div class="fn"/>virtual <b><a href="cellmodemmanager.html#dtor.CellModemManager">~CellModemManager</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#callForwardingEnabled">callForwardingEnabled</a></b> () const</li>
-<li><div class="fn"/>QString <b><a href="cellmodemmanager.html#cellLocation">cellLocation</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#cellModemAvailable">cellModemAvailable</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="cellmodemmanager.html#networkOperator">networkOperator</a></b> () const</li>
 <li><div class="fn"/>QString <b><a href="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</a></b> () const</li>
@@ -36,6 +35,7 @@
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#planeModeSupported">planeModeSupported</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#profilesBlocked">profilesBlocked</a></b> ()</li>
 <li><div class="fn"/>virtual QTelephony::RegistrationState <b><a href="cellmodemmanager.html#registrationState">registrationState</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="cellmodemmanager.html#setCellLocation">setCellLocation</a></b> ( const QString &amp; <i>location</i> )</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#simToolkitAvailable">simToolkitAvailable</a></b> () const</li>
 <li><div class="fn"/>QIcon <b><a href="cellmodemmanager.html#simToolkitIdleModeIcon">simToolkitIdleModeIcon</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="cellmodemmanager.html#simToolkitIdleModeIconSelfExplanatory">simToolkitIdleModeIconSelfExplanatory</a></b> () const</li>
@@ -62,7 +62,6 @@
 <h3>Signals</h3>
 <ul>
 <li><div class="fn"/>void <b><a href="cellmodemmanager.html#callForwardingEnabledChanged">callForwardingEnabledChanged</a></b> ( bool <i>enabled</i> )</li>
-<li><div class="fn"/>void <b><a href="cellmodemmanager.html#cellLocationChanged">cellLocationChanged</a></b> ( const QString &amp; <i>location</i> )</li>
 <li><div class="fn"/>void <b><a href="cellmodemmanager.html#networkOperatorChanged">networkOperatorChanged</a></b> ( const QString &amp; <i>networkOperator</i> )</li>
 <li><div class="fn"/>void <b><a href="cellmodemmanager.html#planeModeEnabledChanged">planeModeEnabledChanged</a></b> ( bool <i>enabled</i> )</li>
 <li><div class="fn"/>void <b><a href="cellmodemmanager.html#registrationStateChanged">registrationStateChanged</a></b> ( QTelephony::RegistrationState <i>state</i> )</li>
@@ -109,7 +108,7 @@
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/RegistrationState</tt></td><td>Set to the current registration state of the network. Possible values are &quot;None&quot;, &quot;Home&quot;, &quot;Searching&quot;, &quot;Denied&quot;, &quot;Unknown&quot; or &quot;Roaming&quot; and correspond to the values of the <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationState</a> enumeration.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/NetworkRegistered</tt></td><td>Set to true if the network is registered (in the home or roaming states), otherwise false.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/Roaming</tt></td><td>Set to true if the network is in the roaming statem otherwise false.</td></tr>
-<tr valign="top" class="even"><td><tt>/Telephony/Status/CellLocation</tt></td><td>Set to the current cell location. This is equivalent to the value returned by the <a href="cellmodemmanager.html#cellLocation">cellLocation</a>() method.</td></tr>
+<tr valign="top" class="even"><td><tt>/Telephony/Status/CellLocation</tt></td><td>Set to the current cell location. This is equivalent to the value returned by the cellLocation() method.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/OperatorName</tt></td><td>Set to the current network operator name. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperator">networkOperator</a>() method.</td></tr>
 <tr valign="top" class="even"><td><tt>/Telephony/Status/OperatorCountry</tt></td><td>Set to the current network operator's country name, if available. This is equivalent to the value returned by the <a href="cellmodemmanager.html#networkOperatorCountry">networkOperatorCountry</a>() method.</td></tr>
 <tr valign="top" class="odd"><td><tt>/Telephony/Status/CallDivert</tt></td><td>True if voice calls will be unconditionally diverted, false otherwise.</td></tr>
@@ -154,10 +153,6 @@
 <h3 class="fn"><a name="callForwardingEnabledChanged"></a>void CellModemManager::callForwardingEnabledChanged ( bool <i>enabled</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the state of unconditional call forwarding changes. <i>enabled</i> will be true if unconditional call forwarding is on, and false otherwise.</p>
 <p>See also <a href="cellmodemmanager.html#callForwardingEnabled">callForwardingEnabled</a>().</p>
-<h3 class="fn"><a name="cellLocation"></a><a href="./qstring.html">QString</a> CellModemManager::cellLocation () const</h3>
-<p>Returns the current cell location. This call will always return an empty string unless <a href="cellmodemmanager.html">CellModemManager</a> is in the Ready state.</p>
-<h3 class="fn"><a name="cellLocationChanged"></a>void CellModemManager::cellLocationChanged ( const <a href="./qstring.html">QString</a> &amp; <i>location</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Emitted whenever the cell <i>location</i> changes.</p>
 <h3 class="fn"><a name="cellModemAvailable"></a>bool CellModemManager::cellModemAvailable () const</h3>
 <p>Returns true if a cell modem is available, otherwise false.</p>
 <h3 class="fn"><a name="disableProfilesControlModem"></a>void CellModemManager::disableProfilesControlModem ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -194,6 +189,8 @@
 <p>Reimplemented from <a href="qabstractcallpolicymanager.html#registrationState">QAbstractCallPolicyManager</a>.</p>
 <h3 class="fn"><a name="registrationStateChanged"></a>void CellModemManager::registrationStateChanged ( <a href="qtelephony.html#RegistrationState-enum">QTelephony::RegistrationState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the network registration <i>state</i> changes.</p>
+<h3 class="fn"><a name="setCellLocation"></a>void CellModemManager::setCellLocation ( const <a href="./qstring.html">QString</a> &amp; <i>location</i> )</h3>
+<p>Updates the value in value space at <tt>/Telephony/Status/CellLocation</tt> to <i>location</i>.</p>
 <h3 class="fn"><a name="setPlaneModeEnabled"></a>void CellModemManager::setPlaneModeEnabled ( bool <i>enabled</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sets the desired plane mode state to <i>enabled</i>. If <i>enabled</i> is true, the <a href="cellmodemmanager.html">CellModemManager</a> will attempt to disable the modem aerial and put it into the <a href="cellmodemmanager.html#State-enum">AerialOff</a> state. If false, the aerial will be enabled and the manager will transition into the Ready state.</p>
 <p>If the modem does not support plane mode, this method will have no effect. Support for plane mode can be determined through the <a href="cellmodemmanager.html#planeModeSupported">planeModeSupported</a>() method.</p>
@@ -225,6 +222,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

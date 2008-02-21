@@ -186,7 +186,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
         {
             reporter->reportError( PackageView::tr("Unable to unpack package, package may be invalid" ),
                     QString( "Installcontrol:installpackage:- package qpk file is invalid, "
-                        "Package must not contain hard links, absolute paths or path references to parent "
+                        "Package must not contain device nodes, hard links, absolute paths or path references to parent "
                         "directories or symlinks which refer to absolute paths or parent directories" ) );
         }
         return false;
@@ -225,7 +225,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
         {
             reporter->reportError( PackageView::tr("Unable to unpack package, package may be invalid" ),
                     QString( "Installcontrol:installpackage:- package's data.tar.gz is invalid "
-                        "Package must not contain hard links, absolute paths or path references to parent "
+                        "Package must not contain devices nodes, hard links, absolute paths or path references to parent "
                         "directories or symlinks which refer to absolute paths or parent directories" ) );
         }
         return false;

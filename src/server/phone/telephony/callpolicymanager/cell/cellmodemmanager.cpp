@@ -30,7 +30,6 @@
 #include <qtopiaservices.h>
 #include <qsoftmenubar.h>
 #include <qtopiaipcenvelope.h>
-#include <qcellbroadcast.h>
 #include <qsiminfo.h>
 #include <qcallsettings.h>
 #include <qphonerffunctionality.h>
@@ -64,7 +63,7 @@ public:
       m_pinManager(0), m_regState(QTelephony::RegistrationNone),
       m_status(0), m_autoRegisterTimer(0), m_profiles(0),
       m_profilesBlocked(false), m_callForwarding(0),
-      m_callForwardingEnabled(false), m_cbs(0),
+      m_callForwardingEnabled(false),
       m_rfFunc(0), m_phoneBook(0) {}
 
     CellModemManager::State m_state;
@@ -82,7 +81,6 @@ public:
     bool m_profilesBlocked;
     QCallForwarding *m_callForwarding;
     bool m_callForwardingEnabled;
-    QCellBroadcast *m_cbs;
     QPhoneRfFunctionality *m_rfFunc;
     QPhoneBook *m_phoneBook;
     QString m_simIdentity;
@@ -242,10 +240,6 @@ CellModemManager::CellModemManager(QObject *parent)
                      SIGNAL(forwardingStatus(QCallForwarding::Reason,QList<QCallForwarding::Status>)),
                      this,
                      SLOT(forwardingStatus(QCallForwarding::Reason,QList<QCallForwarding::Status>)));
-
-    d->m_cbs = new QCellBroadcast(QString(), this);
-    QObject::connect(d->m_cbs, SIGNAL(broadcast(QCBSMessage)),
-                     this, SLOT(broadcast(QCBSMessage)));
 
     QSimInfo *simInfo = new QSimInfo( "modem", this );
     connect( simInfo, SIGNAL(removed()), this, SLOT(simRemoved()) );
@@ -416,20 +410,6 @@ void CellModemManager::forwardingStatus(QCallForwarding::Reason reason,
     }
 }
 
-void CellModemManager::broadcast(const QCBSMessage&m)
-{
-    if(m.channel() == 50) {
-        QString location = m.text();
-        if(location != d->m_location) {
-            d->m_location = location;
-            if(Ready == state()) {
-                emit cellLocationChanged(d->m_location);
-                updateStatus();
-            }
-        }
-    }
-}
-
 /*!
   \fn void CellModemManager::registrationStateChanged(QTelephony::RegistrationState state)
 
@@ -441,12 +421,6 @@ void CellModemManager::broadcast(const QCBSMessage&m)
 
   Emitted whenever the network operator changes.  \a networkOperator will be set
   to the new value.
- */
-
-/*!
-  \fn void CellModemManager::cellLocationChanged(const QString &location)
-
-  Emitted whenever the cell \a location changes.
  */
 
 /*!
@@ -768,8 +742,6 @@ void CellModemManager::setNotReadyStatus()
     stopAutoRegisterTimer();
     if(d->m_regState != QTelephony::RegistrationNone)
         emit registrationStateChanged(QTelephony::RegistrationNone);
-    if(!d->m_location.isEmpty())
-        emit cellLocationChanged(QString());
     if(!d->m_operator.isEmpty())
         emit networkOperatorChanged(QString());
     if(d->m_callForwardingEnabled)
@@ -821,8 +793,6 @@ void CellModemManager::setReadyStatus()
 {
     if(d->m_regState != QTelephony::RegistrationNone)
         emit registrationStateChanged(d->m_regState);
-    if(!d->m_location.isEmpty())
-        emit cellLocationChanged(d->m_location);
     if(!d->m_operator.isEmpty())
         emit networkOperatorChanged(d->m_operator);
     if(d->m_callForwardingEnabled)
@@ -860,7 +830,6 @@ void CellModemManager::updateStatus()
                               registrationState() == QTelephony::RegistrationRoaming);
     d->m_status->setAttribute("Roaming",
                               registrationState() == QTelephony::RegistrationRoaming);
-    d->m_status->setAttribute("CellLocation", cellLocation());
     d->m_status->setAttribute("OperatorName", networkOperator());
     d->m_status->setAttribute("OperatorCountry", networkOperatorCountry());
     d->m_status->setAttribute("CallDivert", callForwardingEnabled());
@@ -1132,15 +1101,11 @@ QTelephony::RegistrationState CellModemManager::registrationState() const
 }
 
 /*!
-  Returns the current cell location.  This call will always return an empty
-  string unless CellModemManager is in the Ready state.
- */
-QString CellModemManager::cellLocation() const
+  Updates the value in value space at \c {/Telephony/Status/CellLocation} to \a location.
+*/
+void CellModemManager::setCellLocation( const QString &location )
 {
-    if(Ready == state())
-        return d->m_location;
-    else
-        return QString();
+    d->m_status->setAttribute("CellLocation", location);
 }
 
 /*!

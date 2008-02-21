@@ -1197,7 +1197,7 @@ void ItemDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option,
                 break;
             case LeafHint:
                 painter->drawPixmap( topleft, m_iconcache.pixmap( LEAF_ICON_ID,
-                    ":icon/mediaplayer/black/leaf", QSize( -iconwidth, iconwidth ) ) );
+                    ":icon/mediaplayer/black/leaf", QSize( iconwidth, iconwidth ) ) );
                 break;
             }
         }

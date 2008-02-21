@@ -78,9 +78,6 @@ HomescreenSettings::HomescreenSettings(QWidget* parent, Qt::WFlags fl)
     QString hsImgName = config.value("HomeScreenPicture").toString();
     int hsDisplayMode = config.value("HomeScreenPictureMode", 0).toInt();
 
-    if ( !hsImgName.isEmpty() && hsImgName[0]!='/' )
-        hsImgName = QString(":image/wallpaper/"+hsImgName);
-    
     image = new QPushButton();
     image->setIconSize(QSize(50,75));
     image->setMinimumHeight(80);
@@ -197,9 +194,6 @@ HomescreenSettings::HomescreenSettings(QWidget* parent, Qt::WFlags fl)
         
         hsImgName = config.value("SecondaryHomeScreenPicture").toString();
         hsDisplayMode = config.value("SecondaryHomeScreenPictureMode", 0).toInt();
-        
-        if ( !hsImgName.isEmpty() && hsImgName[0]!='/' )
-            hsImgName = QString(":image/wallpaper/"+hsImgName);
             
         secondaryImage = new QPushButton();
         secondaryImage->setIconSize(QSize(50,75));

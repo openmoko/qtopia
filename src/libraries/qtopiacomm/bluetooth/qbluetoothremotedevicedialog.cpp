@@ -613,6 +613,7 @@ void QBluetoothRemoteDeviceDialogPrivate::initLayout()
 
     // top bar with text "Searching..." and the bluetooth icon
     QHBoxLayout *statusBar = new QHBoxLayout;
+    statusBar->setContentsMargins(6, 0, 6, 0);
     statusBar->addWidget(m_statusLabel);
     statusBar->addWidget(m_statusIcon->iconLabel());
 
@@ -635,6 +636,7 @@ void QBluetoothRemoteDeviceDialogPrivate::initActions()
             SLOT(triggeredDiscoveryAction()));
 
     m_menu = QSoftMenuBar::menuFor(this);
+    QSoftMenuBar::setHelpEnabled(this, false);
 
     // add generic actions (shown below device actions)
     m_menu->addAction(m_discoveryAction);
@@ -726,7 +728,10 @@ QBluetoothRemoteDeviceDialog::QBluetoothRemoteDeviceDialog(QWidget *parent, Qt::
     : QDialog(parent, flags),
       m_data(new QBluetoothRemoteDeviceDialogPrivate(0, this))
 {
+    // don't want margins on sides because it's annoying when trying to
+    // grab scrollbar on touchscreens
     QVBoxLayout *l = new QVBoxLayout(this);
+    l->setContentsMargins(0, 6, 0, 0);
     l->addWidget(m_data);
 }
 
@@ -741,6 +746,7 @@ QBluetoothRemoteDeviceDialog::QBluetoothRemoteDeviceDialog(QBluetoothLocalDevice
       m_data(new QBluetoothRemoteDeviceDialogPrivate(local, this))
 {
     QVBoxLayout *l = new QVBoxLayout(this);
+    l->setContentsMargins(0, 6, 0, 0);
     l->addWidget(m_data);
 }
 

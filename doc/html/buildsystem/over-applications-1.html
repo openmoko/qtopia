@@ -21,20 +21,7 @@
 <li>singleexec (non-quicklaunch)</li>
 </ul>
 <p>To facilitate switching between build modes, two macros are provided. They are to be used as follows (from examples/application/main.cpp):</p>
-<pre><span class="comment">    /****************************************************************************
-    **
-    ** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
-    **
-    ** This file is part of the Opensource Edition of the Qtopia Toolkit.
-    **
-    ** $TROLLTECH_DUAL_LICENSE$
-    **
-    ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-    ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-    **
-    ****************************************************************************/</span>
-
-    #include &quot;example.h&quot;
+<pre>    #include &quot;example.h&quot;
     #include &lt;qtopiaapplication.h&gt;
 
     QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,Example)
@@ -42,20 +29,7 @@
 <p>The first argument to <a href="../qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() must be a literal string that matches the binary name (ie. the value of TARGET from the .pro file). The build system defines <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a> with the value of TARGET and it is recommended to use this macro. The second argument to <a href="../qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() should be the name of your class. If you use the wrong value you will get a compile failure.</p>
 <p>Building for either quicklaunch or singleexec requires these macros but the build system cannot easily tell if you have used them and the penalty for a wrong guess could be disastrous. Therefore you must use the <a href="conf-qtopia-main-1.html">qtopia_main</a> CONFIG value if you use these macros or the build system will assume your app is not quicklaunch-compatible. If your app uses these macros but does not handle quicklaunch or singleexec you can use the <a href="conf-no-quicklaunch-1.html">no_quicklaunch</a> or <a href="conf-no-singleexec-1.html">no_singleexec</a> CONFIG values.</p>
 <p>Some applications cannot use the macros (eg. If you need to use a custom application class). This prevents the use of quicklauncher but you can still work with singleexec if you make some changes to your code. You need to use the <a href="conf-singleexec-main-1.html">singleexec_main</a> CONFIG value and have a main.cpp that looks something like this (from examples/manual_main/main.cpp):</p>
-<pre><span class="comment">    /****************************************************************************
-    **
-    ** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
-    **
-    ** This file is part of the Opensource Edition of the Qtopia Toolkit.
-    **
-    ** $TROLLTECH_DUAL_LICENSE$
-    **
-    ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-    ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-    **
-    ****************************************************************************/</span>
-
-    #include &quot;example.h&quot;
+<pre>    #include &quot;example.h&quot;
     #include &lt;qtopiaapplication.h&gt;
 
     #ifdef SINGLE_EXEC

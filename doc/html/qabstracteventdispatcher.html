@@ -79,7 +79,7 @@
 <p>For finer control of the application's event loop, call <a href="qabstracteventdispatcher.html#instance">instance</a>() and call functions on the QAbstractEventDispatcher object that is returned. If you want to use your own instance of QAbstractEventDispatcher or of a QAbstractEventDispatcher subclass, you must create your instance <i>before</i> you create the <a href="qapplication.html">QApplication</a> object.</p>
 <p>The main event loop is started by calling <a href="qcoreapplication.html#exec">QCoreApplication::exec</a>(), and stopped by calling <a href="qcoreapplication.html#exit">QCoreApplication::exit</a>(). Local event loops can be created using <a href="qeventloop.html">QEventLoop</a>.</p>
 <p>Programs that perform long operations can call <a href="qabstracteventdispatcher.html#processEvents">processEvents</a>() with a bitwise OR combination of various <a href="qeventloop.html#ProcessEventsFlag-enum">QEventLoop::ProcessEventsFlag</a> values to control which events should be delivered.</p>
-<p>QAbstractEventDispatcher also allows the integration of an external event loop with the Qt event loop. For example, the Motif Extension included with Qt includes a reimplementation of QAbstractEventDispatcher that merges Qt and Motif events together.</p>
+<p>QAbstractEventDispatcher also allows the integration of an external event loop with the Qt event loop. For example, the <a href="http://www.trolltech.com/products/qt/addon/solutions/">Motif Extension Qt Solution</a> includes a reimplementation of QAbstractEventDispatcher that merges Qt and Motif events together.</p>
 <p>See also <a href="qeventloop.html">QEventLoop</a> and <a href="qcoreapplication.html">QCoreApplication</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -154,8 +154,8 @@
 <p>See also <a href="qabstracteventdispatcher.html#awake">awake</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

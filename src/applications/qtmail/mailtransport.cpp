@@ -208,16 +208,29 @@ void MailTransport::encryptionEstablished()
 
 void MailTransport::connectionFailed(const QList<QSslError>& errors)
 {
+    if (ignoreCertificateErrors(errors))
+        mSocket->ignoreSslErrors();
+    else
+        errorHandling(QAbstractSocket::UnknownSocketError, "");
+}
+
+bool MailTransport::ignoreCertificateErrors(const QList<QSslError>& errors)
+{
+    bool failed = false;
+
     QString text;
     foreach (const QSslError& error, errors)
     {
         text += (text.isEmpty() ? "'" : ", '");
         text += error.errorString();
         text += "'";
+
+        if (error.error() == QSslError::NoSslSupport)
+            failed = true;
     }
 
-    qWarning() << ("Encrypted connect failed: " + text).toLatin1();
-    errorHandling(ErrLoginFailed, "");
+    qWarning() << "Encrypted connect" << (failed ? "failed:" : "warnings:") << text;
+    return false;
 }
 #endif
 

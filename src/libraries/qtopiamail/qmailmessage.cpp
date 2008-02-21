@@ -4735,8 +4735,14 @@ void QMailMessagePrivate::outputMessage(QDataStream& out, QMailMessage::Encoding
 void QMailMessagePrivate::outputHeaders( QDataStream& out, bool addTimeStamp, bool addContentHeaders, bool includeBcc, bool stripInternal ) const
 {
     QList<QByteArray> exclusions;
-    if (!includeBcc)
+
+    if (addContentHeaders) {
+        // Don't include the nominated MIME-Version if specified - we implement 1.0
+        exclusions.append("MIME-Version");
+    }
+    if (!includeBcc) {
         exclusions.append("bcc");
+    }
 
     _header.output( out, exclusions, stripInternal );
 
@@ -4746,9 +4752,8 @@ void QMailMessagePrivate::outputHeaders( QDataStream& out, bool addTimeStamp, bo
     }
 
     if (addContentHeaders) {
-        // Output required content header fields if not already done.
-        if (headerField("MIME-Version").isEmpty())
-            out << DataString("MIME-Version: 1.0") << DataString('\n');
+        // Output required content header fields
+        out << DataString("MIME-Version: 1.0") << DataString('\n');
     }
 }
 

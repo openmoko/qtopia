@@ -67,6 +67,7 @@ private:
     QLCDNumber* stopwatchLcd;
     QBoxLayout *swLayout;
     bool init;
+    int totalTime;
 };
 
 #endif

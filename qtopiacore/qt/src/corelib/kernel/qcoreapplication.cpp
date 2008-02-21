@@ -1,33 +1,40 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
 **
 ** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://trolltech.com/products/qt/licenses/licensing/opensource/
+** License versions 2.0 or 3.0 as published by the Free Software
+** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file.  Alternatively you may (at
+** your option) use any later version of the GNU General Public
+** License if such license has been publicly approved by Trolltech ASA
+** (or its successors, if any) and the KDE Free Qt Foundation. In
+** addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.1, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
 **
-** If you are unsure which license is appropriate for your use, please
+** Please review the following information to ensure GNU General
+** Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
+** you are unsure which license is appropriate for your use, please
 ** review the following information:
 ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
 ** or contact the sales department at sales@trolltech.com.
 **
-** In addition, as a special exception, Trolltech gives you certain
-** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.0, which can be found at
-** http://www.trolltech.com/products/qt/gplexception/ and in the file
-** GPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Trolltech, as the sole
+** copyright holder for Qt Designer, grants users of the Qt/Eclipse
+** Integration plug-in the right for the Qt/Eclipse Integration to
+** link to functionality provided by Qt Designer and its related
+** libraries.
 **
-** In addition, as a special exception, Trolltech, as the sole copyright
-** holder for Qt Designer, grants users of the Qt/Eclipse Integration
-** plug-in the right for the Qt/Eclipse Integration to link to
-** functionality provided by Qt Designer and its related libraries.
-**
-** Trolltech reserves all rights not expressly granted herein.
+** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
+** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
+** granted herein.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -779,7 +786,7 @@ int QCoreApplication::exec()
 
   Note that unlike the C library function of the same name, this
   function \e does return to the caller -- it is event processing that
-  stops. 
+  stops.
 
   \sa quit(), exec()
 */
@@ -923,7 +930,8 @@ void QCoreApplication::postEvent(QObject *receiver, QEvent *event, int priority)
             // insert event in descending priority order, using upper
             // bound for a given priority (to ensure proper ordering
             // of events with the same priority)
-            QPostEventList::iterator begin = data->postEventList.begin() + data->postEventList.offset,
+            QPostEventList::iterator begin = data->postEventList.begin()
+                                             + data->postEventList.insertionOffset,
                                        end = data->postEventList.end();
             QPostEventList::iterator at = qUpperBound(begin, end, priority);
             data->postEventList.insert(at, QPostEvent(receiver, event, priority));
@@ -1050,13 +1058,13 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
 
     // okay. here is the tricky loop. be careful about optimizing
     // this, it looks the way it does for good reasons.
-    int i = 0;
-    const int s = data->postEventList.size();
-    const int savedOffset = data->postEventList.offset;
-    data->postEventList.offset = s;
+    int startOffset = data->postEventList.startOffset;
+    int &i = (!event_type && !receiver) ? data->postEventList.startOffset : startOffset;
+    data->postEventList.insertionOffset = data->postEventList.size();
+
     while (i < data->postEventList.size()) {
         // avoid live-lock
-        if (i >= s)
+        if (i >= data->postEventList.insertionOffset)
             break;
 
         const QPostEvent &pe = data->postEventList.at(i);
@@ -1122,7 +1130,6 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
             data->canWait = false;
 
             // uglehack: copied from below
-            data->postEventList.offset = savedOffset;
             --data->postEventList.recursion;
             if (!data->postEventList.recursion && !data->canWait && data->eventDispatcher)
                 data->eventDispatcher->wakeUp();
@@ -1138,16 +1145,18 @@ void QCoreApplicationPrivate::sendPostedEvents(QObject *receiver, int event_type
         // function depends on.
     }
 
-    data->postEventList.offset = savedOffset;
     --data->postEventList.recursion;
     if (!data->postEventList.recursion && !data->canWait && data->eventDispatcher)
         data->eventDispatcher->wakeUp();
 
     // clear the global list, i.e. remove everything that was
     // delivered.
-    if (!data->postEventList.recursion && !event_type && !receiver) {
+    if (!event_type && !receiver && data->postEventList.startOffset >= 0) {
         const QPostEventList::iterator it = data->postEventList.begin();
-        data->postEventList.erase(it, it + i);
+        data->postEventList.erase(it, it + data->postEventList.startOffset);
+        data->postEventList.insertionOffset -= data->postEventList.startOffset;
+        Q_ASSERT(data->postEventList.insertionOffset >= 0);
+        data->postEventList.startOffset = 0;
     }
 }
 

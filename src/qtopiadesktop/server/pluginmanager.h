@@ -40,6 +40,7 @@ public:
     ~PluginManager();
 
     void setupPlugins( bool safeMode );
+    void setupPlugin( QDPlugin *plugin, bool safeMode );
 
     QDAppPluginList activePlugins();
     QDAppPlugin *currentPlugin();
@@ -57,8 +58,6 @@ public:
     QMap<QString,QString> detectedPluginIds();
 
 private:
-    void setupPlugin( QDPlugin *plugin, bool safeMode );
-
     PluginManagerPrivate *d;
 };
 

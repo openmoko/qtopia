@@ -186,10 +186,10 @@ void AddressSeparator::process(QChar character, bool quoted, bool escaped, int c
                 _type = Address;
         } else if ( character == '>' && _inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inAddress = false;
-        } else if ( character == ':' && !_inGroup && !_inAddress && !escaped && commentDepth == 0 ) {
+        } else if ( character == ':' && !_inGroup && !_inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inGroup = true;
             _type = Group;
-        } else if ( character == ';' && _inGroup && !_inAddress && !escaped && commentDepth == 0 ) {
+        } else if ( character == ';' && _inGroup && !_inAddress && !quoted && !escaped && commentDepth == 0 ) {
             _inGroup = false;
 
             // This is a soft separator, because the group construct could have a trailing comment

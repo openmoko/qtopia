@@ -43,9 +43,6 @@
 <a name="headers"></a>
 <h4>Headers</h4>
 <p>When configure prints <tt>Running qmake...</tt> it sets up the include directory. External trees can also install headers into the include directory but this does not happen until the projects are processed as part of building. That makes it important that dependencies are specified correctly. It also means that projects in other trees might not be able to use the includes due to the <a href="#build-order">Build Order</a> limitation noted above.</p>
-<a name="make-test"></a>
-<h4>make test</h4>
-<p>The special command <tt>make test</tt> does not work outside the Qtopia tree. You can still use <tt>make test</tt> to execute a test but you must manually change to the test directory first.</p>
 <p>See also <a href="overviews.html">Overviews</a> and <a href="atask-create-a-new-project-tree-1.html">Create a new project tree</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

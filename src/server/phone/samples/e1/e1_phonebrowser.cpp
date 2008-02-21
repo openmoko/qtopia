@@ -103,7 +103,7 @@ E1PhoneTelephonyBar::E1PhoneTelephonyBar(QWidget *parent)
                      this, SLOT(timeChanged()));
     QObject::connect(&signal, SIGNAL(contentsChanged()),
                      this, SLOT(signalChanged()));
-    QObject::connect(bat, SIGNAL(batteryChanged(int)), 
+    QObject::connect(bat, SIGNAL(chargeChanged(int)), 
                      this, SLOT(batteryChanged(int)));
 
     batteryChanged(bat->charge());
@@ -526,7 +526,7 @@ E1PhoneBrowser::E1PhoneBrowser(QWidget *parent, Qt::WFlags wflags)
     tbar->setFixedHeight(26);
     vlayout->addWidget(tbar);
 
-    QHBoxLayout * layout = new QHBoxLayout(this);
+    QHBoxLayout * layout = new QHBoxLayout;
 
     vlayout->addLayout(layout);
 
@@ -550,8 +550,6 @@ E1PhoneBrowser::E1PhoneBrowser(QWidget *parent, Qt::WFlags wflags)
     vlayout->addWidget(bar);
     QObject::connect(bar, SIGNAL(toListView()), this, SLOT(toList()));
     QObject::connect(bar, SIGNAL(toIconView()), this, SLOT(toIcon()));
-
-    setLayout(vlayout);
 
     tabChanged(m_tabs->currentTab());
 

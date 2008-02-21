@@ -84,6 +84,12 @@ protected slots:
     void connectionFailed(const QList<QSslError>& errors);
 #endif
 
+#ifndef QT_NO_OPENSSL
+protected:
+    // Override to modify certificate error handling
+    virtual bool ignoreCertificateErrors(const QList<QSslError>& errors);
+#endif
+
 private:
     void createSocket(QMailAccount::EncryptType encryptType);
     QMailAccount::EncryptType mailEncryption() const;

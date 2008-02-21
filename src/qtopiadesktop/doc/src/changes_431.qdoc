@@ -17,6 +17,8 @@ This page describes changes to Qtopia Sync Agent 4.3.1.
 
 \list
 \o Appointments starting and ending at midnight are mis-reported as all day events.
+\o An obvious crash bug somehow made it through our QA process. Contact
+   support-embedded@trolltech.com if you require the patch to correct this.
 \endlist
 
 */

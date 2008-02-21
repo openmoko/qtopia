@@ -152,6 +152,7 @@ QDPlugin::~QDPlugin()
 */
 CenterInterface *QDPlugin::centerInterface()
 {
+    Q_ASSERT(d);
     return d->center;
 }
 
@@ -201,6 +202,7 @@ void QDPlugin::internal_init()
 */
 void QDPlugin::lock( QDPlugin *plugin )
 {
+    Q_ASSERT(d);
     d->lockers << plugin;
     if ( qobject_cast<QDDevPlugin*>(this) )
         QCopEnvelope e( "QD/Connection", "setBusy()" );
@@ -211,6 +213,7 @@ void QDPlugin::lock( QDPlugin *plugin )
 */
 void QDPlugin::unlock( QDPlugin *plugin )
 {
+    Q_ASSERT(d);
     d->lockers.removeAll(plugin);
     if ( d->lockers.count() == 0 )
         QCopEnvelope e( "QD/Connection", "clearBusy()" );
@@ -221,6 +224,7 @@ void QDPlugin::unlock( QDPlugin *plugin )
 */
 bool QDPlugin::locked() const
 {
+    Q_ASSERT(d);
     return ( d->lockers.count() != 0 );
 }
 

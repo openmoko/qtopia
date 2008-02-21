@@ -39,7 +39,6 @@ E1Error::E1Error(const QString &error)
 {
     QWidget *myWid = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(myWid);
-    myWid->setLayout(layout);
     QLabel *pix = new QLabel(myWid);
     pix->setPixmap(QPixmap(":image/alert_warning"));
     layout->addWidget(pix);

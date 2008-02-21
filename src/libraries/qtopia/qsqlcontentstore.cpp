@@ -1362,62 +1362,77 @@ QString QSqlContentStore::convertRole( QContent::Role role ) const
 */
 int QSqlContentStore::mimeId( const QString &type, QtopiaDatabaseId dbId )
 {
-    static QCache< QPair<QString, QtopiaDatabaseId>, int> mimeIdCache;
-    if(mimeIdCache.contains(qMakePair(type, dbId)))
-       return *mimeIdCache[qMakePair(type, dbId)];
+    int key = QContentCache::instance()->lookupMimeTypeKey( dbId, type );
+
+    if( key != -1 )
+        return key;
+
+    key = queryMimeId( type, dbId );
+
+    if( key != -1 )
+        return key;
+
+    static const QString insertString = QLatin1String(
+            "insert into mimeTypeLookup( mimeType ) "
+            "values( :type )" );
+
+    QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
+    insertQuery.prepare( insertString );
+
+    insertQuery.bindValue( QLatin1String( ":type" ), type );
+
+    QtopiaSql::instance()->logQuery( insertQuery );
+
+    if( !insertQuery.exec() )
     {
-        static const QString selectString = QLatin1String(
-                "select pKey "
-                "from mimeTypeLookup "
-                "where mimeType = :type" );
+        logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
 
-        QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
-        selectQuery.prepare( selectString );
-
-        selectQuery.bindValue( QLatin1String( ":type" ), type );
-
-        QtopiaSql::instance()->logQuery( selectQuery );
-
-        if( !selectQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
-
-            return 0;
-        }
-
-        if( selectQuery.first() )
-        {
-            int *value=new int;
-            *value = selectQuery.value( 0 ).toInt();
-            mimeIdCache.insert(qMakePair(type, dbId), value);
-            return *value;
-        }
+        return 0;
     }
 
+    key = insertQuery.lastInsertId().toInt();
+
+    QContentCache::instance()->cacheMimeTypeKey( dbId, type, key );
+
+    return key;
+}
+
+/*!
+    Queries the database for the primary key for a mime \a type in the database with the id \a dbId.
+
+    Returns the primary key if one exists and -1 otherwise.
+*/
+int QSqlContentStore::queryMimeId( const QString &type, QtopiaDatabaseId dbId )
+{
+    static const QString selectString = QLatin1String(
+            "select pKey "
+            "from mimeTypeLookup "
+            "where mimeType = :type" );
+
+    QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
+    selectQuery.prepare( selectString );
+
+    selectQuery.bindValue( QLatin1String( ":type" ), type );
+
+    QtopiaSql::instance()->logQuery( selectQuery );
+
+    if( !selectQuery.exec() )
     {
-        static const QString insertString = QLatin1String(
-                "insert into mimeTypeLookup( mimeType ) "
-                "values( :type )" );
+        logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
 
-        QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
-        insertQuery.prepare( insertString );
-
-        insertQuery.bindValue( QLatin1String( ":type" ), type );
-
-        QtopiaSql::instance()->logQuery( insertQuery );
-
-        if( !insertQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
-
-            return 0;
-        }
-
-        int *value=new int;
-        *value = insertQuery.lastInsertId().toInt();
-        mimeIdCache.insert(qMakePair(type, dbId), value);
-        return *value;
+        return -1;
     }
+
+    if( selectQuery.first() )
+    {
+        int key = selectQuery.value( 0 ).toInt();
+
+        QContentCache::instance()->cacheMimeTypeKey( dbId, type, key );
+
+        return key;
+    }
+
+    return -1;
 }
 
 /*!
@@ -1425,62 +1440,77 @@ int QSqlContentStore::mimeId( const QString &type, QtopiaDatabaseId dbId )
  */
 int QSqlContentStore::locationId( const QString &location, QtopiaDatabaseId dbId )
 {
-    static QCache< QPair<QString, QtopiaDatabaseId>, int> locationIdCache;
-    if(locationIdCache.contains(qMakePair(location, dbId)))
-       return *locationIdCache[qMakePair(location, dbId)];
+    int key = QContentCache::instance()->lookupLocationKey( dbId, location );
+
+    if( key != -1 )
+        return key;
+
+    key = queryLocationId( location, dbId );
+
+    if( key != -1 )
+        return key;
+
+    static const QString insertString = QLatin1String(
+            "insert into locationLookup( location ) "
+            "values( :location )" );
+
+    QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
+    insertQuery.prepare( insertString );
+
+    insertQuery.bindValue( QLatin1String( ":location" ), location );
+
+    QtopiaSql::instance()->logQuery( insertQuery );
+
+    if( !insertQuery.exec() )
     {
-        static const QString selectString = QLatin1String(
-                "select pKey "
-                "from locationLookup "
-                "where location = :location" );
+        logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
 
-        QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
-        selectQuery.prepare( selectString );
-
-        selectQuery.bindValue( QLatin1String( ":location" ), location );
-
-        QtopiaSql::instance()->logQuery( selectQuery );
-
-        if( !selectQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
-
-            return 0;
-        }
-
-        if( selectQuery.first() )
-        {
-            int *value=new int;
-            *value = selectQuery.value( 0 ).toInt();
-            locationIdCache.insert(qMakePair(location, dbId), value);
-            return *value;
-        }
+        return -1;
     }
 
+    key = insertQuery.lastInsertId().toInt();
+
+    QContentCache::instance()->cacheLocationKey( dbId, location, key );
+
+    return key;
+}
+
+/*!
+    Queries the database for the primary key for the directory \a location in the database with the id \a dbId.
+
+    Returns the primary key if one exists or -1 otherwise.
+*/
+int QSqlContentStore::queryLocationId( const QString &location, QtopiaDatabaseId dbId )
+{
+    static const QString selectString = QLatin1String(
+            "select pKey "
+            "from locationLookup "
+            "where location = :location" );
+
+    QSqlQuery selectQuery( QtopiaSql::instance()->database( dbId ) );
+    selectQuery.prepare( selectString );
+
+    selectQuery.bindValue( QLatin1String( ":location" ), location );
+
+    QtopiaSql::instance()->logQuery( selectQuery );
+
+    if( !selectQuery.exec() )
     {
-        static const QString insertString = QLatin1String(
-                "insert into locationLookup( location ) "
-                "values( :location )" );
+        logError( __PRETTY_FUNCTION__, "selectQuery", dbId, selectQuery.lastError() );
 
-        QSqlQuery insertQuery( QtopiaSql::instance()->database( dbId ) );
-        insertQuery.prepare( insertString );
-
-        insertQuery.bindValue( QLatin1String( ":location" ), location );
-
-        QtopiaSql::instance()->logQuery( insertQuery );
-
-        if( !insertQuery.exec() )
-        {
-            logError( __PRETTY_FUNCTION__, "insertQuery", dbId, insertQuery.lastError() );
-
-            return 0;
-        }
-
-        int *value=new int;
-        *value = insertQuery.lastInsertId().toInt();
-        locationIdCache.insert(qMakePair(location, dbId), value);
-        return *value;
+        return -1;
     }
+
+    if( selectQuery.first() )
+    {
+        int key = selectQuery.value( 0 ).toInt();
+
+        QContentCache::instance()->cacheLocationKey( dbId, location, key );
+
+        return key;
+    }
+
+    return -1;
 }
 
 /*!

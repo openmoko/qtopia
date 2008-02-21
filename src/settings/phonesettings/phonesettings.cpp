@@ -46,6 +46,7 @@
 #include <QKeyEvent>
 #include <QWaitWidget>
 #include <QtopiaItemDelegate>
+#include <QScrollArea>
 
 const QString SERVICE_NAME = "modem";
 
@@ -249,9 +250,10 @@ void PhoneSettings::itemActivated( QListWidgetItem *item )
         dlg = new CallWaiting( this );
     else if ( index == CallerId )
         dlg = new CallerID( this );
-    else if ( index == Broadcast )
+    else if ( index == Broadcast ) {
         dlg = new CellBroadcasting( this );
-    else if ( index == Fixed )
+        dlg->showMaximized();
+    } else if ( index == Fixed )
         dlg = new FixedDialing( this );
     else if ( index == Flip )
         dlg = new FlipFunction( this );
@@ -291,6 +293,11 @@ void CallBarring::init()
 {
     setObjectName( "barring" );
     setWindowTitle( tr( "Call Barring" ) );
+
+    waitWidget = new QWaitWidget( this );
+    waitWidget->setCancelEnabled( true );
+    connect( waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
+    waitWidget->show();
 
     QVBoxLayout *vb = new QVBoxLayout(this);
 
@@ -342,10 +349,6 @@ void CallBarring::init()
 
     barOptions->setEnabled( false );
 
-    waitWidget = new QWaitWidget( this );
-    waitWidget->setCancelEnabled( true );
-    connect( waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
-
     QMenu *contextMenu = QSoftMenuBar::menuFor( this );
     unlock = contextMenu->addAction( tr( "Deactivate all" ), this, SLOT(unlockAll()) );
     pin = contextMenu->addAction( tr( "Change pin" ), this, SLOT(changePin()) );
@@ -370,7 +373,6 @@ void CallBarring::checkStatus()
     client->requestBarringStatus( QCallBarring::IncomingAll );
     client->requestBarringStatus( QCallBarring::IncomingNonSIM );
     client->requestBarringStatus( QCallBarring::IncomingWhenRoaming );
-    waitWidget->show();
 }
 
 void CallBarring::barringStatus( QCallBarring::BarringType type, QTelephony::CallClass c )
@@ -545,6 +547,11 @@ void CallWaiting::init()
     setObjectName( "waiting" );
     setWindowTitle( tr( "Call Waiting" ) );
 
+    waitWidget = new QWaitWidget( this );
+    waitWidget->setCancelEnabled( true );
+    connect( waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
+    waitWidget->show();
+
     QVBoxLayout *vb = new QVBoxLayout(this);
     waitOptions = new QListWidget( this );
     waitOptions->setEnabled( false );
@@ -554,21 +561,14 @@ void CallWaiting::init()
 
     item = new QListWidgetItem( tr( "Voice" ), waitOptions );
     item->setData( Qt::UserRole, QTelephony::CallClassVoice );
-
     item = new QListWidgetItem( tr( "Data" ), waitOptions );
     item->setData( Qt::UserRole, QTelephony::CallClassData );
-
     item = new QListWidgetItem( tr( "Fax" ), waitOptions );
     item->setData( Qt::UserRole, QTelephony::CallClassFax );
 
     waitOptions->setCurrentRow( 0 );
 
-    waitWidget = new QWaitWidget( this );
-    waitWidget->setCancelEnabled( true );
-    connect( waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
-
     client = new QCallSettings( SERVICE_NAME, this );
-    client->requestCallWaiting();
 }
 
 void CallWaiting::showEvent( QShowEvent *e )
@@ -581,7 +581,6 @@ void CallWaiting::showEvent( QShowEvent *e )
 void CallWaiting::checkStatus()
 {
     client->requestCallWaiting();
-    waitWidget->show();
 }
 
 void CallWaiting::itemActivated( QListWidgetItem * item )
@@ -865,11 +864,6 @@ void CellBroadcasting::activate()
     for ( int i = 0; i < channels.count(); i++ ) {
         if ( channels.at( i )->active )
             c.append( channels.at( i )->num );
-        if ( channels.at( i )->num == 50 )
-            if ( !channels.at( i )->active )
-                QtopiaChannel::send("QPE/System", "clearCellLocation()");
-            else
-                QtopiaChannel::send("QPE/System", "displayCellLocation()");
     }
 
     // always listen to channel 50 to cache location info
@@ -1033,9 +1027,24 @@ void CellBroadcasting::itemActivated( QListWidgetItem * item )
 CellBroadcastEditDialog::CellBroadcastEditDialog( QWidget *parent, Qt::WFlags f )
     : QDialog( parent, f ), lstLang( 0 )
 {
-    setupUi( this );
+    setObjectName( "broadcast-edit" );
 
-    connect( btnLang, SIGNAL(clicked()), this, SLOT(selectLanguages()) );
+    editor = new Ui::ChannelEdit;
+    QWidget *container = new QWidget(this);
+    editor->setupUi( container );
+
+    QScrollArea *sArea = new QScrollArea();
+    sArea->setFocusPolicy(Qt::NoFocus);
+    sArea->setFrameStyle(QFrame::NoFrame);
+    sArea->setWidget( container );
+    sArea->setWidgetResizable( true );
+    sArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QVBoxLayout *layout = new QVBoxLayout( this );
+    layout->setMargin( 0 );
+    layout->addWidget( sArea );
+
+    connect( editor->btnLang, SIGNAL(clicked()), this, SLOT(selectLanguages()) );
 }
 
 void CellBroadcastEditDialog::setChannel( CellBroadcasting::Channel c )
@@ -1046,20 +1055,20 @@ void CellBroadcastEditDialog::setChannel( CellBroadcasting::Channel c )
     ch.active = c.active;
     ch.languages = c.languages;
 
-    num->setValue( ch.num );
+    editor->num->setValue( ch.num );
     if ( !ch.label.isNull() )
-        title->setText( ch.label );
+        editor->title->setText( ch.label );
     switch ( ch.mode ) {
         case CellBroadcasting::Background:
-            homeScreen->setChecked( true );
+            editor->homeScreen->setChecked( true );
             break;
         case CellBroadcasting::Foreground:
-            popup->setChecked( true );
+            editor->popup->setChecked( true );
             break;
     }
 
     if ( ch.num == 50 )
-        num->setEnabled( false );
+        editor->num->setEnabled( false );
 }
 
 CellBroadcasting::Channel CellBroadcastEditDialog::channel() const
@@ -1073,6 +1082,7 @@ void CellBroadcastEditDialog::selectLanguages()
     dlg.setModal( true );
     dlg.setWindowTitle( tr( "Select Languages" ) );
     QVBoxLayout layout( &dlg );
+    layout.setMargin(0);
     lstLang = new QListWidget( &dlg );
     connect( lstLang, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(itemActivated(QListWidgetItem*)) );
     setLanguages();
@@ -1133,11 +1143,11 @@ void CellBroadcastEditDialog::itemActivated( QListWidgetItem *item )
 
 void CellBroadcastEditDialog::accept()
 {
-    ch.num = num->value();
-    ch.label = title->text();
-    if ( homeScreen->isChecked() )
+    ch.num = editor->num->value();
+    ch.label = editor->title->text();
+    if ( editor->homeScreen->isChecked() )
         ch.mode = CellBroadcasting::Background;
-    else if ( popup->isChecked() )
+    else if ( editor->popup->isChecked() )
         ch.mode = CellBroadcasting::Foreground;
     QDialog::accept();
 }
@@ -1402,8 +1412,6 @@ ServiceNumbers::ServiceNumbers( QWidget *parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
     init();
-    connect( serviceNumbers, SIGNAL(serviceNumber(QServiceNumbers::NumberId,QString)),
-            this, SLOT(serviceNumber(QServiceNumbers::NumberId,QString)) );
 }
 
 ServiceNumbers::~ServiceNumbers()
@@ -1447,6 +1455,8 @@ void ServiceNumbers::init()
     vb->addWidget( box2 );
 
     serviceNumbers = new QServiceNumbers( QString(), this );
+    connect( serviceNumbers, SIGNAL(serviceNumber(QServiceNumbers::NumberId,QString)),
+            this, SLOT(serviceNumber(QServiceNumbers::NumberId,QString)) );
     serviceNumbers->requestServiceNumber( QServiceNumbers::SmsServiceCenter );
     serviceNumbers->requestServiceNumber( QServiceNumbers::VoiceMail );
 }
@@ -1466,19 +1476,21 @@ void ServiceNumbers::serviceNumber( QServiceNumbers::NumberId id, const QString&
 //----------------------------------------------------------------------------
 
 CallVolume::CallVolume( QWidget *parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+    : QDialog( parent, fl ),
+      m_changeSpeakerVolume(true),
+      m_changeMicrophoneVolume(true)
 {
     init();
 
     connect(speakerVolume, SIGNAL(valueChanged(int)),
-            callVolume, SLOT(setSpeakerVolume(int)));
+            this, SLOT(speakerSliderChanged(int)));
     connect(microphoneVolume, SIGNAL(valueChanged(int)),
-            callVolume, SLOT(setMicrophoneVolume(int)));
+            this , SLOT(microphoneSliderChanged(int)));
 
     connect(callVolume, SIGNAL(speakerVolumeChanged(int)),
-            speakerVolume, SLOT(setValue(int)));
+            this, SLOT(speakerVolumeChanged(int)));
     connect(callVolume, SIGNAL(microphoneVolumeChanged(int)),
-            microphoneVolume, SLOT(setValue(int)));
+            this, SLOT(microphoneVolumeChanged(int)));
 }
 
 CallVolume::~CallVolume()
@@ -1510,9 +1522,35 @@ void CallVolume::reject()
     QDialog::reject();
 }
 
+void CallVolume::speakerSliderChanged(int volume)
+{
+    if (m_changeSpeakerVolume)
+        callVolume->setSpeakerVolume(volume);
+}
+
+void CallVolume::speakerVolumeChanged(int volume)
+{
+    m_changeSpeakerVolume = false;
+    speakerVolume->setValue(volume);
+    m_changeSpeakerVolume = true;
+}
+
+void CallVolume::microphoneSliderChanged(int volume)
+{
+    if (m_changeMicrophoneVolume)
+        callVolume->setMicrophoneVolume(volume);
+}
+
+void CallVolume::microphoneVolumeChanged(int volume)
+{
+    m_changeMicrophoneVolume = false;
+    microphoneVolume->setValue(volume);
+    m_changeMicrophoneVolume = true;
+}
+
 void CallVolume::init()
 {
-    setObjectName( "callvolume" );
+    setObjectName( "volume" );
     setWindowTitle( tr( "Call Volume" ) );
 
     callVolume = new QCallVolume( QString(), this );

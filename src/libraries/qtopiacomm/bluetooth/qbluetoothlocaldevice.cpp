@@ -478,6 +478,7 @@ void QBluetoothLocalDevice_Private::cancelScanReply(const QDBusMessage &msg)
 {
     if (msg.type() != QDBusMessage::ErrorMessage) {
         emit m_parent->discoveryCancelled();
+        return;
     }
 
     emitError(QDBusError(msg));
@@ -1289,8 +1290,8 @@ bool QBluetoothLocalDevice::cancelDiscovery()
     QList<QVariant> args;
 
     return m_data->iface()->callWithCallback("CancelDiscovery", args, m_data,
-                                             SLOT(asyncReply(QDBusMessage)),
-                                             SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
+                                             SLOT(cancelScanReply(QDBusMessage)),
+                                             SLOT(cancelScanReply(QDBusMessage)));
 }
 
 /*!

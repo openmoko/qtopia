@@ -68,12 +68,11 @@ E1Incoming::E1Incoming()
 
     QWidget * wid = new QWidget(this);
     QVBoxLayout *l = new QVBoxLayout(wid);
-    wid->setLayout(l);
     QLabel * incoming = new QLabel(wid);
     incoming->setText("Incoming Call...");
     l->addWidget(incoming);
 
-    QHBoxLayout *h = new QHBoxLayout(wid);
+    QHBoxLayout *h = new QHBoxLayout;
     l->addLayout(h);
     image = new QLabel(wid);
     h->addWidget(image);

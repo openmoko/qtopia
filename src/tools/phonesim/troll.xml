@@ -897,7 +897,7 @@
 <chat>
   <!-- Request preferred operators -->
   <command>AT+CPOL?</command>
-  <response delay="2000">+CPOL: ${PO1}\n+CPOL: ${PO2}\n+CPOL: ${PO3}\n+CPOL: ${PO4}\n+CPOL: ${PO5}\n+CPOL: ${PO6}\n+CPOL: ${PO7}\n+CPOL: ${PO8}\nOK</response>
+  <response delay="2000">+CPOL: ${PO1}\n+CPOL: ${PO2}\nOK</response>
 </chat>
 
 <chat>

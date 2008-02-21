@@ -132,6 +132,7 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
     connect( qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock(bool)) );
 
     swFrame->installEventFilter( this );
+    totalTime = 0;
     updateClock();
 }
 
@@ -142,16 +143,24 @@ StopWatch::~StopWatch()
 
 void StopWatch::updateClock()
 {
+
     int totalms = swatch_totalms;
-    if ( swatch_running )
-        totalms += swatch_start.elapsed();
+    if ( swatch_running ) {
+        int elapsedTime =  swatch_start.restart();
+        if(elapsedTime > 1300 ) {
+            elapsedTime = 1000; //time skew, just fake it
+        }
+        totalTime += elapsedTime;
+        totalms = totalTime;
+     }
+
     setSwatchLcd( stopwatchLcd, totalms, !swatch_running );
     QTime swatch_time = QTime(0,0,0).addMSecs(totalms);
     analogStopwatch->display( swatch_time );
     if ( swatch_dispLap == swatch_currLap ) {
         swatch_splitms[swatch_currLap] = swatch_totalms;
         if ( swatch_running )
-            swatch_splitms[swatch_currLap] += swatch_start.elapsed();
+            swatch_splitms[swatch_currLap] += totalms;
         updateLap();
     }
 }
@@ -164,7 +173,7 @@ void StopWatch::changeClock( bool )
 void StopWatch::stopStartStopWatch()
 {
     if ( swatch_running ) {
-        swatch_totalms += swatch_start.elapsed();
+        swatch_totalms = totalTime + swatch_start.elapsed();
         swatch_splitms[swatch_currLap] = swatch_totalms;
         stopStart->setText( tr("Start") );
         reset->setText( tr("Reset") );
@@ -180,6 +189,7 @@ void StopWatch::stopStartStopWatch()
         swatch_running = false;
         toggleScreenSaver( true );
         updateClock();
+
     } else {
         swatch_start.start();
         stopStart->setText( tr("Stop") );
@@ -192,6 +202,7 @@ void StopWatch::stopStartStopWatch()
         }
 
         reset->setEnabled( swatch_currLap < 98 );
+
         t->start( 1000 );
         swatch_running = true;
         // disable screensaver while stop watch is running
@@ -207,14 +218,17 @@ void StopWatch::stopStartStopWatch()
 void StopWatch::resetStopWatch()
 {
     if ( swatch_running ) {
-        swatch_splitms[swatch_currLap] = swatch_totalms+swatch_start.elapsed();
+        //do lap/split
+        swatch_splitms[swatch_currLap] = swatch_totalms + totalTime +swatch_start.elapsed();
         swatch_dispLap = swatch_currLap;
         if ( swatch_currLap < 98 )  // allow up to 99 laps
             swatch_currLap++;
         reset->setEnabled( swatch_currLap < 98 );
         updateLap();
         lapTimer->start( 2000 );
-    } else {
+     } else {
+        // really reset
+        totalTime = 0;
         swatch_start.start();
         swatch_totalms = 0;
         swatch_currLap = 0;
@@ -262,7 +276,7 @@ void StopWatch::updateLap()
 {
     if ( swatch_running && swatch_currLap == swatch_dispLap ) {
         swatch_splitms[swatch_currLap] = swatch_totalms;
-        swatch_splitms[swatch_currLap] += swatch_start.elapsed();
+        swatch_splitms[swatch_currLap] = totalTime + swatch_start.elapsed();
     }
     int split = swatch_splitms[swatch_dispLap];
     int lap;

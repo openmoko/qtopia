@@ -703,6 +703,9 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         ThemeControl::instance()->refresh();
         polishWindows();
         updateLauncherIconSize();
+        m_homeScreen->applyHomeScreenImage();
+        if (secondDisplay)
+            applySecondaryBackgroundImage();
         delete waitWidget;
         lower();
     } else if ( message == "applyStyleNoSplash()" ) {
@@ -710,6 +713,9 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         ThemeControl::instance()->refresh();
         polishWindows();
         updateLauncherIconSize();
+        m_homeScreen->applyHomeScreenImage();
+        if (secondDisplay)
+            applySecondaryBackgroundImage();
     } else if ( message == "applyHomeScreenImage()" ) {
         m_homeScreen->applyHomeScreenImage();
         updateBackground();

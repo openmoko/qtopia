@@ -34,6 +34,8 @@
 enum ImapCommand
 {
     IMAP_Init = 0,
+    IMAP_Capability,
+    IMAP_StartTLS,
     IMAP_Login,
     IMAP_Logout,
     IMAP_List,
@@ -80,7 +82,7 @@ enum OperationState
 
 class LongStream;
 class Email;
-class MailTransport;
+class ImapTransport;
 
 class ImapProtocol: public QObject
 {
@@ -93,6 +95,9 @@ public:
     bool open(const QMailAccount& account);
     void close();
     bool connected() { return _connected; };
+
+    void capability();
+    void startTLS();
 
     /*  Valid in non-authenticated state only    */
     void login(QString user, QString password);
@@ -121,6 +126,9 @@ public:
 
     QString lastError() { return _lastError; };
 
+    /* Query whether a capability is supported */
+    bool supportsCapability(const QString& name) const;
+
     static QString token(QString str, QChar c1, QChar c2, int *index);
 
 signals:
@@ -147,6 +155,7 @@ private:
     OperationState commandResponse(QString in);
     void sendCommand(QString cmd);
 
+    void parseCapability();
     void parseSelect();
     void parseFetchAll();
     void parseUid();
@@ -156,7 +165,7 @@ private:
     void createMail(const QByteArray& msg, QString& uid, int size, uint flags);
 
 private:
-    MailTransport *transport;
+    ImapTransport *transport;
 
     ImapCommand status;
     OperationState operationState;
@@ -183,6 +192,7 @@ private:
     QTimer parseFetchTimer;
     bool firstParseFetch;
     QString fetchUid;
+    QStringList _capabilities;
 
     static const int MAX_LINES = 30;
 };

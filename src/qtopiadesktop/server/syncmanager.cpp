@@ -23,6 +23,7 @@
 #ifndef NO_SYNC
 #include "qsyncprotocol.h"
 #endif
+#include "qtopiadesktopapplication.h"
 
 #include <qdplugin.h>
 #include <trace.h>
@@ -55,8 +56,12 @@ SyncManager::SyncManager( QWidget *parent )
         if ( QDServerSyncPlugin *server = qobject_cast<QDServerSyncPlugin*>(plugin) )
             serverPlugins << server;
         else if ( QDClientSyncPluginFactory *factory = qobject_cast<QDClientSyncPluginFactory*>(plugin) )
-            foreach ( const QString &dataset, factory->datasets() )
-                clientPlugins << factory->pluginForDataset( dataset );
+            foreach ( const QString &dataset, factory->datasets() ) {
+                QDClientSyncPlugin *p = factory->pluginForDataset( dataset );
+                qdPluginManager()->setupPlugin( p, false );
+                ((QtopiaDesktopApplication*)qApp)->initializePlugin( p );
+                clientPlugins << p;
+            }
         else if ( QDClientSyncPlugin *client = qobject_cast<QDClientSyncPlugin*>(plugin) )
             clientPlugins << client;
     }

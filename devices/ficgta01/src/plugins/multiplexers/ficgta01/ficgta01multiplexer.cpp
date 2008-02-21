@@ -108,7 +108,7 @@ QSerialIODeviceMultiplexer *Ficgta01MultiplexerPlugin::create
         ( QSerialIODevice *device )
 {
 #ifndef FICGTA01_NO_MUX
-    return new QGsm0710Multiplexer( device, FICGTA01_FRAME_SIZE );
+    return new QGsm0710Multiplexer( device, FICGTA01_FRAME_SIZE, true );
 #else
     return new QNullSerialIODeviceMultiplexer( device );
 #endif

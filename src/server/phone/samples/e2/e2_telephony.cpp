@@ -24,7 +24,7 @@
 #include "e2_callscreen.h"
 #include "e2_dialer.h"
 #include "e2_bar.h"
-#include "phone/themecontrol.h"
+#include "themecontrol.h"
 #include <qcopchannel_qws.h>
 #include <QTimerEvent>
 #include <QDebug>

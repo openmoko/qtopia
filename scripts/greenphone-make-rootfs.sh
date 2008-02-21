@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 install()
 {
@@ -1283,19 +1283,19 @@ install_package()
         LIDS_PASSWORD=greenphone
         echo -n -e "$LIDS_PASSWORD\n$LIDS_PASSWORD\n" | sudo chroot `pwd`/.install /sbin/lidsconf -P >/dev/null 2>&1 || die "sudo failed at line $LINENO"
         mkdir -p $ROOTFS_IMAGE_DIR/etc/lids
-        #AJM USER LIDS mkdir -p $USERFS_IMAGE_DIR/etc/lids
         echo "$LIDS_PASSWORD" > $ROOTFS_IMAGE_DIR/etc/lids/lids.secret
-        #AJM USER LIDS echo "$LIDS_PASSWORD" > $USERFS_IMAGE_DIR/etc/lids/lids.secret
 
         mkdir -p $ROOTFS_IMAGE_DIR/etc/lids
         # all capabilities enabled at BOOT
         sed -e 's/^-/+/g' -e 's/^+30/-30/g' < ../example/lids.boot.cap > $ROOTFS_IMAGE_DIR/etc/lids/lids.boot.cap
 
-        install ../example $ROOTFS_IMAGE_DIR/etc/lids lids.ini lids{,.postboot,.shutdown}.cap
+        install ../example $ROOTFS_IMAGE_DIR/etc/lids lids.ini lids.cap lids.postboot.cap lids.shutdown.cap
         install .install/etc/lids $ROOTFS_IMAGE_DIR/etc/lids lids.pw
-        #AJM USER LIDS install .install/etc/lids $USERFS_IMAGE_DIR/etc/lids lids.pw
         # No ACLs defined in ro root partition
-        touch $ROOTFS_IMAGE_DIR/etc/lids/lids{,.boot,.postboot,.shutdown}.conf
+        touch $ROOTFS_IMAGE_DIR/etc/lids/lids.conf
+        touch $ROOTFS_IMAGE_DIR/etc/lids/lids.boot.conf
+        touch $ROOTFS_IMAGE_DIR/etc/lids/lids.postboot.conf
+        touch $ROOTFS_IMAGE_DIR/etc/lids/lids.shutdown.conf
 
         cd ../../..
 fi
@@ -1519,8 +1519,10 @@ install_basefiles()
 
     sudo mknod ttyUSB0 c 188 0 || die "sudo failed at line $LINENO"
 
-    for i in {0..31}; do
+    i=0
+    while [ $i -le 31 ]; do
         sudo mknod rfcomm$i c 216 $i || die "sudo failed at line $LINENO"
+        i=$(($i + 1))
     done
 
     sudo mknod omega_bt c 250 0 || die "sudo failed at line $LINENO"

@@ -2,6 +2,54 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="http://doc.trolltech.com/qtopia/qtopiadesktop" title="Qtopia Sync Agent Documentation" version="">
     <namespace access="public" threadsafety="unspecified" status="commendable" name="" href="" location="" module="">
+        <class access="public" threadsafety="unspecified" status="commendable" name="TrayIcon" href="trayicon.html" location="trayicon.h" bases="QObject" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="TrayIcon" fullname="TrayIcon::TrayIcon" href="trayicon.html#TrayIcon" location="trayicon.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="TrayIcon(QObject * parent)">
+                <parameter left="QObject *" right="" name="parent" default="0"></parameter>
+                </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="~TrayIcon" fullname="TrayIcon::~TrayIcon" href="trayicon.html#~TrayIcon" location="trayicon.h" virtual="impure" meta="destructor" const="false" static="false" overload="false" type="" signature="~TrayIcon()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="installed" fullname="TrayIcon::installed" href="trayicon.html#installed" location="trayicon.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="bool" signature="installed()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="show" fullname="TrayIcon::show" href="trayicon.html#show" location="trayicon.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="show()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="hide" fullname="TrayIcon::hide" href="trayicon.html#hide" location="trayicon.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="hide()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="clicked" fullname="TrayIcon::clicked" href="trayicon.html#clicked" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="clicked()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="sync" fullname="TrayIcon::sync" href="trayicon.html#sync" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="sync()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="quit" fullname="TrayIcon::quit" href="trayicon.html#quit" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="quit()"></function>
+            </class>
+        <class access="public" threadsafety="unspecified" status="commendable" name="QtSingleApplication" href="qtsingleapplication.html" location="qtsingleapplication.h" bases="QApplication" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="QtSingleApplication" fullname="QtSingleApplication::QtSingleApplication" href="qtsingleapplication.html#QtSingleApplication" location="qtsingleapplication.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QtSingleApplication(const QString &amp; id, int &amp; argc, char ** argv, Type type)">
+                <parameter left="const QString &amp;" right="" name="id" default=""></parameter>
+                <parameter left="int &amp;" right="" name="argc" default=""></parameter>
+                <parameter left="char **" right="" name="argv" default=""></parameter>
+                <parameter left="Type" right="" name="type" default="GuiClient"></parameter>
+                </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="~QtSingleApplication" fullname="QtSingleApplication::~QtSingleApplication" href="qtsingleapplication.html#~QtSingleApplication" location="qtsingleapplication.h" virtual="non" meta="destructor" const="false" static="false" overload="false" type="" signature="~QtSingleApplication()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="isRunning" fullname="QtSingleApplication::isRunning" href="qtsingleapplication.html#isRunning" location="qtsingleapplication_win.cpp" virtual="non" meta="plain" const="true" static="false" overload="false" type="bool" signature="isRunning() const"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="id" fullname="QtSingleApplication::id" href="qtsingleapplication.html#id" location="qtsingleapplication.h" virtual="non" meta="plain" const="true" static="false" overload="false" type="QString" signature="id() const"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="initialize" fullname="QtSingleApplication::initialize" href="qtsingleapplication.html#initialize" location="qtsingleapplication_win.cpp" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="initialize(bool activate)">
+                <parameter left="bool" right="" name="activate" default="true"></parameter>
+                </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="sendMessage" fullname="QtSingleApplication::sendMessage" href="qtsingleapplication.html#sendMessage" location="qtsingleapplication_win.cpp" virtual="non" meta="slot" const="false" static="false" overload="false" type="bool" signature="sendMessage(const QString &amp; message, int timeout)">
+                <parameter left="const QString &amp;" right="" name="message" default=""></parameter>
+                <parameter left="int" right="" name="timeout" default="5000"></parameter>
+                </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="activateMainWidget" fullname="QtSingleApplication::activateMainWidget" href="qtsingleapplication.html#activateMainWidget" location="qtsingleapplication.h" virtual="impure" meta="slot" const="false" static="false" overload="false" type="void" signature="activateMainWidget()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="messageReceived" fullname="QtSingleApplication::messageReceived" href="qtsingleapplication.html#messageReceived" location="qtsingleapplication.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="messageReceived(const QString &amp; message)">
+                <parameter left="const QString &amp;" right="" name="message" default=""></parameter>
+                </function>
+            </class>
+        <function access="public" threadsafety="unspecified" status="commendable" name="qtopiadesktopLogEnabled" href="qtopiadesktoplog-h.html#qtopiadesktopLogEnabled" location="qtopiadesktoplog.cpp" virtual="non" meta="plain" const="false" static="false" overload="false" relates="&lt;qtopiadesktoplog.h&gt;" type="bool" signature="qtopiadesktopLogEnabled(const char * category)">
+            <parameter left="const char *" right="" name="category" default=""></parameter>
+            </function>
+        <class access="public" threadsafety="unspecified" status="commendable" name="QDThread" href="qdthread.html" location="qdthread.h" bases="QThread" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="QDThread" fullname="QDThread::QDThread" href="qdthread.html#QDThread" location="qdthread.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QDThread(QObject * parent)">
+                <parameter left="QObject *" right="" name="parent" default="0"></parameter>
+                </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="~QDThread" fullname="QDThread::~QDThread" href="qdthread.html#~QDThread" location="qdthread.h" virtual="impure" meta="destructor" const="false" static="false" overload="false" type="" signature="~QDThread()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="init" fullname="QDThread::init" href="qdthread.html#init" location="qdthread.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="init()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="start" fullname="QDThread::start" href="qdthread.html#start" location="qdthread.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="start()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="t_init" fullname="QDThread::t_init" href="qdthread.html#t_init" location="qdthread.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="void" signature="t_init()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="t_run" fullname="QDThread::t_run" href="qdthread.html#t_run" location="qdthread.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="void" signature="t_run()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="t_quit" fullname="QDThread::t_quit" href="qdthread.html#t_quit" location="qdthread.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="void" signature="t_quit()"></function>
+            </class>
         <class access="public" threadsafety="unspecified" status="main" name="DesktopSettings" href="desktopsettings.html" location="desktopsettings.h" bases="QSettings" module="">
             <function access="public" threadsafety="unspecified" status="commendable" name="DesktopSettings" fullname="DesktopSettings::DesktopSettings" href="desktopsettings.html#DesktopSettings" location="desktopsettings.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="DesktopSettings(const QString &amp; section)">
                 <parameter left="const QString &amp;" right="" name="section" default="QString()"></parameter>
@@ -21,20 +69,12 @@
                 </function>
             <function access="public" threadsafety="unspecified" status="commendable" name="deviceId" fullname="DesktopSettings::deviceId" href="desktopsettings.html#deviceId" location="desktopsettings.h" virtual="non" meta="plain" const="false" static="true" overload="false" type="QString" signature="deviceId()"></function>
             </class>
-        <function access="public" threadsafety="unspecified" status="commendable" name="qtopiadesktopLogEnabled" href="qtopiadesktoplog-h.html#qtopiadesktopLogEnabled" location="qtopiadesktoplog.cpp" virtual="non" meta="plain" const="false" static="false" overload="false" relates="&lt;qtopiadesktoplog.h&gt;" type="bool" signature="qtopiadesktopLogEnabled(const char * category)">
-            <parameter left="const char *" right="" name="category" default=""></parameter>
-            </function>
-        <class access="public" threadsafety="unspecified" status="commendable" name="QDThread" href="qdthread.html" location="qdthread.h" bases="QThread" module="">
-            <function access="public" threadsafety="unspecified" status="commendable" name="QDThread" fullname="QDThread::QDThread" href="qdthread.html#QDThread" location="qdthread.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QDThread(QObject * parent)">
-                <parameter left="QObject *" right="" name="parent" default="0"></parameter>
-                </function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="~QDThread" fullname="QDThread::~QDThread" href="qdthread.html#~QDThread" location="qdthread.h" virtual="impure" meta="destructor" const="false" static="false" overload="false" type="" signature="~QDThread()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="init" fullname="QDThread::init" href="qdthread.html#init" location="qdthread.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="init()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="start" fullname="QDThread::start" href="qdthread.html#start" location="qdthread.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="start()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="t_init" fullname="QDThread::t_init" href="qdthread.html#t_init" location="qdthread.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="void" signature="t_init()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="t_run" fullname="QDThread::t_run" href="qdthread.html#t_run" location="qdthread.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="void" signature="t_run()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="t_quit" fullname="QDThread::t_quit" href="qdthread.html#t_quit" location="qdthread.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="void" signature="t_quit()"></function>
-            </class>
+        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDPluginList" href="qdplugindefs-h.html#qdpluginlist-typedef" location="qdplugindefs.h"></typedef>
+        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDAppPluginList" href="qdplugindefs-h.html#qdapppluginlist-typedef" location="qdplugindefs.h"></typedef>
+        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDConPluginList" href="qdplugindefs-h.html#qdconpluginlist-typedef" location="qdplugindefs.h"></typedef>
+        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDDevPluginList" href="qdplugindefs-h.html#qddevpluginlist-typedef" location="qdplugindefs.h"></typedef>
+        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDLinkPluginList" href="qdplugindefs-h.html#qdlinkpluginlist-typedef" location="qdplugindefs.h"></typedef>
+        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDSyncPluginList" href="qdplugindefs-h.html#qdsyncpluginlist-typedef" location="qdplugindefs.h"></typedef>
         <class access="public" threadsafety="unspecified" status="commendable" name="Qtopia4SyncPluginFactory" href="qtopia4syncpluginfactory.html" location="qtopia4sync.h" bases="QObject" module="">
             <function access="public" threadsafety="unspecified" status="commendable" name="Qtopia4SyncPluginFactory" fullname="Qtopia4SyncPluginFactory::Qtopia4SyncPluginFactory" href="qtopia4syncpluginfactory.html#Qtopia4SyncPluginFactory" location="qtopia4sync.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="Qtopia4SyncPluginFactory(QObject * parent)">
                 <parameter left="QObject *" right="" name="parent" default="0"></parameter>
@@ -83,55 +123,6 @@
                 </function>
             <function access="public" threadsafety="unspecified" status="commendable" name="clientChangesCompleted" fullname="Qtopia4SyncPlugin::clientChangesCompleted" href="qtopia4syncplugin.html#clientChangesCompleted" location="qtopia4sync.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="clientChangesCompleted()"></function>
             <function access="public" threadsafety="unspecified" status="commendable" name="clientError" fullname="Qtopia4SyncPlugin::clientError" href="qtopia4syncplugin.html#clientError" location="qtopia4sync.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="clientError()"></function>
-            </class>
-        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDPluginList" href="qdplugindefs-h.html#qdpluginlist-typedef" location="qdplugindefs.h"></typedef>
-        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDAppPluginList" href="qdplugindefs-h.html#qdapppluginlist-typedef" location="qdplugindefs.h"></typedef>
-        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDConPluginList" href="qdplugindefs-h.html#qdconpluginlist-typedef" location="qdplugindefs.h"></typedef>
-        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDDevPluginList" href="qdplugindefs-h.html#qddevpluginlist-typedef" location="qdplugindefs.h"></typedef>
-        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDLinkPluginList" href="qdplugindefs-h.html#qdlinkpluginlist-typedef" location="qdplugindefs.h"></typedef>
-        <typedef access="public" threadsafety="unspecified" status="commendable" name="QDSyncPluginList" href="qdplugindefs-h.html#qdsyncpluginlist-typedef" location="qdplugindefs.h"></typedef>
-        <class access="public" threadsafety="unspecified" status="commendable" name="TrayIcon" href="trayicon.html" location="trayicon.h" bases="QObject" module="">
-            <function access="public" threadsafety="unspecified" status="commendable" name="TrayIcon" fullname="TrayIcon::TrayIcon" href="trayicon.html#TrayIcon" location="trayicon.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="TrayIcon(QObject * parent)">
-                <parameter left="QObject *" right="" name="parent" default="0"></parameter>
-                </function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="~TrayIcon" fullname="TrayIcon::~TrayIcon" href="trayicon.html#~TrayIcon" location="trayicon.h" virtual="impure" meta="destructor" const="false" static="false" overload="false" type="" signature="~TrayIcon()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="installed" fullname="TrayIcon::installed" href="trayicon.html#installed" location="trayicon.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="bool" signature="installed()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="show" fullname="TrayIcon::show" href="trayicon.html#show" location="trayicon.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="show()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="hide" fullname="TrayIcon::hide" href="trayicon.html#hide" location="trayicon.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="hide()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="clicked" fullname="TrayIcon::clicked" href="trayicon.html#clicked" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="clicked()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="sync" fullname="TrayIcon::sync" href="trayicon.html#sync" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="sync()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="quit" fullname="TrayIcon::quit" href="trayicon.html#quit" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="quit()"></function>
-            </class>
-        <class access="public" threadsafety="unspecified" status="commendable" name="CenterInterface" href="centerinterface.html" location="center.h" bases="" module="">
-            <function access="public" threadsafety="unspecified" status="commendable" name="currentDevice" fullname="CenterInterface::currentDevice" href="centerinterface.html#currentDevice" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="QDDevPlugin *" signature="currentDevice()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="linkPlugins" fullname="CenterInterface::linkPlugins" href="centerinterface.html#linkPlugins" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="const QDLinkPluginList" signature="linkPlugins()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="devicePlugins" fullname="CenterInterface::devicePlugins" href="centerinterface.html#devicePlugins" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="const QDDevPluginList" signature="devicePlugins()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="getPlugin" fullname="CenterInterface::getPlugin" href="centerinterface.html#getPlugin" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="QDPlugin *" signature="getPlugin(const QString &amp; id)">
-                <parameter left="const QString &amp;" right="" name="id" default=""></parameter>
-                </function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="syncObject" fullname="CenterInterface::syncObject" href="centerinterface.html#syncObject" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="QObject *" signature="syncObject()"></function>
-            </class>
-        <class access="public" threadsafety="unspecified" status="commendable" name="QtSingleApplication" href="qtsingleapplication.html" location="qtsingleapplication.h" bases="QApplication" module="">
-            <function access="public" threadsafety="unspecified" status="commendable" name="QtSingleApplication" fullname="QtSingleApplication::QtSingleApplication" href="qtsingleapplication.html#QtSingleApplication" location="qtsingleapplication.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QtSingleApplication(const QString &amp; id, int &amp; argc, char ** argv, Type type)">
-                <parameter left="const QString &amp;" right="" name="id" default=""></parameter>
-                <parameter left="int &amp;" right="" name="argc" default=""></parameter>
-                <parameter left="char **" right="" name="argv" default=""></parameter>
-                <parameter left="Type" right="" name="type" default="GuiClient"></parameter>
-                </function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="~QtSingleApplication" fullname="QtSingleApplication::~QtSingleApplication" href="qtsingleapplication.html#~QtSingleApplication" location="qtsingleapplication.h" virtual="non" meta="destructor" const="false" static="false" overload="false" type="" signature="~QtSingleApplication()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="isRunning" fullname="QtSingleApplication::isRunning" href="qtsingleapplication.html#isRunning" location="qtsingleapplication_x11.cpp" virtual="non" meta="plain" const="true" static="false" overload="false" type="bool" signature="isRunning() const"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="id" fullname="QtSingleApplication::id" href="qtsingleapplication.html#id" location="qtsingleapplication.h" virtual="non" meta="plain" const="true" static="false" overload="false" type="QString" signature="id() const"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="initialize" fullname="QtSingleApplication::initialize" href="qtsingleapplication.html#initialize" location="qtsingleapplication_x11.cpp" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="initialize(bool activate)">
-                <parameter left="bool" right="" name="activate" default="true"></parameter>
-                </function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="sendMessage" fullname="QtSingleApplication::sendMessage" href="qtsingleapplication.html#sendMessage" location="qtsingleapplication_x11.cpp" virtual="non" meta="slot" const="false" static="false" overload="false" type="bool" signature="sendMessage(const QString &amp; message, int timeout)">
-                <parameter left="const QString &amp;" right="" name="message" default=""></parameter>
-                <parameter left="int" right="" name="timeout" default="5000"></parameter>
-                </function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="activateMainWidget" fullname="QtSingleApplication::activateMainWidget" href="qtsingleapplication.html#activateMainWidget" location="qtsingleapplication.h" virtual="impure" meta="slot" const="false" static="false" overload="false" type="void" signature="activateMainWidget()"></function>
-            <function access="public" threadsafety="unspecified" status="commendable" name="messageReceived" fullname="QtSingleApplication::messageReceived" href="qtsingleapplication.html#messageReceived" location="qtsingleapplication.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="messageReceived(const QString &amp; message)">
-                <parameter left="const QString &amp;" right="" name="message" default=""></parameter>
-                </function>
             </class>
         <class access="public" threadsafety="unspecified" status="commendable" name="QDPluginFactory" href="qdpluginfactory.html" location="qdplugin.h" bases="QObject" module="">
             <function access="public" threadsafety="unspecified" status="commendable" name="QDPluginFactory" fullname="QDPluginFactory::QDPluginFactory" href="qdpluginfactory.html#QDPluginFactory" location="qdplugin.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QDPluginFactory(QObject * parent)">
@@ -367,26 +358,42 @@
             <function access="public" threadsafety="unspecified" status="commendable" name="serverChangesCompleted" fullname="QDServerSyncPlugin::serverChangesCompleted" href="qdserversyncplugin.html#serverChangesCompleted" location="qdplugin.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="serverChangesCompleted()"></function>
             <function access="public" threadsafety="unspecified" status="commendable" name="serverError" fullname="QDServerSyncPlugin::serverError" href="qdserversyncplugin.html#serverError" location="qdplugin.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="serverError()"></function>
             </class>
-        <page access="public" status="commendable" name="&lt;qdplugindefs.h&gt;" href="qdplugindefs-h.html" subtype="header" title="&lt;qdplugindefs.h&gt;" fulltitle="&lt;qdplugindefs.h&gt; - &lt;qdplugindefs.h&gt;" subtitle="" location="qdplugin.qdocpp"></page>
-        <function access="public" threadsafety="unspecified" status="commendable" name="QD_REGISTER_PLUGIN" href="qdplugindefs-h.html#QD_REGISTER_PLUGIN" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qdplugindefs.h&gt;" type="" signature="QD_REGISTER_PLUGIN( CLASS)">
-            <parameter left="" right="" name="CLASS" default=""></parameter>
-            </function>
-        <function access="public" threadsafety="unspecified" status="deprecated" name="QD_EXPORT_PLUGIN" href="qdplugindefs-h.html#QD_EXPORT_PLUGIN" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qdplugindefs.h&gt;" type="" signature="QD_EXPORT_PLUGIN( CLASS)">
-            <parameter left="" right="" name="CLASS" default=""></parameter>
-            </function>
-        <function access="public" threadsafety="unspecified" status="commendable" name="QD_CONSTRUCT_PLUGIN" href="qdplugindefs-h.html#QD_CONSTRUCT_PLUGIN" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qdplugindefs.h&gt;" type="" signature="QD_CONSTRUCT_PLUGIN( CLASS,  PARENT)">
-            <parameter left="" right="" name="CLASS" default=""></parameter>
-            <parameter left="" right="" name="PARENT" default=""></parameter>
-            </function>
-        <page access="public" status="commendable" name="qdautoplugin.cpp" href="qdautoplugin-cpp.html" subtype="header" title="" fulltitle="qdautoplugin.cpp" subtitle="" location="qdplugin.qdocpp"></page>
-        <page access="public" status="commendable" name="chlog_4.3.0_1.html" href="chlog-4-3-0-1.html" subtype="page" title="Qtopia Sync Agent changes for 4.3.0" fulltitle="Qtopia Sync Agent changes for 4.3.0" subtitle="" location="changes_430.qdocpp">
+        <class access="public" threadsafety="unspecified" status="commendable" name="CenterInterface" href="centerinterface.html" location="center.h" bases="" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="currentDevice" fullname="CenterInterface::currentDevice" href="centerinterface.html#currentDevice" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="QDDevPlugin *" signature="currentDevice()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="linkPlugins" fullname="CenterInterface::linkPlugins" href="centerinterface.html#linkPlugins" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="const QDLinkPluginList" signature="linkPlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="devicePlugins" fullname="CenterInterface::devicePlugins" href="centerinterface.html#devicePlugins" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="const QDDevPluginList" signature="devicePlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="getPlugin" fullname="CenterInterface::getPlugin" href="centerinterface.html#getPlugin" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="QDPlugin *" signature="getPlugin(const QString &amp; id)">
+                <parameter left="const QString &amp;" right="" name="id" default=""></parameter>
+                </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="syncObject" fullname="CenterInterface::syncObject" href="centerinterface.html#syncObject" location="center.h" virtual="pure" meta="plain" const="false" static="false" overload="false" type="QObject *" signature="syncObject()"></function>
+            </class>
+        <page access="public" status="commendable" name="index" href="index.html" subtype="group" title="Qtopia Sync Agent Documentation" fulltitle="Qtopia Sync Agent Documentation" subtitle="" location="index.qdocpp"></page>
+        <page access="public" status="commendable" name="classes.html" href="classes.html" subtype="page" title="Classes" fulltitle="Classes" subtitle="" location="index.qdocpp"></page>
+        <page access="public" status="commendable" name="headers" href="headers.html" subtype="group" title="Headers" fulltitle="Headers" subtitle="" location="index.qdocpp"></page>
+        <page access="public" status="commendable" name="examples.html" href="examples.html" subtype="page" title="Examples" fulltitle="Examples" subtitle="" location="index.qdocpp"></page>
+        <page access="public" status="commendable" name="overviews" href="overviews.html" subtype="group" title="Overviews" fulltitle="Overviews" subtitle="" location="index.qdocpp"></page>
+        <page access="public" status="commendable" name="changes" href="changes.html" subtype="group" title="What's new?" fulltitle="What's new?" subtitle="" location="index.qdocpp">
+            <contents name="overview" title="Overview" level="1"></contents>
+            <contents name="releases" title="Releases" level="1"></contents>
+            </page>
+        <page access="public" status="commendable" name="tasks" href="tasks.html" subtype="group" title="Integration Tasks" fulltitle="Integration Tasks" subtitle="" location="tasks.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Add_a_new_device_plugin_1.html" href="task-add-a-new-device-plugin-1.html" subtype="page" title="Add a new device plugin" fulltitle="Add a new device plugin" subtitle="" location="tasks.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Add_a_new_desktop_plugin_1.html" href="task-add-a-new-desktop-plugin-1.html" subtype="page" title="Add a new desktop plugin" fulltitle="Add a new desktop plugin" subtitle="" location="tasks.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Add_a_new_dataset_1.html" href="task-add-a-new-dataset-1.html" subtype="page" title="Add a new dataset" fulltitle="Add a new dataset" subtitle="" location="tasks.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Use_a_TCP/IP_Connection_1.html" href="task-use-a-tcp-ip-connection-1.html" subtype="page" title="Use a TCP/IP Connection" fulltitle="Use a TCP/IP Connection" subtitle="" location="tasks.qdocpp">
+            <contents name="overview" title="Overview" level="1"></contents>
+            <contents name="synchronization" title="Synchronization" level="1"></contents>
+            <contents name="qtopia-sync-agent" title="Qtopia Sync Agent" level="1"></contents>
+            </page>
+        <page access="public" status="commendable" name="task_Use_a_Serial_Connection_1.html" href="task-use-a-serial-connection-1.html" subtype="page" title="Use a Serial Connection" fulltitle="Use a Serial Connection" subtitle="" location="tasks.qdocpp">
+            <contents name="overview" title="Overview" level="1"></contents>
+            <contents name="synchronization" title="Synchronization" level="1"></contents>
+            <contents name="qtopia-sync-agent" title="Qtopia Sync Agent" level="1"></contents>
+            </page>
+        <page access="public" status="commendable" name="chlog_4.3.1_1.html" href="chlog-4-3-1-1.html" subtype="page" title="Qtopia Sync Agent changes for 4.3.1" fulltitle="Qtopia Sync Agent changes for 4.3.1" subtitle="" location="changes_431.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
             <contents name="known-issues" title="Known issues" level="1"></contents>
             </page>
-        <page access="public" status="commendable" name="&lt;qtopiadesktoplog.h&gt;" href="qtopiadesktoplog-h.html" subtype="header" title="&lt;qtopiadesktoplog.h&gt;" fulltitle="&lt;qtopiadesktoplog.h&gt; - &lt;qtopiadesktoplog.h&gt;" subtitle="" location="qtopiadesktoplog.cpp"></page>
-        <function access="public" threadsafety="unspecified" status="commendable" name="QDLOG_OPTION" href="qtopiadesktoplog-h.html#QDLOG_OPTION" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qtopiadesktoplog.h&gt;" type="" signature="QDLOG_OPTION( CATEGORY)">
-            <parameter left="" right="" name="CATEGORY" default=""></parameter>
-            </function>
         <page access="public" status="commendable" name="datasets" href="datasets.html" subtype="group" title="Datasets" fulltitle="Datasets" subtitle="" location="datasets.qdocpp"></page>
         <page access="public" status="commendable" name="dataset_calendar_1.html" href="dataset-calendar-1.html" subtype="page" title="calendar Dataset" fulltitle="calendar Dataset" subtitle="" location="datasets.qdocpp"></page>
         <page access="public" status="commendable" name="src/tools/qdsync/appointment.xml" href="src-tools-qdsync-appointment-xml.html" subtype="header" title="" fulltitle="src/tools/qdsync/appointment.xml" subtitle="" location="datasets.qdocpp"></page>
@@ -397,6 +404,19 @@
         <page access="public" status="commendable" name="dataset_tasks_1.html" href="dataset-tasks-1.html" subtype="page" title="tasks Dataset" fulltitle="tasks Dataset" subtitle="" location="datasets.qdocpp"></page>
         <page access="public" status="commendable" name="src/tools/qdsync/task.xml" href="src-tools-qdsync-task-xml.html" subtype="header" title="" fulltitle="src/tools/qdsync/task.xml" subtitle="" location="datasets.qdocpp"></page>
         <page access="public" status="commendable" name="src/tools/qdsync/task.xsd" href="src-tools-qdsync-task-xsd.html" subtype="header" title="" fulltitle="src/tools/qdsync/task.xsd" subtitle="" location="datasets.qdocpp"></page>
+        <page access="public" status="commendable" name="&lt;qlog.h&gt;" href="qlog-h.html" subtype="header" title="&lt;qlog.h&gt;" fulltitle="&lt;qlog.h&gt; - &lt;qlog.h&gt;" subtitle="" location="qlog.qdocpp"></page>
+        <function access="public" threadsafety="unspecified" status="commendable" name="qLog" href="qlog-h.html#qLog" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="qLog( CATEGORY)">
+            <parameter left="" right="" name="CATEGORY" default=""></parameter>
+            </function>
+        <function access="public" threadsafety="unspecified" status="commendable" name="qLog" href="qlog-h.html#qLog-2" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="true" overload-number="2" relates="&lt;qlog.h&gt;" type="" signature="qLog()"></function>
+        <function access="public" threadsafety="unspecified" status="commendable" name="QLOG_UNCATEGORIZED" href="qlog-h.html#QLOG_UNCATEGORIZED" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="QLOG_UNCATEGORIZED()"></function>
+        <function access="public" threadsafety="unspecified" status="commendable" name="QLOG_ENABLE" href="qlog-h.html#QLOG_ENABLE" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="QLOG_ENABLE( CATEGORY)">
+            <parameter left="" right="" name="CATEGORY" default=""></parameter>
+            </function>
+        <function access="public" threadsafety="unspecified" status="commendable" name="QLOG_OPTION" href="qlog-h.html#QLOG_OPTION" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="QLOG_OPTION( CATEGORY,  FUNCTION)">
+            <parameter left="" right="" name="CATEGORY" default=""></parameter>
+            <parameter left="" right="" name="FUNCTION" default=""></parameter>
+            </function>
         <page access="public" status="commendable" name="qdsync_commands" href="qdsync-commands.html" subtype="group" title="qdsync Protocol" fulltitle="qdsync Protocol" subtitle="" location="qdsyncprotocol.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
             <contents name="state-machine" title="State Machine" level="1"></contents>
@@ -474,36 +494,21 @@
             <contents name="usage" title="Usage" level="1"></contents>
             <contents name="description" title="Description" level="1"></contents>
             </page>
-        <page access="public" status="commendable" name="over_Building_Qtopia_Sync_Agent_1.html" href="over-building-qtopia-sync-agent-1.html" subtype="page" title="Building Qtopia Sync Agent" fulltitle="Building Qtopia Sync Agent" subtitle="" location="build.qdocpp">
-            <contents name="requirements" title="Requirements" level="1"></contents>
-            <contents name="setup" title="Setup" level="1"></contents>
-            <contents name="build" title="Build" level="1"></contents>
-            <contents name="execute-unit-tests" title="Execute Unit Tests" level="1"></contents>
-            <contents name="running" title="Running" level="1"></contents>
-            <contents name="deployment" title="Deployment" level="1"></contents>
-            </page>
-        <page access="public" status="commendable" name="index" href="index.html" subtype="group" title="Qtopia Sync Agent Documentation" fulltitle="Qtopia Sync Agent Documentation" subtitle="" location="index.qdocpp"></page>
-        <page access="public" status="commendable" name="classes.html" href="classes.html" subtype="page" title="Classes" fulltitle="Classes" subtitle="" location="index.qdocpp"></page>
-        <page access="public" status="commendable" name="headers" href="headers.html" subtype="group" title="Headers" fulltitle="Headers" subtitle="" location="index.qdocpp"></page>
-        <page access="public" status="commendable" name="examples.html" href="examples.html" subtype="page" title="Examples" fulltitle="Examples" subtitle="" location="index.qdocpp"></page>
-        <page access="public" status="commendable" name="overviews" href="overviews.html" subtype="group" title="Overviews" fulltitle="Overviews" subtitle="" location="index.qdocpp"></page>
-        <page access="public" status="commendable" name="changes" href="changes.html" subtype="group" title="What's new?" fulltitle="What's new?" subtitle="" location="index.qdocpp">
+        <page access="public" status="commendable" name="&lt;qdplugindefs.h&gt;" href="qdplugindefs-h.html" subtype="header" title="&lt;qdplugindefs.h&gt;" fulltitle="&lt;qdplugindefs.h&gt; - &lt;qdplugindefs.h&gt;" subtitle="" location="qdplugin.qdocpp"></page>
+        <function access="public" threadsafety="unspecified" status="commendable" name="QD_REGISTER_PLUGIN" href="qdplugindefs-h.html#QD_REGISTER_PLUGIN" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qdplugindefs.h&gt;" type="" signature="QD_REGISTER_PLUGIN( CLASS)">
+            <parameter left="" right="" name="CLASS" default=""></parameter>
+            </function>
+        <function access="public" threadsafety="unspecified" status="deprecated" name="QD_EXPORT_PLUGIN" href="qdplugindefs-h.html#QD_EXPORT_PLUGIN" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qdplugindefs.h&gt;" type="" signature="QD_EXPORT_PLUGIN( CLASS)">
+            <parameter left="" right="" name="CLASS" default=""></parameter>
+            </function>
+        <function access="public" threadsafety="unspecified" status="commendable" name="QD_CONSTRUCT_PLUGIN" href="qdplugindefs-h.html#QD_CONSTRUCT_PLUGIN" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qdplugindefs.h&gt;" type="" signature="QD_CONSTRUCT_PLUGIN( CLASS,  PARENT)">
+            <parameter left="" right="" name="CLASS" default=""></parameter>
+            <parameter left="" right="" name="PARENT" default=""></parameter>
+            </function>
+        <page access="public" status="commendable" name="qdautoplugin.cpp" href="qdautoplugin-cpp.html" subtype="header" title="" fulltitle="qdautoplugin.cpp" subtitle="" location="qdplugin.qdocpp"></page>
+        <page access="public" status="commendable" name="chlog_4.3.0_1.html" href="chlog-4-3-0-1.html" subtype="page" title="Qtopia Sync Agent changes for 4.3.0" fulltitle="Qtopia Sync Agent changes for 4.3.0" subtitle="" location="changes_430.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
-            <contents name="releases" title="Releases" level="1"></contents>
-            </page>
-        <page access="public" status="commendable" name="tasks" href="tasks.html" subtype="group" title="Integration Tasks" fulltitle="Integration Tasks" subtitle="" location="tasks.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Add_a_new_device_plugin_1.html" href="task-add-a-new-device-plugin-1.html" subtype="page" title="Add a new device plugin" fulltitle="Add a new device plugin" subtitle="" location="tasks.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Add_a_new_desktop_plugin_1.html" href="task-add-a-new-desktop-plugin-1.html" subtype="page" title="Add a new desktop plugin" fulltitle="Add a new desktop plugin" subtitle="" location="tasks.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Add_a_new_dataset_1.html" href="task-add-a-new-dataset-1.html" subtype="page" title="Add a new dataset" fulltitle="Add a new dataset" subtitle="" location="tasks.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Use_a_TCP/IP_Connection_1.html" href="task-use-a-tcp-ip-connection-1.html" subtype="page" title="Use a TCP/IP Connection" fulltitle="Use a TCP/IP Connection" subtitle="" location="tasks.qdocpp">
-            <contents name="overview" title="Overview" level="1"></contents>
-            <contents name="synchronization" title="Synchronization" level="1"></contents>
-            <contents name="qtopia-sync-agent" title="Qtopia Sync Agent" level="1"></contents>
-            </page>
-        <page access="public" status="commendable" name="task_Use_a_Serial_Connection_1.html" href="task-use-a-serial-connection-1.html" subtype="page" title="Use a Serial Connection" fulltitle="Use a Serial Connection" subtitle="" location="tasks.qdocpp">
-            <contents name="overview" title="Overview" level="1"></contents>
-            <contents name="synchronization" title="Synchronization" level="1"></contents>
-            <contents name="qtopia-sync-agent" title="Qtopia Sync Agent" level="1"></contents>
+            <contents name="known-issues" title="Known issues" level="1"></contents>
             </page>
         <page access="public" status="commendable" name="over_Desktop_Synchronization_1.html" href="over-desktop-synchronization-1.html" subtype="page" title="Desktop Synchronization" fulltitle="Desktop Synchronization" subtitle="" location="desktopsynchronization.qdocpp">
             <contents name="intended-audience" title="Intended Audience" level="1"></contents>
@@ -522,28 +527,27 @@
             <contents name="serial-link" title="Serial Link" level="2"></contents>
             <contents name="usb-serial-driver" title="USB Serial Driver" level="2"></contents>
             </page>
-        <page access="public" status="commendable" name="&lt;qlog.h&gt;" href="qlog-h.html" subtype="header" title="&lt;qlog.h&gt;" fulltitle="&lt;qlog.h&gt; - &lt;qlog.h&gt;" subtitle="" location="qlog.qdocpp"></page>
-        <function access="public" threadsafety="unspecified" status="commendable" name="qLog" href="qlog-h.html#qLog" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="qLog( CATEGORY)">
-            <parameter left="" right="" name="CATEGORY" default=""></parameter>
-            </function>
-        <function access="public" threadsafety="unspecified" status="commendable" name="qLog" href="qlog-h.html#qLog-2" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="true" overload-number="2" relates="&lt;qlog.h&gt;" type="" signature="qLog()"></function>
-        <function access="public" threadsafety="unspecified" status="commendable" name="QLOG_UNCATEGORIZED" href="qlog-h.html#QLOG_UNCATEGORIZED" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="QLOG_UNCATEGORIZED()"></function>
-        <function access="public" threadsafety="unspecified" status="commendable" name="QLOG_ENABLE" href="qlog-h.html#QLOG_ENABLE" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="QLOG_ENABLE( CATEGORY)">
-            <parameter left="" right="" name="CATEGORY" default=""></parameter>
-            </function>
-        <function access="public" threadsafety="unspecified" status="commendable" name="QLOG_OPTION" href="qlog-h.html#QLOG_OPTION" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qlog.h&gt;" type="" signature="QLOG_OPTION( CATEGORY,  FUNCTION)">
-            <parameter left="" right="" name="CATEGORY" default=""></parameter>
-            <parameter left="" right="" name="FUNCTION" default=""></parameter>
-            </function>
-        <page access="public" status="commendable" name="chlog_4.3.1_1.html" href="chlog-4-3-1-1.html" subtype="page" title="Qtopia Sync Agent changes for 4.3.1" fulltitle="Qtopia Sync Agent changes for 4.3.1" subtitle="" location="changes_431.qdocpp">
-            <contents name="overview" title="Overview" level="1"></contents>
-            <contents name="known-issues" title="Known issues" level="1"></contents>
-            </page>
         <page access="public" status="commendable" name="&lt;trace.h&gt;" href="trace-h.html" subtype="header" title="&lt;trace.h&gt;" fulltitle="&lt;trace.h&gt; - &lt;trace.h&gt;" subtitle="" location="trace.cpp"></page>
         <function access="public" threadsafety="unspecified" status="commendable" name="TRACE" href="trace-h.html#TRACE" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;trace.h&gt;" type="" signature="TRACE( CATEGORY)">
             <parameter left="" right="" name="CATEGORY" default=""></parameter>
             </function>
         <function access="public" threadsafety="unspecified" status="commendable" name="LOG" href="trace-h.html#LOG" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;trace.h&gt;" type="" signature="LOG()"></function>
         <function access="public" threadsafety="unspecified" status="commendable" name="WARNING" href="trace-h.html#WARNING" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;trace.h&gt;" type="" signature="WARNING()"></function>
+        <page access="public" status="commendable" name="over_Building_Qtopia_Sync_Agent_1.html" href="over-building-qtopia-sync-agent-1.html" subtype="page" title="Building Qtopia Sync Agent" fulltitle="Building Qtopia Sync Agent" subtitle="" location="build.qdocpp">
+            <contents name="requirements" title="Requirements" level="1"></contents>
+            <contents name="setup" title="Setup" level="1"></contents>
+            <contents name="build" title="Build" level="1"></contents>
+            <contents name="execute-unit-tests" title="Execute Unit Tests" level="1"></contents>
+            <contents name="running" title="Running" level="1"></contents>
+            <contents name="deployment" title="Deployment" level="1"></contents>
+            </page>
+        <page access="public" status="commendable" name="chlog_4.3.2_1.html" href="chlog-4-3-2-1.html" subtype="page" title="Qtopia Sync Agent changes for 4.3.2" fulltitle="Qtopia Sync Agent changes for 4.3.2" subtitle="" location="changes_432.qdocpp">
+            <contents name="overview" title="Overview" level="1"></contents>
+            <contents name="known-issues" title="Known issues" level="1"></contents>
+            </page>
+        <page access="public" status="commendable" name="&lt;qtopiadesktoplog.h&gt;" href="qtopiadesktoplog-h.html" subtype="header" title="&lt;qtopiadesktoplog.h&gt;" fulltitle="&lt;qtopiadesktoplog.h&gt; - &lt;qtopiadesktoplog.h&gt;" subtitle="" location="qtopiadesktoplog.cpp"></page>
+        <function access="public" threadsafety="unspecified" status="commendable" name="QDLOG_OPTION" href="qtopiadesktoplog-h.html#QDLOG_OPTION" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qtopiadesktoplog.h&gt;" type="" signature="QDLOG_OPTION( CATEGORY)">
+            <parameter left="" right="" name="CATEGORY" default=""></parameter>
+            </function>
         </namespace>
     </INDEX>

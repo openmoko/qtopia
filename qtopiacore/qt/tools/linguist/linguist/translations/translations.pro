@@ -1,5 +1,7 @@
 # Include those manually as they do not contain any directory specification
 
+include(../previewtool/previewtool.pri)
+
 FORMS    += ../statistics.ui \
             ../phrasebookbox.ui \
             ../batchtranslation.ui \
@@ -49,5 +51,6 @@ TRANSLATIONS=$$[QT_INSTALL_TRANSLATIONS]/linguist_ja.ts \
              $$[QT_INSTALL_TRANSLATIONS]/linguist_pl.ts \
              $$[QT_INSTALL_TRANSLATIONS]/linguist_untranslated.ts \
              $$[QT_INSTALL_TRANSLATIONS]/linguist_tr_TR.ts \
-             $$[QT_INSTALL_TRANSLATIONS]/linguist_zh_CN.ts
+             $$[QT_INSTALL_TRANSLATIONS]/linguist_zh_CN.ts \
+             $$[QT_INSTALL_TRANSLATIONS]/linguist_zh_TW.ts
 error("This is a dummy profile to be used for translations ONLY.")

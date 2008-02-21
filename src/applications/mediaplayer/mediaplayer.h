@@ -51,6 +51,8 @@ public:
 
     static MediaPlayer *instance();
 
+    PlayerWidget *playerWidget();
+
 public slots:
     // Load and parse playlist from file
     void setDocument( const QString& doc );

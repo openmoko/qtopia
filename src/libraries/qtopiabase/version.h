@@ -20,10 +20,10 @@
 ****************************************************************************/
 
 // Legacy define. Present since 1.x.
-#define QPE_VERSION "4.3.1"
+#define QPE_VERSION "4.3.2"
 
 // These are the preferred defines. Present since 4.3.0.
-#define QTOPIA_VERSION_STR "4.3.1"
-#define QTOPIA_VERSION 0x040301
+#define QTOPIA_VERSION_STR "4.3.2"
+#define QTOPIA_VERSION 0x040302
 
-#define QTOPIA_COMPATIBLE_VERSIONS "4.3.0-4.3.1"
+#define QTOPIA_COMPATIBLE_VERSIONS "4.3.0-4.3.2"

@@ -96,20 +96,20 @@ void QtopiaSqlPrivate::systemMessage(const QString &message, const QByteArray &d
     {
         // okay we need to flush all (old) the database handles here...
 
-        QHash<QtopiaDatabaseId, QSqlDatabase> hash;
-        foreach(hash, QtopiaSqlPrivate::dbs)
+        QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QSqlDatabase> >::iterator hash;
+        for( hash = dbs.begin(); hash != dbs.end(); hash++ )
         {
-            foreach(QtopiaDatabaseId id, hash.keys())
+            foreach(QtopiaDatabaseId id, hash->keys())
             {
                 if(!masterAttachedConns.contains(id))
                 {
-                    hash.take(id).close();
-                    QHash<QtopiaDatabaseId, QString> hash2;
-                    foreach(hash2, QtopiaSqlPrivate::connectionNames)
+                    hash->take(id).close();
+                    QMap< Qt::HANDLE, QHash<QtopiaDatabaseId, QString> >::iterator hash2;
+                    for( hash2 = connectionNames.begin(); hash2 != connectionNames.end(); hash2++ )
                     {
-                        if(hash2.keys().contains(id))
+                        if(hash2->keys().contains(id))
                         {
-                            QSqlDatabase::removeDatabase(hash2.take(id));
+                            QSqlDatabase::removeDatabase(hash2->take(id));
                         }
                     }
                 }

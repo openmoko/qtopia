@@ -49,11 +49,11 @@
 <h3>OOM in the Desktop Environment</h3>
 <p>Most applications running in today's Linux desktop computing environments can safely ignore handling the OOM state, because desktop computing environments are not limited by the amount of physical memory built into the computer. In these systems, Linux provides a large swap space in secondary memory, and when the amount of memory required by the applications running exceeds the amount of main memory available, pages of memory are swapped out into the swap space to make room for more pages, and the swapped out pages later swapped back in as needed.</p>
 <p>The virtual address space available to each Linux process is much larger than even the total size of the physical memory plus the swap space, and an OOM condition caused by too many applications consuming too much virtual address space rarely occurs. When it does occur, the system administrator has the option of increasing the size of the swap space and rerunning the applications that failed.</p>
-<p>The OOM case that occurs most often in Linux systems is the so-called runaway application that calls <tt>malloc()</tt> in an unbounded loop, eventually exhausting its virtual memory space. But this case is always assumed to be a bug in the offending application, so Linux handles it by placing a limit on the amount of virtual memory an application process can acquire for its heap and stack. When a process attempts to exceed its &quot;rlimit,&quot; Linux kills it. The user must then fix the bug.</p>
+<p>The OOM case that occurs most often in Linux systems is the so-called runaway application that calls <tt>malloc()</tt> in an unbounded loop, eventually exhausting its virtual memory space. But this case is always assumed to be a bug in the offending application, so Linux handles it by placing an &quot;rlimit&quot; on the amount of virtual memory an application process can acquire for its heap and stack.</p>
 <a name="oom-in-qtopia"></a>
 <h3>OOM in Qtopia</h3>
 <p>Qtopia is not meant to run in a desktop environment. It is designed for use in mobile and other embedded devices (e.g&#x2e;, the Greenphone), where the amount of main memory might be severely limited, and swap space is not used. In the typical Qtopia embedded environment, running out of memory becomes much more likely.</p>
-<p>OOM can occur in Qtopia in two ways. The runaway application problem remains, and it could even become acute, when Greenphone users begin downloading untrusted third party applications. But these untrusted applications will be run in Qtopia's <a href="sxe.html">Safe eXecution Environment (SXE)</a> as sandboxed applications, subject to the rlimit test.</p>
+<p>OOM can occur in Qtopia in two ways. The runaway application problem remains, and it could even become acute, when Greenphone users begin downloading third party applications. Qtopia's Safe Execution Environment does have a <a href="syscust-sxe.html#sxe-memory-limits">mechanism</a> based on rlimits to mitigate this issue for downloaded applications.</p>
 <p>The second way OOM can occur in Qtopia is when too many applications legitimately require too much memory in total. No single process consumes too much memory, but all of them together do. This is the expected OOM problem for Qtopia and the one that is currently not handled adequately.</p>
 <a name="how-linux-handles-the-expected-oom-problem"></a>
 <h2>How Linux Handles the Expected OOM Problem</h2>
@@ -81,7 +81,7 @@
 <p>The OOM Data Manager is a new C++ class that maintains a database mapping the name of each running application to its process id. The database is divided into three maps. When a process is started it is inserted into one of these maps, depending on whether the application has been designated as expendable, important, or critical.</p>
 <p>Qtopia chooses applications marked expendable first, when a low memory state is signaled and a process must be killed. Applications marked as important can also be killed, but only if there are no expendable applications to kill instead. Applications marked critical must never be killed. In the default Qtopia solution, the Qtopia server, the SIP agent, and the media server are marked as critical applications.</p>
 <p>The OOM Data Manager reads a configuration file called <tt>oom.conf</tt> to get the user-defined lists of critical, important, and expendable application names. The configuration file is discussed in section 4, but note here that any application that is not defined in the file as either critical or important is assumed to be expendable, regardless of whether it is defined as such in the configuration file. In particular, downloaded third party applications are always marked expendable.</p>
-<p>The OOM data manager also intializes <tt>/proc/&lt;pid&gt;/oom_adj</tt> for each process started with a value commensurate with the importance of the process. Critical processes get a large negative value; important processes get 0 (default), and expendable processes get a large positive value. This ensures that Linux will never kill the Qtopia server if the Qtopia OOM solution fails to detect an imminent OOM condition and the kernel gets control.</p>
+<p>The OOM data manager also initializes <tt>/proc/&lt;pid&gt;/oom_adj</tt> for each process started with a value commensurate with the importance of the process. Critical processes get a large negative value; important processes get 0 (default), and expendable processes get a large positive value. This ensures that Linux will never kill the Qtopia server if the Qtopia OOM solution fails to detect an imminent OOM condition and the kernel gets control.</p>
 <a name="the-application-launcher"></a>
 <h3>The Application Launcher</h3>
 <p>The Application Launcher is responsible for launching application processes and keeping track of them until they terminate. For preventing OOM, the Application Launcher has been modified to use the OOM Data Manager to keep track of the mappings from application name to process id for the applications that it starts as separate Linux processes. Qtopia applications that are not run as separate Linux processes are of no interest to the OOM algorithm.</p>
@@ -92,13 +92,13 @@
 <p>The Memory Monitor performs two tests at each interval timeout. The first test is called the Main Memory Test, and the second test is called the Page Fault Test.</p>
 <a name="the-main-memory-test"></a>
 <h4>The Main Memory Test</h4>
-<p>The purpose of the Main Memory Test is to decide how often to run the Memory Monitor. The test involves reading certain values from <tt>/proc/meminfo</tt> and summing them to estimate the amount of main memory available. The values used are MemFree, Buffers, and Cached. When the sum of these values drops below a certain percentage of the main memory in the device (MemTotal), the timer that governs how often the Memory Monitor should run is reset with a short timeout interval so the Memory Monitor runs more often. Otherwise, the timer is reset with a long timeout interval so the Memory Monitor runs less often. The values for the short and long timeout intervals and the main memory threshhold percentage are user-defined and are read from the <tt>oom.conf</tt> configuration file.</p>
+<p>The purpose of the Main Memory Test is to decide how often to run the Memory Monitor. The test involves reading certain values from <tt>/proc/meminfo</tt> and summing them to estimate the amount of main memory available. The values used are MemFree, Buffers, and Cached. When the sum of these values drops below a certain percentage of the main memory in the device (MemTotal), the timer that governs how often the Memory Monitor should run is reset with a short timeout interval so the Memory Monitor runs more often. Otherwise, the timer is reset with a long timeout interval so the Memory Monitor runs less often. The values for the short and long timeout intervals and the main memory threshold percentage are user-defined and are read from the <tt>oom.conf</tt> configuration file.</p>
 <p>Note that the sum of the values of MemFree, Buffers, and Cached is not the amount of virtual memory that is actually available, ie it cannot be used to determine the memory state. In practice, the amount of memory available is much greater than this sum, because many of the memory pages consumed by a process are from code space, and a code space page can become free as soon as program execution leaves the page.</p>
 <a name="the-page-fault-test"></a>
 <h4>The Page Fault Test</h4>
 <p>The page fault test involves monitoring the number of major page faults that occur in each timeout interval (long or short), normalizing them, and averaging them over a specified number of timeout intervals (test cycle). A major page fault is one that cannot be satisfied by a page already loaded in main memory. It requires loading the requested page from secondary memory. We expect that an abnormally high average number of major page faults per test cycle implies that too many pages of main memory are occupied by data pages of too many processes. These processes are competing for the few remaining code space pages available, and page thrashing is the result. Since Linux processes cannot be forced to relinquish data pages they no longer need, an abnormally high average number of major page faults per test cycle is a reliable sign that the system is running low on memory.</p>
-<p>The page fault test is run in three steps. Step one computes the number of major page faults that occurred during the last timeout interval. The data for this computation is read from the per process virtual memory status files in <tt>/proc</tt>. The number of page faults is then stored in a circular list that represents the last n timeout intervals, i.e&#x2e; one test cycle. Step two computes the average number of page faults over all the entries in the test cycle. This average is compared to three user-defined page fault threshhold values read from the <tt>oom.conf</tt> configuration file.</p>
-<p>The three page fault threshhold values represent the Low, Very Low, and Critical memory states. If the average number of major page faults is greater than the critical threshhold, the memory state is believed to be critically low. If the average number of major page faults is greater than the very low threshhold, the memory state is believed to be very low. If the average number of major page faults is greater than the low threshhold, the memory state is believed to be just low. Otherwise the memory state is normal.</p>
+<p>The page fault test is run in three steps. Step one computes the number of major page faults that occurred during the last timeout interval. The data for this computation is read from the per process virtual memory status files in <tt>/proc</tt>. The number of page faults is then stored in a circular list that represents the last n timeout intervals, i.e&#x2e; one test cycle. Step two computes the average number of page faults over all the entries in the test cycle. This average is compared to three user-defined page fault threshold values read from the <tt>oom.conf</tt> configuration file.</p>
+<p>The three page fault threshold values represent the Low, Very Low, and Critical memory states. If the average number of major page faults is greater than the critical threshold, the memory state is believed to be critically low. If the average number of major page faults is greater than the very low threshold, the memory state is believed to be very low. If the average number of major page faults is greater than the low threshold, the memory state is believed to be just low. Otherwise the memory state is normal.</p>
 <p>If the memory state of the current timeout interval is different from the memory state of the previous timeout interval, the memory-state-changed signal is emitted.</p>
 <a name="the-low-memory-handler"></a>
 <h3>The Low Memory Handler</h3>
@@ -132,9 +132,9 @@
     fifteen=expendable
     minesweep=expendable
     snake=expendable
-    calculator=protected
-    clock=protected
-    datebook=protected</pre>
+    calculator=important
+    clock=important
+    datebook=important</pre>
 <p>Note that any application that does not appear in the <tt>[oom_adj]</tt> group is automatically expendable.</p>
 <a name="the-group"></a>
 <h4>The <tt>[values]</tt> Group</h4>
@@ -146,14 +146,12 @@
        samples=5
        percent=20
        long=10000
-       short=1000
-       rlimit=16384000</pre>
-<p>The values specified for the keywords critical, verylow, and low are the page fault threshholds used by the Memory Monitor to determine the current memory state. Using this example configuration file, if the average number of major page faults in a test cycle is above 250, the memory state is critical. If the average number of major page faults for the test cycle is above 120, the memory state is very low. If the average number of major page faults for the test cycle is above 60, the memory state is low. Otherwise, the memory state is normal. Page fault threshhold values must be selected with care. Experimentation with different values may be required.</p>
-<p>The value of the keyword percent is the threshhold of free main memory that determines whether the Memory Monitor should run every long or short timeout interval. While the amount of free main memory remains above the threshhold, the long timeout interval is used. Otherwise the short timeout interval is used.</p>
-<p>A test cycle consists of a certain number of test intervals or samples. The size of a test cycle is specified by the value of the keyword samples. The number of elements in the circular buffer of page fault counts is set to this value. The page fault counts in the circular buffer are summed and the sum is divided by the number of samples to get the average page fault count for the test cycle. This average is then compared to the three page fault threshhold values to determine the memory state.</p>
+       short=1000</pre>
+<p>The values specified for the keywords critical, verylow, and low are the page fault thresholds used by the Memory Monitor to determine the current memory state. Using this example configuration file, if the average number of major page faults in a test cycle is above 250, the memory state is critical. If the average number of major page faults for the test cycle is above 120, the memory state is very low. If the average number of major page faults for the test cycle is above 60, the memory state is low. Otherwise, the memory state is normal. Page fault threshold values must be selected with care. Experimentation with different values may be required.</p>
+<p>The value of the keyword percent is the threshold of free main memory that determines whether the Memory Monitor should run every long or short timeout interval. While the amount of free main memory remains above the threshold, the long timeout interval is used. Otherwise the short timeout interval is used.</p>
+<p>A test cycle consists of a certain number of test intervals or samples. The size of a test cycle is specified by the value of the keyword samples. The number of elements in the circular buffer of page fault counts is set to this value. The page fault counts in the circular buffer are summed and the sum is divided by the number of samples to get the average page fault count for the test cycle. This average is then compared to the three page fault threshold values to determine the memory state.</p>
 <p>The values of the keywords long and short specify the long and short timer intervals respectively. They determine how often the Memory Monitor is run. The long interval is used when there appears to be plenty of main memory available, and the short interval is used when the amount of main memory available gets low. The values are in milliseconds.</p>
-<p>If the user replaces the Memory Monitor task with his own, the page fault threshhold values and the number of samples per test cycle need not be defined, because these items are specific to the algorithm in the default Memory Monitor. The long and short timer intervals are also specific to that algorithm, but the user's replacement class will require at least one timer interval. It can, of course, be hardcoded into the replacement class, but it is probably better to make it a configurable item.</p>
-<p>The value of the keyword rlimit is used by the SXE monitor to prevent the runaway process OOM problem described earlier. This value specifies the amount of memory an application is allowed to allocate.</p>
+<p>If the user replaces the Memory Monitor task with his own, the page fault threshold values and the number of samples per test cycle need not be defined, because these items are specific to the algorithm in the default Memory Monitor. The long and short timer intervals are also specific to that algorithm, but the user's replacement class will require at least one timer interval. It can, of course, be hardcoded into the replacement class, but it is probably better to make it a configurable item.</p>
 <a name="replacing-the-memory-monitor"></a>
 <h3>Replacing the Memory Monitor</h3>
 <p>The Memory Monitor task is the component that runs periodically, determines the memory state, and emits a signal whenever the memory state changes. It is a C++ class. The user can replace this class with one of his own design.</p>
@@ -161,23 +159,16 @@
 <p>The user must decide specific memory levels for these enum values and then implement an algorithm for computing the memory state accordingly. The algorithm should be run on a timer.</p>
 <p>The class <a href="genericmemorymonitortask.html">GenericMemoryMonitorTask</a> in <tt>server/genericmemorymonitortask.h</tt> can be used as an example. This class implements the default Memory Monitor described in this document.</p>
 <p>The replacement class is compiled with the Qtopia server. To get the replacement class installed as a Qtopia task, its implementation file must contain instances of the following macros, which are described in the Qtopia documentation:</p>
-<pre>        QTOPIA_TASK ( TaskName, Object )
-        QTOPIA_TASK_PROVIDES ( TaskName, Interface )
-    \enddcode
-
-    \c{TaskName} is the name you choose to call your replacement task, and \c{Object} is the
-    class name of your replacement class. Interface is the name of the interface base class.
-    For example, the following macros appear in the implementation file for the default
-    Memory Monitor:
-
-    \code
-        QTOPIA_TASK(GenericMemoryMonitor, GenericMemoryMonitorTask);
-        QTOPIA_TASK_PROVIDES(GenericMemoryMonitor, MemoryMonitor);</pre>
+<pre>     QTOPIA_TASK ( TaskName, Object )
+     QTOPIA_TASK_PROVIDES ( TaskName, Interface )</pre>
+<p><tt>TaskName</tt> is the name you choose to call your replacement task, and <tt>Object</tt> is the class name of your replacement class. Interface is the name of the interface base class. For example, the following macros appear in the implementation file for the default Memory Monitor:</p>
+<pre>     QTOPIA_TASK(GenericMemoryMonitor, GenericMemoryMonitorTask);
+     QTOPIA_TASK_PROVIDES(GenericMemoryMonitor, MemoryMonitor);</pre>
 <p>The default Memory Monitor task name is <tt>GenericMemoryMonitor</tt>, and the name of the class that implements it is <a href="genericmemorymonitortask.html">GenericMemoryMonitorTask</a>. The class is found in <tt>server/genericmemorymonitor.h</tt>. The class inherits the interface base class <a href="memorymonitor.html">MemoryMonitor</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

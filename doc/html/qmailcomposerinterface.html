@@ -38,7 +38,7 @@
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
 <ul>
-<li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#attach">attach</a></b> ( const QContent &amp; <i>item</i>, QMailMessage::AttachmentsAction <i>action</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#attach">attach</a></b> ( const QContent &amp; <i>item</i>, QMailMessage::AttachmentsAction <i>action</i> = QMailMessage::LinkToAttachments )</li>
 <li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#clear">clear</a></b> () = 0</li>
 <li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#setMessage">setMessage</a></b> ( const QMailMessage &amp; <i>mail</i> ) = 0</li>
 <li><div class="fn"/>virtual void <b><a href="qmailcomposerinterface.html#setSignature">setSignature</a></b> ( const QString &amp; <i>signature</i> )</li>
@@ -85,7 +85,7 @@
 <p>Destructs the <a href="qmailcomposerinterface.html">QMailComposerInterface</a> object.</p>
 <h3 class="fn"><a name="addActions"></a>void QMailComposerInterface::addActions ( <a href="./qmenu.html">QMenu</a> * <i>menu</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Allows the composer object to add any relevant actions to the application <i>menu</i> supplied.</p>
-<h3 class="fn"><a name="attach"></a>void QMailComposerInterface::attach ( const <a href="qcontent.html">QContent</a> &amp; <i>item</i>, <a href="qmailmessage.html#AttachmentsAction-enum">QMailMessage::AttachmentsAction</a> <i>action</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="attach"></a>void QMailComposerInterface::attach ( const <a href="qcontent.html">QContent</a> &amp; <i>item</i>, <a href="qmailmessage.html#AttachmentsAction-enum">QMailMessage::AttachmentsAction</a> <i>action</i> = QMailMessage::LinkToAttachments )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Adds <i>item</i> as an attachment to the message in the composer. The <i>action</i> parameter specifies what the composer should do with <i>item</i>.</p>
 <h3 class="fn"><a name="clear"></a>void QMailComposerInterface::clear ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Clears any message content contained in the composer.</p>
@@ -121,6 +121,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

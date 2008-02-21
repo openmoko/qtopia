@@ -24,7 +24,7 @@
 
 #include <themedview.h>
 #include <QString>
-#include "phonethemeview.h"
+#include "serverthemeview.h"
 class InputMethods;
 class QRect;
 class PhoneHeader : public PhoneThemedView

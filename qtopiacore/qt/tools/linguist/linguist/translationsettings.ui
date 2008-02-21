@@ -50,7 +50,7 @@
       <item row="1" column="0" >
        <widget class="QLabel" name="lblCountry" >
         <property name="text" >
-         <string>Country</string>
+         <string>Country/Region</string>
         </property>
        </widget>
       </item>

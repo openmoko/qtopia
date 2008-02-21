@@ -19,8 +19,8 @@
     SUBDIRS=$$PROJECTS</pre>
 <a name="description"></a>
 <h3>Description</h3>
-<p>Subdirs projects will build projects that are in the SUBDIRS variable. It is recommended to have a projects.pri file at the top of your project root that sets PROJECTS instead of manually settings SUBDIRS.</p>
-<p>See also <a href="variables.html">Variables</a> and <a href="var-projects-1.html">PROJECTS</a>.</p>
+<p>This variable only makes sense in a subdirs project. It lists the directories to build. If it is absent the build system will attempt to build projects underneath this directory. Note that this behavior does not work for the project at the top of a tree, which must use the second notation to build all projects.</p>
+<p>See also <a href="variables.html">Variables</a>, <a href="fn-qtopia-project-1.html">qtopia_project</a>(), <a href="conf-build-all-dirs-1.html">build_all_dirs</a>, <a href="var-projects-1.html">PROJECTS</a>, and <a href="over-project-trees-1.html">Project Trees</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

@@ -1774,7 +1774,8 @@ void AbFullEditor::catCheckBoxChanged( bool  b )
         // For new code a more unique id should be used instead of using the untranslated text
         // eg. ensureSystemCategory("com.mycompany.myapp.mycategory", "My Category");
         mCatMan->ensureSystemCategory(bcatid, bcatid);
-        mGroupList.append(bcatid);
+        if (!mGroupList.contains(bcatid))
+            mGroupList.append(bcatid);
     } else {
         mGroupList.removeAll(bcatid);
     }

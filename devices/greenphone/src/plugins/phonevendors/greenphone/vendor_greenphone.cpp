@@ -313,9 +313,9 @@ GreenphoneSimToolkit::GreenphoneSimToolkit( GreenphoneModemService *service )
     service->primaryAtChat()->registerNotificationType
         ( "*MTKEY:", this, SLOT(mtkey(QString)) );
     service->primaryAtChat()->registerNotificationType
-        ( "*MTGIN:", this, SLOT(mtkey(QString)) );
+        ( "*MTGIN:", this, SLOT(mtgin(QString)) );
     service->primaryAtChat()->registerNotificationType
-        ( "*MTTONE:", this, SLOT(mtkey(QString)) );
+        ( "*MTTONE:", this, SLOT(mttone(QString)) );
     service->primaryAtChat()->registerNotificationType
         ( "*MTRSH:", this, SLOT(mtrsh(QString)) );
     service->primaryAtChat()->registerNotificationType

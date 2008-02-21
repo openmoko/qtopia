@@ -26,12 +26,12 @@
 #include <QDesktopWidget>
 #include <QEvent>
 #include "cellmodemmanager.h"
-#include "phone/ringcontrol.h"
+#include "ringcontrol.h"
 #include "phone/phonelock.h"
 #include <QFontMetrics>
 #include "applicationlauncher.h"
 #include "dialercontrol.h"
-#include "phone/messagecontrol.h"
+#include "messagecontrol.h"
 #include <QResizeEvent>
 #include <QSize>
 #include <QPainter>

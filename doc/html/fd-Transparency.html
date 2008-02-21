@@ -21,14 +21,14 @@
 <li><a href="#Theme_Background_Specification">Theme Background Specification</a>
 <li><a href="#Transparent_Colors">Transparent Colors</a>
 </ul><h3><a name="Background_Selection">Background Selection</a></h3>
-<p>Themes should allow the background displayed to be selected by the user by including the background plug-in as part of the background element, for example:
+<p>Themes can allow the background displayed to be selected by the user by including the background plug-in as part of the background element, for example:
 
-<p>&lt;verbatim&gt;<br/>
-    &lt;group name="background"&gt;<br/>
-        &lt;image name="background" rect="0,0,0,0" src="background" color="Highlight" tile="yes"/&gt;<br/>
-        &lt;plugin name="bgplugin"/&gt;<br/>
-    &lt;/group&gt;<br/>
-&lt;/verbatim&gt;</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;group name=<span class="code-quote">"background"</span>&gt;</span>
+        <span class="code-tag">&lt;image name=<span class="code-quote">"background"</span> rect=<span class="code-quote">"0,0,0,0"</span> src=<span class="code-quote">"background"</span> color=<span class="code-quote">"Highlight"</span> tile=<span class="code-quote">"yes"</span>/&gt;</span>
+        <span class="code-tag">&lt;plugin name=<span class="code-quote">"bgplugin"</span>/&gt;</span>
+<span class="code-tag">&lt;/group&gt;</span></pre>
+</div></div>
 
 <p>This allows the background to be specified by the Appearance settings application.  If no background is specified by the user then the background is specified entirely by the theme.  Since the theme elements are rendered in order specified in the theme, it is possible to add watermarks over the user's selected background to maintain branding.</p>
 <h3><a name="Background_Tinting">Background Tinting</a></h3>
@@ -40,10 +40,10 @@
 <h3><a name="Transparent_Colors">Transparent Colors</a></h3>
 <p>Qtopia Core supports transparent colors and brushes.  This allows widgets and custom painters to blend with the background and present a more polished appearance.
 
-<p>Qtopia's standard color schemes assign some transparency to most standard palette colors so that the background is visible even when the programmer paints over it.  This does place some responsibility with the developer when painting to ensure that the correct effect is achieved.  In particular it is important not to "overdraw" some areas, since the overlapping region will appear darker than desired and the background will be less visible.</p>
+<p>Qtopia's standard color schemes assign some transparency to most standard palette colors so that the background is visible even when the programmer paints over it.  This does place some responsibility with the developer when painting to ensure that the correct effect is achieved.  In particular it is important not to "overdraw" some areas, since the overlapping region will appear darker than desired making the background less visible.</p>
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div>

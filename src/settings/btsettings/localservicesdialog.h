@@ -43,10 +43,12 @@ public slots:
 private slots:
     void activated(const QModelIndex &index);
     void serviceStarted(const QString &name, bool error, const QString &desc);
-    void toggleSecurity(bool checked);
+    void toggleCurrentSecurity(bool checked);
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
+    void toggleState(const QModelIndex &index);
+
     QBluetoothServiceController *m_serviceController;
     ServicesModel *m_model;
     QListView *m_view;

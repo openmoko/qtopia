@@ -2,10 +2,10 @@ exists($$QPEDIR/src/build/trace_on):message(packages.prf)
 # Package creation
 #
 # struct package {
-#     name       # eg. $name.ipk
+#     name       # eg. $name.qpk
 #     desc       # one line summary
 #     domain     # SXE security domains
-#     deps       # packages that this ipk depends on
+#     deps       # packages that this package depends(ipk only)
 #     multi      # put multiple projects in a single package
 #     version    # package version
 #     license    # package license

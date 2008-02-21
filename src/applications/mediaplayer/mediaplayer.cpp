@@ -79,9 +79,17 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
         {
         CuePlaylistRequest *req = (CuePlaylistRequest*)request;
         PlaylistCue *playlistcue = qobject_cast<PlaylistCue*>(m_context.mediaplayer->playlist().data());
-        if( playlistcue ) {
-            playlistcue->cue( req->playlist() );
+        if(!m_context.mediaplayer->isPlayerVisible()) {
+            m_context.mediaplayer->playerWidget();
+            m_context.mediaplayer->setPlayerVisible(false);
         }
+        if( playlistcue ) {
+            if(m_context.mediaplayer->playlist()->rowCount() != 0)
+                playlistcue->cue( req->playlist() );
+            else
+                playlistcue->playNow( req->playlist() );
+        }
+        m_context.control->setState( PlayerControl::Playing );
 
         delete request;
         }
@@ -90,6 +98,11 @@ void MediaServiceRequestHandler::execute( ServiceRequest* request )
         {
         PlayNowRequest *req = (PlayNowRequest*)request;
         PlaylistCue *playlistcue = qobject_cast<PlaylistCue*>(m_context.mediaplayer->playlist().data());
+        // ensure the player widget is already existing
+        if(!m_context.mediaplayer->isPlayerVisible()) {
+            m_context.mediaplayer->playerWidget();
+            m_context.mediaplayer->setPlayerVisible(false);
+        }
         if( playlistcue ) {
             playlistcue->playNow( req->playlist() );
             m_context.control->setState( PlayerControl::Playing );
@@ -139,7 +152,8 @@ MediaPlayer::MediaPlayer( QWidget* parent, Qt::WFlags f ):
     m_layout->addWidget( m_mediabrowser );
     setLayout( m_layout );
 
-    setPlayerVisible( false );
+    m_mediabrowser->show();
+    m_mediabrowser->setFocus();
 
     context = new QMediaContentContext( this );
     connect( m_playercontrol, SIGNAL(contentChanged(QMediaContent*)),
@@ -171,8 +185,7 @@ void MediaPlayer::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
     if( playlist != m_playlist ) {
         // Open playlist in player
         m_mediabrowser->setCurrentPlaylist( playlist );
-        if(m_playerwidget)
-            m_playerwidget->setPlaylist( playlist );
+        playerWidget()->setPlaylist( playlist );
 
         m_playlist = playlist;
 
@@ -197,21 +210,12 @@ bool MediaPlayer::isPlayerVisible() const
 void MediaPlayer::setPlayerVisible( bool visible )
 {
     if( visible ) {
-        if(!m_playerwidget)
-        {
-            m_playerwidget = new PlayerWidget( m_playercontrol );
-            m_layout->addWidget(m_playerwidget);
-            context->addObject( m_playerwidget );
-            m_playerwidget->setPlaylist(m_playlist);
-        }
-
-        m_playerwidget->show();
-        m_playerwidget->setFocus();
+        playerWidget()->show();
+        playerWidget()->setFocus();
 
         m_mediabrowser->hide();
     } else {
-        if(m_playerwidget)
-            m_playerwidget->hide();
+        playerWidget()->hide();
 
         m_mediabrowser->show();
         m_mediabrowser->setFocus();
@@ -313,4 +317,16 @@ MediaPlayer *MediaPlayer::instance()
         return qobject_cast<MediaPlayer *>(QtopiaApplication::instance()->mainWidget());
     else
         return NULL;
+}
+
+PlayerWidget *MediaPlayer::playerWidget()
+{
+    if(!m_playerwidget)
+    {
+        m_playerwidget = new PlayerWidget( m_playercontrol );
+        m_layout->addWidget(m_playerwidget);
+        context->addObject( m_playerwidget );
+        m_playerwidget->setPlaylist(m_playlist);
+    }
+    return m_playerwidget;
 }

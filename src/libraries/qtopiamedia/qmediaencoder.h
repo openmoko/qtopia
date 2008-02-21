@@ -27,8 +27,6 @@
 #include <qtopiaglobal.h>
 
 
-class QMediaPipe;
-
 class QTOPIAMEDIA_EXPORT QMediaEncoder : public QMediaDevice
 {
 public:

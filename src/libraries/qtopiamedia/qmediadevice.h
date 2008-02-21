@@ -30,9 +30,6 @@
 #include <qtopiaglobal.h>
 
 
-class QMediaPipe;
-
-
 class QTOPIAMEDIA_EXPORT QMediaDevice : public QIODevice
 {
     Q_OBJECT

@@ -438,7 +438,6 @@ protected slots:
     virtual void focusInEvent( QFocusEvent *event );
     virtual void rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end );
     virtual void rowsInserted( const QModelIndex &parent, int start, int end );
-    virtual void scrollContentsBy( int dx, int dy );
 private slots:
     void indexActivated( const QModelIndex &index );
     void selectTypeFilter();
@@ -753,16 +752,19 @@ void DocumentView::focusInEvent( QFocusEvent *event )
 void DocumentView::rowsAboutToBeRemoved( const QModelIndex &parent, int start, int end )
 {
     QModelIndex index = currentIndex();
+
     int scrollValue = verticalScrollBar()->value();
 
     QListView::rowsAboutToBeRemoved(parent, start, end);
 
     if( index.row() >= start && index.row() <= end && end + 1 < model()->rowCount( parent ) )
+    {
         selectionModel()->setCurrentIndex(
                 model()->index( end + 1, index.column(), parent ),
                 QItemSelectionModel::ClearAndSelect );
+    }
 
-    if( index.row() >= start )
+    if(index.row() >= start)
     {
         int adjustedValue = index.row() > end
                 ? scrollValue - end + start - 1
@@ -774,51 +776,17 @@ void DocumentView::rowsAboutToBeRemoved( const QModelIndex &parent, int start, i
 
 void DocumentView::rowsInserted( const QModelIndex &parent, int start, int end )
 {
-    QModelIndex index = currentIndex();
+    QListView::rowsInserted( parent, start, end );
 
-    QListView::rowsInserted(parent, start, end);
-
-    if( index.row() > start )
+    if( !Qtopia::mousePreferred() )
     {
-        int adjustedValue = index.row() > end
-                ? verticalScrollBar()->value() + end - start + 1
-                : verticalScrollBar()->value() + end - index.row() + 1;
-
-        verticalScrollBar()->setMaximum( verticalScrollBar()->maximum() + end - start + 1 );
-        verticalScrollBar()->setValue( adjustedValue < verticalScrollBar()->maximum() ? adjustedValue : verticalScrollBar()->maximum() );
+        if( !currentIndex().isValid() )
+            selectionModel()->setCurrentIndex( model()->index( 0, 0, parent ), QItemSelectionModel::ClearAndSelect );
     }
-}
+    else
+        selectionModel()->clearSelection();
 
-void DocumentView::scrollContentsBy( int dx, int dy )
-{
-    QListView::scrollContentsBy(dx, dy);
-
-    // Drag the selection with the viewport.
-    QModelIndex index = currentIndex();
-    QRect viewRect = viewport()->rect();
-    QRect itemRect = visualRect(index);
-
-    if( !viewRect.intersects( itemRect ) )
-    {
-        if ( dy < 0 )
-        {
-            setSelection( QRect( itemRect.left(), viewRect.top() + spacing() * 2, 1, 1 ), QItemSelectionModel::ClearAndSelect );
-
-            QModelIndexList indexes = selectionModel()->selectedIndexes();
-            if( !indexes.isEmpty() )
-                index = indexes.first();
-        }
-        else
-        {
-            setSelection( QRect( itemRect.left(), viewRect.bottom() - spacing() * 2, 1, 1 ), QItemSelectionModel::ClearAndSelect );
-
-            QModelIndexList indexes = selectionModel()->selectedIndexes();
-            if( !indexes.isEmpty() )
-                index = indexes.last();
-        }
-
-        selectionModel()->setCurrentIndex( index, QItemSelectionModel::ClearAndSelect);
-    }
+    scrollTo(currentIndex());
 }
 
 void DocumentView::selectTypeFilter()

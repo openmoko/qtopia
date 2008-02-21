@@ -65,7 +65,7 @@ void DataView::init()
     vb->addWidget(legend);
     legend->setData(data);
 
-    vb->addStretch( 1 );
+    vb->addStretch( 100 );
 
     updateData();
 

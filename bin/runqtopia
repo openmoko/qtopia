@@ -288,12 +288,13 @@ strace -o strace.out $qpe "$@"
 END
         [ "systemtesthelper", "A helper for running system tests",
           'while [ -f $QTOPIA_RESTART_FILE ]; do qpe "$@"; done', <<'END' ],
-rm -f /tmp/qtopiatest_cmds
+rm -f /tmp/qtopia-${display}/qtopiatest_cmds
+export QTOPIA_SYSTEMTESTHELPER=1
 export QTOPIA_RESTART_FILE=/tmp/qtopia-${display}/restart-qtopia
 touch $QTOPIA_RESTART_FILE
 while [ -f $QTOPIA_RESTART_FILE ]; do
-    eval `cat /tmp/qtopiatest_cmds 2>/dev/null`
-    LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so $qpe "$@" || exit $?
+    ( eval `cat /tmp/qtopia-${display}/qtopiatest_cmds 2>/dev/null`;
+      LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so $qpe "$@"; ) || exit $?
 done
 END
     ],

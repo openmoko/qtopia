@@ -1749,6 +1749,8 @@ for my $prefix ( opt("prefix"), opt("dprefix"), opt("image"), opt("dimage"), opt
         $prefix = fixpath($cwd."/".$path);
         warn "WARNING: Using $prefix instead of $old_prefix.\n";
     }
+    # Remove a trailing slash (will cause problems at install time)
+    $prefix =~ s/\/$//;
 }
 
 # set the prefix for the implicit rpath
@@ -2635,7 +2637,7 @@ if ( opt("edition") ) {
                     "       $depotpath/src/libraries/qtopiabase/custom-".opt("xplatform").".cpp\n";
         die $err;
     }
-    symlink_file("$custom.h",   $QPEDIR."/src/libraries/qtopiabase/custom-qtopia.h");
+    symlink_file("$custom.h", $QPEDIR."/src/libraries/qtopiabase/custom-qtopia.h");
     # Read the file in again so we can put in an include guard
     open IN, "$QPEDIR/src/libraries/qtopiabase/custom-qtopia.h" or die "Can't read $QPEDIR/src/libraries/qtopiabase/custom-qtopia.h";
     my @data = <IN>;
@@ -2646,6 +2648,12 @@ if ( opt("edition") ) {
     open OUT, ">$QPEDIR/src/libraries/qtopiabase/custom-qtopia.h" or die "Can't write $QPEDIR/src/libraries/qtopiabase/custom-qtopia.h";
     print OUT @data;
     close OUT;
+    # Since we're re-writing this file we need to reset the timestamp
+    my $s = stat("$custom.h");
+    if ( defined($s) ) {
+        my $now = $s->mtime;
+        utime $now, $now, "$QPEDIR/src/libraries/qtopiabase/custom-qtopia.h";
+    }
     symlink_file("$custom.cpp", $QPEDIR."/src/libraries/qtopiabase/custom-qtopia.cpp");
     symlink_file(opt("defaultbuttons"), $QPEDIR."/etc/defaultbuttons.conf");
 }

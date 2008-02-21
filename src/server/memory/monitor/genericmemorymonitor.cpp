@@ -180,7 +180,7 @@ GenericMemoryMonitorTask::computeMemoryValues()
 
     QTextStream meminfo(&file);
     QString line;
-    int total, memfree, buffers, cached;
+    int total=0, memfree=0, buffers=0, cached=0;
     static QRegExp kernel24HeaderLine("\\s+total:\\s+used:\\s+free:\\s+shared:\\s+buffers:\\s+cached:");
 
     line = meminfo.readLine();

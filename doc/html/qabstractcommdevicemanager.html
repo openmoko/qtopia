@@ -106,7 +106,8 @@
 <p>NOTE: It is safe to start a new EventLoop inside this method.</p>
 <h3 class="fn"><a name="shouldStartSession"></a>bool QAbstractCommDeviceManager::shouldStartSession ( QUnixSocket * <i>socket</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This method is called whenever a new session request is processed by the device manager. It can be used by clients to specialize the logic of whether a given peer has the ability to start a session utilizing the device. The <i>socket</i> parameter holds the socket of the peer.</p>
-<p>The default implementation always returns true.</p>
+<p>The default implementation returns false if Qtopia is in plane mode; otherwise, it returns true.</p>
+<p>See also <a href="qphoneprofilemanager.html#planeMode">QPhoneProfileManager::planeMode</a>().</p>
 <h3 class="fn"><a name="start"></a>bool QAbstractCommDeviceManager::start ()</h3>
 <p>Returns if able to start the manager; otherwise returns false.</p>
 <p>See also <a href="qabstractcommdevicemanager.html#isStarted">isStarted</a>() and <a href="qabstractcommdevicemanager.html#stop">stop</a>().</p>
@@ -120,6 +121,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

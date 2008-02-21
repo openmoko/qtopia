@@ -44,7 +44,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "bluetooth/scomisc_p.h"
+#include "scomisc_p.h"
 
 class HandsfreeIpcAdaptor : public QtopiaIpcAdaptor
 {

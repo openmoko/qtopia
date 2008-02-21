@@ -99,7 +99,7 @@
         <keyword ref="qpainterpath-element.html#operator-QPointF">operator QPointF</keyword>
         <keyword ref="qpainterpath-element.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qpainterpath-element.html#operator-eq-eq">operator==</keyword>
-        <keyword ref="qpainterpath-element.html#type-var">type</keyword>
+        <keyword ref="qpainterpath-element.html#type-varx">type</keyword>
         <keyword ref="qpainterpath-element.html#x-var">x</keyword>
         <keyword ref="qpainterpath-element.html#y-var">y</keyword>
         <section ref="qpainterpath-element-members.html" title="List of all members"/>
@@ -1937,7 +1937,6 @@
         <keyword ref="qcalendarwidget.html#selectionChanged">selectionChanged</keyword>
         <keyword ref="qcalendarwidget.html#setCurrentPage">setCurrentPage</keyword>
         <keyword ref="qcalendarwidget.html#setDateRange">setDateRange</keyword>
-        <keyword ref="qcalendarwidget.html#setDateTextFormat">setDateTextFormat</keyword>
         <keyword ref="qcalendarwidget.html#setHeaderTextFormat">setHeaderTextFormat</keyword>
         <keyword ref="qcalendarwidget.html#setWeekdayTextFormat">setWeekdayTextFormat</keyword>
         <keyword ref="qcalendarwidget.html#showNextMonth">showNextMonth</keyword>
@@ -2092,10 +2091,6 @@
         <keyword ref="qchar.html#toUpper">toUpper</keyword>
         <keyword ref="qchar.html#unicode">unicode</keyword>
         <keyword ref="qchar.html#unicodeVersion">unicodeVersion</keyword>
-        <keyword ref="qchar.html#operator-lt">operator&lt;</keyword>
-        <keyword ref="qchar.html#operator-lt-eq">operator&lt;=</keyword>
-        <keyword ref="qchar.html#operator-gt">operator&gt;</keyword>
-        <keyword ref="qchar.html#operator-gt-eq">operator&gt;=</keyword>
         <section ref="qchar-members.html" title="List of all members"/>
         <section ref="qchar-qt3.html" title="Qt 3 support members"/>
     </section>
@@ -3709,7 +3704,7 @@
     </section>
     <section ref="qdomelement.html" title="QDomElement Class Reference">
         <keyword ref="qdomelement.html">QDomElement</keyword>
-        <keyword ref="qdomelement.html#attributex">attribute</keyword>
+        <keyword ref="qdomelement.html#attribute">attribute</keyword>
         <keyword ref="qdomelement.html#attributeNS">attributeNS</keyword>
         <keyword ref="qdomelement.html#attributeNode">attributeNode</keyword>
         <keyword ref="qdomelement.html#attributeNodeNS">attributeNodeNS</keyword>
@@ -3835,7 +3830,7 @@
         <keyword ref="qdomnode.html#lineNumber">lineNumber</keyword>
         <keyword ref="qdomnode.html#localName">localName</keyword>
         <keyword ref="qdomnode.html#namedItem">namedItem</keyword>
-        <keyword ref="qdomnode.html#namespaceURI">namespaceURI</keyword>
+        <keyword ref="qdomnode.html#namespaceURIx">namespaceURI</keyword>
         <keyword ref="qdomnode.html#nextSibling">nextSibling</keyword>
         <keyword ref="qdomnode.html#nextSiblingElement">nextSiblingElement</keyword>
         <keyword ref="qdomnode.html#nodeName">nodeName</keyword>
@@ -6490,7 +6485,6 @@
         <keyword ref="qkeyevent.html#nativeScanCode">nativeScanCode</keyword>
         <keyword ref="qkeyevent.html#nativeVirtualKey">nativeVirtualKey</keyword>
         <keyword ref="qkeyevent.html#text">text</keyword>
-        <keyword ref="qkeyevent.html#operator-eq-eq">operator==</keyword>
         <section ref="qkeyevent-members.html" title="List of all members"/>
         <section ref="qkeyevent-qt3.html" title="Qt 3 support members"/>
     </section>
@@ -9160,6 +9154,8 @@
         <keyword ref="qpixmap.html#operator-QVariant">operator QVariant</keyword>
         <keyword ref="qpixmap.html#operator-not">operator!</keyword>
         <keyword ref="qpixmap.html#operator-eq">operator=</keyword>
+        <keyword ref="qpixmap.html#operator-lt-lt">operator&lt;&lt;</keyword>
+        <keyword ref="qpixmap.html#operator-gt-gt">operator&gt;&gt;</keyword>
         <section ref="qpixmap-members.html" title="List of all members"/>
         <section ref="qpixmap-obsolete.html" title="Obsolete members"/>
         <section ref="qpixmap-qt3.html" title="Qt 3 support members"/>
@@ -9808,8 +9804,6 @@
         <keyword ref="qregexp.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qregexp.html#operator-eq">operator=</keyword>
         <keyword ref="qregexp.html#operator-eq-eq">operator==</keyword>
-        <keyword ref="qregexp.html#operator-lt-lt">operator&lt;&lt;</keyword>
-        <keyword ref="qregexp.html#operator-gt-gt">operator&gt;&gt;</keyword>
         <section ref="qregexp-members.html" title="List of all members"/>
         <section ref="qregexp-qt3.html" title="Qt 3 support members"/>
     </section>
@@ -10399,6 +10393,7 @@
         <keyword ref="qsize.html#operator-2a">operator*</keyword>
         <keyword ref="qsize.html#operator-2b">operator+</keyword>
         <keyword ref="qsize.html#operator-">operator-</keyword>
+        <keyword ref="qsize.html#operator-eq-eq">operator==</keyword>
         <section ref="qsize-members.html" title="List of all members"/>
     </section>
     <section ref="qsizef.html" title="QSizeF Class Reference">
@@ -11551,6 +11546,10 @@
         <keyword ref="qstringref.html#toString">toString</keyword>
         <keyword ref="qstringref.html#unicode">unicode</keyword>
         <keyword ref="qstringref.html#operator-eq">operator=</keyword>
+        <keyword ref="qstringref.html#operator-lt">operator&lt;</keyword>
+        <keyword ref="qstringref.html#operator-lt-eq">operator&lt;=</keyword>
+        <keyword ref="qstringref.html#operator-gt">operator&gt;</keyword>
+        <keyword ref="qstringref.html#operator-gt-eq">operator&gt;=</keyword>
         <section ref="qstringref-members.html" title="List of all members"/>
     </section>
     <section ref="qstyle.html" title="QStyle Class Reference">
@@ -12099,7 +12098,7 @@
         <keyword ref="qstylehintreturn.html#StyleOptionType-enum">QStyleHintReturn::Type</keyword>
         <keyword ref="qstylehintreturn.html#StyleOptionVersion-enum">StyleOptionVersion</keyword>
         <keyword ref="qstylehintreturn.html#StyleOptionVersion-enum">QStyleHintReturn::Version</keyword>
-        <keyword ref="qstylehintreturn.html#type-var">type</keyword>
+        <keyword ref="qstylehintreturn.html#type-varx">type</keyword>
         <keyword ref="qstylehintreturn.html#version-var">version</keyword>
         <section ref="qstylehintreturn-members.html" title="List of all members"/>
     </section>
@@ -12164,7 +12163,7 @@
         <keyword ref="qstyleoption.html#palette-var">palette</keyword>
         <keyword ref="qstyleoption.html#rect-var">rect</keyword>
         <keyword ref="qstyleoption.html#state-var">state</keyword>
-        <keyword ref="qstyleoption.html#type-var">type</keyword>
+        <keyword ref="qstyleoption.html#type-varx">type</keyword>
         <keyword ref="qstyleoption.html#version-var">version</keyword>
         <keyword ref="qstyleoption.html#qstyleoption_cast">qstyleoption_cast</keyword>
         <section ref="qstyleoption-members.html" title="List of all members"/>
@@ -17020,7 +17019,7 @@
         <keyword ref="qxmlstreamattribute.html">QXmlStreamAttribute</keyword>
         <keyword ref="qxmlstreamattribute.html#isDefault">isDefault</keyword>
         <keyword ref="qxmlstreamattribute.html#name">name</keyword>
-        <keyword ref="qxmlstreamattribute.html#namespaceUrix">namespaceUri</keyword>
+        <keyword ref="qxmlstreamattribute.html#namespaceUri">namespaceUri</keyword>
         <keyword ref="qxmlstreamattribute.html#qualifiedName">qualifiedName</keyword>
         <keyword ref="qxmlstreamattribute.html#value">value</keyword>
         <keyword ref="qxmlstreamattribute.html#operator-not-eq">operator!=</keyword>
@@ -17049,7 +17048,7 @@
     </section>
     <section ref="qxmlstreamnamespacedeclaration.html" title="QXmlStreamNamespaceDeclaration Class Reference">
         <keyword ref="qxmlstreamnamespacedeclaration.html">QXmlStreamNamespaceDeclaration</keyword>
-        <keyword ref="qxmlstreamnamespacedeclaration.html#namespaceUrix">namespaceUri</keyword>
+        <keyword ref="qxmlstreamnamespacedeclaration.html#namespaceUri">namespaceUri</keyword>
         <keyword ref="qxmlstreamnamespacedeclaration.html#prefix">prefix</keyword>
         <keyword ref="qxmlstreamnamespacedeclaration.html#operator-not-eq">operator!=</keyword>
         <keyword ref="qxmlstreamnamespacedeclaration.html#operator-eq">operator=</keyword>
@@ -17116,7 +17115,7 @@
         <keyword ref="qxmlstreamreader.html#lineNumber">lineNumber</keyword>
         <keyword ref="qxmlstreamreader.html#name">name</keyword>
         <keyword ref="qxmlstreamreader.html#namespaceDeclarations">namespaceDeclarations</keyword>
-        <keyword ref="qxmlstreamreader.html#namespaceUrix">namespaceUri</keyword>
+        <keyword ref="qxmlstreamreader.html#namespaceUri">namespaceUri</keyword>
         <keyword ref="qxmlstreamreader.html#notationDeclarations">notationDeclarations</keyword>
         <keyword ref="qxmlstreamreader.html#processingInstructionData">processingInstructionData</keyword>
         <keyword ref="qxmlstreamreader.html#processingInstructionTarget">processingInstructionTarget</keyword>
@@ -17583,8 +17582,8 @@
     <section ref="focus.html" title="Keyboard Focus">
         <keyword ref="focus.html">Keyboard Focus</keyword>
     </section>
-    <section ref="known-issues.html" title="Known Issues in 4.3&#x2e;3">
-        <keyword ref="known-issues.html">Known Issues in 4.3&#x2e;3</keyword>
+    <section ref="known-issues.html" title="Known Issues in 4.3&#x2e;4">
+        <keyword ref="known-issues.html">Known Issues in 4.3&#x2e;4</keyword>
     </section>
     <section ref="layout.html" title="Layout Classes">
         <keyword ref="layout.html">Layout Classes</keyword>

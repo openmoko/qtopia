@@ -28,7 +28,7 @@
 #include <QDialog>
 #include <QKeyEvent>
 #include <QLineEdit>
-#include "phonethemeview.h"
+#include "serverthemeview.h"
 #include "qabstractdialerscreen.h"
 
 class Dialer;

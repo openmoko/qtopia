@@ -63,6 +63,7 @@ void ImapClient::newConnection()
 
     unresolvedUid.clear();
     selected = false;
+    tlsEnabled = false;
     messageCount = 0;
 
     atCurrentBox = 0;
@@ -105,8 +106,37 @@ void ImapClient::operationDone(ImapCommand &command, OperationState &state)
     switch( command ) {
         case IMAP_Init:
         {
+            // Cannot be emitted in 4.3 due to string freeze:
+            //emit updateStatus( tr("Checking capabilities" ) );
+            client.capability();
+            break;
+        }
+        case IMAP_Capability:
+        {
+#ifndef QT_NO_OPENSSL
+            if (!tlsEnabled && (account->mailEncryption() == QMailAccount::Encrypt_TLS)) {
+                if (client.supportsCapability("STARTTLS")) {
+                    // Cannot be emitted in 4.3 due to string freeze:
+                    //emit updateStatus( tr("Starting TLS" ) );
+                    client.startTLS();
+                    break;
+                } else {
+                    // TODO: request user direction
+                    qWarning() << "No TLS support - continuing unencrypted";
+                }
+            }
+#endif
             emit updateStatus( tr("Logging in" ) );
             client.login(account->mailUserName(), account->mailPassword());
+            break;
+        }
+        case IMAP_StartTLS:
+        {
+            // We are now in TLS mode
+            tlsEnabled = true;
+
+            // Check capabilities for encrypted mode
+            client.capability();
             break;
         }
         case IMAP_Login:
@@ -473,9 +503,10 @@ void ImapClient::errorHandling(int status, QString msg)
 {
     if ( client.connected() ) {
         client.close();
-        emit updateStatus(tr("Error occurred"));
-        emit errorOccurred(status, msg);
     }
+
+    emit updateStatus(tr("Error occurred"));
+    emit errorOccurred(status, msg);
 }
 
 void ImapClient::quit()

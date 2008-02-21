@@ -269,7 +269,8 @@ bool SxeProgramInfo::isValid() const
 bool SxeProgramInfo::locateBinary()
 {
 #ifdef SXE_INSTALLER
-    Q_ASSERT( "SxeProgramInfo::locateBinary called by sxe_installer!!" );
+    qFatal( "SxeProgramInfo::locateBinary called by sxe_installer!!" );
+    return false;
 #else
     if ( isValid() )
         return true;

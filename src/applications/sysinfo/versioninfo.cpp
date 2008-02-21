@@ -43,7 +43,9 @@ VersionInfo::~VersionInfo()
 {
 }
 
+#ifndef SYSINFO_GEEK_MODE
 #define SYSINFO_GEEK_MODE
+#endif
 
 void VersionInfo::init()
 {

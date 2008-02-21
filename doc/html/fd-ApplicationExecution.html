@@ -25,7 +25,7 @@
 <h3><a name="Lazy_Application_Shutdown">Lazy Application Shutdown</a></h3>
 <p>It is common for a user to be rapidly switching between a small number of applications.  While from their perspective they are starting, using and then exiting an application, starting an application, even with quicklauncher, is expensive and so it is inefficient for the system to truly act in this manner.  With "lazy application shutdown" enabled (Trolltech/Launcher:AppLoading/LazyShutdown=true) rather than terminating an application when the user exits from it the system leaves it running in a hidden state.  When the user restarts the application the running process only has to perform the comparatively quick operation of showing its UI.  
 
-<p>The system will automatically terminate applications in the lazy application shutdown state when either too many are in this state or the system gets low on memory.  Lazy Application Shutdown is a performance optimization and should not effect the way applications appear to the user.</p>
+<p>The system will automatically terminate applications in the lazy application shutdown state when either too many are in this state or the system gets low on memory.  Lazy Application Shutdown is a performance optimization and does not effect the way applications appear to the user.</p>
 <h3><a name="Quicklauncher">Quicklauncher</a></h3>
 <p>Much of a Qtopia application's startup time is spent in the slow but necessary tasks of C++ symbol relocation and QtopiaApplication/QApplication construction. Doing this predictable, repetitive work at the last moment gives poor application launch performance.
 
@@ -36,5 +36,5 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div>

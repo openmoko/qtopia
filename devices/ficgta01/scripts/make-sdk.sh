@@ -47,7 +47,7 @@ make_x86_sdk()
 {
 		echo "make_x86_sdk()"
 		if [ "$CLEAN" = "1" ] ;then  
-				echo "clean"
+				echo "clean "$QPEDIR 
 				sleep 3
 				rm -Rf $QPEDIR/x86-sdk
 				mkdir -p $QPEDIR/x86-sdk/qtopiacore
@@ -326,9 +326,9 @@ echo "Optimizing space for sdk iso"
 		done
 
 # optimize headers 
-		cd /opt/Qtopia/SDK/$QPEVER/x86/
-    rm -rf include
-    ln -s ../$DEVICE/include include
+#		cd /opt/Qtopia/SDK/$QPEVER/x86/
+#    rm -rf include
+#    ln -s ../$DEVICE/include include
 
 # mkspecs as well
 		cd /opt/Qtopia/SDK/$QPEVER/x86/qtopiacore/qt

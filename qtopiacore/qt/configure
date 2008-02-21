@@ -2,7 +2,7 @@
 #
 # Configures to build the Qt library
 #
-# Copyright (C) 1999-2007 Trolltech ASA. All rights reserved.
+# Copyright (C) 1999-2008 Trolltech ASA. All rights reserved.
 #
 # This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 # WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -162,7 +162,7 @@ if [ -f "$relpath"/LICENSE.Qtopia ]; then
     Licensee="Qtopia"
     Edition="Qtopia"
     QT_EDITION="QT_EDITION_DESKTOP"
-elif [ -f "$relpath"/LICENSE.QPL -o -f "$relpath"/LICENSE.GPL ]; then
+elif [ -f "$relpath"/LICENSE.QPL -o -f "$relpath"/LICENSE.GPL2 -o -f "$relpath"/LICENSE.GPL3 ]; then
     # Open Source edition - may only be used under the terms of the QPL or GPL.
     [ "$PLATFORM_MAC" = "maybe" ] && PLATFORM_MAC=yes
     [ "$PLATFORM_QWS" = "maybe" ] && PLATFORM_QWS=yes
@@ -191,7 +191,7 @@ elif [ -f "$relpath"/LICENSE.SNAPSHOT.COMMERCIAL ]; then
     Licensee="Snapshot"
     Edition="Snapshot"
     QT_EDITION="QT_EDITION_DESKTOP"
-elif [ -f "$relpath"/LICENSE.SNAPSHOT.OPENSOURCE ]; then
+elif [ -f "$relpath"/LICENSE.SNAPSHOT.OPENSOURCE.GPL2 -o -f "$relpath"/LICENSE.SNAPSHOT.OPENSOURCE.GPL3 ]; then
     # snapshot - opensource
     [ "$PLATFORM_MAC" = "maybe" ] && PLATFORM_MAC=yes
     [ "$PLATFORM_QWS" = "maybe" ] && PLATFORM_QWS=yes
@@ -420,7 +420,7 @@ else
         ;;
     esac
     if [ '!' -f "$outpath/LICENSE" ]; then
-        echo "The LICENSE, LICENSE.QPL, or LICENSE.GPL file shipped with"
+        echo "The LICENSE, LICENSE.QPL, or LICENSE.GPL2 file shipped with"
         echo "this software has disappeared."
         echo
         echo "Sorry, you are not licensed to use this software."
@@ -3125,17 +3125,18 @@ elif [ "$Edition" = "OpenSource" ]; then
     while true; do
         if [ "$PLATFORM_QWS" = "yes" ]; then
             echo "You are licensed to use this software under the terms of"
-            echo "the GNU General Public License (GPL)."
+            echo "the GNU General Public License (GPL) versions 2 or 3."
             echo
             affix="the"
         elif [ "$PLATFORM_MAC" = "yes" ]; then
             echo "You are licensed to use this software under the terms of"
-            echo "the GNU General Public License (GPL)."
+            echo "the GNU General Public License (GPL) versions 2 or 3."
             echo
             affix="the"
         elif [ "$PLATFORM_X11" = "yes" ]; then
             echo "You are licensed to use this software under the terms of either"
-            echo "the Q Public License (QPL) or the GNU General Public License (GPL)."
+            echo "the Q Public License (QPL) or the GNU General Public License (GPL)"
+	    echo "versions 2 or 3"
             echo
             [ "$OPT_CONFIRM_LICENSE" = "no" ] && echo "Type 'Q' to view the Q Public License."
             affix="either"
@@ -3144,7 +3145,8 @@ elif [ "$Edition" = "OpenSource" ]; then
 	    echo "You have already accepted the terms of the $LicenseType license."
             acceptance=yes
         else
-            echo "Type 'G' to view the GNU General Public License."
+	    echo "Type '2' to view the GNU General Public License version 2."
+	    echo "Type '3' to view the GNU General Public License version 3."
             echo "Type 'yes' to accept this license offer."
             echo "Type 'no' to decline this license offer."
             echo
@@ -3162,8 +3164,10 @@ elif [ "$Edition" = "OpenSource" ]; then
             echo "You are not licensed to use this software."
             echo
             exit 1
-        elif [ "$acceptance" = "G" -o "$acceptance" = "g" ]; then
-            more "$relpath/LICENSE.GPL"
+        elif [ "$acceptance" = "2" ]; then
+            more "$relpath/LICENSE.GPL2"
+        elif [ "$acceptance" = "3" ]; then
+            more "$relpath/LICENSE.GPL3"
         elif [ "$acceptance" = "Q" -o "$acceptance" = "q" ]; then
             if [ "$PLATFORM_QWS" != "yes" ]; then
                 more "$relpath/LICENSE.QPL"
@@ -3216,7 +3220,7 @@ elif [ "$Edition" = "Preview" ]; then
 elif [ "$Edition" = "Snapshot" ]; then
     while true; do
         if [ "$QT_EDITION" = "QT_EDITION_OPENSOURCE" ]; then
-            TheLicense=`head -n 1 "$relpath/LICENSE.SNAPSHOT.OPENSOURCE"`
+            TheLicense=`head -n 1 "$relpath/LICENSE.SNAPSHOT.OPENSOURCE.GPL2"`
         else
             TheLicense=`head -n 1 "$relpath/LICENSE.SNAPSHOT.COMMERCIAL"`
         fi
@@ -3230,7 +3234,9 @@ elif [ "$Edition" = "Snapshot" ]; then
             echo "You are licensed to use this software under the terms of"
             echo "the $TheLicense"
             echo
-            echo "Type '?' to read the Snapshot License."
+            test -f "$relpath/LICENSE.SNAPSHOT.COMMERCIAL" && echo "Type '?' to read the Snapshot License."
+	    test -f "$relpath/LICENSE.SNAPSHOT.OPENSOURCE.GPL2" && echo "Type '2' to view the GNU General Public License version 2."
+	    test -f "$relpath/LICENSE.SNAPSHOT.OPENSOURCE.GPL2" && echo "Type '3' to view the GNU General Public License version 3."
             echo "Type 'yes' to accept this license offer."
             echo "Type 'no' to decline this license offer."
             echo
@@ -3249,11 +3255,11 @@ elif [ "$Edition" = "Snapshot" ]; then
             echo
             exit 0
         elif [ "$acceptance" = "?" ]; then
-            if [ "$QT_EDITION" = "QT_EDITION_OPENSOURCE" ]; then
-                more "$relpath/LICENSE.SNAPSHOT.OPENSOURCE"
-            else
-                more "$relpath/LICENSE.SNAPSHOT.COMMERCIAL"
-            fi
+            more "$relpath/LICENSE.SNAPSHOT.COMMERCIAL"
+        elif [ "$acceptance" = "2" ]; then
+            more "$relpath/LICENSE.SNAPSHOT.OPENSOURCE.GPL2"
+        elif [ "$acceptance" = "3" ]; then
+            more "$relpath/LICENSE.SNAPSHOT.OPENSOURCE.GPL3"
         fi
     done
 elif [ "$Edition" != "Trolltech" ]; then

@@ -28,6 +28,7 @@
 #include <QPalette>
 #include <QSettings>
 #include <QDesktopWidget>
+#include <QFile>
 
 #include "qglobalpixmapcache.h"
 #include "qexportedbackground.h"
@@ -57,18 +58,8 @@ Q_GLOBAL_STATIC(ExportedBackgroundLocalInfo, localInfo);
 class QExportedBackgroundPrivate
 {
 public:
-    void primeWallpaper()
-    {
-        QSettings cfg("Trolltech","qpe");
-        cfg.beginGroup("Appearance");
-        wallpaper = cfg.value("BackgroundImage").toString();
-        if(!wallpaper.startsWith('/'))
-            wallpaper = QString(":image/wallpaper/"+wallpaper);
-    }
-
     QPixmap bg;
     QPixmap state;
-    QString wallpaper;
     int screen;
 };
 
@@ -103,7 +94,7 @@ public:
 
 /*!
     \fn void QExportedBackground::wallpaperChanged()
-
+    \deprecated
     This signal is emitted when the wallpaper changes.
 
     \sa wallpaper()
@@ -165,18 +156,14 @@ QExportedBackground::~QExportedBackground()
 }
 
 /*!
+    \deprecated
     Returns the wallpaper.
     
-    The wallpaper is set by the user, for example
-    a photo from the camera.  It is most commonly displayed only
-    in the homescreen but some themes also export the wallpaper as the
-    background.
+    As of Qtopia 4.3 the wallpaper is the same as the background. Use background() instead.
 */
 QPixmap QExportedBackground::wallpaper() const
 {
-    if (d->wallpaper.isEmpty())
-        d->primeWallpaper();
-    return QPixmap(d->wallpaper);
+    return background();
 }
 
 /*!
@@ -201,12 +188,7 @@ void QExportedBackground::sysMessage(const QString &msg, const QByteArray&)
         getPixmaps();
         emit changed();
         emit changed(background());
-    } else if ( msg == "applyStyleSplash()" ||
-                msg == "applyStyleNoSplash()" ) {
-        QString oldWallpaper = d->wallpaper;
-        d->primeWallpaper();
-        if(d->wallpaper != oldWallpaper)
-            emit wallpaperChanged();
+        emit wallpaperChanged();
     }
 }
 
@@ -338,15 +320,7 @@ void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src,
     int level = colour.alpha();
     int div = 255;
     int mult = 255-level;
-    QSize dataSize = qt_screen->mapToDevice(QSize(src.width(),src.height()));
-    if(qt_screen->isTransformed()) {
-        int rot = qt_screen->transformOrientation();
-        if(rot == 1 || rot == 3) {
-            rot = dataSize.width();
-            dataSize.setWidth(dataSize.height());
-            dataSize.setHeight(rot);
-        }
-    }
+    QSize dataSize = QSize(src.width(),src.height());
     if (src.depth() == 16 && dest.depth() == 16) {
         sr = (sr << 8) & 0xF800;
         sg = (sg << 3) & 0x07e0;

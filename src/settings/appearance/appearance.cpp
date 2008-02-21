@@ -695,6 +695,10 @@ void AppearanceSettings::writeColorSchemeSettings()
         gConfig.setValue( "Text", color );
         color = scheme.value( "ButtonText", "#000000" ).toString();
         gConfig.setValue( "ButtonText", color );
+        color = scheme.value( "ButtonText_disabled", "" ).toString();
+        gConfig.setValue( "ButtonText_disabled", color );
+        alpha = scheme.value( "ButtonText_disabled_alpha", 255 ).toString();
+        gConfig.setValue( "ButtonText_disabled_alpha", alpha );
         color = scheme.value( "Base", "#FFFFFF" ).toString();
         gConfig.setValue( "Base", color );
         alpha = scheme.value( "Base_alpha", "176" ).toString();
@@ -705,8 +709,12 @@ void AppearanceSettings::writeColorSchemeSettings()
         gConfig.setValue( "AlternateBase_alpha", alpha );
         color = scheme.value( "Text_disabled", "" ).toString();
         gConfig.setValue("Text_disabled", color);
+        alpha = scheme.value( "Text_disabled_alpha", 255 ).toString();
+        gConfig.setValue("Text_disabled_alpha", alpha);
         color = scheme.value( "Foreground_disabled", "" ).toString();
         gConfig.setValue("Foreground_disabled", color);
+        alpha = scheme.value( "Foreground_disabled_alpha", 255 ).toString();
+        gConfig.setValue("Foreground_disabled_alpha", alpha);
         color = scheme.value( "Shadow", "" ).toString();
         gConfig.setValue("Shadow", color);
         color = scheme.value( "Link", "#0000FF" ).toString();

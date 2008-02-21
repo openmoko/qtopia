@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include <qtopia/private/qcontent_p.h>
+#include <private/qcontentstore_p.h>
 #include <qtopiaipcenvelope.h>
 #include <QDebug>
 #include <qtopialog.h>
@@ -85,6 +86,8 @@ void QContentUpdateManager::addUpdated(QContentId id, QContent::ChangeType c)
 
 void QContentUpdateManager::requestRefresh()
 {
+    QContentCache::instance()->clear();
+
     emit refreshRequested();
 }
 

@@ -42,7 +42,6 @@ See <a href="http://www.3gpp.org/ftp/tsg_t/ WG3_USIM/TSGT3_30/docs/T3-040071.doc
 <li><a href="#Send_Messages">Send Messages</a>
 <li><a href="#Setup_Event_List">Set-up Event List</a>
 <li><a href="#Setup_Idle_Mode_Text">Set-up Idle Mode Text</a>
-<li><a href="#Setup_Event_List">Setup Event List</a>
 <li><a href="#SIM_Commands">SIM Commands</a>
 </ul><h3><a name="Call_Control_By_SIM">Call Control By SIM</a></h3>
 <p>Some SIMs can control the dialing process to change the way things work.<br/>
@@ -233,20 +232,22 @@ section 6.4.12).</p>
 <p>The SIM toolkit application can request that it be notified when the system<br/>
 is idle or there is user activity.  This features handles <tt>SET UP EVENT LIST</tt><br/>
 (3GPP TS 11.14, section 6.4.16).  The application layer is notified<br/>
-of the event request, and there is an API for sending events, however no Qtopia<br/>
-applications currently send the events.
+of the event request, and there is an API for sending events.
+
+<p>The server intercepts the message from QSimToolkit and then responds to<br/>
+the requested events as they occur. The two main events of interest are<br/>
+IdleScreen and UserActivity, which indicate when the screen is idle, and when the<br/>
+user starts performing some activity again.</p>
+
+<p>Many events, particularly call-related events, are handled internally by the modem<br/>
+and so Qtopia does not have any special handling for them.  If the modem does not<br/>
+handle these events, the modem vendor plug-in is expected to handle them.</p>
 <h3><a name="Setup_Idle_Mode_Text">Set-up Idle Mode Text</a></h3>
 <p>The SIM toolkit application can request that a particular text string be<br/>
 displayed on the phone's home screen whenever the system is idle.  This<br/>
 feature handles <tt>SET UP IDLE MODE TEXT</tt> (3GPP TS 11.14, section 6.4.22).<br/>
 There is an API to send this text string to the application layer but<br/>
 no Qtopia applications currently display the string.
-<h3><a name="Setup_Event_List">Setup Event List</a></h3>
-<p>Setup event list doesn't do anything useful yet.  The server intercepts<br/>
-the message from QSimToolkit and then respond to the requested events<br/>
-as they occur.  The two main events of interest are <tt>IdleScreen</tt> and<br/>
-<tt>UserActivity</tt>, which indicate when the screen is idle, and when the<br/>
-user starts performing some activity again.
 <h3><a name="SIM_Commands">SIM Commands</a></h3>
 <p>The following SIM commands are supported:
 
@@ -331,5 +332,5 @@ user starts performing some activity again.
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div>

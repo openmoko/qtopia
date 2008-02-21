@@ -71,20 +71,14 @@
 <h2>Detailed Description</h2>
 <p>The QImageDocumentSelectorDialog class allows the user to select an image from a list of image documents available on the device.</p>
 <p>QImageDocumentSelectorDialog is a convenience class that presents the <a href="qimagedocumentselector.html">QImageDocumentSelector</a> widget in a dialog.</p>
-<p>The following code uses QImageDocumentSelectorDialog to allow the user to select a wallpaper image from the Qtopia directories:</p>
-<pre>    QContentFilter locations;
-    QStringList qtopiaPaths = Qtopia::installPaths();
-    foreach( QString path, qtopiaPaths ) {
-        locations |= QContentFilter( QContentFilter::Location, path + &quot;pics/wallpaper&quot; );
-    }
+<p>The following code uses QImageDocumentSelectorDialog to allow the user to select a picture taken by the camera:</p>
+<pre>    QImageDocumentSelectorDialog dialog( this );
 
-    QImageDocumentSelectorDialog dialog( this );
-
-    dialog.setFilter( locations );
+    dialog.setFilter( QContentFilter::category( &quot;Camera&quot; ) );
 
     if( QtopiaApplication::execDialog( &amp;dialog ) ) {
         <span class="comment">//</span> Accept
-        QContent wallpaper = dialog.selectedDocument();
+        QContent picture = dialog.selectedDocument();
     } else {
         <span class="comment">//</span> Reject
     }</pre>
@@ -159,6 +153,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

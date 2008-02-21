@@ -29,7 +29,7 @@
 <li><div class="fn"/><b><a href="qxmlstreamattribute.html#dtor.QXmlStreamAttribute">~QXmlStreamAttribute</a></b> ()</li>
 <li><div class="fn"/>bool <b><a href="qxmlstreamattribute.html#isDefault">isDefault</a></b> () const</li>
 <li><div class="fn"/>QStringRef <b><a href="qxmlstreamattribute.html#name">name</a></b> () const</li>
-<li><div class="fn"/>QStringRef <b><a href="qxmlstreamattribute.html#namespaceUrix">namespaceUri</a></b> () const</li>
+<li><div class="fn"/>QStringRef <b><a href="qxmlstreamattribute.html#namespaceUri">namespaceUri</a></b> () const</li>
 <li><div class="fn"/>QStringRef <b><a href="qxmlstreamattribute.html#qualifiedName">qualifiedName</a></b> () const</li>
 <li><div class="fn"/>QStringRef <b><a href="qxmlstreamattribute.html#value">value</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qxmlstreamattribute.html#operator-not-eq">operator!=</a></b> ( const QXmlStreamAttribute &amp; <i>other</i> ) const</li>
@@ -40,7 +40,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QXmlStreamAttribute class represents a single XML attribute</p>
-<p>An attribute consists of an optionally empty <a href="qxmlstreamattribute.html#namespaceUrix">namespaceUri</a>(), a <a href="qxmlstreamattribute.html#name">name</a>(), a <a href="qxmlstreamattribute.html#value">value</a>(), and an <a href="qxmlstreamattribute.html#isDefault">isDefault</a>() attribute.</p>
+<p>An attribute consists of an optionally empty <a href="qxmlstreamattribute.html#namespaceUri">namespaceUri</a>(), a <a href="qxmlstreamattribute.html#name">name</a>(), a <a href="qxmlstreamattribute.html#value">value</a>(), and an <a href="qxmlstreamattribute.html#isDefault">isDefault</a>() attribute.</p>
 <p>The raw XML attribute name is returned as <a href="qxmlstreamattribute.html#qualifiedName">qualifiedName</a>().</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -58,11 +58,11 @@
 <p>Returns true if the parser added this attribute with a default value following an ATTLIST declaration in the DTD; otherwise returns false.</p>
 <h3 class="fn"><a name="name"></a><a href="qstringref.html">QStringRef</a> QXmlStreamAttribute::name () const</h3>
 <p>Returns the attribute's local name.</p>
-<h3 class="fn"><a name="namespaceUrix"></a><a href="qstringref.html">QStringRef</a> QXmlStreamAttribute::namespaceUri () const</h3>
+<h3 class="fn"><a name="namespaceUri"></a><a href="qstringref.html">QStringRef</a> QXmlStreamAttribute::namespaceUri () const</h3>
 <p>Returns the attribute's resolved namespaceUri, or an empty string reference if the attribute does not have a defined namespace.</p>
 <h3 class="fn"><a name="qualifiedName"></a><a href="qstringref.html">QStringRef</a> QXmlStreamAttribute::qualifiedName () const</h3>
 <p>Returns the attribute's qualified name.</p>
-<p>A qualified name is the raw name of an attribute in the XML data. It consists of the namespace prefix, followed by colon, followed by the attribute's local name. Since the namespace prefix is not unique (the same prefix can point to different namespaces and different prefixes can point to the same namespace), you shouldn't use qualifiedName(), but the resolved <a href="qxmlstreamattribute.html#namespaceUrix">namespaceUri</a>() and the attribute's local <a href="qxmlstreamattribute.html#name">name</a>().</p>
+<p>A qualified name is the raw name of an attribute in the XML data. It consists of the namespace prefix, followed by colon, followed by the attribute's local name. Since the namespace prefix is not unique (the same prefix can point to different namespaces and different prefixes can point to the same namespace), you shouldn't use qualifiedName(), but the resolved <a href="qxmlstreamattribute.html#namespaceUri">namespaceUri</a>() and the attribute's local <a href="qxmlstreamattribute.html#name">name</a>().</p>
 <h3 class="fn"><a name="value"></a><a href="qstringref.html">QStringRef</a> QXmlStreamAttribute::value () const</h3>
 <p>Returns the attribute's value.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QXmlStreamAttribute::operator!= ( const QXmlStreamAttribute &amp; <i>other</i> ) const</h3>
@@ -73,8 +73,8 @@
 <p>Compares this attribute with <i>other</i> and returns true if they are equal; otherwise returns false.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

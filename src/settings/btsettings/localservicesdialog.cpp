@@ -32,6 +32,7 @@
 #include <QtopiaItemDelegate>
 #include <QVBoxLayout>
 #include <QMenu>
+#include <QCheckBox>
 
 
 class ServicesModel : public QAbstractListModel
@@ -41,6 +42,7 @@ public:
     ServicesModel(QBluetoothServiceController *serviceController, QObject *parent);
 
     void setSecurityEnabled(const QModelIndex &index, bool enable);
+    bool isSecurityEnabled(const QModelIndex &index);
     QString serviceFromIndex(const QModelIndex &index);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -53,6 +55,9 @@ private slots:
     void serviceStopped(const QString &name);
 
 private:
+    static int defaultRowHeight();
+
+    friend class LocalServicesDialog;
     QBluetoothServiceController *m_serviceController;
     QStringList m_serviceIds;
     QIcon m_lockIcon;
@@ -91,6 +96,13 @@ void ServicesModel::setSecurityEnabled(const QModelIndex &index, bool enable)
     emit dataChanged(index, index);
 }
 
+bool ServicesModel::isSecurityEnabled(const QModelIndex &index)
+{
+    QBluetooth::SecurityOptions security =
+            m_serviceController->securityOptions(serviceFromIndex(index));
+    return ( (security & QBluetooth::Authenticated ) && (security & QBluetooth::Encrypted) );
+}
+
 QString ServicesModel::serviceFromIndex(const QModelIndex &index)
 {
     if (!index.isValid())
@@ -106,6 +118,13 @@ int ServicesModel::rowCount(const QModelIndex &/*parent*/) const
 int ServicesModel::columnCount(const QModelIndex &/*parent*/) const
 {
     return 1;
+}
+
+int ServicesModel::defaultRowHeight()
+{
+    int extent = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+    int margin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameVMargin);
+    return extent + margin*2;
 }
 
 QVariant ServicesModel::data(const QModelIndex &index, int role) const
@@ -140,6 +159,13 @@ QVariant ServicesModel::data(const QModelIndex &index, int role) const
                 return m_lockIcon;
             }
         }
+        case Qt::SizeHintRole:
+        {
+            // ensure additional decoration fits within the row height and
+            // doesn't get cropped
+            int height = defaultRowHeight();
+            return QSize(height, height);
+        }
         default:
             break;
     }
@@ -149,12 +175,16 @@ QVariant ServicesModel::data(const QModelIndex &index, int role) const
 
 Qt::ItemFlags ServicesModel::flags(const QModelIndex &index) const
 {
+    Qt::ItemFlags flags;
     if (m_serviceController->state(m_serviceIds[index.row()]) ==
             QBluetoothServiceController::Starting) {
-        return ( Qt::ItemIsSelectable | Qt::ItemIsUserCheckable );
+        flags = ( Qt::ItemIsSelectable | Qt::ItemIsUserCheckable );
     } else {
-        return ( Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
+        flags = ( Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
     }
+    if (!QApplication::keypadNavigationEnabled())
+        flags ^= Qt::ItemIsSelectable;
+    return flags;
 }
 
 void ServicesModel::serviceStarted(const QString &name, bool error, const QString &)
@@ -190,23 +220,26 @@ LocalServicesDialog::LocalServicesDialog(QWidget *parent, Qt::WFlags)
     : QDialog(parent),
       m_serviceController(new QBluetoothServiceController(this)),
       m_model(new ServicesModel(m_serviceController, this)),
-      m_view(new QListView(this))
+      m_view(new QListView(this)),
+      m_securityAction(0)
 {
     connect(m_view, SIGNAL(activated(QModelIndex)),
             SLOT(activated(QModelIndex)));
 
-    m_securityAction = new QAction(tr("Use secure connections"), this);
-    m_securityAction->setCheckable(true);
-    connect(m_securityAction, SIGNAL(triggered(bool)),
-            this, SLOT(toggleSecurity(bool)));
-    QSoftMenuBar::menuFor(this)->addAction(m_securityAction);
+    if (QApplication::keypadNavigationEnabled()) {
+        m_securityAction = new QAction(tr("Use secure connections"), this);
+        m_securityAction->setCheckable(true);
+        connect(m_securityAction, SIGNAL(triggered(bool)),
+                this, SLOT(toggleCurrentSecurity(bool)));
+        QSoftMenuBar::menuFor(this)->addAction(m_securityAction);
+    }
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(m_view);
     setLayout(layout);
 
     setWindowTitle(tr("My Services"));
-    setObjectName("local-services");
+    setObjectName("services");
 }
 
 LocalServicesDialog::~LocalServicesDialog()
@@ -228,6 +261,11 @@ void LocalServicesDialog::start()
     m_view->setTextElideMode(Qt::ElideRight);
     m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    // if dialog is not maximized, view may not be sized correctly in 
+    // larger resolutions
+    m_view->setMinimumHeight(ServicesModel::defaultRowHeight() * 
+            m_serviceController->services().count());
+
     if (m_model->rowCount() > 0)
         m_view->setCurrentIndex(m_model->index(0, 0));
 
@@ -236,6 +274,57 @@ void LocalServicesDialog::start()
 }
 
 void LocalServicesDialog::activated(const QModelIndex &index)
+{
+    if (QApplication::keypadNavigationEnabled()) {
+        toggleState(index);
+    } else {
+        QString name = m_model->serviceFromIndex(index);
+        if (name.isEmpty())
+            return;
+        QCheckBox *stateCheckBox = new QCheckBox(tr("Enabled"));
+        switch (m_serviceController->state(name)) {
+            case QBluetoothServiceController::NotRunning:
+                stateCheckBox->setChecked(false);
+                break;
+            case QBluetoothServiceController::Starting:
+                stateCheckBox->setChecked(true);
+                stateCheckBox->setEnabled(false);
+                break;
+            case QBluetoothServiceController::Running:
+                stateCheckBox->setChecked(true);
+                break;
+        }
+        bool serviceEnabled = stateCheckBox->isChecked();
+        QCheckBox *securityCheckBox = new QCheckBox(tr("Use secure connections"));
+        bool securityEnabled = m_model->isSecurityEnabled(index);
+        securityCheckBox->setChecked(securityEnabled);
+
+        QDialog d;
+        d.setWindowTitle(name);
+        QVBoxLayout layout;
+        layout.addWidget(stateCheckBox);
+        layout.addWidget(securityCheckBox);
+        d.setLayout(&layout);
+        if (QtopiaApplication::execDialog(&d) == QDialog::Accepted) {
+            if (stateCheckBox->isChecked() != serviceEnabled)
+                toggleState(index);
+            if (securityCheckBox->isChecked() != securityEnabled)
+                m_model->setSecurityEnabled(index, securityCheckBox->isChecked());
+        }
+    }
+}
+
+void LocalServicesDialog::serviceStarted(const QString &name, bool error, const QString &desc)
+{
+    if (error && name == m_lastStartedService) {
+        m_lastStartedService.clear();
+        QMessageBox::warning(this, tr("Service Error"),
+                QString(tr("<P>Unable to start service:") + QString("\r\n"))
+                        + desc);
+    }
+}
+
+void LocalServicesDialog::toggleState(const QModelIndex &index)
 {
     QString name = m_model->serviceFromIndex(index);
     if (name.isEmpty())
@@ -253,33 +342,19 @@ void LocalServicesDialog::activated(const QModelIndex &index)
             m_serviceController->stop(name);
             break;
     }
+    emit m_model->dataChanged(index, index);
 }
 
-void LocalServicesDialog::serviceStarted(const QString &name, bool error, const QString &desc)
-{
-    if (error && name == m_lastStartedService) {
-        m_lastStartedService.clear();
-        QMessageBox::warning(this, tr("Service Error"),
-                QString(tr("<P>Unable to start service:") + QString("\r\n"))
-                        + desc);
-    }
-}
-
-void LocalServicesDialog::toggleSecurity(bool checked)
+void LocalServicesDialog::toggleCurrentSecurity(bool checked)
 {
     m_model->setSecurityEnabled(m_view->currentIndex(), checked);
 }
 
 void LocalServicesDialog::currentChanged(const QModelIndex &current, const QModelIndex &/*previous*/)
 {
-    QString name = m_model->serviceFromIndex(current);
-    QBluetooth::SecurityOptions security = m_serviceController->securityOptions(name);
-    if ( (security & QBluetooth::Authenticated ) &&
-         (security & QBluetooth::Encrypted) ) {
-        m_securityAction->setChecked(true);
-    } else {
-        m_securityAction->setChecked(false);
-    }
+    if (m_securityAction)
+        m_securityAction->setChecked(m_model->isSecurityEnabled(current));
 }
+
 
 #include "localservicesdialog.moc"

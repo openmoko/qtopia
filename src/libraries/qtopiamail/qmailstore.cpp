@@ -730,10 +730,10 @@ int QMailStore::sizeOfMessages(const QMailMessageKey& key) const
 }
 
 /*!
-    Returns the QMailId's of folders in the message store. If \key is not empty 
+    Returns the \l{QMailId}s of folders in the message store. If \a key is not empty 
     only folders matching the parameters set by \a key will be returned, otherwise 
-    all folder id's will be returned.
-    If \a sortKey is not empty, the id's will be sorted by the parameters set 
+    all folder identifiers will be returned.
+    If \a sortKey is not empty, the identifiers will be sorted by the parameters set 
     by \a sortKey.
 */
 
@@ -770,10 +770,10 @@ QMailIdList QMailStore::queryFolders(const QMailFolderKey& key,
 }
 
 /*!
-    Returns the QMailId's of messages in the message store. If \key is not empty 
+    Returns the \l{QMailId}s of messages in the message store. If \a key is not empty 
     only messages matching the parameters set by \a key will be returned, otherwise 
-    all message id's will be returned.
-    If \a sortKey is not empty, the id's will be sorted by the parameters set 
+    all message identifiers will be returned.
+    If \a sortKey is not empty, the identifiers will be sorted by the parameters set 
     by \a sortKey.
 */
 

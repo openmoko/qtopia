@@ -120,7 +120,7 @@ void AlarmView::init()
     mainL->addRow(mAlarmList);
 
     mSnoozeButton = new QPushButton(tr("Snooze"));
-    mainL->addWidget(mSnoozeButton);
+    mainL->addRow(mSnoozeButton);
 
     mSnoozeChoices = new QComboBox();
 
@@ -219,7 +219,8 @@ void AlarmView::snoozeClicked()
             break;
     }
 
-    Qtopia::addAlarm(now.addSecs(snoozedelay), "Calendar", "alarm(QDateTime,int)", (mStartTime.secsTo(now) + snoozedelay) / 60);
+    QDateTime snoozeTime = now.addSecs(snoozedelay);
+    Qtopia::addAlarm(snoozeTime, "Calendar", "alarm(QDateTime,int)", snoozeTime.secsTo(mStartTime) / 60);
 
     emit closeView();
 }

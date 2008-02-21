@@ -1,33 +1,40 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
 ** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://trolltech.com/products/qt/licenses/licensing/opensource/
+** License versions 2.0 or 3.0 as published by the Free Software
+** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file.  Alternatively you may (at
+** your option) use any later version of the GNU General Public
+** License if such license has been publicly approved by Trolltech ASA
+** (or its successors, if any) and the KDE Free Qt Foundation. In
+** addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.1, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
 **
-** If you are unsure which license is appropriate for your use, please
+** Please review the following information to ensure GNU General
+** Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
+** you are unsure which license is appropriate for your use, please
 ** review the following information:
 ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
 ** or contact the sales department at sales@trolltech.com.
 **
-** In addition, as a special exception, Trolltech gives you certain
-** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.0, which can be found at
-** http://www.trolltech.com/products/qt/gplexception/ and in the file
-** GPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Trolltech, as the sole
+** copyright holder for Qt Designer, grants users of the Qt/Eclipse
+** Integration plug-in the right for the Qt/Eclipse Integration to
+** link to functionality provided by Qt Designer and its related
+** libraries.
 **
-** In addition, as a special exception, Trolltech, as the sole copyright
-** holder for Qt Designer, grants users of the Qt/Eclipse Integration
-** plug-in the right for the Qt/Eclipse Integration to link to
-** functionality provided by Qt Designer and its related libraries.
-**
-** Trolltech reserves all rights not expressly granted herein.
+** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
+** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
+** granted herein.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -2230,8 +2237,9 @@ void Configure::displayConfig()
     if (dictionary["EDITION"] == "Trolltech") {
         cout << "Trolltech license file used (" << dictionary["LICENSE FILE"] << ")" << endl;
     } else if (dictionary["EDITION"] == "OpenSource") {
-        cout << "You are licensed to use this software under the terms of the GNU GPL." << endl;
-        cout << "See " << dictionary["LICENSE FILE"] << endl << endl;
+        cout << "You are licensed to use this software under the terms of the GNU GPL version 2 or 3." << endl;
+        cout << "See " << dictionary["LICENSE FILE"] << "2" << endl
+             << " or " << dictionary["LICENSE FILE"] << "3" << endl << endl;
     } else {
         QString l1 = licenseInfo[ "LICENSEE" ];
         QString l2 = licenseInfo[ "LICENSEID" ];
@@ -2617,21 +2625,22 @@ Configure::ProjectType Configure::projectType( const QString& proFileName )
 
 #if !defined(EVAL)
 
-bool Configure::showLicense(const QString &licenseFile)
+bool Configure::showLicense(QString orgLicenseFile)
 {
     if (dictionary["LICENSE_CONFIRMED"] == "yes") {
         cout << "You have already accepted the terms of the license." << endl << endl;
         return true;
     }
 
+    QString licenseFile = orgLicenseFile;
     QString theLicense;
     if (dictionary["EDITION"] == "OpenSource") {
-        theLicense = "GNU General Public License";
+        theLicense = "GNU General Public License (GPL) version 2 or 3";
     } else {
         // the first line of the license file tells us which license it is
         QFile file(licenseFile);
         if (!file.open(QFile::ReadOnly)) {
-            cout << "Failed to load LICENSE file";
+            cout << "Failed to load LICENSE file" << endl;
             return false;
         }
         theLicense = file.readLine().trimmed();
@@ -2641,9 +2650,14 @@ bool Configure::showLicense(const QString &licenseFile)
         char accept = '?';
         cout << "You are licensed to use this software under the terms of" << endl
              << "the " << theLicense << "." << endl
-             << endl
-             << "Type '?' to view the " << theLicense << "." << endl
-             << "Type 'y' to accept this license offer." << endl
+             << endl;
+        if (dictionary["EDITION"] == "OpenSource") {
+            cout << "Type '2' to view the GNU General Public License version 2 (GPLv2)." << endl;
+            cout << "Type '3' to view the GNU General Public License version 3 (GPLv3)." << endl;
+        } else {
+            cout << "Type '?' to view the " << theLicense << "." << endl;
+        }
+        cout << "Type 'y' to accept this license offer." << endl
              << "Type 'n' to decline this license offer." << endl
              << endl
              << "Do you accept the terms of the license?" << endl;
@@ -2655,6 +2669,12 @@ bool Configure::showLicense(const QString &licenseFile)
         } else if (accept == 'n') {
             return false;
         } else {
+            if (dictionary["EDITION"] == "OpenSource") {
+                if (accept == '3')
+                    licenseFile = orgLicenseFile + "3";
+                else
+                    licenseFile = orgLicenseFile + "2";
+            }
             // Get console line height, to fill the screen properly
             int i = 0, screenHeight = 25; // default
             CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
@@ -2667,7 +2687,7 @@ bool Configure::showLicense(const QString &licenseFile)
             // Prompt the license content to the user
             QFile file(licenseFile);
             if (!file.open(QFile::ReadOnly)) {
-                cout << "Failed to load LICENSE file";
+                cout << "Failed to load LICENSE file" << endl;
                 return false;
             }
             QStringList licenseContent = QString(file.readAll()).split('\n');
@@ -2687,7 +2707,7 @@ bool Configure::showLicense(const QString &licenseFile)
 void Configure::readLicense()
 {
     dictionary["LICENSE FILE"] = sourcePath + "/LICENSE.GPL";
-    if (QFile::exists(dictionary["LICENSE FILE"])) {
+    if (QFile::exists(dictionary["LICENSE FILE"] + "2") || QFile::exists(dictionary["LICENSE FILE"] + "3")) {
         cout << endl << "This is the Qt/Windows Open Source Edition." << endl;
         licenseInfo["LICENSEE"] = "Open Source";
         dictionary["EDITION"] = "OpenSource";
@@ -2702,7 +2722,7 @@ void Configure::readLicense()
     }
 #ifndef COMMERCIAL_VERSION
     else {
-        cout << endl << "Cannot find the GPL license file (" << dictionary["LICENSE FILE"] << ")" << endl;
+        cout << endl << "Cannot find the GPL license files!" << endl;
         dictionary["DONE"] = "error";
     }
 #else

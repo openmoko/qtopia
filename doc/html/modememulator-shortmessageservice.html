@@ -20,26 +20,6 @@
 <h1 align="center">Modem Emulator - Short Message Service<br /><span class="subtitle"></span>
 </h1>
 <p>The AT commands in this section are used for accessing the Short Message Service (SMS) subsystem.</p>
-<p><b>AT+CSMP Set Text Mode Parameters</b></p>
-<p>The <tt>AT+CSMP</tt> command sets the additional parameters that are passed in the header of an SMS message when sending messages in text mode (<tt>AT+CMGF=1</tt>).</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CSMP=[&lt;fo&gt;[,&lt;vp&gt;[,&lt;pid&gt;[,&lt;dcs&gt;]]]]</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CSMP?</tt></td><td><tt>+CSMP: 1,167,0,0</tt></td></tr>
-<tr valign="top" class="odd"><td><tt>AT+CSMP=?</tt></td><td><tt>OK</tt></td></tr>
-</table></p>
-<p>This implementation always sends SMS messages with the default GSM values, irrespective of what is set with <tt>AT+CSMP</tt>. Applications should use PDU mode for sending messages with specific header values.</p>
-<p>Conforms with 3GPP TS 27.005.</p>
-<p><b>AT+CSMS Select Message Service</b></p>
-<p>The <tt>AT+CSMS</tt> command selects the short message service to use.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CSMS=&lt;service&gt;</tt></td><td><tt>+CSMS: &lt;mt&gt;,&lt;mo&gt;,&lt;bm&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CSMS?</tt></td><td><tt>+CSMS: &lt;service&gt;,&lt;mt&gt;,&lt;mo&gt;,&lt;bm&gt;</tt></td></tr>
-<tr valign="top" class="odd"><td><tt>AT+CSMS=?</tt></td><td><tt>+CSMS:</tt> (list of supported <tt>&lt;service&gt;</tt>s)</td></tr>
-</table></p>
-<p>This implementation says that it supports service 0 and 1, mobile-terminated messages, mobile-originated messages, and cell broadcast messages, irrespective of the underlying modem's message support. The underlying modem will select the correct service automatically.</p>
-<p>Conforms with 3GPP TS 27.005.</p>
 <p><b>AT+CMGD Delete Message</b></p>
 <p>The <tt>AT+CMGD</tt> command allows deletion of messages from the message store.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -197,6 +177,26 @@
 <tr valign="top" class="odd"><td><tt>AT+CSDH=?</tt></td><td><tt>+CSDH: (0,1)</tt></td></tr>
 </table></p>
 <p>Conforms with 3GPP TS 27.005.</p>
+<p><b>AT+CSMP Set Text Mode Parameters</b></p>
+<p>The <tt>AT+CSMP</tt> command sets the additional parameters that are passed in the header of an SMS message when sending messages in text mode (<tt>AT+CMGF=1</tt>).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CSMP=[&lt;fo&gt;[,&lt;vp&gt;[,&lt;pid&gt;[,&lt;dcs&gt;]]]]</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CSMP?</tt></td><td><tt>+CSMP: 1,167,0,0</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSMP=?</tt></td><td><tt>OK</tt></td></tr>
+</table></p>
+<p>This implementation always sends SMS messages with the default GSM values, irrespective of what is set with <tt>AT+CSMP</tt>. Applications should use PDU mode for sending messages with specific header values.</p>
+<p>Conforms with 3GPP TS 27.005.</p>
+<p><b>AT+CSMS Select Message Service</b></p>
+<p>The <tt>AT+CSMS</tt> command selects the short message service to use.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CSMS=&lt;service&gt;</tt></td><td><tt>+CSMS: &lt;mt&gt;,&lt;mo&gt;,&lt;bm&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CSMS?</tt></td><td><tt>+CSMS: &lt;service&gt;,&lt;mt&gt;,&lt;mo&gt;,&lt;bm&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSMS=?</tt></td><td><tt>+CSMS:</tt> (list of supported <tt>&lt;service&gt;</tt>s)</td></tr>
+</table></p>
+<p>This implementation says that it supports service 0 and 1, mobile-terminated messages, mobile-originated messages, and cell broadcast messages, irrespective of the underlying modem's message support. The underlying modem will select the correct service automatically.</p>
+<p>Conforms with 3GPP TS 27.005.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -207,6 +207,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/installation.qdoc -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/doc/src/installation.qdoc -->
 <head>
   <title>Qt 4.3: Installing Qt/Windows</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -24,17 +24,18 @@
 <ol type="1">
 <li>If you have the commercial edition of Qt, copy the license file from your account on dist.trolltech.com into your home directory (this may be known as the <tt>userprofile</tt> environment variable) and rename it to <tt>.qt-license</tt>. This renaming process must be done using a <i>command prompt</i> on Windows, <b>not</b> with Windows Explorer. For example on Windows 2000, <tt>%USERPROFILE%</tt> should be something like <tt>C:\Documents and Settings\username</tt><p>For the open source version you do not need a license file.</p>
 </li>
-<li>Uncompress the files into the directory you want Qt installed; e.g&#x2e; <tt>C:\Qt\4.3.3</tt>.<p><b>Note:</b> The install path must not contain any spaces.</p>
+<li>Uncompress the files into the directory you want Qt installed; e.g&#x2e; <tt>C:\Qt\4.3.4</tt>.<p><b>Note:</b> The install path must not contain any spaces.</p>
 </li>
 <li>Environment variables<p>In order to build and use Qt, the <tt>PATH</tt> environment variable needs to be extended:</p>
 <pre> PATH               - to locate qmake, moc and other Qt tools</pre>
-<p>This is done by adding <tt>c:\Qt\4.3.3\bin</tt> to the <tt>PATH</tt> variable.</p>
+<p>This is done by adding <tt>c:\Qt\4.3.4\bin</tt> to the <tt>PATH</tt> variable.</p>
 <p>For newer versions of Windows, <tt>PATH</tt> can be extended through the <b>Control Panel|System|Advanced|Environment variables</b> menu and for older versions by editing <tt>c:\autoexec.bat</tt>.</p>
 <p>You may also need to ensure that the locations of your compiler and other build tools are listed in the <tt>PATH</tt> variable. This will depend on your choice of software development environment.</p>
+<p><b>Note</b>: If you don't use the configured shells, which is available in the application menu, in the <a href="opensourceedition.html">Qt Open Source Edition</a>, <tt>configure</tt> requires that <tt>sh.exe</tt> is not in the path or that it is run from <tt>msys</tt>. This also goes for mingw32-make.</p>
 </li>
 <li>Building<p>To configure the Qt library for your machine type:</p>
 <pre> C:
- cd \Qt\4.3.3
+ cd \Qt\4.3.4
  configure</pre>
 <p>Type <tt>configure -help</tt> to get a list of all available options.</p>
 <p>If you have multiple compilers installed, and want to build the Qt library using a specific compiler, you must specify a <tt>qmake</tt> specification. This is done by pasing <tt>-platform &lt;spec&gt;</tt> to configure; for example:</p>
@@ -57,8 +58,8 @@
 <p>We hope you will enjoy using Qt. Good luck!</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

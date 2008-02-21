@@ -24,6 +24,9 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QTimer>
+#include <QMessageBox>
+#include <QSimInfo>
+#include <QDebug>
 
 SimInfo::SimInfo( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -39,11 +42,14 @@ SimInfo::~SimInfo()
 
 void SimInfo::init()
 {
+    simInf = new QSimInfo();
     sms = new QSMSReader( QString(), this );
     pb = new QPhoneBook( QString(), this );
     pbused = -1;
     pbtotal = -1;
 
+    connect( simInf, SIGNAL(removed()), this, SLOT(updateData()));
+    connect( simInf, SIGNAL(inserted()), this, SLOT(updateData()));
     connect( sms, SIGNAL(unreadCountChanged()), this, SLOT(updateData()) );
     connect( sms, SIGNAL(messageCount(int)), this, SLOT(updateData()) );
 
@@ -53,6 +59,8 @@ void SimInfo::init()
 
     QVBoxLayout *vb = new QVBoxLayout( this );
 
+    header = new QLabel(this);
+    vb->addWidget( header);
     smsData = new GraphData();
     smsGraph = new BarGraph( this );
     smsGraph->setFrameStyle( QFrame::Panel | QFrame::Sunken );
@@ -78,37 +86,45 @@ void SimInfo::init()
 
 void SimInfo::updateData()
 {
-    // Update the sms information.
-    int smsUsed = sms->usedMessages();
-    int smsTotal = sms->totalMessages();
-    smsData->clear();
-    if ( smsUsed != -1 && smsTotal != -1 ) {
-        smsData->addItem( tr("SMS Used: %1", "%1=number").arg(smsUsed), smsUsed );
-        smsData->addItem( tr("SMS Free: %1", "%1=number").arg(smsTotal - smsUsed),
+    if(simInf->identity() != QString("")) {
+        // Update the sms information.
+        int smsUsed = sms->usedMessages();
+        int smsTotal = sms->totalMessages();
+        smsData->clear();
+        if ( smsUsed != -1 && smsTotal != -1 ) {
+            smsData->addItem( tr("SMS Used: %1", "%1=number").arg(smsUsed), smsUsed );
+            smsData->addItem( tr("SMS Free: %1", "%1=number").arg(smsTotal - smsUsed),
                           smsTotal - smsUsed );
-    } else {
-        smsData->addItem( tr("SMS Used: Please wait"), 0 );
-        smsData->addItem( tr("SMS Free: Please wait"), 1 );
-    }
-    smsGraph->repaint();
-    smsLegend->update();
-    smsGraph->show();
-    smsLegend->show();
+        } else {
+            smsData->addItem( tr("SMS Used: Please wait"), 0 );
+            smsData->addItem( tr("SMS Free: Please wait"), 1 );
+        }
+        smsGraph->repaint();
+        smsLegend->update();
+        smsGraph->show();
+        smsLegend->show();
 
-    // Update the phone book information.
-    pbData->clear();
-    if ( pbused != -1 && pbtotal != -1 ) {
-        pbData->addItem( tr("Contacts Used: %1", "%1=number").arg(pbused), pbused );
-        pbData->addItem( tr("Contacts Free: %1", "%1=number").arg(pbtotal - pbused),
+        // Update the phone book information.
+        pbData->clear();
+        if ( pbused != -1 && pbtotal != -1 ) {
+            pbData->addItem( tr("Contacts Used: %1", "%1=number").arg(pbused), pbused );
+            pbData->addItem( tr("Contacts Free: %1", "%1=number").arg(pbtotal - pbused),
                           pbtotal - pbused );
+        } else {
+            pbData->addItem( tr("Contacts Used: Please wait"), 0 );
+            pbData->addItem( tr("Contacts Free: Please wait"), 1 );
+        }
+        pbGraph->repaint();
+        pbLegend->update();
+        pbGraph->show();
+        pbLegend->show();
     } else {
-        pbData->addItem( tr("Contacts Used: Please wait"), 0 );
-        pbData->addItem( tr("Contacts Free: Please wait"), 1 );
+        header->setText(tr("Missing SIM"));
+        smsGraph->hide();
+        smsLegend->hide();
+        pbGraph->hide();
+        pbLegend->hide();
     }
-    pbGraph->repaint();
-    pbLegend->update();
-    pbGraph->show();
-    pbLegend->show();
 }
 
 void SimInfo::limits( const QString& store, const QPhoneBookLimits& value )

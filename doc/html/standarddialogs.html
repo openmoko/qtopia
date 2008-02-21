@@ -39,9 +39,9 @@
 <p>The dialog appears whenever the <a href="applicationlauncher.html#applicationTerminated">ApplicationLauncher::applicationTerminated</a>() signal is emitted with the filtered parameter set to false.</p>
 <p>Invoking this method will disable the default crash dialog.</p>
 <h3 class="fn"><a name="disablePowerAlertDialog"></a>void StandardDialogs::disablePowerAlertDialog ()</h3>
-<p>The power alert dialog appears whenever the device battery runs low. The default implementation is a standard <a href="./qmessagebox.html">QMessageBox</a> alerting the user to the low power situation.</p>
-<p>The dialog appears when the battery level is very low or critical. The dialog will be redisplayed every five minutes until the power state improves or the device is placed on a charger. The default implementation uses the <a href="qpowerstatus.html">QPowerStatus</a> to determine this information.</p>
-<p>The period at which the power alert dialog redisplays can be configured by setting the <tt>PowerAlertDialog/DisplayPeriod</tt> value to the period in seconds in the <tt>Trolltech\HardwareAccessories</tt> configuration file. By default this value is 300 seconds (5 minutes). Setting it to 0 disables the power alert dialog.</p>
+<p>The power alert dialog appears whenever the device battery runs low. The default implementation is a standard <a href="./qmessagebox.html">QMessageBox</a> and an audible sound alerting the user to the low power situation.</p>
+<p>The dialog appears when the battery level is very low or critical. The dialog will be redisplayed every five minutes, when very low, or every minute, when critical, until the power state improves or the device is placed on a charger. The default implementation uses the <a href="qpowerstatus.html">QPowerStatus</a> to determine this information.</p>
+<p>The period at which the power alert dialog redisplays can be configured by setting the <tt>PowerAlertDialog/DisplayPeriod</tt> and <tt>PowerAlertDialog/CriticalDisplayPeriod</tt> values to the period in seconds in the <tt>Trolltech/HardwareAccessories</tt> configuration file. If not specified the default values of 300 seconds (5 minutes) and 60 seconds are used for <tt>PowerAlertDialog/DisplayPeriod</tt> and <tt>PowerAlertDialog/CriticalDisplayPeriod</tt> respectively. Setting <tt>PowerAlertDialog/DisplayPeriod</tt> to 0 disables the power alert dialog.</p>
 <p>Invoking this method will disable the power alert dialog.</p>
 <h3 class="fn"><a name="disablePreloadCrashDialog"></a>void StandardDialogs::disablePreloadCrashDialog ()</h3>
 <p>The preload crash dialog appears whenever a preloaded application crashes. The default implementation is a standard <a href="./qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application, and informing them that it has been removed from the preload list.</p>
@@ -62,6 +62,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

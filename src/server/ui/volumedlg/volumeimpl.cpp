@@ -144,7 +144,7 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     setPalette(p);
 
     QVBoxLayout *vBox = new QVBoxLayout(this);
-    QHBoxLayout *hBox = new QHBoxLayout(this);
+    QHBoxLayout *hBox = new QHBoxLayout;
 
     volumeWidget = new VolumeWidget(this);
 
@@ -170,7 +170,7 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     hBox->addWidget(volumeWidget->m);
     hBox->addStretch();
     
-    QHBoxLayout *wp = new QHBoxLayout(this);
+    QHBoxLayout *wp = new QHBoxLayout;
     wp->addWidget(volumeWidget);
     wp->addWidget(volumeLevel);
 

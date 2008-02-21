@@ -255,9 +255,7 @@ void HelpBrowser::init()
     browser->setFrameStyle( QFrame::NoFrame );
 
     browser->installEventFilter( this );
-    QString sheet = "a { color: palette(link) } a:visited { color: palette(link-visted) }";
-    if (browser->document())
-        browser->document()->setDefaultStyleSheet(sheet);
+    browser->ensurePolished();
     browser->setSource( HOMEPAGE );
 }
 

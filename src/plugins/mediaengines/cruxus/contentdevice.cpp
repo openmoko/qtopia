@@ -29,7 +29,6 @@ class ContentDevicePrivate
 public:
     QContent*   content;
     QIODevice*  contentDevice;
-    QMediaPipe* outputPipe;
     QMediaDevice::Info  outputInfo;
 };
 
@@ -47,7 +46,6 @@ ContentDevice::ContentDevice(QString const& filePath):
 
     d->content = new QContent(marker != -1 ? urlStripped : filePath, false);
     d->contentDevice = 0;
-    d->outputPipe = 0;
 
     d->outputInfo.type = QMediaDevice::Info::Raw;
 }

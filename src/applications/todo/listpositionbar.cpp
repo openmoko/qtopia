@@ -23,6 +23,7 @@
 #include <QPainter>
 #include <QIcon>
 #include <QPaintEvent>
+#include <QStyle>
 
 ListPositionBar::ListPositionBar(QWidget *parent)
  : QWidget(parent), mCurrent(0), mMax(0), mShowPrev(false), mShowNext(false)
@@ -38,7 +39,7 @@ ListPositionBar::ListPositionBar(QWidget *parent)
     f.setPointSizeF(ptsize);
     setFont(f);
 
-    mMetric = fontMetrics().height();
+    mMetric = qMax(fontMetrics().height(), style()->pixelMetric(QStyle::PM_ToolBarIconSize));
     setMinimumHeight(mMetric + 2);
 
     mLeftPixmap = QIcon(":icon/left").pixmap(mMetric);
@@ -110,7 +111,6 @@ void ListPositionBar::paintEvent(QPaintEvent *pe)
     QPainter p(this);
 
     p.fillRect(pe->rect(), palette().alternateBase());
-
 
     QRect pixmaprect(0, 2, mMetric,mMetric);
     if (layoutDirection() == Qt::RightToLeft) {

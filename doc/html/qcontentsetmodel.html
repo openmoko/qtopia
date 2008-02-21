@@ -24,7 +24,7 @@
 <li><div class="fn"/>virtual <b><a href="qcontentsetmodel.html#dtor.QContentSetModel">~QContentSetModel</a></b> ()</li>
 <li><div class="fn"/>QContent <b><a href="qcontentsetmodel.html#content">content</a></b> ( uint <i>row</i> ) const</li>
 <li><div class="fn"/>QContent <b><a href="qcontentsetmodel.html#content-2">content</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
-<li><div class="fn"/>QContentId <b><a href="qcontentsetmodel.html#contentId">contentId</a></b> ( uint <i>row</i> ) const</li>
+<li><div class="fn"/>QContentId <b><a href="qcontentsetmodel.html#contentIdx">contentId</a></b> ( uint <i>row</i> ) const</li>
 <li><div class="fn"/>QContentId <b><a href="qcontentsetmodel.html#contentId-2">contentId</a></b> ( const QModelIndex &amp; <i>index</i> ) const</li>
 <li><div class="fn"/>virtual QVariant <b><a href="qcontentsetmodel.html#data">data</a></b> ( const QModelIndex &amp; <i>index</i>, int <i>role</i> = Qt::DisplayRole ) const</li>
 <li><div class="fn"/>QDrmRights::Permissions <b><a href="qcontentsetmodel.html#mandatoryPermissions">mandatoryPermissions</a></b> () const</li>
@@ -83,7 +83,7 @@
 <h3 class="fn"><a name="content-2"></a><a href="qcontent.html">QContent</a> QContentSetModel::content ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the <a href="qcontent.html">QContent</a> for the requested <i>index</i>.</p>
-<h3 class="fn"><a name="contentId"></a><a href="qcontent.html#QContentId-typedef">QContentId</a> QContentSetModel::contentId ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>row</i> ) const</h3>
+<h3 class="fn"><a name="contentIdx"></a><a href="qcontent.html#QContentId-typedef">QContentId</a> QContentSetModel::contentId ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>row</i> ) const</h3>
 <p>Returns the <a href="qcontent.html#QContentId-typedef">QContentId</a> for the requested <i>row</i>. The value returned may be <a href="qcontent.html#InvalidId-var">QContent::InvalidId</a> if the <a href="qcontent.html">QContent</a> has not been committed to the backing store, or there is no associated <a href="qcontentset.html">QContentSet</a> for the model.</p>
 <h3 class="fn"><a name="contentId-2"></a><a href="qcontent.html#QContentId-typedef">QContentId</a> QContentSetModel::contentId ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>index</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
@@ -124,6 +124,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

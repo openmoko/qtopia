@@ -721,6 +721,8 @@ void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::Ava
         QString country = countryForOperatorId( op.id );
         if ( !country.isEmpty() )
             name = name + "\n" + "[ " + country + " ]";
+        else
+            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
         item = new QListWidgetItem( name, m_opList );
         item->setData( Qt::UserRole, name );
         switch ( op.availability ) {
@@ -896,6 +898,8 @@ void PreferredOperatorsDialog::populateList()
             ( "2" + QString::number( resolved.at( i ).id ) );
         if ( !country.isEmpty() )
             name = name + "\n" + "[ " + country + " ]";
+        else
+            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
         QListWidgetItem *item = new QListWidgetItem( name, m_list );
         item->setData( Qt::UserRole, name );
     }
@@ -939,15 +943,14 @@ void PreferredOperatorsDialog::initAddNetworkDlg()
             ( "2" + QString::number( m_operatorNames.at( i ).id ) );
         if ( !country.isEmpty() )
             name = name + "\n" + "[ " + country + " ]";
+        else
+            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
         QListWidgetItem *item = new QListWidgetItem( name, m_addNetworkList, m_operatorNames.at( i ).id );
         item->setData( Qt::UserRole, name );
     }
 
     connect( m_addNetworkList, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(networkSelected(QListWidgetItem*)) );
-
-    connect( m_addNetworkList, SIGNAL(itemActivated(QListWidgetItem*)),
-            m_addNetworkDlg, SLOT(accept()) );
 
     QtopiaApplication::setMenuLike( m_addNetworkDlg, true );
 }
@@ -972,7 +975,7 @@ bool PreferredOperatorsDialog::isPreferred( unsigned int id )
     return false;
 }
 
-// ugly hack to make the Select Position dialog sane.
+// necessary to make the Select Position dialog sane.
 bool PreferredOperatorsDialog::eventFilter(QObject *obj, QEvent *event)
 {
     QSpinBox *spinBox = (QSpinBox*)obj;
@@ -1028,9 +1031,10 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
     } else {
         savedPrefNetOpLoc = -1;
         spinBox.installEventFilter( this );
-        if ( QtopiaApplication::execDialog( &dlg ) && savedPrefNetOpLoc > 0 )
+        if ( QtopiaApplication::execDialog( &dlg ) && savedPrefNetOpLoc > 0 ) {
             oper.index = savedPrefNetOpLoc;
-        else
+            m_addNetworkDlg->accept();
+        } else
             return;
     }
 

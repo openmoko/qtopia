@@ -47,7 +47,7 @@ public:
 
     void setDefaultIntervals();
 
-    virtual void setIntervals(int* a, int size) = 0;
+    virtual void setIntervals(int* a, int size);
     virtual bool save(int level) = 0;
 
     void setBacklight(int bright);

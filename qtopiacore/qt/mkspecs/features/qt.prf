@@ -78,7 +78,7 @@ for(QTPLUG, $$list($$lower($$unique(QTPLUGIN)))) {
           }
        }
 
-    !isEmpty(QT_PLUGINPATH): LIBS += -L$$QT_PLUGINPATH
+    !isEmpty(QT_PLUGINPATH): LIBS *= -L$$QT_PLUGINPATH
     LIBS += $$QT_LINKAGE
 }
 #specific module settings

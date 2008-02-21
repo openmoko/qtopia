@@ -48,6 +48,7 @@ public:
     ~QtopiaDesktopApplication();
 
     void initialize();
+    void initializePlugin( QDPlugin *p );
 
 signals:
     void setConnectionState( int state );

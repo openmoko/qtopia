@@ -435,12 +435,11 @@ E2Incoming::E2Incoming()
     bar()->addButton(but, 0);
 
     QVBoxLayout *l = new QVBoxLayout(this);
-    setLayout(l);
     QLabel * incoming = new QLabel(this);
     incoming->setText("Incoming Call...");
     l->addWidget(incoming);
 
-    QHBoxLayout *h = new QHBoxLayout(this);
+    QHBoxLayout *h = new QHBoxLayout;
     l->addLayout(h);
     image = new QLabel(this);
     h->addWidget(image);

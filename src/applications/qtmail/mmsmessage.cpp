@@ -61,7 +61,7 @@ private:
 
 struct HeaderField {
     quint8 number;
-    char *name;
+    const char *name;
     MMSHeaderCodec::Type type;
 };
 
@@ -95,7 +95,7 @@ static const HeaderField headerFields[] = {
 
 struct ValueMap {
     int number;
-    char *string;
+    const char *string;
 };
 
 static const ValueMap messageTypes[] = {

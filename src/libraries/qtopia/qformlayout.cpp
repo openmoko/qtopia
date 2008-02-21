@@ -271,7 +271,7 @@ static int storageIndexFromLayoutItem(const QFormLayoutPrivate::ItemMatrix &m,
     }
 }
 
-static inline void updateFormLayoutItem(QFormLayoutItem *item, int userVSpacing,
+static void updateFormLayoutItem(QFormLayoutItem *item, int userVSpacing,
                                         QFormLayout::FieldGrowthPolicy fieldGrowthPolicy,
                                         bool fullRow)
 {
@@ -808,6 +808,8 @@ void QFormLayoutPrivate::setupVerticalLayoutData(int width)
         } else {
             vLayouts[0].init(0, 0);
         }
+    } else {
+        vLayouts[0].init(0, 0);
     }
 
     vLayoutCount = vidx;

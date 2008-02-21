@@ -64,19 +64,9 @@ public:
         exportedBackgroundServer()->localInstances.removeAll(parent);
     }
 
-    void primeWallpaper()
-    {
-        QSettings cfg("Trolltech","qpe");
-        cfg.beginGroup("Appearance");
-        wallpaper = cfg.value("BackgroundImage").toString();
-        if(!wallpaper.startsWith('/'))
-            wallpaper = QString(":image/wallpaper/"+wallpaper);
-    }
-
     QExportedBackground *parent;
     QPixmap bg;
     Pixmap rawPixmap;
-    QString wallpaper;
     int screen;
     Atom backgroundAtom;
 
@@ -143,9 +133,7 @@ QExportedBackground::~QExportedBackground()
 
 QPixmap QExportedBackground::wallpaper() const
 {
-    if (d->wallpaper.isEmpty())
-        d->primeWallpaper();
-    return QPixmap(d->wallpaper);
+    return background();
 }
 
 const QPixmap &QExportedBackground::background() const
@@ -228,12 +216,6 @@ void QExportedBackground::sysMessage(const QString& msg,const QByteArray&)
 {
     // backgroundChanged() is not needed here because X11 property
     // notifications are used to advertise changes in the background.
-    if ( msg == "applyStyleSplash()" || msg == "applyStyleNoSplash()" ) {
-        QString oldWallpaper = d->wallpaper;
-        d->primeWallpaper();
-        if(d->wallpaper != oldWallpaper)
-            emit wallpaperChanged();
-    }
 }
 
 void QExportedBackground::getPixmaps()
@@ -288,6 +270,7 @@ void QExportedBackground::getPixmaps()
     // Advertise the background changes.
     emit changed();
     emit changed(background());
+    emit wallpaperChanged();
 }
 
 void QExportedBackground::colorize(QPixmap &dest, const QPixmap &src, const QColor &color)

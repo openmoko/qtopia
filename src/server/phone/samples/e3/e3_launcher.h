@@ -31,7 +31,7 @@
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
 #endif
-#include "phone/themebackground_p.h"
+#include "themebackground_p.h"
 
 class LauncherView;
 class PhoneHeader;

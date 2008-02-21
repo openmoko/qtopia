@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/src/gui/dialogs/qfontdialog.cpp -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/src/gui/dialogs/qfontdialog.cpp -->
 <head>
   <title>Qt 4.3: QFontDialog Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -56,7 +56,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QFontDialog class provides a dialog widget for selecting a font.</p>
-<p>The usual way to use this class is to call one of the static convenience functions, e.g&#x2e; <a href="qfontdialog.html#getFont">getFont</a>().</p>
+<p>A font dialog is created through one of the static <a href="qfontdialog.html#getFont">getFont</a>() functions.</p>
 <p>Examples:</p>
 <pre> bool ok;
  QFont font = QFontDialog::getFont(
@@ -77,7 +77,6 @@
 <p>Executes a modal font dialog and returns a font.</p>
 <p>If the user clicks <b>OK</b>, the selected font is returned. If the user clicks <b>Cancel</b>, the <i>initial</i> font is returned.</p>
 <p>The dialog is constructed with the given <i>parent</i>. <i>caption</i> is shown as the window title of the dialog and <i>initial</i> is the initially selected font. If the <i>ok</i> parameter is not-null, the value it refers to is set to true if the user clicks <b>OK</b>, and set to false if the user clicks <b>Cancel</b>.</p>
-<p>This static function is less flexible than the full <a href="qfontdialog.html">QFontDialog</a> object, but is convenient and easy to use.</p>
 <p>Examples:</p>
 <pre> bool ok;
  QFont font = QFontDialog::getFont(&amp;ok, QFont(&quot;Times&quot;, 12), this);
@@ -105,7 +104,6 @@
 <p>Executes a modal font dialog and returns a font.</p>
 <p>If the user clicks <b>OK</b>, the selected font is returned. If the user clicks <b>Cancel</b>, the Qt default font is returned.</p>
 <p>The dialog is constructed with the given <i>parent</i>. If the <i>ok</i> parameter is not-null, the value it refers to is set to true if the user clicks <b>OK</b>, and false if the user clicks <b>Cancel</b>.</p>
-<p>This static function is less functional than the full <a href="qfontdialog.html">QFontDialog</a> object, but is convenient and easy to use.</p>
 <p>Example:</p>
 <pre> bool ok;
  QFont font = QFontDialog::getFont(&amp;ok, this);
@@ -117,8 +115,8 @@
  }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

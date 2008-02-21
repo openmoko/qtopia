@@ -1,33 +1,40 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
 ** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://trolltech.com/products/qt/licenses/licensing/opensource/
+** License versions 2.0 or 3.0 as published by the Free Software
+** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file.  Alternatively you may (at
+** your option) use any later version of the GNU General Public
+** License if such license has been publicly approved by Trolltech ASA
+** (or its successors, if any) and the KDE Free Qt Foundation. In
+** addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.1, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
 **
-** If you are unsure which license is appropriate for your use, please
+** Please review the following information to ensure GNU General
+** Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
+** you are unsure which license is appropriate for your use, please
 ** review the following information:
 ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
 ** or contact the sales department at sales@trolltech.com.
 **
-** In addition, as a special exception, Trolltech gives you certain
-** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.0, which can be found at
-** http://www.trolltech.com/products/qt/gplexception/ and in the file
-** GPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Trolltech, as the sole
+** copyright holder for Qt Designer, grants users of the Qt/Eclipse
+** Integration plug-in the right for the Qt/Eclipse Integration to
+** link to functionality provided by Qt Designer and its related
+** libraries.
 **
-** In addition, as a special exception, Trolltech, as the sole copyright
-** holder for Qt Designer, grants users of the Qt/Eclipse Integration
-** plug-in the right for the Qt/Eclipse Integration to link to
-** functionality provided by Qt Designer and its related libraries.
-**
-** Trolltech reserves all rights not expressly granted herein.
+** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
+** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
+** granted herein.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -1009,14 +1016,16 @@ OSStatus QWidgetPrivate::qt_widget_event(EventHandlerCallRef er, EventRef event,
                 GetDragMouse(drag, &where, 0);
                 dropWidget = QApplication::widgetAt(QPoint(where.h, where.v));
 
-                if (dropWidget != QDragManager::self()->currentTarget()){
+                if (dropWidget != QDragManager::self()->currentTarget()) {
                     // We have to 'fake' enter and leave events for the shaddowed widgets:
-                    if (QDragManager::self()->currentTarget())
-                        QDragManager::self()->currentTarget()->d_func()->qt_mac_dnd_event(kEventControlDragLeave, drag);
-                    if (dropWidget){
-                        dropWidget->d_func()->qt_mac_dnd_event(kEventControlDragEnter, drag);
-                        dropWidget = 0;
+                    if (ekind == kEventControlDragEnter) {
+                        if (QDragManager::self()->currentTarget())
+                            QDragManager::self()->currentTarget()->d_func()->qt_mac_dnd_event(kEventControlDragLeave, drag);
+                        if (dropWidget) {
+                            dropWidget->d_func()->qt_mac_dnd_event(kEventControlDragEnter, drag);
+                        }
                     }
+                    dropWidget = 0;
                 }
             }
 
@@ -2948,17 +2957,30 @@ void QWidgetPrivate::setModal_sys()
 
     if (modal || primaryWindowModal) {
         if (!qt_mac_menu_buttons_explicitly_set(q->data->window_flags)){
-            if (old_wclass == kDocumentWindowClass || old_wclass == kFloatingWindowClass || old_wclass == kUtilityWindowClass)
+            if (old_wclass == kDocumentWindowClass || old_wclass == kFloatingWindowClass || old_wclass == kUtilityWindowClass){
                 // Only change the class to kMovableModalWindowClass if the no explicit jewels
                 // are set (kMovableModalWindowClass can't contain them), and the current window class
-                // can be converted to modal (according to carbon doc).
+                // can be converted to modal (according to carbon doc). Mind the order of 
+                // HIWindowChangeClass and ChangeWindowAttributes.
                 HIWindowChangeClass(windowRef, kMovableModalWindowClass);
+                quint32 tmpWattr = kWindowCloseBoxAttribute | kWindowHorizontalZoomAttribute;
+                ChangeWindowAttributes(windowRef, tmpWattr, kWindowNoAttributes);
+                ChangeWindowAttributes(windowRef, kWindowNoAttributes, tmpWattr);
+            }
         }
     } else if(windowRef) {
+        if (q->window()->d_func()->topData()->wattr |= kWindowCloseBoxAttribute)
+            ChangeWindowAttributes(windowRef, kWindowCloseBoxAttribute, kWindowNoAttributes);
+        if (q->window()->d_func()->topData()->wattr |= kWindowHorizontalZoomAttribute)
+            ChangeWindowAttributes(windowRef, kWindowHorizontalZoomAttribute, kWindowNoAttributes);
+
         WindowClass newClass = q->window()->d_func()->topData()->wclass;
         if (old_wclass != newClass && newClass != 0)
-            HIWindowChangeClass(windowRef, newClass);
+            HIWindowChangeClass(windowRef, newClass);        
     }
+
+    // Make sure that HIWindowChangeClass didn't remove drag support:
+    SetAutomaticControlDragTrackingEnabledForWindow(windowRef, true);
 }
 
 void QWidgetPrivate::macUpdateHideOnSuspend()

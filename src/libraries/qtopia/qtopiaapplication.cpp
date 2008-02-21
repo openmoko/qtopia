@@ -3021,7 +3021,10 @@ void QtopiaApplication::applyStyle()
 
     val = config.value( QLatin1String("Text_disabled") ).toString();
     if (!val.isEmpty()) {
-        pal.setColor( QPalette::Disabled, QPalette::Text, QColor(val));
+        QColor col(val);
+        int alpha = config.value( QLatin1String("Text_disabled_alpha") , 255).toInt();
+        col.setAlpha(alpha);
+        pal.setColor( QPalette::Disabled, QPalette::Text, col);
     } else {
         pal.setColor( QPalette::Disabled, QPalette::Text,
             pal.color(QPalette::Active, QPalette::Base).dark() );
@@ -3029,10 +3032,24 @@ void QtopiaApplication::applyStyle()
 
     val = config.value( QLatin1String("Foreground_disabled") ).toString();
     if (!val.isEmpty()) {
-        pal.setColor( QPalette::Disabled, QPalette::Foreground, QColor(val));
+        QColor col(val);
+        int alpha = config.value( QLatin1String("Foreground_disabled_alpha") , 255).toInt();
+        col.setAlpha(alpha);
+        pal.setColor( QPalette::Disabled, QPalette::Foreground, col);
     } else {
         pal.setColor( QPalette::Disabled, QPalette::Foreground,
             pal.color(QPalette::Active, QPalette::Background).dark() );
+    }
+
+    val = config.value( QLatin1String("ButtonText_disabled") ).toString();
+    if (!val.isEmpty()) {
+        QColor col(val);
+        int alpha = config.value( QLatin1String("ButtonText_disabled_alpha") , 255).toInt();
+        col.setAlpha(alpha);
+        pal.setColor( QPalette::Disabled, QPalette::ButtonText, col);
+    } else {
+        pal.setColor( QPalette::Disabled, QPalette::ButtonText,
+            pal.color(QPalette::Active, QPalette::Button).darker() );
     }
 
     setPalette( pal );

@@ -1,0 +1,19 @@
+/*!
+
+\changelog 4.3.2
+
+\section1 Overview
+
+This page describes changes to Qtopia Sync Agent 4.3.2.
+
+\list
+\o Fixed an obvious crash bug that somehow made it through our QA process.
+\endlist
+
+\section1 Known issues
+
+\list
+\o Appointments starting and ending at midnight are mis-reported as all day events.
+\endlist
+
+*/

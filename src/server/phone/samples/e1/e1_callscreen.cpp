@@ -42,11 +42,10 @@ E1Callscreen::E1Callscreen(E1Button *b, QWidget *parent)
   m_button(b)
 {
     QVBoxLayout *vbox = new QVBoxLayout(this);
-    setLayout(vbox);
 
     m_state = "Connected";
 
-    QHBoxLayout *dialerLayout = new QHBoxLayout(this);
+    QHBoxLayout *dialerLayout = new QHBoxLayout;
     vbox->addLayout(dialerLayout);
 
     E1Bar *dialerBar = new E1Bar(this);
@@ -59,12 +58,12 @@ E1Callscreen::E1Callscreen(E1Button *b, QWidget *parent)
     dialerLayout->addWidget(dialerBar);
     QObject::connect(dialer, SIGNAL(clicked()), this, SIGNAL(toDialer()));
 
-    QVBoxLayout *buttonLayout = new QVBoxLayout(this);
+    QVBoxLayout *buttonLayout = new QVBoxLayout;
     dialerLayout->addLayout(buttonLayout);
 
     buttonLayout->insertStretch(-1);
 
-    QHBoxLayout *midbox = new QHBoxLayout(this);
+    QHBoxLayout *midbox = new QHBoxLayout;
     buttonLayout->addLayout(midbox);
     nameLabel = new QLabel(this);
     imageLabel = new QLabel(this);
@@ -74,7 +73,7 @@ E1Callscreen::E1Callscreen(E1Button *b, QWidget *parent)
 
     buttonLayout->insertStretch(-1);
 
-    QHBoxLayout *buttonBox = new QHBoxLayout(this);
+    QHBoxLayout *buttonBox = new QHBoxLayout;
     buttonLayout->addLayout(buttonBox);
 
     E1Bar *holdBar = new E1Bar(this);

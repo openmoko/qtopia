@@ -25,7 +25,7 @@
 #include <themedview.h>
 
 #include <QListWidget>
-#include "phonethemeview.h"
+#include "serverthemeview.h"
 #include <QPhoneCall>
 #ifdef QTOPIA_CELL
 #include <QSimControlEvent>

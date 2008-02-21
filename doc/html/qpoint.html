@@ -38,16 +38,16 @@
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
 <ul>
-<li><div class="fn"/>bool <b><a href="qpoint.html#operator-not-eq-12">operator!=</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
-<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2a-10">operator*</a></b> ( const QPoint &amp; <i>point</i>, qreal <i>factor</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpoint.html#operator-not-eq-29">operator!=</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2a-23">operator*</a></b> ( const QPoint &amp; <i>point</i>, qreal <i>factor</i> )</li>
 <li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2a-25">operator*</a></b> ( qreal <i>factor</i>, const QPoint &amp; <i>point</i> )</li>
-<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2b-3">operator+</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
-<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator--3">operator-</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2b-15">operator+</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator--9">operator-</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
 <li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator--11">operator-</a></b> ( const QPoint &amp; <i>point</i> )</li>
 <li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2f">operator/</a></b> ( const QPoint &amp; <i>point</i>, qreal <i>divisor</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpoint.html#operator-lt-lt-53">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPoint &amp; <i>point</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpoint.html#operator-eq-eq-15">operator==</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpoint.html#operator-gt-gt-38">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpoint.html#operator-lt-lt-102">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpoint.html#operator-eq-eq-36">operator==</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpoint.html#operator-gt-gt-55">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPoint &amp; <i>point</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -136,10 +136,10 @@
 <p>See also <a href="qpoint.html#operator-2a-eq">operator*=</a>().</p>
 <hr />
 <h2>Related Non-Members</h2>
-<h3 class="fn"><a name="operator-not-eq-12"></a>bool operator!= ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-not-eq-29"></a>bool operator!= ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> and <i>p2</i> are not equal; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-2a-10"></a>const QPoint operator* ( const QPoint &amp; <i>point</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>factor</i> )</h3>
+<h3 class="fn"><a name="operator-2a-23"></a>const QPoint operator* ( const QPoint &amp; <i>point</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>factor</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a copy of the given <i>point</i> multiplied by the given <i>factor</i>.</p>
 <p>Note that the result is rounded to the nearest integer as points are held as integers. Use <a href="qpointf.html">QPointF</a> for floating point accuracy.</p>
@@ -147,11 +147,11 @@
 <h3 class="fn"><a name="operator-2a-25"></a>const QPoint operator* ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>factor</i>, const QPoint &amp; <i>point</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a copy of the given <i>point</i> multiplied by the given <i>factor</i>.</p>
-<h3 class="fn"><a name="operator-2b-3"></a>const QPoint operator+ ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-2b-15"></a>const QPoint operator+ ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a <a href="qpoint.html">QPoint</a> object that is the sum of the given points, <i>p1</i> and <i>p2</i>; each component is added separately.</p>
 <p>See also <a href="qpoint.html#operator-2b-eq">QPoint::operator+=</a>().</p>
-<h3 class="fn"><a name="operator--3"></a>const QPoint operator- ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator--9"></a>const QPoint operator- ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a <a href="qpoint.html">QPoint</a> object that is formed by subtracting <i>p2</i> from <i>p1</i>; each component is subtracted separately.</p>
 <p>See also <a href="qpoint.html#operator--eq">QPoint::operator-=</a>().</p>
@@ -163,21 +163,21 @@
 <p>Returns the <a href="qpoint.html">QPoint</a> formed by dividing both components of the given <i>point</i> by the given <i>divisor</i>.</p>
 <p>Note that the result is rounded to the nearest integer as points are held as integers. Use <a href="qpointf.html">QPointF</a> for floating point accuracy.</p>
 <p>See also <a href="qpoint.html#operator-2f-eq">QPoint::operator/=</a>().</p>
-<h3 class="fn"><a name="operator-lt-lt-53"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPoint &amp; <i>point</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-102"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPoint &amp; <i>point</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the given <i>point</i> to the given <i>stream</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
-<h3 class="fn"><a name="operator-eq-eq-15"></a>bool operator== ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-36"></a>bool operator== ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> and <i>p2</i> are equal; otherwise returns false.</p>
-<h3 class="fn"><a name="operator-gt-gt-38"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPoint &amp; <i>point</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-55"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPoint &amp; <i>point</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a point from the given <i>stream</i> into the given <i>point</i> and returns a reference to the stream.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

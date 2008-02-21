@@ -39,11 +39,10 @@ E2Dialer::E2Dialer(E2Button *b, QWidget *parent, Qt::WFlags flags)
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(0);
     layout->setMargin(0);
-    setLayout(layout);
 
     m_history = new E2CallHistory(0);
 
-    QHBoxLayout *hlayout = new QHBoxLayout(this);
+    QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addSpacing(3);
     layout->addStretch(10);
     layout->addLayout(hlayout, 2);
@@ -63,12 +62,12 @@ E2Dialer::E2Dialer(E2Button *b, QWidget *parent, Qt::WFlags flags)
     hlayout->addWidget(back);
     hlayout->addSpacing(3);
 
-    QHBoxLayout *csLayout = new QHBoxLayout(this);
+    QHBoxLayout *csLayout = new QHBoxLayout;
     csLayout->setSpacing(0);
     csLayout->setMargin(0);
     layout->addLayout(csLayout);
 
-    QVBoxLayout *csvLayout = new QVBoxLayout(this);
+    QVBoxLayout *csvLayout = new QVBoxLayout;
     csvLayout->setSpacing(0);
     csvLayout->setMargin(0);
     csLayout->addLayout(csvLayout);
@@ -79,11 +78,11 @@ E2Dialer::E2Dialer(E2Button *b, QWidget *parent, Qt::WFlags flags)
                      this, SIGNAL(toCallscreen()));
 
 
-    QVBoxLayout *vgrid = new QVBoxLayout(this);
+    QVBoxLayout *vgrid = new QVBoxLayout;
     csLayout->addStretch(20);
     csLayout->addLayout(vgrid);
     csLayout->addStretch(20);
-    QGridLayout *grid = new QGridLayout(this);
+    QGridLayout *grid = new QGridLayout;
     m_grid = grid;
     grid->setSpacing(10);
     vgrid->addLayout(grid);

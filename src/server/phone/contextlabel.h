@@ -25,7 +25,7 @@
 #include <qtopiaglobal.h>
 #include <themedview.h>
 #include "qtopiainputevents.h"
-#include "phonethemeview.h"
+#include "serverthemeview.h"
 #include "qsoftmenubarprovider.h"
 
 class QTimer;

@@ -47,11 +47,14 @@ protected:
 private slots:
     void updateClock();
     void changeClock( bool );
+    void updateDateFormat();
 
 private:
     QTimer *t;
     bool init;
     bool ampm;
+    QString dateFormat;
+    void getDateFormat();
 };
 
 #endif

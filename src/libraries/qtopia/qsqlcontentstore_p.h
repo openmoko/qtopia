@@ -113,7 +113,9 @@ private:
     QString convertRole( QContent::Role role ) const;
 
     int mimeId( const QString &type, QtopiaDatabaseId dbId );
+    int queryMimeId( const QString &type, QtopiaDatabaseId dbId );
     int locationId( const QString &location, QtopiaDatabaseId dbId );
+    int queryLocationId( const QString &location, QtopiaDatabaseId dbId );
 
     QContent desktopContent( const QString &fileName );
     QContent executableContent( const QString &fileName );

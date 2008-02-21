@@ -96,6 +96,7 @@ void ContactSelectDialog::init()
 
     QtopiaApplication::setMenuLike( this, true );
     setWindowTitle( tr( "Select contact" ) );
+    showMaximized();
 
     actionDeleteNumber = new QAction( QIcon( ":icon/trash" ), tr( "Remove number" ), this );
     actionDeleteAll = new QAction( QIcon( ":icon/trash" ), tr( "Remove all" ), this );
@@ -151,6 +152,7 @@ void ContactSelectDialog::numberFromContacts()
     QContactSelector *dlg = new QContactSelector( false, this );
     dlg->setModal( true );
     dlg->setModel( contactModel );
+    dlg->showMaximized();
     QtopiaApplication::execDialog( dlg );
     if ( dlg->result() && dlg->contactSelected() ) {
         QContact contact = dlg->selectedContact();

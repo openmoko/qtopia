@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xbel>
 <xbel>
- <bookmark icon="remote" href="fish://root@neo:/home/root/Documents" >
+ <bookmark icon="remote" href="fish://root@neo/home/root/Documents" >
   <title>fish://root@neo/</title>
   <info>
    <metadata owner="http://www.kde.org" />

@@ -83,7 +83,6 @@ public:
     QString networkOperator() const;
     QString networkOperatorCountry() const;
     QTelephony::RegistrationState registrationState() const;
-    QString cellLocation() const;
     bool callForwardingEnabled() const;
     bool simToolkitAvailable() const;
     bool cellModemAvailable() const;
@@ -100,6 +99,8 @@ public:
     static QString stateToString(State state);
     static QStringList emergencyNumbers();
 
+    void setCellLocation( const QString &location );
+
 public slots:
     void setPlaneModeEnabled(bool);
     void setSimPin(const QString &pin);
@@ -110,7 +111,6 @@ signals:
     void planeModeEnabledChanged(bool);
     void registrationStateChanged(QTelephony::RegistrationState);
     void networkOperatorChanged(const QString &);
-    void cellLocationChanged(const QString &);
     void stateChanged(CellModemManager::State newState,
                       CellModemManager::State oldState);
     void callForwardingEnabledChanged(bool);
@@ -128,7 +128,6 @@ private slots:
     void forwardingStatus(QCallForwarding::Reason reason,
                           const QList<QCallForwarding::Status>& status);
     void setCallerIdRestriction();
-    void broadcast(const QCBSMessage&);
     void simInserted();
     void simRemoved();
     void simToolkitAvailableChange();

@@ -54,9 +54,8 @@ int fseek_func(void *stream, ogg_int64_t offset, int whence) {
     return -1;
 }
 
-int fclose_func (void *stream) {
-    QMediaDevice *p = (QMediaDevice*)stream;
-    return true;
+int fclose_func (void * /*stream*/) {
+    return 0;
 }
 
 long ftell_func  (void *stream) {

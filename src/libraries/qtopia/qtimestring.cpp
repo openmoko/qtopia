@@ -543,7 +543,7 @@ QString QTimeString::localMD( const QDate &dt, Length len )
   showing year, month, and date.
 
   \list
-    \o \c{QTimeString::Long} - Mon 27 September 2005
+    \o \c{QTimeString::Long} - Monday 27 September 2005
     \o \c{QTimeString::Medium} - 27 Sep 2005
     \o \c{QTimeString::Short} - the same as the medium string
   \endlist

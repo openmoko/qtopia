@@ -219,7 +219,7 @@ void QtopiaDesktopApplication::processArgs( const QStringList &args )
                 "--wait: Delay at startup so that a debugger can attach.\n"
                 "--safe: Force safe mode (No plugins are loaded).\n"
                 "\n";
-            qWarning() << usage;
+            qWarning() << usage.toLocal8Bit().constData();
             ::exit( 2 );
         }
     }
@@ -432,9 +432,7 @@ void QtopiaDesktopApplication::setupPlugins()
     qdPluginManager()->setupPlugins( safeMode );
     foreach ( QDPlugin *plugin, qdPluginManager()->plugins() ) {
         TRACE(QDA) << "QDPlugin::init" << "for plugin" << plugin->displayName();
-        qdPluginManager()->pluginData(plugin)->center = new DesktopWrapper( plugin );
-        plugin->init();
-        plugin->internal_init();
+        initializePlugin( plugin );
     }
     foreach ( QDAppPlugin *p, qdPluginManager()->appPlugins() ) {
         QDAppPluginData *dta = qdPluginManager()->pluginData(p);
@@ -678,5 +676,12 @@ bool QtopiaDesktopApplication::macEventFilter( EventHandlerCallRef, EventRef eve
     return false;
 }
 #endif
+
+void QtopiaDesktopApplication::initializePlugin( QDPlugin *plugin )
+{
+    qdPluginManager()->pluginData(plugin)->center = new DesktopWrapper( plugin );
+    plugin->init();
+    plugin->internal_init();
+}
 
 #include "qtopiadesktopapplication.moc"

@@ -22,8 +22,8 @@
 #include "e1_header.h"
 #include "e1_dialog.h"
 #include "e1_callhistory.h"
-#include "phone/messagecontrol.h"
-#include "phone/themecontrol.h"
+#include "messagecontrol.h"
+#include "themecontrol.h"
 #include "dialercontrol.h"
 #include "windowmanagement.h"
 #include <QSize>

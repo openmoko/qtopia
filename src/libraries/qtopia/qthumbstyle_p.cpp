@@ -425,6 +425,9 @@ int QThumbStyle::pixelMetric(PixelMetric metric, const QStyleOption *option,
     case PM_MenuScrollerHeight:
         ret = d->editableStrut.height();
         break;
+    case PM_TabBarScrollButtonWidth:
+        ret = d->editableStrut.width();
+        break;
     default:
         ret = QPhoneStyle::pixelMetric(metric, option, widget);
     }

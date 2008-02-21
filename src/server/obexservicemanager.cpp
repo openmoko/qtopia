@@ -24,6 +24,7 @@
 #include <qobexpushservice.h>
 #include <qobexpushclient.h>
 #include <qcommdevicesession.h>
+#include <qcommdevicecontroller.h>
 
 #ifdef QTOPIA_BLUETOOTH
 #include <qbluetoothsdprecord.h>
@@ -726,6 +727,11 @@ BluetoothPushingService::BluetoothPushingService(ObexServiceManager *parent)
     QObject::connect(m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
                      this, SLOT(sdapQueryComplete(QBluetoothSdpQueryResult)));
 
+    QBluetoothLocalDeviceManager mgr;
+    QCommDeviceController *controller = new QCommDeviceController(
+            mgr.defaultDevice().toLatin1(), this);
+    QObject::connect(controller, SIGNAL(down()), SLOT(bluetoothDown()));
+
     m_device = 0;
     m_current = 0;
 
@@ -743,6 +749,12 @@ BluetoothPushingService::~BluetoothPushingService()
     delete m_waitWidget;
     delete m_sdap;
     delete m_session;
+}
+
+void BluetoothPushingService::bluetoothDown()
+{
+    // ensure state is reset
+    m_busy = false;
 }
 
 /*!

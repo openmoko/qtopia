@@ -30,6 +30,7 @@ class GraphData;
 class Graph;
 class GraphLegend;
 class QLabel;
+class QSimInfo;
 
 class SimInfo : public QWidget
 {
@@ -47,11 +48,13 @@ private:
     QSMSReader *sms;
     QPhoneBook *pb;
     GraphData *smsData;
+    QLabel *header;
     Graph *smsGraph;
     GraphLegend *smsLegend;
     GraphData *pbData;
     Graph *pbGraph;
     GraphLegend *pbLegend;
+    QSimInfo *simInf;
     int pbused;
     int pbtotal;
 };

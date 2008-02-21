@@ -11,7 +11,13 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Content: Installed Software: Safe Execution Environment<br><small>Functional Description</small></h1><p><strong>Qtopia 4.3.0 provides an expanded version of the Safe Execution Environment for experimental purposes, a more lightweight version is scheduled for the official release</strong>. <p /> The Safe Execution Environment provides a level of security to enable downloading, installing and running third-party native applications; by addressing the risk of compromising the operation of the device, or its data, when running such applications. <p/>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Content: Installed Software: Safe Execution Environment<br><small>Functional Description</small></h1><p>The Safe Execution Environment provides a level of security to enable 
+downloading, installing and running third-party native applications; by 
+addressing the risk of compromising the operation of the device, or its data, 
+when running such applications. <p/> 
+<strong>The Safe Execution Environment for Qtopia 4.3 Final only supports the 
+download and secure execution of games</strong> <p />
+
 <h2>Features</h2>
 <ul><li><a href="#Game_Download">Game Download</a>
 <li><a href="#Safe_Execution_Package_Manager">Safe Execution Package Manager</a>
@@ -22,7 +28,7 @@
 </ul><h3><a name="Game_Download">Game Download</a></h3>
 <p>End-users may safely download and run <b>games</b>.  Here <em>games</em> refers to restricted applications which do not require access to the full range of Qtopia features (such as networking and document access).
 
-<p>These applications will be restricted to</p>
+<p>These applications are restricted to</p>
 <ul>
 	<li>write-only display access</li>
 	<li>a specific location on the file-system</li>
@@ -34,9 +40,9 @@
 <h3><a name="Safe_Execution_Policy_Implementation">Safe Execution Policy Implementation</a></h3>
 <p><h4><a name="ApplicationLevelPolicy"></a>Application Level Policy</h4>
 
-<p>A policy file can be used to regulate the communication between applications and the server that take place along Qtopia IPC.  The policy file consists of a set of domains, each of which consists of a set of request strings.  Every application is associated with a number of domains, this limits the set of requests the application can make.</p>
+<p>A policy file can be used to regulate the communication between applications and the server that take place along Qtopia IPC.  The policy file consists of a set of domains, each of which consists of a set of request strings.  There are currently 2 domains, untrusted and trusted.</p>
 
-<p>Through application policy, requests such as sending an SMS can be allowed for some applications but not others.</p>
+<p>Through application policy,  requests can be allowed for applications in the trusted domain while denied for those in the untrusted domain.</p>
 
 <h4><a name="OSLevelPolicy"></a>OS Level Policy</h4>
 
@@ -65,5 +71,5 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div>

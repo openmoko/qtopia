@@ -87,7 +87,7 @@ public slots:
     void setMessage( const QMailMessage &mail );
     void setText( const QString &txt, const QString &type );
     void clear();
-    void attach( const QContent &lnk, QMailMessage::AttachmentsAction action );
+    void attach( const QContent &lnk, QMailMessage::AttachmentsAction action = QMailMessage::LinkToAttachments );
 
 private:
     GenericComposer *m_composer;

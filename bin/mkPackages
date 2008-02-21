@@ -6,6 +6,10 @@
 # break on errors
 set -e
 
+if [ -n "$1" -a "$1" == "--descriptors" ]; then
+set "." $@ 
+fi
+
 pkg_dir=$1
 test -z $pkg_dir && pkg_dir=.
 

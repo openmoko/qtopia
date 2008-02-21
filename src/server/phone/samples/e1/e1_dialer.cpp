@@ -146,8 +146,6 @@ void E1DialerButton::moveEvent( QMoveEvent* e )
 E1Dialer::E1Dialer( E1Button *b, QWidget* parent, Qt::WFlags f )
     : QWidget( parent, f | Qt::FramelessWindowHint ), m_textButton(b), m_activeCallCount(0)
 {
-    qWarning("E1Dialer::E1Dialer()");
-
     QVBoxLayout* vlayout = new QVBoxLayout( this );
     vlayout->setSpacing( 7 );
     vlayout->setMargin( 7 );

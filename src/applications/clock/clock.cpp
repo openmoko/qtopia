@@ -33,6 +33,7 @@
 #include <qmessagebox.h>
 #include <QDesktopWidget>
 #include <QAnalogClock>
+#include <QSettings>
 
 Clock::Clock(QWidget *parent, Qt::WFlags f)
     : QWidget(parent, f)
@@ -56,11 +57,13 @@ Clock::Clock(QWidget *parent, Qt::WFlags f)
     clockLcd->setFixedHeight((int)( 0.125f*(float)physicalDpiY()));
     QSoftMenuBar::setLabel(clockLcd, Qt::Key_Select, QSoftMenuBar::NoLabel);
     QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
-    date->setText( QTimeString::localYMD( QDate::currentDate(), QTimeString::Long ) );
+
+    getDateFormat();
 
     t = new QTimer( this );
     connect( t, SIGNAL(timeout()), SLOT(updateClock()) );
 
+    connect( qApp, SIGNAL(dateFormatChanged()), SLOT(updateDateFormat()) );
     connect( qApp, SIGNAL(timeChanged()), SLOT(updateClock()) );
     connect( qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock(bool)) );
 
@@ -92,12 +95,22 @@ void Clock::updateClock()
     if (isVisible())
         clockLcd->repaint();
     analogClock->display( QTime::currentTime() );
-    date->setText( QTimeString::localYMD( QDate::currentDate(), QTimeString::Long ) );
+
+    QString df = "dddd "+dateFormat;
+    df.replace(QString("%D"), QString("d"));
+    df.replace(QString("%M"), QString("MMMM"));
+    df.replace(QString("%Y"), QString("yyyy"));
+    df.replace(QString("/"), QString(" "));
+    df.replace(QString("-"), QString(" "));
+    df.replace(QString("."), QString(" "));
+    date->setText( QDateTime::currentDateTime().toString(df) );
+
 }
 
 void Clock::changeClock( bool a )
 {
     ampm = a;
+    getDateFormat();
     updateClock();
 }
 
@@ -112,5 +125,19 @@ void Clock::hideEvent(QHideEvent *e)
 {
     t->stop();
     QWidget::hideEvent(e);
+}
+
+void Clock::updateDateFormat()
+{
+    getDateFormat();
+    updateClock();
+}
+
+void Clock::getDateFormat()
+{
+    QSettings cfg("Trolltech","qpe");
+    cfg.beginGroup( "Date" );
+    dateFormat = cfg.value("DateFormat").toString();
+    if(dateFormat.isEmpty()) dateFormat = "%M/%D/%Y";
 }
 

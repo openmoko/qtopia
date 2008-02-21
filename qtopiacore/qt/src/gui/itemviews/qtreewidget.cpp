@@ -1,33 +1,40 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
+** Copyright (C) 1992-2008 Trolltech ASA. All rights reserved.
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
 **
 ** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://trolltech.com/products/qt/licenses/licensing/opensource/
+** License versions 2.0 or 3.0 as published by the Free Software
+** Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file.  Alternatively you may (at
+** your option) use any later version of the GNU General Public
+** License if such license has been publicly approved by Trolltech ASA
+** (or its successors, if any) and the KDE Free Qt Foundation. In
+** addition, as a special exception, Trolltech gives you certain
+** additional rights. These rights are described in the Trolltech GPL
+** Exception version 1.1, which can be found at
+** http://www.trolltech.com/products/qt/gplexception/ and in the file
+** GPL_EXCEPTION.txt in this package.
 **
-** If you are unsure which license is appropriate for your use, please
+** Please review the following information to ensure GNU General
+** Public Licensing requirements will be met:
+** http://trolltech.com/products/qt/licenses/licensing/opensource/. If
+** you are unsure which license is appropriate for your use, please
 ** review the following information:
 ** http://trolltech.com/products/qt/licenses/licensing/licensingoverview
 ** or contact the sales department at sales@trolltech.com.
 **
-** In addition, as a special exception, Trolltech gives you certain
-** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.0, which can be found at
-** http://www.trolltech.com/products/qt/gplexception/ and in the file
-** GPL_EXCEPTION.txt in this package.
+** In addition, as a special exception, Trolltech, as the sole
+** copyright holder for Qt Designer, grants users of the Qt/Eclipse
+** Integration plug-in the right for the Qt/Eclipse Integration to
+** link to functionality provided by Qt Designer and its related
+** libraries.
 **
-** In addition, as a special exception, Trolltech, as the sole copyright
-** holder for Qt Designer, grants users of the Qt/Eclipse Integration
-** plug-in the right for the Qt/Eclipse Integration to link to
-** functionality provided by Qt Designer and its related libraries.
-**
-** Trolltech reserves all rights not expressly granted herein.
+** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
+** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
+** granted herein.
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -266,7 +273,7 @@ QModelIndex QTreeModel::parent(const QModelIndex &child) const
     if (!child.isValid())
         return QModelIndex();
     QTreeWidgetItem *itm = static_cast<QTreeWidgetItem *>(child.internalPointer());
-    if (!itm)
+    if (!itm || itm == rootItem)
         return QModelIndex();
     QTreeWidgetItem *parent = itm->parent();
     return index(parent, 0);
@@ -563,6 +570,9 @@ void QTreeModel::sort(int column, Qt::SortOrder order)
 void QTreeModel::ensureSorted(int column, Qt::SortOrder order,
                               int start, int end, const QModelIndex &parent)
 {
+    if (isChanging())
+        return;
+
     sortPending = false;
 
     if (column < 0 || column >= columnCount())
@@ -726,7 +736,7 @@ void QTreeModel::itemChanged(QTreeWidgetItem *item)
 
 bool QTreeModel::executePendingSort() const
 {
-    if (sortPending) {
+    if (sortPending && !isChanging()) {
         sortPending = false;
         int column = view()->header()->sortIndicatorSection();
         Qt::SortOrder order = view()->header()->sortIndicatorOrder();
@@ -736,6 +746,12 @@ bool QTreeModel::executePendingSort() const
         return true;
     }
     return false;
+}
+
+bool QTreeModel::isChanging() const
+{
+    Q_D(const QTreeModel);
+    return !d->changes.isEmpty();
 }
 
 /*!
@@ -770,7 +786,8 @@ void QTreeModel::emitDataChanged(QTreeWidgetItem *item, int column)
 
 void QTreeModel::beginInsertItems(QTreeWidgetItem *parent, int row, int count)
 {
-    beginInsertRows(index(parent, 0), row, row + count - 1);
+    QModelIndex par = index(parent, 0);
+    beginInsertRows(par, row, row + count - 1);
 }
 
 void QTreeModel::endInsertItems()
@@ -802,6 +819,9 @@ void QTreeModel::endRemoveItems()
 void QTreeModel::sortItems(QList<QTreeWidgetItem*> *items, int column, Qt::SortOrder order)
 {
     Q_UNUSED(column);
+    if (isChanging())
+        return;
+    
     // store the original order of indexes
     QVector< QPair<QTreeWidgetItem*,int> > sorting(items->count());
     for (int i = 0; i < sorting.count(); ++i) {
@@ -813,6 +833,8 @@ void QTreeModel::sortItems(QList<QTreeWidgetItem*> *items, int column, Qt::SortO
     LessThan compare = (order == Qt::AscendingOrder ? &itemLessThan : &itemGreaterThan);
     qStableSort(sorting.begin(), sorting.end(), compare);
 
+    QModelIndexList fromList;
+    QModelIndexList toList;
     int colCount = columnCount();
     for (int r = 0; r < sorting.count(); ++r) {
         QTreeWidgetItem *item = sorting.at(r).first;
@@ -821,9 +843,11 @@ void QTreeModel::sortItems(QList<QTreeWidgetItem*> *items, int column, Qt::SortO
         for (int c = 0; c < colCount; ++c) {
             QModelIndex from = createIndex(oldRow, c, item);
             QModelIndex to = createIndex(r, c, item);
-            changePersistentIndex(from, to);
+            fromList << from;
+            toList << to;
         }
     }
+    changePersistentIndexList(fromList, toList);
 }
 
 /*!
@@ -1304,7 +1328,6 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidget *view, int type)
         QTreeModel *model = ::qobject_cast<QTreeModel*>(view->model());
         model->rootItem->addChild(this);
         values.reserve(model->headerItem->columnCount());
-        model->executePendingSort();
     }
 }
 
@@ -1332,7 +1355,6 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidget *view, const QStringList &strings, 
         QTreeModel *model = ::qobject_cast<QTreeModel*>(view->model());
         model->rootItem->addChild(this);
         values.reserve(model->headerItem->columnCount());
-        model->executePendingSort();
     }
 }
 
@@ -1358,7 +1380,6 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidget *view, QTreeWidgetItem *after, int 
             int i = model->rootItem->indexOfChild(after) + 1;
             model->rootItem->insertChild(i, this);
             values.reserve(model->headerItem->columnCount());
-            model->executePendingSort();
         }
     }
 }
@@ -1378,12 +1399,6 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidgetItem *parent, int type)
 {
     if (parent)
         parent->addChild(this);
-     if (view) {
-        QTreeModel *model = ::qobject_cast<QTreeModel*>(view->model());
-        if (model) {
-            model->executePendingSort();
-        }
-    }
 }
 
 /*!
@@ -1404,12 +1419,6 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidgetItem *parent, const QStringList &str
         setText(i, strings.at(i));
     if (parent)
         parent->addChild(this);
-     if (view) {
-        QTreeModel *model = ::qobject_cast<QTreeModel*>(view->model());
-        if (model) {
-            model->executePendingSort();
-        }
-    }
 }
 
 /*!
@@ -1431,12 +1440,6 @@ QTreeWidgetItem::QTreeWidgetItem(QTreeWidgetItem *parent, QTreeWidgetItem *after
     if (parent) {
         int i = parent->indexOfChild(after) + 1;
         parent->insertChild(i, this);
-    }
-    if (view) {
-        QTreeModel *model = ::qobject_cast<QTreeModel*>(view->model());
-        if (model) {
-            model->executePendingSort();
-        }
     }
 }
 
@@ -1605,11 +1608,13 @@ void QTreeWidgetItemPrivate::propagateDisabled(QTreeWidgetItem *item)
     while (!parents.isEmpty()) {
         QTreeWidgetItem *parent = parents.pop();
         if (!parent->d->disabled) { // if not explicitly disabled
+            Qt::ItemFlags oldFlags = parent->itemFlags;
             if (enable)
                 parent->itemFlags = parent->itemFlags | Qt::ItemIsEnabled;
             else
                 parent->itemFlags = parent->itemFlags & ~Qt::ItemIsEnabled;
-            parent->itemChanged(); // ### we may want to optimize this
+            if (parent->itemFlags != oldFlags)
+                parent->itemChanged();
         }
 
         for (int i = 0; i < parent->children.count(); ++i) {
@@ -1853,7 +1858,6 @@ void QTreeWidgetItem::insertChild(int index, QTreeWidgetItem *child)
             child->par = this;
         if (view->isSortingEnabled()) {
             // do a delayed sort instead
-            index = children.count(); // append
             model->sortPending = true;
         }
         model->beginInsertItems(this, index, 1);
@@ -2032,6 +2036,8 @@ void QTreeWidgetItem::sortChildren(int column, Qt::SortOrder order, bool climb)
 {
     QTreeModel *model = (view ? ::qobject_cast<QTreeModel*>(view->model()) : 0);
     if (!model)
+        return;
+    if (model->isChanging())
         return;
     model->sortItems(&children, column, order);
     if (climb) {
@@ -2239,15 +2245,8 @@ void QTreeWidgetPrivate::_q_dataChanged(const QModelIndex &topLeft,
 
 void QTreeWidgetPrivate::_q_itemsSorted()
 {
-    // update the internal view items
-    for (int i = 0; i < viewItems.count(); ++i) {
-        const QModelIndex index = viewItems.at(i).index;
-        if (!index.isValid())
-            continue;
-        const QTreeWidgetItem *par = static_cast<QTreeWidgetItem*>(index.internalPointer())->parent();
-        QTreeWidgetItem *itm = par ? par->child(index.row()) : model()->rootItem->child(index.row());
-        viewItems[i].index = model()->createIndexFromItem(index.row(), index.column(), itm);
-    }
+    Q_Q(QTreeWidget);
+    q->doItemsLayout();
 }
 
 /*!

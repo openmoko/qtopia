@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/qpair.qdoc -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/doc/src/qpair.qdoc -->
 <head>
   <title>Qt 4.3: QPair Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -41,14 +41,14 @@
 <h3>Related Non-Members</h3>
 <ul>
 <li><div class="fn"/>QPair&lt;T1, T2&gt; <b><a href="qpair.html#qMakePair">qMakePair</a></b> ( const T1 &amp; <i>value1</i>, const T2 &amp; <i>value2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpair.html#operator-not-eq-39">operator!=</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpair.html#operator-lt-12">operator&lt;</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpair.html#operator-lt-lt-135">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpair.html#operator-lt-eq-9">operator&lt;=</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpair.html#operator-eq-eq-52">operator==</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpair.html#operator-gt-9">operator&gt;</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
-<li><div class="fn"/>bool <b><a href="qpair.html#operator-gt-eq-9">operator&gt;=</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
-<li><div class="fn"/>QDataStream &amp; <b><a href="qpair.html#operator-gt-gt-76">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpair.html#operator-not-eq-23">operator!=</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpair.html#operator-lt-6">operator&lt;</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpair.html#operator-lt-lt-35">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>out</i>, const QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpair.html#operator-lt-eq-6">operator&lt;=</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpair.html#operator-eq-eq-26">operator==</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpair.html#operator-gt-6">operator&gt;</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpair.html#operator-gt-eq-6">operator&gt;=</a></b> ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpair.html#operator-gt-gt-20">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>in</i>, QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -92,44 +92,44 @@
 <pre> QList&lt;QPair&lt;int, double&gt; &gt; list;
  list.append(qMakePair(66, 3.14159));</pre>
 <p>This is equivalent to <a href="qpair.html">QPair</a>&lt;T1, T2&gt;(<i>value1</i>, <i>value2</i>), but usually requires less typing.</p>
-<h3 class="fn"><a name="operator-not-eq-39"></a>bool operator!= ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-not-eq-23"></a>bool operator!= ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> is not equal to <i>p2</i>; otherwise returns false. Two pairs compare as not equal if their <tt>first</tt> data members are not equal or if their <tt>second</tt> data members are not equal.</p>
 <p>This function requires the T1 and T2 types to have an implementation of <tt>operator==()</tt>.</p>
-<h3 class="fn"><a name="operator-lt-12"></a>bool operator&lt; ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-6"></a>bool operator&lt; ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> is less than <i>p2</i>; otherwise returns false. The comparison is done on the <tt>first</tt> members of <i>p1</i> and <i>p2</i>; if they compare equal, the <tt>second</tt> members are compared to break the tie.</p>
 <p>This function requires the T1 and T2 types to have an implementation of <tt>operator&lt;()</tt>.</p>
-<h3 class="fn"><a name="operator-lt-lt-135"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</h3>
+<h3 class="fn"><a name="operator-lt-lt-35"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>out</i>, const QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Writes the pair <i>pair</i> to stream <i>out</i>.</p>
 <p>This function requires the T1 and T2 types to implement <tt>operator&lt;&lt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
-<h3 class="fn"><a name="operator-lt-eq-9"></a>bool operator&lt;= ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-lt-eq-6"></a>bool operator&lt;= ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> is less than or equal to <i>p2</i>; otherwise returns false. The comparison is done on the <tt>first</tt> members of <i>p1</i> and <i>p2</i>; if they compare equal, the <tt>second</tt> members are compared to break the tie.</p>
 <p>This function requires the T1 and T2 types to have an implementation of <tt>operator&lt;()</tt>.</p>
-<h3 class="fn"><a name="operator-eq-eq-52"></a>bool operator== ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-eq-eq-26"></a>bool operator== ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> is equal to <i>p2</i>; otherwise returns false. Two pairs compare equal if their <tt>first</tt> data members compare equal and if their <tt>second</tt> data members compare equal.</p>
 <p>This function requires the T1 and T2 types to have an implementation of <tt>operator==()</tt>.</p>
-<h3 class="fn"><a name="operator-gt-9"></a>bool operator&gt; ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-6"></a>bool operator&gt; ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> is greater than <i>p2</i>; otherwise returns false. The comparison is done on the <tt>first</tt> members of <i>p1</i> and <i>p2</i>; if they compare equal, the <tt>second</tt> members are compared to break the tie.</p>
 <p>This function requires the T1 and T2 types to have an implementation of <tt>operator&lt;()</tt>.</p>
-<h3 class="fn"><a name="operator-gt-eq-9"></a>bool operator&gt;= ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
+<h3 class="fn"><a name="operator-gt-eq-6"></a>bool operator&gt;= ( const QPair&lt;T1, T2&gt; &amp; <i>p1</i>, const QPair&lt;T1, T2&gt; &amp; <i>p2</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns true if <i>p1</i> is greater than or equal to <i>p2</i>; otherwise returns false. The comparison is done on the <tt>first</tt> members of <i>p1</i> and <i>p2</i>; if they compare equal, the <tt>second</tt> members are compared to break the tie.</p>
 <p>This function requires the T1 and T2 types to have an implementation of <tt>operator&lt;()</tt>.</p>
-<h3 class="fn"><a name="operator-gt-gt-76"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</h3>
+<h3 class="fn"><a name="operator-gt-gt-20"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>in</i>, QPair&lt;T1, T2&gt; &amp; <i>pair</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Reads a pair from stream <i>in</i> into <i>pair</i>.</p>
 <p>This function requires the T1 and T2 types to implement <tt>operator&gt;&gt;()</tt>.</p>
 <p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

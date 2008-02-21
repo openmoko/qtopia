@@ -42,10 +42,13 @@
 
 static bool bShowNumber = false;
 static bool bGameWon = false;
+static int gPhysicalDpiX = 0;
 
 FifteenMainWindow::FifteenMainWindow(QWidget *parent, Qt::WFlags fl)
   : QMainWindow( parent, fl )
 {
+    gPhysicalDpiX = this->physicalDpiX();
+
     // random seed
     srand(time(0));
 
@@ -91,6 +94,8 @@ FifteenMainWindow::FifteenMainWindow(QWidget *parent, Qt::WFlags fl)
     menu->addAction( actionLoadImg );
     menu->addAction( actionDeleteImg );
     menu->addAction( actionShowNum );
+
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
 }
 
 void FifteenMainWindow::showNumber()
@@ -250,8 +255,12 @@ void PiecesDelegate::paint(QPainter *p, const QStyleOptionViewItem &o, const QMo
     QVariant variant = i.model()->data(i, Qt::BackgroundColorRole);
     QColor color = variant.value<QColor>();
     QVariant font = i.model()->data(i, Qt::FontRole);
-    if (!font.isNull())
-        p->setFont(font.value<QFont>());
+    if (!font.isNull()) {
+        QFont f = font.value<QFont>();
+        if (gPhysicalDpiX)
+            f.setPointSize((int)(gPhysicalDpiX/4)/8);
+        p->setFont(f);
+    }
 
     // draw cell background
     if(number == 16)
@@ -275,9 +284,9 @@ void PiecesDelegate::paint(QPainter *p, const QStyleOptionViewItem &o, const QMo
         p->drawImage( QPoint( o.rect.x(), o.rect.y() ), img2 );
         if( bShowNumber ) {
             p->setPen(Qt::black);
-            p->drawText(o.rect.x() + 1, o.rect.y() + 1, x2, y2, Qt::AlignLeft | Qt::AlignTop, QString::number(number));
+            p->drawText(o.rect.x() + 1, o.rect.y() + 1, x2, y2, Qt::AlignHCenter | Qt::AlignVCenter, QString::number(number));
             p->setPen(Qt::white);
-            p->drawText(o.rect.x(), o.rect.y(), x2, y2, Qt::AlignLeft | Qt::AlignTop, QString::number(number));
+            p->drawText(o.rect.x(), o.rect.y(), x2, y2, Qt::AlignHCenter | Qt::AlignVCenter, QString::number(number));
         }
         return;
     } else if (number == 16 )

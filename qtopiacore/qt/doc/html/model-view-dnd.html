@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/qt/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.3/doc/src/model-view-programming.qdoc -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/doc/src/model-view-programming.qdoc -->
 <head>
   <title>Qt 4.3: Using Drag and Drop with Item Views</title>
   <link rel="prev" href="model-view-convenience.html" />
@@ -43,14 +43,14 @@
 <p>Although all of the standard items have one or both flags set for drag and drop, you generally need to set various properties in the view itself to take advantage of the built-in support for drag and drop:</p>
 <ul>
 <li>To enable item dragging, set the view's <a href="qabstractitemview.html#dragEnabled-prop">dragEnabled</a> property to <tt>true</tt>.</li>
-<li>To allow the user to drop either internal or external items within the view, set the view's <a href="qwidget.html#acceptDrops-prop">acceptDrops</a> property to <tt>true</tt>.</li>
+<li>To allow the user to drop either internal or external items within the view, set the view's <a href="qabstractscrollarea.html#viewport">viewport()</a>'s <a href="qwidget.html#acceptDrops-prop">acceptDrops</a> property to <tt>true</tt>.</li>
 <li>To show the user where the item currently being dragged will be placed if dropped, set the view's <a href="qabstractitemview.html#showDropIndicator-prop">showDropIndicator</a> property. This provides the user with continuously updating information about item placement within the view.</li>
 </ul>
 <p>For example, we can enable drag and drop in a list widget with the following lines of code:</p>
 <pre> QListWidget *listWidget = new QListWidget(this);
  listWidget-&gt;setSelectionMode(QAbstractItemView::SingleSelection);
  listWidget-&gt;setDragEnabled(true);
- listWidget-&gt;setAcceptDrops(true);
+ listWidget-&gt;viewport()-&gt;setAcceptDrops(true);
  listWidget-&gt;setDropIndicatorShown(true);</pre>
 <p>The result is a list widget which allows the items to be copied around within the view, and even lets the user drag items between views containing the same type of data. In both situations, the items are copied rather than moved.</p>
 <p>To enable the user to move the items around within the view, we must set the list widget's <a href="qabstractitemview.html#dragDropMode-prop">dragDropMode</a>:</p>
@@ -180,8 +180,8 @@
 </p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

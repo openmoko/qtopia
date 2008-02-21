@@ -44,6 +44,13 @@ SOURCES =   \
             drmsession.cpp \
             mediapowercontrol.cpp\
             mediavolumecontrol.cpp
+ 
+contains(DEFINES,QTOPIA_TELEPHONY) {
+    HEADERS += callmonitor.h
+    SOURCES += callmonitor.cpp
+
+    depends(libraries/qtopiaphone)
+}
 
 pkg.desc = Media Server
 pkg.domain = trusted 

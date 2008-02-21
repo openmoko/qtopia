@@ -85,7 +85,7 @@ public slots:
     void setMessage( const QMailMessage &mail );
     void setText( const QString &txt, const QString &type );
     void clear();
-    void attach( const QContent &lnk, QMailMessage::AttachmentsAction );
+    void attach( const QContent &lnk, QMailMessage::AttachmentsAction = QMailMessage::LinkToAttachments );
     void setSignature( const QString &sig );
     void attachmentsChanged();
 

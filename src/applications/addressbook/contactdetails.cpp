@@ -48,7 +48,7 @@
 ContactDetails::ContactDetails( QWidget *parent )
     : QWidget( parent ), mTabs(0), mModel(0)
 {
-    setObjectName("contactdetails");
+    setObjectName("viewing");
 
     QSoftMenuBar::setLabel(this, Qt::Key_Back,
         QSoftMenuBar::Back, QSoftMenuBar::AnyFocus);

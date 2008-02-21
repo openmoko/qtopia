@@ -46,7 +46,7 @@
 </ul>
 </li>
 <li><b>Safe Execution Environment (SXE)</b><ul>
-<li>The SXE domain system has been simplified. The previous set of more than 50 domains has been replaced by two domains: trusted and untrusted. This makes developing an SXE-enabled device significantly easier.</li>
+<li>The SXE domain system has been simplified. The previous set of more than 50 domains has been replaced by two domains: trusted and untrusted. SXE provides a sandbox solution for the secure download and running of games.</li>
 </ul>
 </li>
 </ol>
@@ -66,6 +66,7 @@
 <li>BUG 187460: The user was not audibly notified of an incoming file transfer. Now the device will vibrate and play the message ringtone to alert the user that a file transfer is being received.</li>
 <li>BUG 189837: On touchscreen devices there was no way to backspace an incorrectly entered pairing PIN.</li>
 <li>BUG 196183: In the Bluetooth Settings application, changes to the Visibility timeout value would not be saved unless the user moved to another field before exiting the application.</li>
+<li>BUG 197384: The Bluetooth transmitter could be switched on while Airplane Safe Mode was active by attempting to send a file from the documents list.</li>
 </ul>
 </li>
 <li><b>[Build System}</b><ul>
@@ -144,6 +145,7 @@
 <li>BUG 190490: SMTP authentication against an incoming mail server has been made optional. Previously, this was (incorrectly) mandatory.</li>
 <li>BUG 190492: When connecting to an IMAP server, the username and password were passed as literal strings instead of quoted strings, causing certain special characters to be handled incorrectly.</li>
 <li>BUG 191452: Some customer devices would incorrectly report a &quot;Mail-encoding error&quot; when sending or receiving SMS messages. This was due to shared mmap not working correctly on those devices. The Messages application now avoids this problem by not using shared mmap.</li>
+<li>BUG 197898: When downloading messages via POP, the Messages application would incorrectly indicate to the user that a message had been removed from the server by another user if the server UID was a substring of that of another message.</li>
 </ul>
 </li>
 <li><b>Neo 1973 (ficgta01 device profile)</b><ul>
@@ -248,6 +250,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

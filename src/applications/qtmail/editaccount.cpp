@@ -138,7 +138,7 @@ EditAccount::EditAccount( QWidget* parent, const char* name, Qt::WFlags fl )
     lblSmtpPassword->hide();
     smtpUsernameInput->hide();
     smtpPasswordInput->hide();
-    encryptionCheckBox->hide();
+    encryptionIncoming->hide();
 #else
     authentication->addItem("INCOMING"); // notr
 #endif
@@ -172,7 +172,7 @@ void EditAccount::setAccount(QMailAccount *in, bool newOne)
         authentication->setCurrentIndex(0);
         smtpUsernameInput->setEnabled(false);
         smtpPasswordInput->setEnabled(false);
-    encryptionCheckBox->setChecked(false);
+        encryptionIncoming->setCurrentIndex(0);
 #endif
         setWindowTitle( tr("Create new account", "translation not longer than English") );
 
@@ -218,7 +218,7 @@ void EditAccount::setAccount(QMailAccount *in, bool newOne)
         QMailAccount::AuthType type = authenticationType[authentication->currentIndex()];
         smtpUsernameInput->setEnabled(type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
         smtpPasswordInput->setEnabled(type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
-        encryptionCheckBox->setChecked(account->mailEncryption() != QMailAccount::Encrypt_NONE);
+        encryptionIncoming->setCurrentIndex(static_cast<int>(account->mailEncryption()));
 #endif
     }
 
@@ -393,12 +393,18 @@ void EditAccount::typeChanged(int)
         imapSettings->hide();
         syncCheckBox->hide();
         deleteCheckBox->setChecked( false );
+        
+        if (encryptionIncoming->count() > 2)
+            encryptionIncoming->removeItem(2);
     } else if (accountType->currentText() == "IMAP") {
         syncCheckBox->hide();
         imapSettings->show();
         mailboxButton->setEnabled( account->mailboxes().count() > 0 );
         mailPortInput->setText("143");
         deleteCheckBox->setChecked( true );
+        
+        if (encryptionIncoming->count() < 3)
+            encryptionIncoming->addItem("TLS");
     }
 }
 
@@ -505,10 +511,7 @@ void EditAccount::accept()
     account->setSmtpPassword(smtpPasswordInput->text());
     account->setSmtpAuthentication(authenticationType[authentication->currentIndex()]);
     account->setSmtpEncryption(static_cast<QMailAccount::EncryptType>(encryption->currentIndex()));
-    if(encryptionCheckBox->isChecked())
-        account->setMailEncryption(QMailAccount::Encrypt_SSL);
-    else
-        account->setMailEncryption(QMailAccount::Encrypt_NONE);
+    account->setMailEncryption(static_cast<QMailAccount::EncryptType>(encryptionIncoming->currentIndex()));
 #endif
 
     QDialog::accept();

@@ -20,6 +20,38 @@
 <h1 align="center">Modem Emulator - Identification<br /><span class="subtitle"></span>
 </h1>
 <p>The AT commands in this section are used for retrieving identification information for the modem.</p>
+<p><b>AT+CGMI Read Manufacturer Information</b></p>
+<p>The <tt>AT+CGMI</tt> command is an alias for <tt>AT+GMI</tt>.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CGMI</tt></td><td><tt>&lt;manufacturer&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CGMI=?</tt></td><td></td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CGMM Read Model Information</b></p>
+<p>The <tt>AT+CGMM</tt> command returns information about the model of the phone.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CGMM</tt></td><td><tt>&lt;model&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CGMM=?</tt></td><td></td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CGMR Read Revision Information</b></p>
+<p>The <tt>AT+CGMR</tt> command returns information about the revision of the phone's software.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CGMR</tt></td><td><tt>&lt;revision&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CGMR=?</tt></td><td></td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CGSN Read Product Serial Number</b></p>
+<p>The <tt>AT+CGSN</tt> command returns information about the serial number of the phone. Note: the return value may be a static string for all phones of a type, so it should not be relied upon to be unique.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CGSN</tt></td><td><tt>&lt;sn&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CGSN=?</tt></td><td></td></tr>
+</table></p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><b>ATI Identification Information</b></p>
 <p>The <tt>ATI</tt> command returns identification information about the modem's manufacturer and revision. <tt>ATI0</tt> can also be used for this purpose. All other <tt>ATIn</tt> commands will return an empty string.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -56,38 +88,6 @@
 <tr valign="top" class="odd"><td><tt>AT+GSN</tt></td><td><tt>&lt;sn&gt;</tt></td></tr>
 </table></p>
 <p>Conforms with: Recommendation V.250.</p>
-<p><b>AT+CGMI Read Manufacturer Information</b></p>
-<p>The <tt>AT+CGMI</tt> command is an alias for <tt>AT+GMI</tt>.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CGMI</tt></td><td><tt>&lt;manufacturer&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CGMI=?</tt></td><td></td></tr>
-</table></p>
-<p>Conforms with: 3GPP TS 27.007.</p>
-<p><b>AT+CGMM Read Model Information</b></p>
-<p>The <tt>AT+CGMM</tt> command returns information about the model of the phone.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CGMM</tt></td><td><tt>&lt;model&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CGMM=?</tt></td><td></td></tr>
-</table></p>
-<p>Conforms with: 3GPP TS 27.007.</p>
-<p><b>AT+CGMR Read Revision Information</b></p>
-<p>The <tt>AT+CGMR</tt> command returns information about the revision of the phone's software.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CGMR</tt></td><td><tt>&lt;revision&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CGMR=?</tt></td><td></td></tr>
-</table></p>
-<p>Conforms with: 3GPP TS 27.007.</p>
-<p><b>AT+CGSN Read Product Serial Number</b></p>
-<p>The <tt>AT+CGSN</tt> command returns information about the serial number of the phone. Note: the return value may be a static string for all phones of a type, so it should not be relied upon to be unique.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CGSN</tt></td><td><tt>&lt;sn&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CGSN=?</tt></td><td></td></tr>
-</table></p>
-<p>Conforms with: 3GPP TS 27.007.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -98,6 +98,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

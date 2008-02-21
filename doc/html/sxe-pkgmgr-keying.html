@@ -13,8 +13,8 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Package Keying and Manifest<br /><span class="subtitle"></span>
 </h1>
-<p>There are two control files governing the operation of the SXE with respect to packages and programs.</p>
-<p>All control files for SXE must be writable and are stored in the directory given by <a href="qpackageregistry.html#sxeConfPath">QPackageRegistry::sxeConfPath</a>(). This directory is normally <tt>Qtopia::qtopiaDir() + &quot;etc&quot;</tt> and the <b>File</b> entry in the tables below are relative to this path.</p>
+<p>There are two registry files governing the operation of the SXE with respect to packages and programs.</p>
+<p>All registry files for SXE must be writable and are stored in the directory given by <a href="qpackageregistry.html#sxeConfPath">QPackageRegistry::sxeConfPath</a>(). This directory is normally <tt>Qtopia::qtopiaDir() + &quot;etc&quot;</tt> and the <b>File</b> entry in the tables below are relative to this path.</p>
 <p>The table below summarizes the operations of SXE with respect to these files.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Name</th><th>File</th><th>Runtime Access</th><th>Format</th><th>Function</th></tr></thead>
@@ -31,7 +31,7 @@
 <li>adding new programs to <tt>Keyfile</tt> (<tt>qpe</tt>: read only)</li>
 <li>recording new programs for policy and uninstall (<tt>packagemanager</tt>: read-write)</li>
 <li>several binaries may have the same <tt>progId</tt> (and key)</li>
-<li>one-to-one mapping betw binary file on storage &amp; install_id</li>
+<li>one-to-one mapping between binary file on storage &amp; install_id</li>
 </ul>
 </td></tr>
 <tr valign="top" class="even"><td>Installs</td><td><tt>installs</tt></td><td><tt>packagemanager</tt>, <tt>qpe</tt></td><td>Text file (fields ':' separated, records LF separated):<ul>
@@ -56,8 +56,8 @@
 <h2>Key Propagation</h2>
 <p>In order for keys to work as an authentication mechanism, they must be a shared secret between the process, which is executing a given program, and the server, which is doing the authentication.</p>
 <p>Here <b>shared secret</b> means that no other process can have the key; but both the client and server of the service must have it.</p>
-<p>Acheiving this state is not a trivial problem, but when it is acheived it makes authentication secure, simple and fast. No further lookup is required, since possession of the key guarantees authentication.</p>
-<p>SXE acheives key propagation by relying on the LIDS kernel patch as modified by Trolltech.</p>
+<p>Achieving this state is not a trivial problem, but when it is achieved it makes authentication secure, simple and fast. No further lookup is required, since possession of the key guarantees authentication.</p>
+<p>SXE achieves key propagation by relying on the LIDS kernel patch as modified by Trolltech.</p>
 <p>The client can read its key from <tt>/proc/1234/lids_key</tt> where 1234 is the Unix <tt>pid</tt> of that process. Keys are created in these pseudo files when the process is launched, and the kernel enforces that <b>only the process itself</b> (in this case process pid 1234) can read its own key.</p>
 <p>This technique means that no LIDS rules are required to protect each key, since it is automatically exclusive to the process. Also problems relating to read only file systems are solved.</p>
 <p>The server can read the keys for all processes from <tt>/proc/lids/keys</tt>. This pseudo file is updated by the kernel will the keys, and the device id and inode number of the binary. The pseudo file is protected by a LIDS MAC rule to prevent untrusted processes from reading it.</p>
@@ -99,6 +99,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

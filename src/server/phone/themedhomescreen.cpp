@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include "themedhomescreen.h"
-#include "phonethemeview.h"
+#include "serverthemeview.h"
 #include "themecontrol.h"
 #include "themebackground_p.h"
 #include "homescreenwidgets.h"

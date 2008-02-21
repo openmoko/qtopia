@@ -420,7 +420,8 @@ QString PopClient::getUidl(QString uidl)
 
 QString PopClient::msgPosFromUidl(QString uidl)
 {
-    QStringList list = uidlList.filter(uidl);
+    QRegExp exactUid("\\b" + uidl + "\\b");
+    QStringList list = uidlList.filter(exactUid);
     if ( list.count() != 1 )        //should be only 1 match
         return QString::null;
 
@@ -464,7 +465,8 @@ int PopClient::nextMsgServerPos()
         // if requested mail is not on server, try to get
         // a new mail from the list
         while ( (mPtr != NULL) && (ref.count() == 0) ) {
-            ref = uidlList.filter(*mPtr);
+            QRegExp exactUid("\\b" + *mPtr + "\\b");
+            ref = uidlList.filter(exactUid);
 
             if (ref.count() != 1) {
                 unresolvedUidl.append(*mPtr);

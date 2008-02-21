@@ -20,43 +20,34 @@
 <h1 align="center">Modem Emulator - Call Control<br /><span class="subtitle"></span>
 </h1>
 <p>The AT commands in this section are used for dialing, accepting, and manipulating voice and data calls.</p>
-<p><b>ATA Answer Incoming Call</b></p>
-<p>The <tt>ATA</tt> command answers an incoming voice or data call.</p>
+<p><b>ATD Dial Call</b></p>
+<p>The <tt>ATD</tt> command initiates a dial for a voice or data call.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATA</tt></td><td><ul>
+<tr valign="top" class="odd"><td><tt>ATDdialstring[i][;]</tt></td><td><ul>
 <li><tt>CONNECT [&lt;rate&gt;]</tt>: Data call has connected at <tt>rate</tt>.</li>
 <li><tt>OK</tt>: Voice call has connected.</li>
 <li><tt>NO CARRIER</tt>: Connection could not be established.</li>
+<li><tt>BUSY</tt>: Called party is busy.</li>
 <li><tt>ERROR</tt>: Command issues when already connected.</li>
 </ul>
 </td></tr>
 </table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATH Hangup Call</b></p>
-<p>The <tt>ATH</tt> command hangs up the current connected, dialing, or incoming call. The <tt>AT+CHLD</tt> command is recommended instead for voice calls.</p>
+<p>The command name is followed by a string of digits and control characters, according to the following table:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATH[&lt;n&gt;]</tt></td><td><ul>
-<li><tt>OK</tt></li>
-<li><tt>ERROR</tt></li>
-</ul>
-</td></tr>
+<tr valign="top" class="odd"><td><tt>0-9, *, #, +, A, B, C, D</tt></td><td>Digits to be dialed. In GSM networks, <tt>D</tt> is ignored, in accordance with 3GPP TS 27.007.</td></tr>
+<tr valign="top" class="even"><td><tt>,</tt></td><td>Insert a pause into the dialing sequence.</td></tr>
+<tr valign="top" class="odd"><td><tt>T</tt>, <tt>P</tt></td><td>Select tone or pulse dialing. These are ignored.</td></tr>
+<tr valign="top" class="even"><td><tt>!</tt></td><td>Insert a hook flash into the dialing sequence. This is ignored in GSM networks.</td></tr>
+<tr valign="top" class="odd"><td><tt>W</tt></td><td>Wait for dial tone. This is ignored in GSM networks.</td></tr>
+<tr valign="top" class="even"><td><tt>@</tt></td><td>Wait for quiet answer. This is ignored in GSM networks.</td></tr>
+<tr valign="top" class="odd"><td><tt>;</tt></td><td>This must be last character in the dialing string, and indicates a voice call rather than a data call. The system will issue <tt>OK</tt> and immediately return to command mode.</td></tr>
+<tr valign="top" class="even"><td><tt>i</tt></td><td>Allow the local user's caller ID information to be presented to the called party.</td></tr>
+<tr valign="top" class="odd"><td><tt>I</tt></td><td>Suppress the local user's caller ID information from being presented to the called party.</td></tr>
 </table></p>
-<p>If the parameter <tt>&lt;n&gt;</tt> is present, it must be zero.</p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATO Return to Online Data State</b></p>
-<p>The <tt>ATO</tt> command returns to the online data state if a data call is currently in progress.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATO[&lt;n&gt;]</tt></td><td><ul>
-<li><tt>OK</tt></li>
-<li><tt>ERROR</tt></li>
-</ul>
-</td></tr>
-</table></p>
-<p>The parameter <tt>&lt;n&gt;</tt> is ignored in this implementation. If it is present, it should be zero according to Recommendation V.250.</p>
-<p>Conforms with: Recommendation V.250.</p>
+<p>If the dialing sequence begins with <tt>&gt;</tt>, then the rest of the sequence, up until the semi-colon, is interpreted as a name in a direct-dialing phonebook. This will only work with GSM modems that support the feature. Dialing by explicit number is recommended.</p>
+<p>If the system has been configured with support for VoIP, then VoIP calls can be placed with the <tt>ATD</tt> command by using the full URI of the called party. For example: <tt>ATDsip:fred@jones.com;</tt>.</p>
+<p>Conforms with: Recommendation V.250, 3GPP TS 27.007.</p>
 <p><b>AT+COPN Read Operator Names</b></p>
 <p>This command returns the list of operator names from the MT. Each operator code that has an alphanumeric equivalent in the MT memory shall be returned.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -65,14 +56,6 @@
 <tr valign="top" class="even"><td><tt>AT+COPN=?</tt></td><td></td></tr>
 </table></p>
 <p>Conforms with: 3GPP TS 27.007.</p>
-<p><b>AT+BLDN Bluetooth Last Dialed Number</b></p>
-<p>The <tt>AT+BLDN</tt> command is used by Bluetooth hands-free (HF) devices to request that the last number dialed be re-dialed.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+BLDN</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+BLDN</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
-</table></p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
 <p><b>AT+CBST Select Bearer Service Type</b></p>
 <p>The <tt>AT+CBST</tt> command is used to select the GSM data bearer.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -292,34 +275,51 @@
 </table></p>
 <p>The <tt>&lt;tones&gt;</tt> parameter is a string containing the digits to be sent as DTMF tones. The dual tone frequencies and tone duration parameters from 3GPP TS 27.007 are not supported.</p>
 <p>Conforms with: 3GPP TS 27.007.</p>
-<p><b>ATD Dial Call</b></p>
-<p>The <tt>ATD</tt> command initiates a dial for a voice or data call.</p>
+<p><b>AT+BLDN Bluetooth Last Dialed Number</b></p>
+<p>The <tt>AT+BLDN</tt> command is used by Bluetooth hands-free (HF) devices to request that the last number dialed be re-dialed.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATDdialstring[i][;]</tt></td><td><ul>
+<tr valign="top" class="odd"><td><tt>AT+BLDN</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+BLDN</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
+</table></p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>ATA Answer Incoming Call</b></p>
+<p>The <tt>ATA</tt> command answers an incoming voice or data call.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATA</tt></td><td><ul>
 <li><tt>CONNECT [&lt;rate&gt;]</tt>: Data call has connected at <tt>rate</tt>.</li>
 <li><tt>OK</tt>: Voice call has connected.</li>
 <li><tt>NO CARRIER</tt>: Connection could not be established.</li>
-<li><tt>BUSY</tt>: Called party is busy.</li>
 <li><tt>ERROR</tt>: Command issues when already connected.</li>
 </ul>
 </td></tr>
 </table></p>
-<p>The command name is followed by a string of digits and control characters, according to the following table:</p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATH Hangup Call</b></p>
+<p>The <tt>ATH</tt> command hangs up the current connected, dialing, or incoming call. The <tt>AT+CHLD</tt> command is recommended instead for voice calls.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>0-9, *, #, +, A, B, C, D</tt></td><td>Digits to be dialed. In GSM networks, <tt>D</tt> is ignored, in accordance with 3GPP TS 27.007.</td></tr>
-<tr valign="top" class="even"><td><tt>,</tt></td><td>Insert a pause into the dialing sequence.</td></tr>
-<tr valign="top" class="odd"><td><tt>T</tt>, <tt>P</tt></td><td>Select tone or pulse dialing. These are ignored.</td></tr>
-<tr valign="top" class="even"><td><tt>!</tt></td><td>Insert a hook flash into the dialing sequence. This is ignored in GSM networks.</td></tr>
-<tr valign="top" class="odd"><td><tt>W</tt></td><td>Wait for dial tone. This is ignored in GSM networks.</td></tr>
-<tr valign="top" class="even"><td><tt>@</tt></td><td>Wait for quiet answer. This is ignored in GSM networks.</td></tr>
-<tr valign="top" class="odd"><td><tt>;</tt></td><td>This must be last character in the dialing string, and indicates a voice call rather than a data call. The system will issue <tt>OK</tt> and immediately return to command mode.</td></tr>
-<tr valign="top" class="even"><td><tt>i</tt></td><td>Allow the local user's caller ID information to be presented to the called party.</td></tr>
-<tr valign="top" class="odd"><td><tt>I</tt></td><td>Suppress the local user's caller ID information from being presented to the called party.</td></tr>
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATH[&lt;n&gt;]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>ERROR</tt></li>
+</ul>
+</td></tr>
 </table></p>
-<p>If the dialing sequence begins with <tt>&gt;</tt>, then the rest of the sequence, up until the semi-colon, is interpreted as a name in a direct-dialing phonebook. This will only work with GSM modems that support the feature. Dialing by explicit number is recommended.</p>
-<p>If the system has been configured with support for VoIP, then VoIP calls can be placed with the <tt>ATD</tt> command by using the full URI of the called party. For example: <tt>ATDsip:fred@jones.com;</tt>.</p>
-<p>Conforms with: Recommendation V.250, 3GPP TS 27.007.</p>
+<p>If the parameter <tt>&lt;n&gt;</tt> is present, it must be zero.</p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATO Return to Online Data State</b></p>
+<p>The <tt>ATO</tt> command returns to the online data state if a data call is currently in progress.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATO[&lt;n&gt;]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>ERROR</tt></li>
+</ul>
+</td></tr>
+</table></p>
+<p>The parameter <tt>&lt;n&gt;</tt> is ignored in this implementation. If it is present, it should be zero according to Recommendation V.250.</p>
+<p>Conforms with: Recommendation V.250.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -330,6 +330,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

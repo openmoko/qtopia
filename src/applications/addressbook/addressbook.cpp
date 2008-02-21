@@ -2844,6 +2844,7 @@ void ContactsService::createNewContact(const QString& phoneNumber)
 void ContactsService::showContact(const QUniqueId& uid)
 {
     parent->showJustItem(uid);
+    parent->raise();
 }
 
 /*!

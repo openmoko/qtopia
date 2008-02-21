@@ -394,15 +394,37 @@ protected:
         p.setRenderHint(QPainter::Antialiasing);
         if (widget && (widget->hasEditFocus() || qobject_cast<QGroupBox*>(widget))) {
             if (widget->width() < width() && widget->height() < height()) {
-                QPainterPath rectPath;
-                rectPath.addRoundRect(opt.rect, 800/opt.rect.width(), 800/opt.rect.height());
-                QPainterPath clipPath;
                 QRect wgeom = widget->geometry();
-                if (QGroupBox *gb = qobject_cast<QGroupBox*>(widget)) {
-                    if (gb->isCheckable()) {
-                        QFontMetrics fm(p.font());
-                        wgeom.setTop(wgeom.top() + fm.height());
-                    }
+                QPainterPath rectPath;
+                QPainterPath clipPath;
+                QGroupBox *gb = qobject_cast<QGroupBox*>(widget);
+                if (gb && gb->isCheckable()) {
+                    //put bounds around frame rather than frame and title
+                    QStyleOptionGroupBox opt;
+                    opt.initFrom(gb);
+                    opt.text = gb->title();
+                    if (gb->isChecked())
+                        opt.subControls |= QStyle::SC_GroupBoxCheckBox;
+                    QRect frame = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxFrame, gb);
+                    wgeom.setTop(wgeom.top() + frame.y());
+                    
+                    int sp = 0;
+                    if (widget->parentWidget() && widget->parentWidget()->layout())
+                        sp = widget->parentWidget()->layout()->spacing();
+                    frame.adjust(0, 0, sp, sp);
+                    rectPath.addRoundRect(frame, 800/frame.width(), 800/frame.height());
+                    
+                    //put highlight around checkbox and title as well
+                    QRect checkRect = style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxLabel, gb);
+                    checkRect = checkRect.united(style()->subControlRect(QStyle::CC_GroupBox, &opt, QStyle::SC_GroupBoxCheckBox, gb));
+                    checkRect.adjust(0,0,sp,sp);
+                    p.drawRoundRect(checkRect, 800/checkRect.width(), 800/checkRect.height());
+                    
+                    QRegion region(this->rect());
+                    region -= QRegion(checkRect);
+                    p.setClipRegion(region);
+                } else {
+                    rectPath.addRoundRect(opt.rect, 800/opt.rect.width(), 800/opt.rect.height());
                 }
                 clipPath.addRoundRect(wgeom.translated(-geometry().topLeft()), 800/wgeom.width(), 800/wgeom.height());
                 p.drawPath(rectPath.subtracted(clipPath));
@@ -643,9 +665,29 @@ bool QPhoneStylePrivate::eventFilter(QObject *o, QEvent *e)
         }
     }
 
-    if(e->type() == QEvent::Resize && qobject_cast<QScrollArea*>(o) && QApplication::focusWidget())
+    if(e->type() == QEvent::Resize)
     {
-        focusVisibilityTimer.start(0, this);
+        if (qobject_cast<QMenu*>(wgt)) {
+            //TODO: can we do a better check and make a more accurate mask?
+            QRegion reg(wgt->rect());
+            if (QApplication::desktop()->width() < 240) {
+                reg -= QRegion(QRect(0, 0, 1, 1));
+                reg -= QRegion(QRect(wgt->rect().right(), 0, 1, 1));
+                reg -= QRegion(QRect(0, wgt->rect().bottom(), 1, 1));
+                reg -= QRegion(QRect(wgt->rect().right(), wgt->rect().bottom(), 1, 1));
+            } else {
+                reg -= QRegion(QRect(0, 0, 2, 1));
+                reg -= QRegion(QRect(wgt->rect().right()-1, 0, 2, 1));
+                reg -= QRegion(QRect(0, wgt->rect().bottom(), 2, 1));
+                reg -= QRegion(QRect(wgt->rect().right()-1, wgt->rect().bottom(), 2, 1));
+                reg -= QRegion(QRect(0, 1, 1, 1));
+                reg -= QRegion(QRect(wgt->rect().right(), 1, 1, 1));
+                reg -= QRegion(QRect(0, wgt->rect().bottom()-1, 1, 1));
+                reg -= QRegion(QRect(wgt->rect().right(), wgt->rect().bottom()-1, 1, 1));
+            }
+            wgt->setMask(reg);
+        } else if (qobject_cast<QScrollArea*>(o) && QApplication::focusWidget())
+            focusVisibilityTimer.start(0, this);
     }
 
     return false;
@@ -1589,6 +1631,22 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
 
         QColor bg = opt->palette.color(!enabled ? QPalette::Base : 
                 (focus && !Qtopia::mousePreferred()) ? QPalette::Highlight : QPalette::Button);
+        if (widget && qobject_cast<QTabBar*>(widget->parentWidget())) {
+            if (enabled)
+                bg.setAlpha(255);
+            else {
+                QColor windowCol = opt->palette.color(QPalette::Window);
+                windowCol.setAlpha(255);
+                QBrush brush(windowCol);
+#ifdef QTOPIA_ENABLE_GLOBAL_BACKGROUNDS
+                brush = QBrush(windowCol, d->bgExport->background());
+                p->setBrushOrigin(-widget->mapToGlobal(QPoint(0,0)));
+#endif
+                p->setPen(Qt::NoPen);
+                p->setBrush(brush);
+                drawRoundRect(p, r, 10, 10);
+            }
+        }
         if (pressed)
             bg = bg.darker(130);
         QLinearGradient bgg(r.x(), r.y(), r.x(), r.bottom());
@@ -1658,7 +1716,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
         break;
     case PE_FrameTabWidget:
         if (const QStyleOptionTabWidgetFrame *twf = qstyleoption_cast<const QStyleOptionTabWidgetFrame *>(opt)) {
-            p->setPen(opt->palette.mid().color());
+            p->setPen(opt->palette.light().color());
             p->drawLine(twf->rect.left(),twf->rect.top(),twf->rect.right(),twf->rect.top());
             if (const QTabWidget *tw = qobject_cast<const QTabWidget*>(widget)) {
                 int current = tw->currentIndex();
@@ -1957,6 +2015,30 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
     case PE_FrameGroupBox: {
         p->setBrush(opt->palette.base());
         p->setPen(opt->palette.mid().color());
+        if (opt->state & State_HasFocus && styleHint((QStyle::StyleHint)SH_ExtendedFocusHighlight, opt, widget)) {
+            //don't fill area under highlight
+            const QGroupBox *gb = qobject_cast<const QGroupBox*>(widget);
+            if (gb && gb->isCheckable()) {
+                QStyleOptionGroupBox gbopt;
+                gbopt.initFrom(gb);
+                gbopt.text = gb->title();
+                if (gb->isChecked())
+                    gbopt.subControls |= QStyle::SC_GroupBoxCheckBox;
+
+                int sp = 0;
+                if (widget->parentWidget() && widget->parentWidget()->layout())
+                    sp = widget->parentWidget()->layout()->spacing();
+
+                QRect checkRect = subControlRect(QStyle::CC_GroupBox, &gbopt, QStyle::SC_GroupBoxLabel, gb);
+                checkRect = checkRect.united(subControlRect(QStyle::CC_GroupBox, &gbopt, QStyle::SC_GroupBoxCheckBox, gb));
+                checkRect.adjust(-sp/2,0,sp/2,sp/2);
+
+                //TODO: fix noise in corners (use modified painter path rather than clip region?)
+                QRegion region(opt->rect);
+                region -= QRegion(checkRect);
+                p->setClipRegion(region);
+            }
+        }
         QRect r = opt->rect;
         r.adjust(0,0,-1,-1);
         drawRoundRect(p, r, 8, 8);
@@ -2506,24 +2588,26 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
 #endif
                     p->setBrushOrigin(-widget->mapToGlobal(QPoint(0,0)));
                     p->setBrush(pal.window());
+                    p->setPen(opt->palette.color(QPalette::Light));
                 } else {
-                    bg.setAlpha(220);
+                    bg.setAlpha(204);
                     QLinearGradient bgg(r.x(), r.y(), r.right(), r.bottom());
-                    bgg.setColorAt(0.0f, bg.lighter(120));
+                    bgg.setColorAt(0.0f, bg.darker(120));
                     bgg.setColorAt(0.4f, bg);
                     p->setBrush(bgg);
+                    bg.setAlpha(255);
+                    p->setPen(bg.darker(120));
                 }
+
                 //TODO: cache gradient
-                
-                p->setPen(bg.darker(120));
                 p->setRenderHint(QPainter::Antialiasing);
                 
                 QPainterPath path;
-                path.moveTo(r.left(), selected ? r.bottom() + 1 : r.bottom());
+                path.moveTo(r.left(), selected ? r.bottom() + 1 : r.bottom()-1);
                 path.lineTo(r.left(), r.top()+5);
                 path.arcTo(r.left(), r.y(), 10, 10,  180, -90);
                 path.lineTo(r.right()-20, r.y());
-                path.quadTo(r.right()-5, r.y(), r.right(), selected ? r.bottom() + 1 : r.bottom());
+                path.quadTo(r.right()-5, r.y(), r.right(), selected ? r.bottom() + 1 : r.bottom()-1);
                 p->drawPath(path);
             }
             
@@ -2757,7 +2841,6 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 if (cmb->state & State_HasFocus && !Qtopia::mousePreferred()) {
                     p->setPen(cmb->palette.highlightedText().color());
                     p->setBackground(cmb->palette.highlight());
-
                 } else {
                     p->setPen(cmb->palette.text().color());
                     p->setBackground(cmb->palette.background());
@@ -3164,29 +3247,7 @@ bool QPhoneStyle::event(QEvent *e)
 void QPhoneStyle::drawItemText(QPainter *painter, const QRect &rect, int alignment, const QPalette &pal,
                           bool enabled, const QString& text, QPalette::ColorRole textRole) const
 {
-    if (text.isEmpty())
-        return;
-    QPen savedPen;
-    if (textRole != QPalette::NoRole) {
-        savedPen = painter->pen();
-        painter->setPen(QPen(pal.brush(textRole), savedPen.widthF()));
-    }
-    if (!enabled) {
-        if (styleHint(SH_DitherDisabledText)) {
-            painter->drawText(rect, alignment, text);
-            painter->fillRect(painter->boundingRect(rect, alignment, text), QBrush(painter->background().color(), Qt::Dense5Pattern));
-            return;
-        } else if (styleHint(SH_EtchDisabledText) && textRole != QPalette::NoRole) {
-            QColor c = pal.color(textRole);
-            c.setAlpha(c.alpha()*1/2);
-            QPen pen(c);
-            pen.setWidthF(savedPen.widthF());
-            painter->setPen(c);
-        }
-    }
-    painter->drawText(rect, alignment, text);
-    if (textRole != QPalette::NoRole)
-        painter->setPen(savedPen);
+    QtopiaStyle::drawItemText(painter, rect, alignment, pal, enabled, text, textRole);
 }
 
 /*!
@@ -3238,6 +3299,9 @@ int QPhoneStyle::styleHint(StyleHint stylehint, const QStyleOption *option,
             ret = gConfig()->value( "Style/FullWidthMenu", 0 ).toInt();
             break;
         case SH_ScrollbarLineStepButtons:
+            ret = 0;
+            break;
+        case SH_EtchDisabledText:
             ret = 0;
             break;
         default:

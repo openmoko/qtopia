@@ -715,6 +715,8 @@ sub makeMakefile
 
     # The "regular" and "redirect" targets
     for my $target ( @targets ) {
+        # Make clean is implemented specially when fastmake is used
+        next if ( $fastmake && $target eq "clean" || $target eq "distclean" );
         $contents .= "$target: $makefile".$PRINT_DIR;
         if ( $$CONFIG{syncqtopia} && $fastmake && $target =~ /^(first_)?syncqtopia$/ ) {
             $contents =~ s/\n\t$//;
@@ -730,6 +732,17 @@ sub makeMakefile
             $contents .= $BUILD;
         }
         $contents .= "\n";
+    }
+
+    # Make clean is implemented specially when fastmake is used
+    if ( $fastmake ) {
+        for my $clean ( "clean", "distclean" ) {
+            $contents .= "$clean:\n".
+                         "\t\@echo \"\"\n".
+                         "\t\@echo \"You cannot run make $clean immediately after running configure.\"\n".
+                         "\t\@echo \"If you want to perform a clean build you should pass -clean to configure.\"\n".
+                         "\t\@echo \"\"\n";
+        }
     }
 
     # The "loud" target, which removes the hiding of compiler command lines caused by -silent

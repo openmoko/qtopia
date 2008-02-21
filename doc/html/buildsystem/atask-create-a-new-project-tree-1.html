@@ -26,14 +26,13 @@
 <pre>    PROJECTS=\
         src/libraries/mylib\
         src/applications/myapp</pre>
-<p>We want test cases that build after the main project so we rely on some build system tricks. The first is to force only 2 directories to build from the top of the tree. Put this in <tt>projects.pro</tt>.</p>
+<p>To build all of the projects we need this in <tt>projecst.pro</tt>.</p>
 <pre>    qtopia_project(subdirs)
-    CONFIG+=ordered
-    SUBDIRS=src tests</pre>
-<p>Then we need this in <tt>src/src.pro</tt>.</p>
+    SUBDIRS=$$PROJECTS</pre>
+<p>To enable building part of the tree we have stub projects like this.</p>
 <pre>    qtopia_project(subdirs)</pre>
 <p>The projects to build come from <tt>projects.pri</tt>.</p>
-<p>Finally we want to build all test cases without having to list them so put this into tests/tests.pro.</p>
+<p>There are test cases for mylib. They are placed under <tt>mylib/tests</tt> and a special <tt>tests.pro</tt> ensures they are all executed.</p>
 <pre>    qtopia_project(subdirs)
     CONFIG+=build_all_dirs</pre>
 <p>See also <a href="advancedtasks.html">Advanced Tasks</a>.</p>

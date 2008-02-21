@@ -137,11 +137,20 @@ public:
     QContent lookup( QContentId contentId );
     void cache( const QContent &content );
     void remove( QContentId contentId );
+    void clear();
+
+    void cacheMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType, int key );
+    void cacheLocationKey( QtopiaDatabaseId databaseId, const QString &location, int key );
+
+    int lookupMimeTypeKey( QtopiaDatabaseId databaseId, const QString &mimeType );
+    int lookupLocationKey( QtopiaDatabaseId databaseId, const QString &location );
 
     static QContentCache *instance();
 
 private:
     QCache< QContentId, QContent > m_cache;
+    QCache< QPair<QString, QtopiaDatabaseId>, int> m_mimeIdCache;
+    QCache< QPair<QString, QtopiaDatabaseId>, int> m_locationIdCache;
     QReadWriteLock m_lock;
 };
 

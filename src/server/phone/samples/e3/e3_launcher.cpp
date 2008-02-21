@@ -25,7 +25,7 @@
 #include "phone/phoneheader.h"
 #include "phone/contextlabel.h"
 #include "windowmanagement.h"
-#include "phone/themecontrol.h"
+#include "themecontrol.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include "qtopiaserverapplication.h"
@@ -60,7 +60,7 @@
 #include "dialercontrol.h"
 #include "applicationlauncher.h"
 #include "phone/callhistory.h"
-#include "phone/qabstractthemewidgetfactory.h"
+#include "qabstractthemewidgetfactory.h"
 #include "e3_today.h"
 #include "phone/dialerservice.h"
 #include <QLabel>

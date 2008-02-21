@@ -84,6 +84,7 @@ public slots:
     void pushFile(const QBluetoothAddress &addr, const QContentId &id);
 
 private slots:
+    void bluetoothDown();
     void sdapQueryComplete(const QBluetoothSdpQueryResult &result);
     void pushCommandFinished(int id, bool error);
     void donePushingVObj(bool error);

@@ -36,17 +36,29 @@ INCLUDEPATH+= core_server \
               ui/taskmanager \
               ui/shutdown \
               ui/volumedlg \
+              media/alertservice \
               media/volumemanagement \
               comm/session \
               bluetooth/audiovolumemgr \
               bluetooth/serial \
+              bluetooth/scomisc \
               pim/savetocontacts \
               pim/servercontactmodel \
-              phone/telephony/phoneserver/dummyservice \
+              phone/secondarydisplay/abstract \
               phone/telephony/callpolicymanager/abstract \
               phone/telephony/callpolicymanager/cell \
               phone/telephony/callpolicymanager/voip \
-              phone/telephony/dialercontrol
+              phone/telephony/cell/cellbroadcast \
+              phone/telephony/dialercontrol \
+              phone/telephony/dialfilter/gsm  \
+              phone/telephony/msgcontrol \
+              phone/telephony/phoneserver/dummyservice \
+              phone/telephony/ringcontrol \
+              phone/telephony/videoringtone \
+              phone/themecontrol \
+              phone 
+
+
 
 SERVER_FORMS+=\
     ui/shutdown/shutdown.ui \
@@ -225,7 +237,7 @@ BLUETOOTH_HEADERS=bluetooth/servicemgr/bluetoothservicemanager.h \
                   bluetooth/hs/btheadsettask.h \
                   bluetooth/hs/qbluetoothhsagserver_p.h \
                   bluetooth/hs/qbluetoothhsservice_p.h \
-                  bluetooth/scomisc_p.h \
+                  bluetooth/scomisc/scomisc_p.h \
                   bluetooth/audiovolumemgr/btaudiovolumemanager.h \
                   bluetooth/ftp/btftpservice.h
 
@@ -240,7 +252,7 @@ BLUETOOTH_SOURCES=bluetooth/servicemgr/bluetoothservicemanager.cpp \
 
 # This is documented in src/build/doc/src/deviceprofiles.qdoc
 isEmpty(DEVICE_CONFIG_PATH)|!exists($$DEVICE_CONFIG_PATH/server/scomisc.cpp) {
-    BLUETOOTH_SOURCES+=bluetooth/scomisc.cpp
+    BLUETOOTH_SOURCES+=bluetooth/scomisc/scomisc.cpp
 }
 
 BLUETOOTH_PHONE_HEADERS+=bluetooth/dun/btdialupservice.h \
@@ -285,18 +297,18 @@ UNPORTED_SOURCES=firstuse.cpp
 
 PHONE_HEADERS=\
     phone/contextlabel.h \
-    phone/themecontrol.h \
+    phone/themecontrol/themecontrol.h \
     ui/launcherviews/documentview/documentview.h \
     phone/phonebrowser.h \
     processctrl/taskmanagerentry/taskmanagerentry.h \
     ui/launcherviews/taskmanagerview/taskmanagerlauncherview.h \
     infrastructure/camera/cameramonitor.h \
     core_server/alarmcontrol.h \
-    phone/phonethemeview.h \
+    phone/themecontrol/serverthemeview.h \
     phone/homescreencontrol.h \
     phone/qabstracthomescreen.h \
     phone/themedhomescreen.h \
-    phone/themebackground_p.h \
+    phone/themecontrol/themebackground_p.h \
     phone/profileprovider/qphoneprofileprovider.h \
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
     phone/phoneheader.h\
@@ -305,19 +317,19 @@ PHONE_HEADERS=\
     core_server/qabstractmessagebox.h\
     phone/qabstractbrowserscreen.h\
     phone/phonelauncher.h \
-    phone/qabstractsecondarydisplay.h \
+    phone/secondarydisplay/abstract/qabstractsecondarydisplay.h \
     infrastructure/softmenubar/qsoftmenubarprovider.h \
-    phone/secondarythemeddisplay.h \
+    phone/secondarydisplay/themed/secondarythemeddisplay.h \
     phone/receivewindow.h \
     phone/homescreenwidgets.h \
-    phone/phonepowermanager.h \
+    phone/powermanager/phonepowermanager.h \
     net/gprsmonitor/gprsmonitor.h \
-    phone/qabstractthemewidgetfactory.h \
+    phone/themecontrol/qabstractthemewidgetfactory.h \
     ui/components/touchscreenlockdlg/touchscreenlockdlg.h
 
 TELEPHONY_HEADERS=\
     phone/telephony/atemulator/externalaccess.h \
-    phone/messagecontrol.h \
+    phone/telephony/msgcontrol/messagecontrol.h \
     phone/callcontactlist.h \
     phone/callscreen.h \
     phone/telephony/dialercontrol/dialercontrol.h \
@@ -328,36 +340,36 @@ TELEPHONY_HEADERS=\
     phone/dialerservice.h \
     phone/qabstractdialerscreen.h\
     phone/telephony/phoneserver/base/phoneserver.h \
-    phone/ringcontrol.h\
-    phone/ringtoneservice.h\
+    phone/telephony/ringcontrol/ringcontrol.h\
+    phone/telephony/ringcontrol/ringtoneservice.h\
     pim/servercontactmodel/servercontactmodel.h \
     phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.h \
-    phone/videoringtone.h
+    phone/telephony/videoringtone/videoringtone.h
 
 PHONE_SOURCES=\
     phone/contextlabel.cpp \
     phone/phonelauncher.cpp \
-    phone/themecontrol.cpp \
+    phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \
     phone/phonebrowser.cpp \
     processctrl/taskmanagerentry/taskmanagerentry.cpp \
     ui/launcherviews/taskmanagerview/taskmanagerlauncherview.cpp \
     infrastructure/camera/cameramonitor.cpp \
     core_server/alarmcontrol.cpp \
-    phone/phonethemeview.cpp \
+    phone/themecontrol/serverthemeview.cpp \
     phone/qabstracthomescreen.cpp \
     phone/themedhomescreen.cpp \
-    phone/themebackground_p.cpp \
+    phone/themecontrol/themebackground_p.cpp \
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
     phone/phoneheader.cpp\
     phone/phonelock.cpp\
     core_server/qabstractmessagebox.cpp\
     ui/taskmanager/taskmanagerservice.cpp\
-    phone/qabstractsecondarydisplay.cpp \
+    phone/secondarydisplay/abstract/qabstractsecondarydisplay.cpp \
     infrastructure/softmenubar/qsoftmenubarprovider.cpp \
-    phone/secondarythemeddisplay.cpp \
-    phone/phonepowermanager.cpp \
+    phone/secondarydisplay/themed/secondarythemeddisplay.cpp \
+    phone/powermanager/phonepowermanager.cpp \
     phone/receivewindow.cpp \
     phone/homescreenwidgets.cpp \
     net/gprsmonitor/gprsmonitor.cpp \
@@ -365,7 +377,7 @@ PHONE_SOURCES=\
 
 TELEPHONY_SOURCES=\
     phone/telephony/atemulator/externalaccess.cpp \
-    phone/messagecontrol.cpp \
+    phone/telephony/msgcontrol/messagecontrol.cpp \
     phone/callcontactlist.cpp\
     phone/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
@@ -374,12 +386,12 @@ TELEPHONY_SOURCES=\
     phone/numberdisplay.cpp \
     phone/dialer.cpp \
     phone/dialerservice.cpp \
-    phone/ringcontrol.cpp\
-    phone/ringtoneservice.cpp\
+    phone/telephony/ringcontrol/ringcontrol.cpp\
+    phone/telephony/ringcontrol/ringtoneservice.cpp\
     phone/telephony/phoneserver/base/phoneserver.cpp \
     pim/servercontactmodel/servercontactmodel.cpp \
     phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.cpp \
-    phone/videoringtone.cpp
+    phone/telephony/videoringtone/videoringtone.cpp
 
 enable_telephony {
     TELEPHONY_HEADERS+=phone/callhistory.h
@@ -388,15 +400,15 @@ enable_telephony {
 
 enable_cell {
     PHONE_HEADERS+=phone/telephony/callpolicymanager/cell/cellmodemmanager.h\
-                   phone/cellbroadcastcontrol.h\
+                   phone/telephony/cell/cellbroadcast/cellbroadcastcontrol.h\
                    phone/telephony/phoneserver/dummyservice/phoneserverdummymodem.h\
-                   phone/gsmkeyactions.h\
-                   phone/gsmkeyfilter.h
+                   phone/telephony/dialfilter/gsm/gsmkeyactions.h\
+                   phone/telephony/dialfilter/gsm/gsmkeyfilter.h
     PHONE_SOURCES+=phone/telephony/callpolicymanager/cell/cellmodemmanager.cpp\
-                   phone/cellbroadcastcontrol.cpp\
+                   phone/telephony/cell/cellbroadcast/cellbroadcastcontrol.cpp\
                    phone/telephony/phoneserver/dummyservice/phoneserverdummymodem.cpp\
-                   phone/gsmkeyactions.cpp\
-                   phone/gsmkeyfilter.cpp
+                   phone/telephony/dialfilter/gsm/gsmkeyactions.cpp\
+                   phone/telephony/dialfilter/gsm/gsmkeyfilter.cpp
 }
 
 enable_voip {
@@ -714,14 +726,6 @@ pics.path=/pics/qpe
 pics.hint=pics
 INSTALLS+=pics
 
-# Wallpapers no longer used.
-#wallpaperpics.files=$$QTOPIA_DEPOT_PATH/pics/wallpaper/*.png
-#wallpaperpics.path=/pics/wallpaper
-#wallpaperpics.hint=content nct
-#wallpaperpics.categories=SystemWallpapers
-#wallpaperpics.trtarget=QtopiaWallpapers
-#INSTALLS+=wallpaperpics
-
 enable_cell {
     sdk_simapp_headers.files=$$SIMAPP_HEADERS
     sdk_simapp_headers.path=/src/applications/simapp
@@ -802,7 +806,8 @@ help.files=\
     appservices.html\
     simapp.html\
     callhistory.html\
-    calibrat*
+    calibrat*\
+    dialer*
 help.hint=help
 INSTALLS+=help
 

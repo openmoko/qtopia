@@ -46,23 +46,26 @@ DirectPainterVideoWidget::DirectPainterVideoWidget(GenericVideoSurface* surface,
 
 DirectPainterVideoWidget::~DirectPainterVideoWidget()
 {
+#ifndef QTOPIA_NO_MEDIAVIDEOSCALING
+    delete m_frameBufferImage;
+#endif
     HX_RELEASE(m_surface);
 }
 
 void DirectPainterVideoWidget::paintNotification()
 {
-    if (m_isVisible)
-    {
-        if (m_firstPaintCalc)
+    if (m_isVisible) {
+        if (m_firstPaintCalc) {
             calc(m_savedRegion);
 
+        }
         paint();
     }
 }
 
 int DirectPainterVideoWidget::isSupported()
 {
-    return true;
+    return screenDepth() == 16 || screenDepth() == 32;
 }
 
 // private
@@ -73,28 +76,38 @@ void DirectPainterVideoWidget::regionChanged(const QRegion &exposedRegion)
 
 void DirectPainterVideoWidget::calc(QRegion const& region)
 {
-    QImage const&   buffer = m_surface->buffer();
-
     m_isVisible = false;
 
-    if (!region.isEmpty() && !buffer.isNull())
-    {
-        if (m_firstPaintCalc)   // XXX: Assume original exposed region is max widget size!
-        {
-            QRect bounds = region.boundingRect();
-            QRect imageRect = buffer.rect();
+    QImage const& buffer = m_surface->buffer();
+
+    if (!region.isEmpty() && !buffer.isNull()) {
+        if (m_firstPaintCalc) {
+            QRect bounds = geometry();
+            m_destRect = buffer.rect();
 
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-            m_destSize = buffer.size();
-            m_destSize.scale(bounds.size(), Qt::KeepAspectRatio);
+            m_frameBufferImage = new QImage(frameBuffer(),
+                                            screenWidth(),
+                                            screenHeight(),
+                                            screenDepth() == 16 ? QImage::Format_RGB16 :
+                                                                  QImage::Format_RGB32);
 
-            imageRect.setSize(m_destSize);
+            const double fourfifths = double(4) / 5;
+            if ((m_destRect.width() < fourfifths * bounds.width() &&
+                 m_destRect.height() < fourfifths * bounds.height()) ||
+                (m_destRect.width() > bounds.width() ||
+                 m_destRect.height() > bounds.height()))
+            {
+                QSize scaled = m_destRect.size();
+                scaled.scale(bounds.size(), Qt::KeepAspectRatio);
+                m_destRect.setSize(scaled);
+            }
+            m_destRect.moveCenter(bounds.center());
+#else
+            m_destRect.moveCenter(bounds.center());
+            m_destTopLeft = m_destRect.topLeft();
 #endif
-            imageRect.moveCenter(bounds.center());
-
-            m_destRect = bounds;
-            m_destTopLeft = imageRect.topLeft();
-            m_blackRegion = region ^ QRegion(imageRect);
+            m_blackRegion = requestedRegion() ^ QRegion(m_destRect);
 
             m_firstPaintCalc = false;
         }
@@ -118,30 +131,30 @@ void DirectPainterVideoWidget::paint()
 
     m_painting = true;
 
-    QImage const& buffer = m_surface->buffer();
+    if (!m_firstPaintCalc) {
+        QImage const& buffer = m_surface->buffer();
 
-    if (!buffer.isNull() && !m_firstPaintCalc)
-    {
         startPainting();
 
         QRegion paintRegion = allocatedRegion();
 
-        if (m_black != 0)
-        {
+        if (m_black != 0) {
             qt_screen->solidFill(Qt::black, paintRegion & m_blackRegion);
             --m_black;
         }
 
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-        qt_screen->blit(buffer.scaled(m_destSize),
-                        m_destTopLeft,
-                        paintRegion);
+        QPainter    p(m_frameBufferImage);
+        p.setClipRegion(paintRegion);
+        p.setWindow(0, 0, buffer.width(), buffer.height());
+        p.setViewport(m_destRect);
+        p.drawImage(0, 0, buffer);
 #else
         qt_screen->blit(buffer, m_destTopLeft, paintRegion);
 #endif
-        endPainting();
+        qt_screen->setDirty(paintRegion.boundingRect());
 
-        qt_screen->setDirty(m_destRect);
+        endPainting();
     }
 
     m_painting = false;

@@ -25,7 +25,7 @@
 #include "e1_error.h"
 #include "e1_dialer.h"
 #include "e1_bar.h"
-#include "phone/themecontrol.h"
+#include "themecontrol.h"
 #ifdef Q_WS_X11
 #include <qcopchannel_x11.h>
 #else

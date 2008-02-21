@@ -22,99 +22,31 @@
 <a name="control-and-status"></a>
 <h2>Control and Status</h2>
 <p>The AT commands in this section are used for controlling state information in the modem and for reporting the current status of the state information.</p>
-<p><b>ATE Command Echo</b></p>
-<p>The <tt>ATE</tt> command can be used to turn command echo on (<tt>ATE1</tt>) or off (<tt>ATE0</tt>). If no parameter is supplied (i.e&#x2e; <tt>ATE</tt>), it is the same as <tt>ATE0</tt>.</p>
+<p><b>AT+CFUN Set Phone Functionality</b></p>
+<p>The <tt>AT+CFUN</tt> command returns information about the current functionality level of the phone, and allows the level to be modified.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATE[&lt;n&gt;]</tt></td><td><ul>
-<li><tt>OK</tt></li>
-<li><tt>ERROR</tt></li>
+<tr valign="top" class="odd"><td><tt>AT+CFUN=&lt;fun&gt;[,&lt;rst&gt;]</tt></td><td><tt>OK</tt>, <tt>ERROR</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CFUN?</tt></td><td><tt>+CFUN: &lt;fun&gt;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CFUN=?</tt></td><td><tt>+CFUN: (0-4),(0-1)</tt></td></tr>
+</table></p>
+<p>Set command selects the level of functionality <tt>&lt;fun&gt;</tt> in the MT. Read command returns the current level. Test command returns the values that are supported by the MT.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><tt>&lt;fun&gt;</tt></td><td><ul>
+<li>0 minimum functionality</li>
+<li>1 full functionality</li>
+<li>2 disable phone transmit RF circuits only</li>
+<li>3 disable phone receive RF circuits only</li>
+<li>4 disable phone both transmit and receive RF circuits</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td><tt>&lt;rst&gt;</tt></td><td><ul>
+<li>0 do not reset the MT before setting it to <tt>&lt;fun&gt;</tt></li>
+<li>1 reset the MT before setting it to <tt>&lt;fun&gt;</tt> (not supported at present)</li>
 </ul>
 </td></tr>
 </table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATQ Result Code Suppression</b></p>
-<p>The <tt>ATQ</tt> command can be used to suppress (<tt>ATQ1</tt>) or not suppress (<tt>ATQ0</tt>) the reporting of result codes. If no parameter is supplied (i.e&#x2e; <tt>ATQ</tt>), it is the same as <tt>ATQ0</tt>.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATQ[&lt;n&gt;]</tt></td><td><ul>
-<li><tt>OK</tt></li>
-<li><tt>ERROR</tt></li>
-</ul>
-</td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATS3 Command Line Termination Character</b></p>
-<p>The <tt>ATS3</tt> command can be used to query or alter the character character used to terminate AT command lines. There is usually no reason to set this to something other than the default of 13.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATS3=&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>ATS3?</tt></td><td><tt>&lt;n&gt;&lt;CR&gt;&lt;LF&gt;OK</tt></td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATS4 Response Formatting Character</b></p>
-<p>The <tt>ATS4</tt> command can be used to query or alter the response formatting (line feed) character used to format AT response lines. There is usually no reason to set this to something other than the default of 10.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATS4=&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>ATS4?</tt></td><td><tt>&lt;n&gt;&lt;CR&gt;&lt;LF&gt;OK</tt></td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATS5 Command Line Editing Character (Backspace)</b></p>
-<p>The <tt>ATS5</tt> command can be used to query or alter the backspace character that is used to edit AT command lines. There is usually no reason to set this to something other than the default of 8.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATS5=&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>ATS5?</tt></td><td><tt>&lt;n&gt;&lt;CR&gt;&lt;LF&gt;OK</tt></td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATV Verbose Result Codes</b></p>
-<p>The <tt>ATV</tt> command can be used to turn on (<tt>ATV1</tt>) or off (<tt>ATV0</tt>) the use of verbose result codes such as <tt>OK</tt>, <tt>ERROR</tt>, <tt>NO CARRIER</tt>, etc. If no parameter is supplied (i.e&#x2e; <tt>ATV</tt>), it is the same as <tt>ATV0</tt>.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATV[&lt;n&gt;]</tt></td><td><ul>
-<li><tt>OK</tt></li>
-<li><tt>ERROR</tt></li>
-</ul>
-</td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>ATZ Initialize Modem</b></p>
-<p>The <tt>ATZ</tt> command initializes the modem and returns all status settings to their default values. In the current implementation, this command is identical to <tt>AT&amp;F</tt>.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>ATZ[&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
-</table></p>
-<p>The parameter <tt>&lt;n&gt;</tt> is ignored in this implementation.</p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>AT&amp;F Reset to Factory Defaults</b></p>
-<p>The <tt>AT&amp;F</tt> command resets all status settings to their factory default values.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT&amp;F</tt></td><td><tt>OK</tt></td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>AT&amp;W Write Settings</b></p>
-<p>The <tt>AT&amp;W</tt> command saves all status settings so they can be restored the next time the modem is initialized. In the current implementation, this command is ignored.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT&amp;W</tt></td><td><tt>OK</tt></td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
-<p><b>AT+GCAP Request Capabilities</b></p>
-<p>The <tt>AT+GCAP</tt> command requests the capabilities of the modem. It responds with a list of functionality areas, such as GSM, Fax, etc, that the modem supports.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+GCAP</tt></td><td><tt>+GCAP: &lt;functionality-list&gt;</tt></td></tr>
-</table></p>
-<p>The following functionality values may be returned:</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Value</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>+CGSM</tt></td><td>GSM commands according to 3GPP TS 27.007 and 27.005.</td></tr>
-<tr valign="top" class="even"><td><tt>+FCLASS</tt></td><td>Fax commands.</td></tr>
-<tr valign="top" class="odd"><td><tt>+VOIP</tt></td><td>VoIP calls can be dialed with <tt>ATD&lt;uri&gt;;</tt>.</td></tr>
-</table></p>
-<p>Conforms with: Recommendation V.250.</p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><b>AT+CACM Accumulated Call Meter</b></p>
 <p>The <tt>AT+CACM</tt> command is used to reset or query the accumulated call meter advice of charge.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -261,115 +193,6 @@
 <tr valign="top" class="even"><td><tt>AT+CSIM=?</tt></td><td></td></tr>
 </table></p>
 <p>Conforms with 3GPP TS 27.007.</p>
-<p><b>AT+BRSF Bluetooth Retrieve Supported Features</b></p>
-<p>The <tt>AT+BRSF</tt> command is used by Bluetooth hands-free (HF) devices to report the features that are supported by the hands-free unit, and to request the phone's audio gateway (AG) feature set.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+BRSF=&lt;HF supported features bitmap&gt;</tt></td><td><tt>+BRSF: &lt;AG supported features bitmap&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+BRSF=&lt;HF supported features bitmap&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
-</table></p>
-<p>Set command is used by the hands-free device to send a bitmap of its supported features to the phone's audio gateway. The audio gateway in turn responds with a separate bitmap of its supported features.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>&lt;HF supported features bitmap&gt;</tt></td><td>Decimal integer containing the following bits:<ul>
-<li>0 - EC / NR function</li>
-<li>1 - Call waiting and 3-way calling</li>
-<li>2 - CLI presentation capability.</li>
-<li>3 - Voice recognition activation.</li>
-<li>4 - Remote volume control</li>
-<li>5 - Enhanced call status</li>
-<li>6 - Enhanced call control</li>
-<li>7-31 - Reserved</li>
-</ul>
-</td></tr>
-<tr valign="top" class="even"><td><tt>&lt;AG supported features bitmap&gt;</tt></td><td>Decimal integer containing the following bits:<ul>
-<li>0 - Three way calling</li>
-<li>1 - EC / NR function</li>
-<li>2 - Voice recognition</li>
-<li>3 - In-band ring</li>
-<li>4 - Attach a number to voice tag</li>
-<li>5 - Ability to reject a call</li>
-<li>6 - Enhanced call status</li>
-<li>7 - Enhanced call control</li>
-<li>8 - Extended error result codes</li>
-<li>9-31 - Reserved</li>
-</ul>
-</td></tr>
-</table></p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
-<p><b>AT+VGM Gain of Microphone</b></p>
-<p>The <tt>AT+VGM</tt> command is used by a Bluetooth hands-free (HF) device to report its current microphone gain level setting to the phone's audio gateway (AG).</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+VGM=&lt;gain&gt;</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+VGM=&lt;gain&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
-<tr valign="top" class="odd"><td><tt>AT+VGM?</tt></td><td><tt>+VGM: &lt;gain&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+VGM=?</tt></td><td><tt>+VGM: (0-15)</tt></td></tr>
-</table></p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>&lt;gain&gt;</tt></td><td>Decimal integer indicating the microphone gain between 0 and 15, where 15 is the maximum gain.</td></tr>
-</table></p>
-<p>Set command reports the HF's current gain level setting. Get command reports the previous setting. Test command returns the valid gain levels.</p>
-<p>The audio gateway may also send unsolicited <tt>+VGM: &lt;gain&gt;</tt> messages whenever the gain changes on the AG.</p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
-<p><b>AT+VGS Gain of Speaker</b></p>
-<p>The <tt>AT+VGS</tt> command is used by a Bluetooth hands-free (HF) device to report its current speaker gain level setting to the phone's audio gateway (AG).</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+VGS=&lt;gain&gt;</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+VGS=&lt;gain&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
-<tr valign="top" class="odd"><td><tt>AT+VGS?</tt></td><td><tt>+VGS: &lt;gain&gt;</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+VGS=?</tt></td><td><tt>+VGS: (0-15)</tt></td></tr>
-</table></p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>&lt;gain&gt;</tt></td><td>Decimal integer indicating the speaker gain between 0 and 15, where 15 is the maximum gain.</td></tr>
-</table></p>
-<p>Set command reports the HF's current gain level setting. Get command reports the previous setting. Test command returns the valid gain levels.</p>
-<p>The audio gateway may also send unsolicited <tt>+VGS: &lt;gain&gt;</tt> messages whenever the gain changes on the AG.</p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
-<p><b>AT+NREC Control Noise Reduction and Echo Cancellation</b></p>
-<p>The <tt>AT+NREC</tt> command is used by a Bluetooth hands-free (HF) device to turn off the Noise Reduction and Echo Cancellation capabilities of the phone's audio gateway (AG).</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+NREC=0</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+NREC=0</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
-</table></p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
-<p><b>AT+BVRA Control Bluetooth Voice Recognition</b></p>
-<p>The <tt>AT+BVRA</tt> command is used by a Bluetooth hands-free (HF) device to turn on and off the Voice Recognition capabilities of the phone's audio gateway (AG).</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+BVRA=&lt;num&gt;</tt></td><td><tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+BVRA=&lt;num&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
-</table></p>
-<p>The AG can also initiate Bluetooth Voice Recognition events by sending the {+BVRA=&lt;num&gt;} unsolicited result code.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>&lt;num&gt;</tt></td><td>Decimal integer. 0 indicates voice recognition functionality should be ended. 1 indicates voice recognition functionality should be started.</td></tr>
-</table></p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
-<p><b>AT+BINP Bluetooth: Attach Phone Number to a Voice Tag</b></p>
-<p>The <tt>AT+BINP</tt> command can be used by the Bluetooth hands-free (HF) device to request Phone Number from the AG.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+BINP=1</tt></td><td>+BINP:&lt;PhoneNumber&gt;, <tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+BINP=1</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
-</table></p>
-<p>Each time this command is sent, the Audio Gateway shall respond with a different Phone Number.</p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
-<p><b>AT+BTRH Bluetooth Respond and Hold</b></p>
-<p>The <tt>AT+BTRH</tt> command can be used by the Bluetooth hands-free (HF) device to perform the Respond and Hold feature.</p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+BTRH?</tt></td><td>[+BTRH:&lt;number&gt;], <tt>OK</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+BTRH = &lt;num&gt;</tt></td><td>+BTRH:&lt;num&gt;, <tt>OK</tt></td></tr>
-<tr valign="top" class="odd"><td><tt>AT+BTRH = &lt;num&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
-</table></p>
-<p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th>Num Value</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>0</tt></td><td>Put the incoming call on hold.</td></tr>
-<tr valign="top" class="even"><td><tt>1</tt></td><td>Accept the call which was held.</td></tr>
-<tr valign="top" class="odd"><td><tt>2</tt></td><td>Reject the call which was held.</td></tr>
-</table></p>
-<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
 <p><b>AT+CALM Alert Sound Mode</b></p>
 <p>This command is used to select the general alert sound mode of the MT.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -1039,31 +862,208 @@
 </ul>
 </td></tr>
 </table></p>
-<p><b>AT+CFUN Set Phone Functionality</b></p>
-<p>The <tt>AT+CFUN</tt> command returns information about the current functionality level of the phone, and allows the level to be modified.</p>
+<p><b>AT+BRSF Bluetooth Retrieve Supported Features</b></p>
+<p>The <tt>AT+BRSF</tt> command is used by Bluetooth hands-free (HF) devices to report the features that are supported by the hands-free unit, and to request the phone's audio gateway (AG) feature set.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>AT+CFUN=&lt;fun&gt;[,&lt;rst&gt;]</tt></td><td><tt>OK</tt>, <tt>ERROR</tt></td></tr>
-<tr valign="top" class="even"><td><tt>AT+CFUN?</tt></td><td><tt>+CFUN: &lt;fun&gt;</tt></td></tr>
-<tr valign="top" class="odd"><td><tt>AT+CFUN=?</tt></td><td><tt>+CFUN: (0-4),(0-1)</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+BRSF=&lt;HF supported features bitmap&gt;</tt></td><td><tt>+BRSF: &lt;AG supported features bitmap&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+BRSF=&lt;HF supported features bitmap&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
 </table></p>
-<p>Set command selects the level of functionality <tt>&lt;fun&gt;</tt> in the MT. Read command returns the current level. Test command returns the values that are supported by the MT.</p>
+<p>Set command is used by the hands-free device to send a bitmap of its supported features to the phone's audio gateway. The audio gateway in turn responds with a separate bitmap of its supported features.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
-<tr valign="top" class="odd"><td><tt>&lt;fun&gt;</tt></td><td><ul>
-<li>0 minimum functionality</li>
-<li>1 full functionality</li>
-<li>2 disable phone transmit RF circuits only</li>
-<li>3 disable phone receive RF circuits only</li>
-<li>4 disable phone both transmit and receive RF circuits</li>
+<tr valign="top" class="odd"><td><tt>&lt;HF supported features bitmap&gt;</tt></td><td>Decimal integer containing the following bits:<ul>
+<li>0 - EC / NR function</li>
+<li>1 - Call waiting and 3-way calling</li>
+<li>2 - CLI presentation capability.</li>
+<li>3 - Voice recognition activation.</li>
+<li>4 - Remote volume control</li>
+<li>5 - Enhanced call status</li>
+<li>6 - Enhanced call control</li>
+<li>7-31 - Reserved</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td><tt>&lt;rst&gt;</tt></td><td><ul>
-<li>0 do not reset the MT before setting it to <tt>&lt;fun&gt;</tt></li>
-<li>1 reset the MT before setting it to <tt>&lt;fun&gt;</tt> (not supported at present)</li>
+<tr valign="top" class="even"><td><tt>&lt;AG supported features bitmap&gt;</tt></td><td>Decimal integer containing the following bits:<ul>
+<li>0 - Three way calling</li>
+<li>1 - EC / NR function</li>
+<li>2 - Voice recognition</li>
+<li>3 - In-band ring</li>
+<li>4 - Attach a number to voice tag</li>
+<li>5 - Ability to reject a call</li>
+<li>6 - Enhanced call status</li>
+<li>7 - Enhanced call control</li>
+<li>8 - Extended error result codes</li>
+<li>9-31 - Reserved</li>
 </ul>
 </td></tr>
 </table></p>
-<p>Conforms with: 3GPP TS 27.007.</p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>AT+VGM Gain of Microphone</b></p>
+<p>The <tt>AT+VGM</tt> command is used by a Bluetooth hands-free (HF) device to report its current microphone gain level setting to the phone's audio gateway (AG).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+VGM=&lt;gain&gt;</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+VGM=&lt;gain&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+VGM?</tt></td><td><tt>+VGM: &lt;gain&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+VGM=?</tt></td><td><tt>+VGM: (0-15)</tt></td></tr>
+</table></p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><tt>&lt;gain&gt;</tt></td><td>Decimal integer indicating the microphone gain between 0 and 15, where 15 is the maximum gain.</td></tr>
+</table></p>
+<p>Set command reports the HF's current gain level setting. Get command reports the previous setting. Test command returns the valid gain levels.</p>
+<p>The audio gateway may also send unsolicited <tt>+VGM: &lt;gain&gt;</tt> messages whenever the gain changes on the AG.</p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>AT+VGS Gain of Speaker</b></p>
+<p>The <tt>AT+VGS</tt> command is used by a Bluetooth hands-free (HF) device to report its current speaker gain level setting to the phone's audio gateway (AG).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+VGS=&lt;gain&gt;</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+VGS=&lt;gain&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit.</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+VGS?</tt></td><td><tt>+VGS: &lt;gain&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+VGS=?</tt></td><td><tt>+VGS: (0-15)</tt></td></tr>
+</table></p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><tt>&lt;gain&gt;</tt></td><td>Decimal integer indicating the speaker gain between 0 and 15, where 15 is the maximum gain.</td></tr>
+</table></p>
+<p>Set command reports the HF's current gain level setting. Get command reports the previous setting. Test command returns the valid gain levels.</p>
+<p>The audio gateway may also send unsolicited <tt>+VGS: &lt;gain&gt;</tt> messages whenever the gain changes on the AG.</p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>AT+NREC Control Noise Reduction and Echo Cancellation</b></p>
+<p>The <tt>AT+NREC</tt> command is used by a Bluetooth hands-free (HF) device to turn off the Noise Reduction and Echo Cancellation capabilities of the phone's audio gateway (AG).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+NREC=0</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+NREC=0</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
+</table></p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>AT+BVRA Control Bluetooth Voice Recognition</b></p>
+<p>The <tt>AT+BVRA</tt> command is used by a Bluetooth hands-free (HF) device to turn on and off the Voice Recognition capabilities of the phone's audio gateway (AG).</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+BVRA=&lt;num&gt;</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+BVRA=&lt;num&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
+</table></p>
+<p>The AG can also initiate Bluetooth Voice Recognition events by sending the {+BVRA=&lt;num&gt;} unsolicited result code.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><tt>&lt;num&gt;</tt></td><td>Decimal integer. 0 indicates voice recognition functionality should be ended. 1 indicates voice recognition functionality should be started.</td></tr>
+</table></p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>AT+BINP Bluetooth: Attach Phone Number to a Voice Tag</b></p>
+<p>The <tt>AT+BINP</tt> command can be used by the Bluetooth hands-free (HF) device to request Phone Number from the AG.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+BINP=1</tt></td><td>+BINP:&lt;PhoneNumber&gt;, <tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+BINP=1</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
+</table></p>
+<p>Each time this command is sent, the Audio Gateway shall respond with a different Phone Number.</p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>AT+BTRH Bluetooth Respond and Hold</b></p>
+<p>The <tt>AT+BTRH</tt> command can be used by the Bluetooth hands-free (HF) device to perform the Respond and Hold feature.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+BTRH?</tt></td><td>[+BTRH:&lt;number&gt;], <tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+BTRH = &lt;num&gt;</tt></td><td>+BTRH:&lt;num&gt;, <tt>OK</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>AT+BTRH = &lt;num&gt;</tt></td><td><tt>ERROR</tt> if the device is not a Bluetooth hands-free unit or functionality is not supported.</td></tr>
+</table></p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Num Value</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>0</tt></td><td>Put the incoming call on hold.</td></tr>
+<tr valign="top" class="even"><td><tt>1</tt></td><td>Accept the call which was held.</td></tr>
+<tr valign="top" class="odd"><td><tt>2</tt></td><td>Reject the call which was held.</td></tr>
+</table></p>
+<p>Conforms with: Bluetooth Hands-Free Profile 1.5</p>
+<p><b>ATE Command Echo</b></p>
+<p>The <tt>ATE</tt> command can be used to turn command echo on (<tt>ATE1</tt>) or off (<tt>ATE0</tt>). If no parameter is supplied (i.e&#x2e; <tt>ATE</tt>), it is the same as <tt>ATE0</tt>.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATE[&lt;n&gt;]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>ERROR</tt></li>
+</ul>
+</td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATQ Result Code Suppression</b></p>
+<p>The <tt>ATQ</tt> command can be used to suppress (<tt>ATQ1</tt>) or not suppress (<tt>ATQ0</tt>) the reporting of result codes. If no parameter is supplied (i.e&#x2e; <tt>ATQ</tt>), it is the same as <tt>ATQ0</tt>.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATQ[&lt;n&gt;]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>ERROR</tt></li>
+</ul>
+</td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATS3 Command Line Termination Character</b></p>
+<p>The <tt>ATS3</tt> command can be used to query or alter the character character used to terminate AT command lines. There is usually no reason to set this to something other than the default of 13.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATS3=&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>ATS3?</tt></td><td><tt>&lt;n&gt;&lt;CR&gt;&lt;LF&gt;OK</tt></td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATS4 Response Formatting Character</b></p>
+<p>The <tt>ATS4</tt> command can be used to query or alter the response formatting (line feed) character used to format AT response lines. There is usually no reason to set this to something other than the default of 10.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATS4=&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>ATS4?</tt></td><td><tt>&lt;n&gt;&lt;CR&gt;&lt;LF&gt;OK</tt></td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATS5 Command Line Editing Character (Backspace)</b></p>
+<p>The <tt>ATS5</tt> command can be used to query or alter the backspace character that is used to edit AT command lines. There is usually no reason to set this to something other than the default of 8.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATS5=&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
+<tr valign="top" class="even"><td><tt>ATS5?</tt></td><td><tt>&lt;n&gt;&lt;CR&gt;&lt;LF&gt;OK</tt></td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATV Verbose Result Codes</b></p>
+<p>The <tt>ATV</tt> command can be used to turn on (<tt>ATV1</tt>) or off (<tt>ATV0</tt>) the use of verbose result codes such as <tt>OK</tt>, <tt>ERROR</tt>, <tt>NO CARRIER</tt>, etc. If no parameter is supplied (i.e&#x2e; <tt>ATV</tt>), it is the same as <tt>ATV0</tt>.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATV[&lt;n&gt;]</tt></td><td><ul>
+<li><tt>OK</tt></li>
+<li><tt>ERROR</tt></li>
+</ul>
+</td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>ATZ Initialize Modem</b></p>
+<p>The <tt>ATZ</tt> command initializes the modem and returns all status settings to their default values. In the current implementation, this command is identical to <tt>AT&amp;F</tt>.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATZ[&lt;n&gt;]</tt></td><td><tt>OK</tt></td></tr>
+</table></p>
+<p>The parameter <tt>&lt;n&gt;</tt> is ignored in this implementation.</p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>AT&amp;F Reset to Factory Defaults</b></p>
+<p>The <tt>AT&amp;F</tt> command resets all status settings to their factory default values.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT&amp;F</tt></td><td><tt>OK</tt></td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>AT&amp;W Write Settings</b></p>
+<p>The <tt>AT&amp;W</tt> command saves all status settings so they can be restored the next time the modem is initialized. In the current implementation, this command is ignored.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT&amp;W</tt></td><td><tt>OK</tt></td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
+<p><b>AT+GCAP Request Capabilities</b></p>
+<p>The <tt>AT+GCAP</tt> command requests the capabilities of the modem. It responds with a list of functionality areas, such as GSM, Fax, etc, that the modem supports.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+GCAP</tt></td><td><tt>+GCAP: &lt;functionality-list&gt;</tt></td></tr>
+</table></p>
+<p>The following functionality values may be returned:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Value</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>+CGSM</tt></td><td>GSM commands according to 3GPP TS 27.007 and 27.005.</td></tr>
+<tr valign="top" class="even"><td><tt>+FCLASS</tt></td><td>Fax commands.</td></tr>
+<tr valign="top" class="odd"><td><tt>+VOIP</tt></td><td>VoIP calls can be dialed with <tt>ATD&lt;uri&gt;;</tt>.</td></tr>
+</table></p>
+<p>Conforms with: Recommendation V.250.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>
@@ -1074,6 +1074,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

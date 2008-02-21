@@ -212,7 +212,7 @@
 <p>If a parse error occurs, this function returns false and the error message is placed in <tt>*</tt><i>errorMsg</i>, the line number in <tt>*</tt><i>errorLine</i> and the column number in <tt>*</tt><i>errorColumn</i> (unless the associated pointer is set to 0); otherwise this function returns true. The various error messages are described in the <a href="qxmlparseexception.html">QXmlParseException</a> class documentation. Note that, if you want to display these error messages to your application's users, they will be displayed in English unless they are explicitly translated.</p>
 <p>If <i>namespaceProcessing</i> is true, the function <a href="qdomnode.html#prefix">QDomNode::prefix</a>() returns a string for all elements and attributes. It returns an empty string if the element or attribute has no prefix.</p>
 <p>Text nodes consisting only of whitespace are stripped and won't appear in the <a href="qdomdocument.html">QDomDocument</a>. If this behavior is not desired, one can use the setContent() overload that allows a <a href="qxmlreader.html">QXmlReader</a> to be supplied.</p>
-<p>If <i>namespaceProcessing</i> is false, the functions <a href="qdomnode.html#prefix">QDomNode::prefix</a>(), <a href="qdomnode.html#localName">QDomNode::localName</a>() and <a href="qdomnode.html#namespaceURI">QDomNode::namespaceURI</a>() return an empty string.</p>
+<p>If <i>namespaceProcessing</i> is false, the functions <a href="qdomnode.html#prefix">QDomNode::prefix</a>(), <a href="qdomnode.html#localName">QDomNode::localName</a>() and <a href="qdomnode.html#namespaceURIx">QDomNode::namespaceURI</a>() return an empty string.</p>
 <p>Entity references are handled as follows:</p>
 <ul>
 <li>References to internal general entities and character entities occurring in the content are included. The result is a <a href="qdomtext.html">QDomText</a> node with the references replaced by their corresponding entity values.</li>
@@ -222,7 +222,7 @@
 <li>Any unparsed entity reference is replaced with an empty string.</li>
 </ul>
 <p><a href="qdomnode.html#prefix">QDomNode::prefix</a>() <a href="qstring.html#isNull">QString::isNull</a>() <a href="qstring.html#isEmpty">QString::isEmpty</a>()</p>
-<p>See also <a href="qdomnode.html#namespaceURI">QDomNode::namespaceURI</a>() and <a href="qdomnode.html#localName">QDomNode::localName</a>().</p>
+<p>See also <a href="qdomnode.html#namespaceURIx">QDomNode::namespaceURI</a>() and <a href="qdomnode.html#localName">QDomNode::localName</a>().</p>
 <h3 class="fn"><a name="setContent-2"></a>bool QDomDocument::setContent ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, bool <i>namespaceProcessing</i>, <a href="qstring.html">QString</a> * <i>errorMsg</i> = 0, int * <i>errorLine</i> = 0, int * <i>errorColumn</i> = 0 )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This function reads the XML document from the string <i>text</i>, returning true if the content was successfully parsed; otherwise returns false. Since <i>text</i> is already a Unicode string, no encoding detection is done.</p>
@@ -258,8 +258,8 @@
 <p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
-<td width="30%">Copyright &copy; 2007 <a href="trolltech.html">Trolltech</a></td>
+<td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.3</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
 </tr></table></div></address></body>
 </html>

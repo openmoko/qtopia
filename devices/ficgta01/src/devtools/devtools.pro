@@ -52,3 +52,8 @@ help.files=qpe-devtools*
 help.hint=help
 INSTALLS+=help
 
+#probably not the best place to put this stuff
+conf.files=$$QTOPIA_DEPOT_PATH/devices/ficgta01/etc/default/Trolltech/PredictiveKeyboard.conf 
+conf.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/etc/default/Trolltech/Bluetooth.conf
+conf.path=/etc/default/Trolltech
+INSTALLS+=conf

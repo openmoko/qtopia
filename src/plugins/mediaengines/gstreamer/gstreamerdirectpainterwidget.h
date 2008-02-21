@@ -55,13 +55,16 @@ private:
     bool        m_firstPaintCalc;
     bool        m_painting;
     int         m_black;
-    QPoint      m_destTopLeft;
-    QSize       m_destSize;
     QSize       m_videoSize;
     QRect       m_destRect;
     QRegion     m_savedRegion;
     QRegion     m_blackRegion;
     GstElement* m_sink;
+#ifndef QTOPIA_NO_MEDIAVIDEOSCALING
+    QImage*     m_frameBufferImage;
+#else
+    QPoint      m_destTopLeft;
+#endif
 };
 
 }   // ns gstreamer

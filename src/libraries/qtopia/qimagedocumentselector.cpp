@@ -423,22 +423,16 @@ QDrmRights::Permissions QImageDocumentSelector::mandatoryPermissions() const
   QImageDocumentSelector widget in a dialog.
 
   The following code uses QImageDocumentSelectorDialog to allow the user
-  to select a wallpaper image from the Qtopia directories:
+  to select a picture taken by the camera:
 
   \code
-    QContentFilter locations;
-    QStringList qtopiaPaths = Qtopia::installPaths();
-    foreach( QString path, qtopiaPaths ) {
-        locations |= QContentFilter( QContentFilter::Location, path + "pics/wallpaper" );
-    }
-
     QImageDocumentSelectorDialog dialog( this );
 
-    dialog.setFilter( locations );
+    dialog.setFilter( QContentFilter::category( "Camera" ) );
 
     if( QtopiaApplication::execDialog( &dialog ) ) {
         // Accept
-        QContent wallpaper = dialog.selectedDocument();
+        QContent picture = dialog.selectedDocument();
     } else {
         // Reject
     }

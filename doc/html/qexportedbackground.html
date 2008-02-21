@@ -25,7 +25,7 @@
 <li><div class="fn"/><b><a href="qexportedbackground.html#dtor.QExportedBackground">~QExportedBackground</a></b> ()</li>
 <li><div class="fn"/>const QPixmap &amp; <b><a href="qexportedbackground.html#background">background</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qexportedbackground.html#isAvailable">isAvailable</a></b> () const</li>
-<li><div class="fn"/>QPixmap <b><a href="qexportedbackground.html#wallpaper">wallpaper</a></b> () const</li>
+<li><div class="fn"/>QPixmap <b><a href="qexportedbackground.html#wallpaper">wallpaper</a></b> () const&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 </ul>
 <ul>
 <li><div class="fn"/>29 public functions inherited from <a href="./qobject.htmlqobject.html#public-functions">QObject</a></li>
@@ -35,7 +35,7 @@
 <ul>
 <li><div class="fn"/>void <b><a href="qexportedbackground.html#changed">changed</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qexportedbackground.html#changed-2">changed</a></b> ( const QPixmap &amp; <i>background</i> )</li>
-<li><div class="fn"/>void <b><a href="qexportedbackground.html#wallpaperChanged">wallpaperChanged</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qexportedbackground.html#wallpaperChanged">wallpaperChanged</a></b> ()&nbsp;&nbsp;<tt> (deprecated)</tt></li>
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="./qobject.htmlqobject.html#signals">QObject</a></li>
@@ -74,15 +74,17 @@
 <h3 class="fn"><a name="isAvailable"></a>bool QExportedBackground::isAvailable () const</h3>
 <p>Returns whether an exported background is available.</p>
 <h3 class="fn"><a name="wallpaper"></a><a href="./qpixmap.html">QPixmap</a> QExportedBackground::wallpaper () const</h3>
+<p>This function is deprecated.</p>
 <p>Returns the wallpaper.</p>
-<p>The wallpaper is set by the user, for example a photo from the camera. It is most commonly displayed only in the homescreen but some themes also export the wallpaper as the background.</p>
+<p>As of Qtopia 4.3 the wallpaper is the same as the background. Use <a href="qexportedbackground.html#background">background</a>() instead.</p>
 <h3 class="fn"><a name="wallpaperChanged"></a>void QExportedBackground::wallpaperChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This function is deprecated.</p>
 <p>This signal is emitted when the wallpaper changes.</p>
 <p>See also <a href="qexportedbackground.html#wallpaper">wallpaper</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

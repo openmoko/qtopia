@@ -254,7 +254,7 @@ void SettingsDisplay::init()
     m_ui->timeoutSpinBox->installEventFilter(this);
 }
 
-bool SettingsDisplay::eventFilter(QObject *watched, QEvent *event)
+bool SettingsDisplay::eventFilter(QObject *, QEvent *event)
 {
     if (event->type() == QEvent::LeaveEditFocus) {
         // in Qt 4.3, editingFinished() isn't emitted when 

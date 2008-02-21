@@ -17,17 +17,17 @@
 <li><a href="#use-case">Use-case</a></li>
 <li><a href="#discussion-of-benefits">Discussion of Benefits</a></li>
 <li><a href="#limitations">Limitations</a></li>
-<li><a href="#known-issues">Known Issues:</a></li>
+<li><a href="#known-issues">Known Issues</a></li>
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>The primary objective of SXE is to enable the user to download native applications, (which is currently limited to games) and be able to run these with confidence that they will not be able to compromise telephony software and services and cause billable events such as making unauthorized phone calls or sending SMS's.</p>
-<p>The secondary objectives of SXE are to</p>
+<p>The primary objective of the first release SXE is to enable the user to download native applications, (which is currently limited to games) and be able to run these with confidence that they will not be able to compromise telephony software and services and cause billable events such as making unauthorized phone calls or sending SMS's.</p>
+<p>The secondary objectives of the initial release are to</p>
 <ul>
 <li>maintain the integrity of the Qtopia system and availability of services and functionality</li>
-<li>provide improved performance, functionality and escurity over VM and other sandboxing models.</li>
+<li>provide improved performance, functionality and security over VM and other sandboxing models.</li>
 <li>ensure the confidentiality and integrity of user data.</li>
-<li>cause minimal impact and maximum ustabilty for the end-user including performance considerations.</li>
+<li>cause minimal impact and maximum usability for the end-user including performance considerations.</li>
 </ul>
 <a name="use-case"></a>
 <h2>Use-case</h2>
@@ -58,12 +58,11 @@
 <ul>
 <li>draw into the application region of the display</li>
 <li>play audio</li>
-<li>write settings files</li>
-<li>change the context bar</li>
 <li>have write access to a sandboxed directory</li>
+<li>change the context bar</li>
 </ul>
 <a name="known-issues"></a>
-<h2>Known Issues:</h2>
+<h2>Known Issues</h2>
 <p>There are a few open issues (for the greenphone) that have been evaluated and have not been considered as a priority to address for the first release of SXE.</p>
 <p>Sandboxed applications can:</p>
 <ul>
@@ -72,12 +71,12 @@
 <li>use up all semaphores and shared memory available on the system.</li>
 <li>connect to any socket on the filesystem</li>
 </ul>
-<p>The first three issues are effectively denial of service attacks on the system, but the effects of these attacks are minimal since a simple reboot will restore the device back into normal state. There should be no further problems unless the downloaded malware is run again. There is little to gain in performing such an attack.</p>
-<p>Regading the fourth issue, there are several sockets listened to by the qpe server, however there are message verification steps being performed on the server side which should prevent any malicious activity from occuring. Explicit protections have been made on the /dev/log socket to prevent downloaded applications trying to spoof security messages. All the other remaining sockets such as sdp, are meant to be publically writable, therefore this issue is not much of a cause of concern.</p>
+<p>The first three issues are effectively denial of service attacks on the system, but the effects of these attacks are minimal since a simple reboot will restore the device back into a normal state. There should be no further problems unless the downloaded malware is run again. There is little to gain in performing such an attack.</p>
+<p>Regarding the fourth issue: Explicit protections have been made on the /dev/log socket to prevent untrusted applications trying to spoof security messages. It is permissible to allow untrusted applications to connect to the qws, document server, and valuespace_applayer sockets listened to by qpe, since message verification occurs on the server side. There are other various sockets on the device without these protections, however exploitations of these are believed only to be capable of causing nuisances to the user at best. Nevertheless, resolving this issue is one of the priorities for future releases.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div></address></body>
 </html>

@@ -113,6 +113,7 @@ private:
 
     QString retrieveUid;
     uint retrieveLength;
+    bool tlsEnabled;
 };
 
 #endif

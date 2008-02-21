@@ -37,7 +37,7 @@ and allows users to receive, manage, and consume DRM protected content.
 <h3><a name="OMA_DRM_v1_Separate_Delivery">OMA DRM v1 Separate Delivery</a></h3>
 <p>OMA DRM Separate Delivery content (application/vnd.oma.drm.content; .dcf) is received in an encrypted container format.  The key required to decrypt the content is delivered separately as part of a rights object (application/vnd.com.drm.rights+xml; .dr, application/vnd.oma.drm.rights+wbxml; .drc) pushed to the device in a WAP push.  Once received separate delivery content is subject to the same restrictions as combined delivery content with the exception that the encrypted container may be redistributed.
 
-<p>If the user attempts to consume separate delivery content they do not have rights for they may be prompted to visit a website from which they can purchase rights.  The purchased rights will be delivered in a WAP push to the device.</p>
+<p>If the user attempts to consume separate delivery content they do not have rights for they may be prompted to visit a website from which they can purchase rights.  The purchased rights are subsequently delivered in a WAP push to the device.</p>
 <h3><a name="OMA_DRM_v2">OMA DRM v2</a></h3>
 <p><h4><a name="ROAPTriggers"></a>ROAP Triggers</h4>
 
@@ -45,7 +45,7 @@ and allows users to receive, manage, and consume DRM protected content.
 
 <h4><a name="EmbeddedPreview"></a>Embedded Preview</h4>
 
-<p>DCF files may contain an embedded preview object; an unprotected and likely reduced quality version of the actual content.  Where rights are not available for an item of content this preview is in its place.  Before rendering a preview object the user is given the option to activate the full version of the content, if they decline they are then notified that the preview version will be rendered.</p>
+<p>DCF files may contain an embedded preview object; an unprotected and likely reduced quality version of the actual content.  Where rights are not available for an item of content this preview is in its place.  Before rendering a preview object the user is given the option to activate the full version of the content, if they decline they are then notified that the version rendered is a preview version.</p>
 
 <h4><a name="PreviewRights"></a>Preview Rights</h4>
 
@@ -62,5 +62,5 @@ and allows users to receive, manage, and consume DRM protected content.
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td align="center"><a href="trademarks.html">Trademarks</a></td>
-<td align="right"><div align="right">Qtopia 4.3.1</div></td>
+<td align="right"><div align="right">Qtopia 4.3.2</div></td>
 </tr></table></div>

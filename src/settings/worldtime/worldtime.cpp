@@ -105,9 +105,6 @@ WorldTime::WorldTime( QWidget *parent,
        gl->setRowStretch(i, 1);
    }
 
-   gl->addItem(new QSpacerItem(5,100),
-               QSizePolicy::MinimumExpanding, QSizePolicy::Ignored);
-
    gl->setColumnStretch(1,4);
    int goodWidth = qApp->desktop()->width() / 2 + 5;
 
@@ -124,8 +121,8 @@ WorldTime::WorldTime( QWidget *parent,
 
        listTimes.append(new CityInfo(this));
 
-       gl->addWidget( listCities.at(i), i + 3, 0,  Qt::Alignment(Qt::AlignBottom));
-       gl->addWidget( listTimes.at(i), i + 3, 1, Qt::Alignment(Qt::AlignBottom));
+       gl->addWidget( listCities.at(i), i + 3, 0 );
+       gl->addWidget( listTimes.at(i), i + 3, 1, Qt::Alignment(Qt::AlignVCenter) | Qt::AlignHCenter);
    }
 
 

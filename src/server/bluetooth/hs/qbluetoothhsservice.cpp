@@ -42,7 +42,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "bluetooth/scomisc_p.h"
+#include "scomisc_p.h"
 
 #define MAX_RINGS 10
 

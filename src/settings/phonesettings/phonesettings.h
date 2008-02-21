@@ -201,7 +201,7 @@ private:
     QCellBroadcast *client;
 };
 
-class CellBroadcastEditDialog : public QDialog, public Ui::ChannelEdit
+class CellBroadcastEditDialog : public QDialog
 {
     Q_OBJECT
 
@@ -221,6 +221,7 @@ private slots:
 private:
     CellBroadcasting::Channel ch;
     QListWidget *lstLang;
+    Ui::ChannelEdit *editor;
 };
 
 class FixedDialing : public QDialog
@@ -306,12 +307,21 @@ protected:
     void accept();
     void reject();
 
+private slots:
+    void speakerSliderChanged(int volume);
+    void speakerVolumeChanged(int volume);
+    void microphoneSliderChanged(int volume);
+    void microphoneVolumeChanged(int volume);
+
 private:
     QSlider *speakerVolume;
     QSlider *microphoneVolume;
 
     int m_oldSpeakerVolume;
     int m_oldMicrophoneVolume;
+
+    bool m_changeSpeakerVolume;
+    bool m_changeMicrophoneVolume;
 
     QCallVolume *callVolume;
 };
