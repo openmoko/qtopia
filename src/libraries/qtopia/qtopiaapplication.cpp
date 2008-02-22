@@ -139,6 +139,8 @@ bool mousePreferred = false;
 #define QTOPIA_USE_TEST_SLAVE 1
 #endif
 
+static void raiseAndActivateWindow(QWidget *w);
+
 enum QPEWidgetFlagsEnum {
     MenuLikeDialog = 0x01,
 } QPEWidgetFlags;
@@ -1558,8 +1560,10 @@ public:
             d->setGeometry(geom);
             d->show();
         }
-//        d->raise();
-//        d->activateWindow();
+
+#ifdef Q_WS_X11
+        raiseAndActivateWindow(d);
+#endif
     }
 
     static bool read_widget_rect(const QString &app, bool &maximized, QPoint &p, QSize &s)
@@ -1687,8 +1691,8 @@ public:
                 else
                     qpe_main_widget->show();
             }
-            qpe_main_widget->raise();
-            qpe_main_widget->activateWindow();
+
+            raiseAndActivateWindow(qpe_main_widget);
         }
     }
 
@@ -2815,8 +2819,7 @@ bool QtopiaApplication::qwsEventFilter( QWSEvent *e )
             // make sure our modal widget is ALWAYS on top
             QWidget *topm = activeModalWidget();
             if ( topm && (int)topm->winId() != fe->simpleData.window) {
-                topm->raise();
-                topm->activateWindow();
+                raiseAndActivateWindow(topm);
             }
         }
         if ( fe->simpleData.get_focus && inputMethodDict ) {
@@ -3245,8 +3248,8 @@ bool QtopiaApplication::raiseAppropriateWindow()
                     top->show();
             }
         }
-        top->raise();
-        top->activateWindow();
+
+        raiseAndActivateWindow(top);
     }
 
     QWidget *topm = activeModalWidget();
@@ -3264,8 +3267,7 @@ bool QtopiaApplication::raiseAppropriateWindow()
                 if ( w == d->lastraised )
                     foundlast = true;
                 if ( foundlast ) {
-                    w->raise();
-                    w->activateWindow();
+                    raiseAndActivateWindow(w);
                     topsub = w;
                 }
             }
@@ -3275,8 +3277,7 @@ bool QtopiaApplication::raiseAppropriateWindow()
         if ( !w->parentWidget() && w != top && w != topm && w->isVisible() && w->windowType() != Qt::Desktop) {
             if ( w == d->lastraised )
                 break;
-            w->raise();
-            w->activateWindow();
+            raiseAndActivateWindow(w);
             topsub = w;
         }
     }
@@ -3285,8 +3286,7 @@ bool QtopiaApplication::raiseAppropriateWindow()
     // 3. Raise the active modal widget.
     if ( topm && topm != top ) {
         topm->show();
-        topm->raise();
-        topm->activateWindow();
+        raiseAndActivateWindow(topm);
         // If we haven't already handled the fastAppShowing message
         if (!top && d->preloaded) {
             QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("fastAppShowing(QString)"));
@@ -3320,6 +3320,7 @@ void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
         }
         /* so next quit won't quit */
     } else if ( msg == QLatin1String("raise()") ) {
+        qWarning() << d->appName << "raised";
         d->notbusysent = false;
         raiseAppropriateWindow();
         // Tell the system we're still chugging along...
@@ -3419,11 +3420,38 @@ static void markQtopiaWindow(QWidget *w)
     w->setWindowFlags(Qt::FramelessWindowHint|w->windowFlags());
 }
 
+// Emulate a pager here. Qtopia 'knows' when to do these things...
+static void raiseAndActivateWindow(QWidget *w)
+{
+    w->raise();
+    w->activateWindow();
+
+    // Play pager now
+    static Atom netActiveWindow = XInternAtom(QX11Info::display(), "_NET_ACTIVE_WINDOW", False);
+
+    XEvent event;
+    event.xclient.type = ClientMessage;
+    event.xclient.display= QX11Info::display();
+    event.xclient.window = w->winId();
+    event.xclient.message_type = netActiveWindow;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = 2; 
+    event.xclient.data.l[1] = QX11Info::appUserTime();
+    event.xclient.data.l[2] = 0;
+    XSendEvent(QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureRedirectMask|SubstructureNotifyMask, &event);
+}
+
 #else
 
 static void markQtopiaWindow(QWidget *)
 {
     // Nothing to do here for other platforms.
+}
+
+static void raiseAndActivateWindow(QWidget *w)
+{
+    w->raise();
+    w->activateWindow();
 }
 
 #endif
