@@ -1027,7 +1027,7 @@ void AbstractName::textChanged()
 //----------------------------------------------------------------------
 
 AbFullEditor::AbFullEditor(QWidget *parent, Qt::WFlags fl)
-    : AbEditor(parent, fl),
+    : AbEditor(parent, fl|Qt::FramelessWindowHint),
     abName(0)
 {
     setObjectName("edit");
@@ -2609,7 +2609,7 @@ void parseEmailTo( const QString &strDefaultEmail,
 #ifdef QTOPIA_CELL
 
 AbSimEditor::AbSimEditor(QWidget *parent, Qt::WFlags fl)
-    : AbEditor(parent, fl)
+    : AbEditor(parent, fl|Qt::FramelessWindowHint)
 {
     setObjectName("edit");
     setModal(true);

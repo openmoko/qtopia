@@ -89,7 +89,7 @@ static DelayedWaitDialog *waitDlg = 0;
 #endif
 
 SimApp::SimApp(QWidget *parent, Qt::WFlags f)
-    : QMainWindow(parent, f), view(0), notification(0),
+    : QMainWindow(parent, f|Qt::FramelessWindowHint), view(0), notification(0),
       hasStk(false), simToolkitAvailable(false), eventList(0), idleModeMsgId(0),
       failLabel(0), commandOutsideMenu(false), hasSustainedDisplayText(false)
 {
