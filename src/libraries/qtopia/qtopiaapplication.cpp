@@ -4440,6 +4440,11 @@ void QtopiaApplication::updateDialogGeometry()
 }
 
 
+void QtopiaApplication::prepareMainWidget( QWidget* w )
+{
+    markQtopiaMainWindow(w);
+}
+
 
 /*!
     Shows \a dialog. A heuristic approach is taken to

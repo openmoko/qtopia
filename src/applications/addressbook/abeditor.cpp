@@ -1027,9 +1027,11 @@ void AbstractName::textChanged()
 //----------------------------------------------------------------------
 
 AbFullEditor::AbFullEditor(QWidget *parent, Qt::WFlags fl)
-    : AbEditor(parent, fl|Qt::FramelessWindowHint),
+    : AbEditor(parent, fl),
     abName(0)
 {
+    QtopiaApplication::prepareMainWidget(this);
+
     setObjectName("edit");
     setModal(true);
 

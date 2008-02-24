@@ -256,7 +256,7 @@ void QuickDialModel::populate()
 PhoneQuickDialerScreen::PhoneQuickDialerScreen( QWidget *parent, Qt::WFlags fl )
     : QAbstractDialerScreen( parent, fl ), mSpeedDial( false )
 {
-    setWindowFlags(Qt::FramelessWindowHint|windowFlags());
+    QtopiaApplication::prepareMainWidget(this);
 
     QCallList &callList = DialerControl::instance()->callList();
     QVBoxLayout *l = new QVBoxLayout( this );
