@@ -466,8 +466,6 @@ void PhoneLauncher::callPressed()
     // Called if server windows are not on top
     showCallHistory();
 #endif
-    if (warningBox)
-        delete warningBox;
 }
 
 /*!
@@ -754,19 +752,6 @@ void PhoneLauncher::launchType(const QString& type)
 /*!
   \internal
   */
-void PhoneLauncher::showMessageBox(const QString& title, const QString& text, QAbstractMessageBox::Icon icon)
-{
-    if (!warningBox) {
-        warningBox = QAbstractMessageBox::messageBox(this, title, text, icon);
-        warningBox->setAttribute(Qt::WA_DeleteOnClose); // It's a QPointer<> so safe.
-    }
-    warningBox->setText(text);
-    QtopiaApplication::showDialog(warningBox);
-}
-
-/*!
-  \internal
-  */
 void PhoneLauncher::showHomeScreen(int state)
 {
     // state: 0 -> no screensaver calls
@@ -790,9 +775,6 @@ void PhoneLauncher::showHomeScreen(int state)
     if(phoneBrowser(false)) {
         phoneBrowser()->hide();
     }
-
-    if (warningBox)
-        delete warningBox;
 
     if (state == 1) {
         //QtopiaIpcEnvelope closeApps( "QPE/System", "close()" );
@@ -852,9 +834,6 @@ void PhoneLauncher::showPhoneLauncher()
     phoneBrowser()->showMaximized();
     phoneBrowser()->raise();
     phoneBrowser()->activateWindow();
-
-    if (warningBox)
-        delete warningBox;
 }
 
 #ifdef QTOPIA_PHONEUI
