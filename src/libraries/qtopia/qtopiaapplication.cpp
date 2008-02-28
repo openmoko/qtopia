@@ -3441,7 +3441,9 @@ static void raiseAndActivateWindow(QWidget *w)
     event.xclient.format = 32;
     event.xclient.data.l[0] = 2; 
     event.xclient.data.l[1] = QX11Info::appUserTime();
-    event.xclient.data.l[2] = 0;
+    event.xclient.data.l[2] = qApp->activeWindow() ? qApp->activeWindow()->winId() : 0;
+    event.xclient.data.l[3] = 0;
+    event.xclient.data.l[4] = 0;
     XSendEvent(QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureRedirectMask|SubstructureNotifyMask, &event);
 }
 
