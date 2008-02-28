@@ -274,7 +274,12 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 #ifndef QT_NO_TRANSLATION //load translation for profile names
     QtopiaApplication::loadTranslations("QtopiaDefaults");
 #endif
+#ifdef QT_ILLUME_LAUNCHER
+    setGeometry(0, 0, 0, 0);
+    hide();
+#else
     setGeometry(desktopRect);
+#endif
 
     QObject::connect(ThemeControl::instance(), SIGNAL(themeChanged()),
                      this, SLOT(loadTheme()));
@@ -288,8 +293,13 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     // Create home screen
     m_homeScreen = qtopiaWidget<QAbstractHomeScreen>(this);
     // Homescreen covers the entire screen
+#ifdef QT_ILLUME_LAUNCHER
+    m_homeScreen->setGeometry(0, 0, 0, 0);
+    m_homeScreen->hide();
+#else
     if (m_homeScreen->geometry() != rect())
         m_homeScreen->setGeometry(0, 0, width(), height());
+#endif
     HomeScreenControl::instance()->setHomeScreen(m_homeScreen);
 
     QObject::connect(m_homeScreen, SIGNAL(speedDial(QString)),
@@ -436,15 +446,21 @@ PhoneLauncher::~PhoneLauncher()
   */
 void PhoneLauncher::showEvent(QShowEvent *e)
 {
+#ifndef QT_ILLUME_LAUNCHER
     QTimer::singleShot(0, m_homeScreen, SLOT(show()));
     QTimer::singleShot(0, m_homeScreen, SLOT(applyHomeScreenImage()));
+#endif
+
     QTimer::singleShot(0, this, SLOT(updateBackground()));
     if (m_secondDisplay)
         QTimer::singleShot(0, this, SLOT(applySecondaryBackgroundImage()));
 #ifdef QTOPIA_PHONEUI
     QTimer::singleShot(0, this, SLOT(initializeCallHistory()));
 #endif
+
+#ifndef QT_ILLUME_LAUNCHER
     header()->show();
+#endif
     if (QSoftMenuBar::keys().count())
         context()->show();
     QWidget::showEvent(e);
@@ -574,8 +590,10 @@ void PhoneLauncher::loadTheme()
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
 
     // header - not lazy
+#ifndef QT_ILLUME_LAUNCHER
     WindowManagement::dockWindow(header(), WindowManagement::Top, header()->reservedSize());
     if ( v ) header()->show();
+#endif
 
     // context bar - not lazy
     WindowManagement::dockWindow(context(), WindowManagement::Bottom, context()->reservedSize());
@@ -583,7 +601,11 @@ void PhoneLauncher::loadTheme()
         context()->show();
 
     // home screen - not lazy
+#ifdef QT_ILLUME_LAUNCHER
+    m_homeScreen->setGeometry(0, 0, 0, 0);
+#else
     m_homeScreen->setGeometry(desktopRect);
+#endif
     m_homeScreen->updateInformation();
 
 #ifdef QTOPIA_PHONEUI
@@ -1038,6 +1060,10 @@ PhoneHeader *PhoneLauncher::header()
         m_header = new PhoneHeader(0);
         WindowManagement::protectWindow(m_header);
         ThemeControl::instance()->registerThemedView(m_header, "Title");
+#ifdef QT_ILLUME_LAUNCHER
+        m_header->setGeometry(0, 0, 0, 0);
+        m_header->hide();
+#endif
     }
 
     return m_header;
