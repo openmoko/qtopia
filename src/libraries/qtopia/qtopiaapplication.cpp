@@ -139,7 +139,7 @@ bool mousePreferred = false;
 #define QTOPIA_USE_TEST_SLAVE 1
 #endif
 
-static void markQtopiaMainWindow(QWidget *w);
+static void markQtopiaWindow(QWidget *w);
 static void raiseAndActivateWindow(QWidget *w);
 
 enum QPEWidgetFlagsEnum {
@@ -3400,7 +3400,6 @@ void QtopiaApplication::setMainWidget(QWidget *widget, bool noMaximize)
     Q_ASSERT(widget->isTopLevel());
     d->qpe_main_widget = widget;
     d->nomaximize = noMaximize;
-    markQtopiaMainWindow(widget);
 }
 
 #ifdef Q_WS_X11
@@ -3450,11 +3449,6 @@ static void raiseAndActivateWindow(QWidget *w)
 #else
 
 static void markQtopiaWindow(QWidget *)
-{
-    // Nothing to do here for other platforms.
-}
-
-static void markQtopiaMainWindow(QWidget *)
 {
     // Nothing to do here for other platforms.
 }
@@ -4444,7 +4438,7 @@ void QtopiaApplication::updateDialogGeometry()
 
 void QtopiaApplication::prepareMainWidget( QWidget* w )
 {
-    markQtopiaMainWindow(w);
+    markQtopiaWindow(w);
 }
 
 
