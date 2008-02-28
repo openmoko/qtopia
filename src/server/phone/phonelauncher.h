@@ -215,25 +215,27 @@ private:
     QBasicTimer m_multitaskingMultipressTimer;
     int m_multitaskingcursor;
     uint m_registrationMessageId;
+
+    QStringList m_iconPath;
+    bool m_slowUpdates;
+
+    mutable QAbstractSecondaryDisplay *m_secondDisplay;
+
+    QAbstractMessageBox *m_warningMessageBox;
+
+    QSpeedDialFeedback *m_speeddialfeedback;
+    QString m_configuration;
+
+    UIApplicationMonitor m_appMon;
+
 #ifdef QTOPIA_PHONEUI
     int m_messageCount;
     int m_activeCalls;
     QValueSpaceItem m_newMessages;
-#endif
-    QStringList m_iconPath;
-    bool m_slowUpdates;
-#ifdef QTOPIA_PHONEUI
     QAbstractMessageBox *m_serviceMessageBox;
     QAbstractMessageBox *m_CBSMessageBox;
-#endif
-
-#ifdef QTOPIA_PHONEUI
     mutable CallScreen *m_callScreen;
     mutable QAbstractDialerScreen *m_dialer;
-#endif
-    mutable QAbstractSecondaryDisplay *m_secondDisplay;
-
-#ifdef QTOPIA_PHONEUI
     CallHistory *m_callHistory;
 
     QAbstractMessageBox *m_missedMessageBox;
@@ -241,13 +243,6 @@ private:
     QAbstractMessageBox *m_incomingMessageBox;
     QAbstractMessageBox *m_dialingMessageBox;
     QAbstractMessageBox *m_callTypeMessageBox;
-#endif
-#ifdef QTOPIA_VOIP
-    QAbstractMessageBox *m_voipNoPresenceMessageBox;
-#endif
-    QAbstractMessageBox *m_warningMessageBox;
-
-#ifdef QTOPIA_PHONEUI
     int m_alertedMissed;
     bool m_messageBoxFull;
     bool m_isSystemMessage;
@@ -257,21 +252,16 @@ private:
     bool m_queuedIncoming;
 
     bool m_waitingVoiceMailNumber;
-#endif
-    QSpeedDialFeedback *m_speeddialfeedback;
-    QString m_configuration;
-
-    UIApplicationMonitor m_appMon;
-
-#ifdef QTOPIA_PHONEUI
     QServiceNumbers *m_serviceNumbers;
+    bool m_dialerSpeedDialFeedbackActive;
 #endif
+#ifdef QTOPIA_VOIP
+    QAbstractMessageBox *m_voipNoPresenceMessageBox;
+#endif
+
 #ifdef QTOPIA_CELL
     CellModemManager *m_cellModem;
     GsmKeyActions *m_gsmKeyActions;
-#endif
-#ifdef QTOPIA_PHONEUI
-    bool m_dialerSpeedDialFeedbackActive;
 #endif
 };
 

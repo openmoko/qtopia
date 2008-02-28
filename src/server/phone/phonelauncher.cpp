@@ -208,37 +208,29 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     : QAbstractServerInterface(parent, fl), m_updateTid(0), m_header(0),
       m_context(0), m_stack(0), m_homeScreen(0), m_documentsMenu(0), 
       m_registrationMessageId(0),
+    m_secondDisplay(0),
+    m_warningMessageBox(0),
+    m_speeddialfeedback(0),
 #ifdef QTOPIA_PHONEUI
       m_messageCount(0), m_activeCalls(0),
       m_newMessages("Communications/Messages/NewMessages"),
-#endif
-#ifdef QTOPIA_PHONEUI
     m_serviceMessageBox(0), m_CBSMessageBox(0),
     m_callScreen(0), m_dialer(0),
-#endif
-    m_secondDisplay(0),
-#ifdef QTOPIA_PHONEUI
     m_callHistory(0),
     m_missedMessageBox(0), m_messagesMessageBox(0), m_incomingMessageBox(0),
     m_dialingMessageBox(0), m_callTypeMessageBox(0),
-#endif
-#ifdef QTOPIA_VOIP
-    m_voipNoPresenceMessageBox(0),
-#endif
-    m_warningMessageBox(0),
-#ifdef QTOPIA_PHONEUI
     m_alertedMissed(0),
     m_messageBoxFull(false),
     m_isSystemMessage(false),
     m_queuedIncoming(false),
     m_waitingVoiceMailNumber(false),
+    m_dialerSpeedDialFeedbackActive(false),
 #endif
-    m_speeddialfeedback(0)
+#ifdef QTOPIA_VOIP
+    m_voipNoPresenceMessageBox(0),
+#endif
 #ifdef QTOPIA_CELL
-    , m_cellModem(0), m_gsmKeyActions(0)
-#endif
-#ifdef QTOPIA_PHONEUI
-    , m_dialerSpeedDialFeedbackActive(false)
+    m_cellModem(0), m_gsmKeyActions(0)
 #endif
 {
     m_configuration = Qtopia::defaultButtonsFile();
