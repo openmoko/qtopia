@@ -53,3 +53,7 @@
 #ifndef V4L_VIDEO_DEVICE
 #define V4L_VIDEO_DEVICE            "" //no video
 #endif
+
+#ifdef Q_WS_X11
+#define QT_ILLUME_LAUNCHER
+#endif
