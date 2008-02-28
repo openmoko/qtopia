@@ -284,6 +284,8 @@ void HelpBrowser::textChanged(QUrl url)
         setWindowTitle( browser->documentTitle() ) ;
 #ifdef DEBUG
     location->setText( url.toString() );
+#else
+    Q_UNUSED(url);
 #endif
 }
 

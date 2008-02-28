@@ -4,6 +4,5 @@
 -prefix /opt/Qtopia
 -no-helix -no-sxe -no-drm -no-ssl
 -extra-qtopiacore-config "-depths 8,16,32" 
--D SYSINFO_GEEK_MODE
 -release
 -extra-qt-config -no-glib 

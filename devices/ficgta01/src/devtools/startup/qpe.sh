@@ -68,8 +68,14 @@ mknod /dev/ttySAC0 c 204 64 -m 660
 chgrp dialout /dev/ttySAC0
 
 # power gsm on
-echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
-echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
+if [ -e /sys/bus/platform/devices/gta01-pm-gsm.0 ]; then
+    echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
+    echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
+else
+    echo "1" > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+    echo "1" > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
+fi
+
 
 	echo "starting clock" > $HOME/log
 	echo `date` >> $HOME/log

@@ -62,6 +62,9 @@ private:
     GstElement* m_sink;
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
     QImage*     m_frameBufferImage;
+    QRect       m_windowRect;
+    QRect       m_viewPort;
+    QTransform  m_transform;
 #else
     QPoint      m_destTopLeft;
 #endif

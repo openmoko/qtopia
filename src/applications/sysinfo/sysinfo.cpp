@@ -84,10 +84,8 @@ void SystemInfo::delayedInit()
 {
     tab->addTab( new StorageInfoView(tab), tr("Storage"));
     QCoreApplication::processEvents();
-#ifdef SYSINFO_GEEK_MODE
     tab->addTab( wrapWithScrollArea(new LoadInfo(tab)), tr("CPU") );
     QCoreApplication::processEvents();
-#endif
     tab->addTab( wrapWithScrollArea(new MemoryInfo(tab)), tr("Memory") );
     QCoreApplication::processEvents();
     tab->addTab( wrapWithScrollArea(new DataView(tab)), tr("Data") );
@@ -103,9 +101,9 @@ void SystemInfo::delayedInit()
 }
 
 /*TODO: Once the cleanup wizard has been ported it must be published using \service tag
- 
+
     \service CleanupWizardService CleanupWizard
- 
+
     \brief Provides the Qtopia CleanupWizard service.
 
     The \i CleanupWizard service enables applications to pop up the

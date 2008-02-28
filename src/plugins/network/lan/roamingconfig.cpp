@@ -35,7 +35,7 @@ RoamingPage::RoamingPage( const QtopiaNetworkProperties& cfg, QWidget* parent, Q
     init ( cfg );
 
     connect( ui.autoConnect, SIGNAL(stateChanged(int)), this, SLOT(reconnectToggled(int)) );
-    connect( ui.knownNetworks, SIGNAL(itemActivated(QListWidgetItem*)), 
+    connect( ui.knownNetworks, SIGNAL(itemActivated(QListWidgetItem*)),
              this, SLOT(listActivated(QListWidgetItem*)) );
     ui.knownNetworks->installEventFilter(this);
 #else
@@ -163,7 +163,7 @@ void RoamingPage::listActivated(QListWidgetItem* item)
 bool RoamingPage::eventFilter( QObject* watched, QEvent* event )
 {
 #if WIRELESS_EXT > 13
-    if ( watched == ui.knownNetworks && 
+    if ( watched == ui.knownNetworks &&
             0 != currentSelection )
     {
         if ( event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
@@ -187,7 +187,6 @@ bool RoamingPage::eventFilter( QObject* watched, QEvent* event )
                     ui.knownNetworks->takeItem( row );
                     ui.knownNetworks->insertItem( row+1, currentSelection );
                     ui.knownNetworks->setCurrentRow( row+1 );
-                    
                 }
                 return true;
             } else if ( ke->key() == Qt::Key_Back ) {
@@ -195,6 +194,9 @@ bool RoamingPage::eventFilter( QObject* watched, QEvent* event )
             }
         }
     }
+#else
+    Q_UNUSED(watched);
+    Q_UNUSED(event);
 #endif
     return false;
 }

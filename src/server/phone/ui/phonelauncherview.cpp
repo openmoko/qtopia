@@ -632,7 +632,8 @@ void PhoneLauncherView::keyPressEvent(QKeyEvent *event)
         // Change the selected item's appearance.
         selectedItem->setActive(true);
 
-        emit pressed(*selectedItem->current()->content());
+        if (selectedItem->current()->content())
+            emit pressed(*selectedItem->current()->content());
     } else {
         // Key not handled by PhoneLauncherView.
         QGraphicsView::keyPressEvent(event);
@@ -678,7 +679,8 @@ void PhoneLauncherView::mousePressEvent(QMouseEvent *event)
             // selectionChangedHandler(), which emits highlighted(...) and causes the
             // window title to be updated.
             selectedItem->setCurrent(pressedItem, false);
-            emit pressed(*selectedItem->current()->content());
+            if (selectedItem->current()->content())
+                emit pressed(*selectedItem->current()->content());
         }
         selectedItem->setActive(true);
     }

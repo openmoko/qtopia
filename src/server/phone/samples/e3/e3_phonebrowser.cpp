@@ -52,25 +52,25 @@ E3BrowserDelegate::E3BrowserDelegate(QObject *parent)
 {
 }
 
-QSize E3BrowserDelegate::sizeHint(const QStyleOptionViewItem &option, 
+QSize E3BrowserDelegate::sizeHint(const QStyleOptionViewItem &,
                                const QModelIndex &) const
 {
     return QSize(64, 64);
 }
 
-void E3BrowserDelegate::paint(QPainter *painter, 
-                           const QStyleOptionViewItem &option, 
+void E3BrowserDelegate::paint(QPainter *painter,
+                           const QStyleOptionViewItem &option,
                            const QModelIndex &index) const
 {
     QFontMetrics met(option.font);
 
     QRect iconRect = option.rect;
     iconRect.adjust(2, 2, -2, -2); // Margin
-    iconRect.adjust(2 + met.height() / 2, 0, 
+    iconRect.adjust(2 + met.height() / 2, 0,
                     -1 * (2 + met.height() / 2), -1 * (met.height() + 4)); // Text
     QRect textRect(option.rect.left(), iconRect.bottom() + 4, option.rect.width() - 4, met.height());
 
-    QPixmap pix = 
+    QPixmap pix =
         qvariant_cast<QIcon>(index.data(Qt::DecorationRole)).pixmap(iconRect.size());
 
     if(option.state & QStyle::State_Selected) {
@@ -118,7 +118,7 @@ private:
     QListView::ViewMode m_mode;
     QStackedWidget *stack;
     QHash<QString, int> stackContents;
-    
+
     E3BrowserDelegate *m_bd;
     QItemDelegate *m_id;
 };
@@ -187,7 +187,7 @@ QObject* E3BrowserScreenStack::createView(const QString &name)
     return view;
 }
 
-void E3BrowserScreenStack::raiseView(const QString &view, bool) 
+void E3BrowserScreenStack::raiseView(const QString &view, bool)
 {
     stack->setCurrentIndex(stackContents[view]);
 }

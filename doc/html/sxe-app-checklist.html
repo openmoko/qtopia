@@ -40,7 +40,7 @@
 <ul>
 <li>An application should typically declare itself a qtopia application in the project file<pre>    qtopia_project(qtopia app) # see buildsystem.html for more project keywords</pre>
 </li>
-<li>The application needs to declare which <a href="sxe-pkgmgr-profiles.html#sxe-domains">domain</a> it will be using in the project file:<pre>    pkg.domain=trusted</pre>
+<li>The application needs to declare which <a href="sxe-pkgmgr-profiles.html#sxe-domains">domain</a> it will be using in the project file:<pre>    target.hint=sxe</pre>
 </li>
 </ul>
 <p>The above requirements refer specifically to Qtopia applications which communicate with the qpe server and make requests. Binaries which do not communicate with the server do not need to do these steps. They still need to declare a domain however and are bound by the MAC rules that domain imposes.</p>

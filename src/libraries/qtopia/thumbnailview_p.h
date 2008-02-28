@@ -240,7 +240,6 @@ signals:
     // Select key pressed
     void selected();
 
-    // Only Qtopia PDA
     // ### TODO: stylus held on thumbnail
     void held( const QPoint& );
 

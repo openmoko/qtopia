@@ -165,6 +165,7 @@ bool bt_sco_set_fd(void *handle, int fd)
 */
 QByteArray find_btsco_device(const QByteArray &idPref = QByteArray())
 {
+    Q_UNUSED(idPref);
     return QByteArray("default");
 }
 

@@ -38,10 +38,13 @@ help.files=example.html
 help.hint=help
 INSTALLS+=help
 
+# SXE information
+target.hint=sxe
+target.domain=untrusted
+
 # Package information (used for make packages)
 pkg.name=example
 pkg.desc=Example Application
 pkg.version=1.0.0-1
 pkg.maintainer=Trolltech (www.trolltech.com)
 pkg.license=Commercial
-pkg.domain=trusted

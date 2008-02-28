@@ -158,7 +158,6 @@ static void set_fl(int bright)
 void LightSettings::reject()
 {
     set_fl(initbright);
-
     QDialog::reject();
     close();
 }
@@ -250,8 +249,6 @@ void LightSettings::applyMode()
     b->brightness->setValue( currentMode->initbright);
     b->interval_suspend->setEnabled( currentMode->canSuspend );
     b->notnetworkedsuspend->setChecked( !currentMode->networkedsuspend );
-
-
 }
 
 void LightSettings::applyBrightness()
@@ -259,6 +256,12 @@ void LightSettings::applyBrightness()
     // slot called, but we haven't changed the powerMode values yet
     currentMode->initbright = (  b->brightness->value() );
     set_fl(currentMode->initbright);
+
+    QSettings cfg("Trolltech","qpe");
+    cfg.beginGroup("BatteryPower");
+    cfg.setValue("Brightness", b->brightness->value());
+
+    
 }
 
 void LightSettings::powerTypeChanged(int index)

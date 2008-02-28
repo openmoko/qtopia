@@ -105,8 +105,6 @@ my %licenseInfo = ();
     my @products;
     push (@products, "Phone") if ( configopt("phone") );
     push (@products, "Platform") if ( configopt("platform") );
-    push (@products, "Media") if ( configopt("media") );
-    push (@products, "PDA") if ( configopt("pda") );
     $licenseInfo{Product} = "Qtopia ".join("/", @products);
 }
 checkLicenseKey();
@@ -142,16 +140,12 @@ my $x86_64 = 0;
 
 # The $build_ variables limit what you can build
 my $build_desktop = configopt("desktop");
-my $build_pda = configopt("pda");
 my $build_phone = configopt("phone");
-my $build_media = configopt("media");
 my $build_platform = configopt("platform");
 # For now, Windows and Mac OS X cannot build Qtopia
 if ( $isWindows || $isMac ) {
     $build_platform = 0;
-    $build_pda = 0;
     $build_phone = 0;
-    $build_media = 0;
 }
 
 # Version stuff
@@ -161,14 +155,12 @@ getVersions();
 
 # Edition-specific defaults
 my %dispsz = ( "phone" => "160-240",
-               "pda" => "240-320",
-               "media" => "240-320",
                "platform" => "160-800" );
 
 # edition limiters
-my $qtopia_visref = sub { $build_platform || $build_pda || $build_phone  || $build_media };
+my $qtopia_visref = sub { $build_platform || $build_phone };
 my $qtopia_autoref = sub { opt("edition") };
-my $nonplatform_visref = sub { $build_pda || $build_phone || $build_media };
+my $nonplatform_visref = sub { $build_phone };
 my $nonplatform_autoref = sub { opt("edition") && opt("edition") ne "platform" };
 my $desktop_visref = sub { $build_desktop };
 my $desktop_autoref = sub { opt("qtopiadesktop") };
@@ -1001,7 +993,7 @@ set_optvar( "readline", +{
     "unset" => [ "no-%", "Disable GNU readline." ],
     "default" => configopt("depot"),
     "default_tested" => 1,
-    "visible" => sub { configopt("depot") && ($build_platform || $build_pda || $build_phone  || $build_media) },
+    "visible" => sub { configopt("depot") && ($build_platform || $build_phone) },
     "autodep" => $qtopia_autoref,
     "silentignore" => [ "no-readline" ],
     "config_pri" => "CONFIG+=enable_readline",
@@ -1227,8 +1219,8 @@ set_optvar( "qpe_config", +{
 });
 
 # If we are a non-depot or desktop-only package, turn on Qtopia Sync Agent
-#if ( !configopt("depot") || ($build_desktop && !$build_platform && !$build_pda && !$build_phone) ) {
-if ( $build_desktop && !$build_platform && !$build_pda && !$build_phone && !$build_media )  {
+#if ( !configopt("depot") || ($build_desktop && !$build_platform && !$build_phone) ) {
+if ( $build_desktop && !$build_platform && !$build_phone )  {
     opt("qtopiadesktop", "default") = 1;
 }
 
@@ -1237,16 +1229,6 @@ if ( $build_platform ) {
     my $availref = opt("edition", "available");
     push(@$availref, "platform");
     opt("edition", "default") = "platform";
-}
-if ( $build_media ) {
-    my $availref = opt("edition", "available");
-    push(@$availref, "media");
-    opt("edition", "default") = "media";
-}
-if ( $build_pda ) {
-    my $availref = opt("edition", "available");
-    push(@$availref, "pda");
-    opt("edition", "default") = "pda";
 }
 if ( $build_phone ) {
     my $availref = opt("edition", "available");
@@ -1636,11 +1618,7 @@ if ( opt("edition") ) {
     }
     if ( !opt("defaultbuttons") ) {
         opt("defaultbuttons", "auto") = 1;
-        if ( opt("edition") eq "phone" || opt("edition") eq "platform" || opt("edition") eq "media" ) {
-            opt("defaultbuttons") = "phone";
-        } else {
-            opt("defaultbuttons") = "pda";
-        }
+        opt("defaultbuttons") = "phone";
         # Use the proper path
         opt("defaultbuttons") = "$depotpath/etc/defaultbuttons-".opt("defaultbuttons").".conf";
     }
@@ -3490,7 +3468,7 @@ sub getVersions
     $verfile = "$depotpath/src/libraries/qtopiabase/version.h" unless ( -f $verfile );
     if ( open(IN, "$verfile" ) ) {
         while ( defined($_ = <IN>) ) {
-            if ( /QPE_VERSION\s+"(\d+\.\d+\.\d+)"/ ) {
+            if ( /QPE_VERSION\s+"(\d+\.\d+\.\d+).*"/ ) {
                 $qtopiaVersionStr = $1;
                 ( $qtopiaMajorVersion, $qtopiaMinorVersion, $qtopiaRevVersion ) = ( $qtopiaVersionStr =~ /(\d+)\.(\d+)\.(\d+)/ );
                 last;
@@ -3516,7 +3494,7 @@ sub getVersions
         die "ERROR: Could not read version from ".fixpath("$qt_depot_path/src/corelib/global/qglobal.h")."\n";
     }
 
-    if ( ( $build_phone || $build_pda || $build_media || $build_platform )
+    if ( ( $build_phone || $build_platform )
          && ( $qtMajorVersion != 4 || $qtMinorVersion != 3 ) ) {
         die <<END;
 ERROR: Qtopia $qtopiaMajorVersion.$qtopiaMinorVersion is designed to work with Qt 4.3.
@@ -3665,7 +3643,7 @@ sub checkLicenseKey
     if ( -f "$depotpath/LICENSE.GPL" && configopt("free") ) {
         $licenseInfo{Product} .= " Open Source";
         $licenseInfo{LicenseFile} = "LICENSE.GPL";
-        $licenseInfo{DestLicenseFile} = "LICENSE.GPL";
+        $licenseInfo{DestLicenseFile} = "LICENSE.GPL2";
     } elsif ( -f "$depotpath/LICENSE.TROLL" && configopt("depot") ) {
         $licenseInfo{Product} .= " Trolltech Internal";
         $licenseInfo{LicenseFile} = "LICENSE.TROLL";

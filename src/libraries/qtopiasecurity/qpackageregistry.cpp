@@ -286,7 +286,7 @@ struct ProgramInfo
   This enum specifies one of the registry files
   \value Keyfile
          keyfile
-  \value Manifest 
+  \value Manifest
          manifest
          keyfile
   \value KeyfileSequence
@@ -700,7 +700,7 @@ void QPackageRegistry::addToManifest( const SxeProgramInfo &spi, int sfd )
         pi.values.installId = curInstallId++;
         pi.values.progId = spi.id;
         ::lseek( manifestFd, 0, SEEK_END );
-    
+
         // endianess here not a problem since either way around the value is just
         // a key between the installs and manifest files
         ::fwrite( &toWrite->values.installId,
@@ -923,10 +923,10 @@ void QPackageRegistry::registerBinary( SxeProgramInfo &pi )
         qWarning( "\tno safe-exec install on %s", qPrintable( fpath ));
     }
 
-    //only modify Keyfile if not on a lids enabled device 
+    //only modify Keyfile if not on a lids enabled device
     if ( !QFile::exists( procLidsKeysPath ))
         updateProcKeyFile( pi, kf.fileDescriptor() );
-    
+
     addToManifest( pi, kf.fileDescriptor() );
     if ( !profileDict.contains( pi.domain ))
     {
@@ -994,11 +994,11 @@ bool QPackageRegistry::unregisterPackageBinaries( const QString &packagePath )
     QList<QVariant> checkList;
     if ( !openSystemFiles() )
         goto endUnregisterPackageBinaries;
-    
+
     if ( manifestFd == -1 )
     {
         qWarning( "Manifest file not open, ignoring unregister request" );
-        goto endUnregisterPackageBinaries; 
+        goto endUnregisterPackageBinaries;
     }
 
     if ( installStrm == NULL )
@@ -1107,14 +1107,14 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
 
     //specific variables for Manifest
     IdBlock idBuf;
-    
+
     //specific variables for Keyfile
     struct usr_key_entry kBuf;
 
     off_t currPos;
     bool match;
     //iterate through the registry file and depending on a match with the checklist
-    //set beginPos or afterEndPos appropriately.   
+    //set beginPos or afterEndPos appropriately.
     do
     {
         match = false;
@@ -1128,15 +1128,15 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
         {
             if( !fread( &installId, sizeof( installId ), 1, stream ) )
                 break;
-            
-            lineNo++; 
+
+            lineNo++;
             pad =  ::fgetc ( stream );
             if ( pad != ':' )
                 qWarning( "expected \":\" reading installs - line %d", lineNo );
-        
+
             fgets( charBuf, MAX_PATH_LEN, installStrm );
             if ( QString( charBuf ).contains( checkList.toString() ) )
-            {   
+            {
                 ret.append( installId );
                 match = true;
             }
@@ -1171,14 +1171,14 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
         if ( match ) //if a match has been made
         {
             if ( beginPos == -1 ) //set beginPos if not already set
-                beginPos = currPos;   
+                beginPos = currPos;
         } else
         {
-            if ( beginPos == -1 ) // have not even made one match yet 
+            if ( beginPos == -1 ) // have not even made one match yet
                 continue;
-            else 
-                if ( afterEndPos == -1 ) // we already have a match and we've reached the 
-                {                       // end of the series of entries we want to remove 
+            else
+                if ( afterEndPos == -1 ) // we already have a match and we've reached the
+                {                       // end of the series of entries we want to remove
                     afterEndPos = currPos;
                     break;
                 }
@@ -1187,17 +1187,17 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
 
     if ( beginPos == -1 )
     {
-        qLog(SXE) << "QPackageRegistry::Package to be removed not found in %s", (type == Installs ) ? "installs" : "manifest";
+        qLog(SXE) << "QPackageRegistry::Package to be removed not found in" << (type == Installs ? "installs" : "manifest");
         return ret;
     }
-    
+
     if ( afterEndPos == -1 )
         afterEndPos = initSize;
     off_t newSize = initSize - (afterEndPos - beginPos);
     Q_UNUSED(newSize);
-    
+
     //try to shift up any entries from afterEndPos to
-    //begin pos 
+    //begin pos
     fseek( stream, afterEndPos, SEEK_SET );
     unsigned int numItems;
     while( ( numItems = ::fread(charBuf, sizeof(char), MAX_PATH_LEN, stream) ) )
@@ -1208,7 +1208,7 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
         ::fwrite(charBuf, sizeof( char ), numItems, stream );
 
         beginPos =  ftello( stream );
-        fseek ( stream, afterEndPos, SEEK_SET ); 
+        fseek ( stream, afterEndPos, SEEK_SET );
     }
 
     //registry file could become corrupt if not properly truncated
@@ -1226,7 +1226,7 @@ QVariant QPackageRegistry::removeFromRegistry( const QVariant &checkList, Regist
     return ret;
 }
 
- 
+
 /*!
   Write the (possibly updated) policy file out to the file system.
 
@@ -1354,7 +1354,7 @@ int QPackageRegistry::bootstrap( const QString &installRoot )
 
 /*!
   Return the key associated the specified program id \a progId.
-      
+
   As a host binary sxe_installer doesnt have access to this method in
   qtransportauth_qws.cpp, so reimplement it here.
 

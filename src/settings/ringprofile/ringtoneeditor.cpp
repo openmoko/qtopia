@@ -442,7 +442,7 @@ void RingToneSelect::stopSound()
 #ifndef MEDIA_SERVER
 void RingToneSelect::soundCompleted(int)
 {
-    bool soundFinished = true;
+    soundFinished = true;
 }
 #endif
 

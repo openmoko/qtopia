@@ -153,7 +153,7 @@ void PhoneThemedView::myItemClicked(ThemeItem *item)
         QtopiaServiceRequest env( "Alarm", "editAlarm()" );
         env.send();
     } else if( in == "battery" ) {
-        // TODO: show more battery info, as per PDA plugin
+        // TODO: show more battery info
         Qtopia::execute("light-and-power");
     } else if( in == "time" ) {
         QtopiaServiceRequest env( "Time", "editTime()" );

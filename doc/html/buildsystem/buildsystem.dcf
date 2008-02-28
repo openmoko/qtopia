@@ -89,6 +89,9 @@
     <section ref="task-create-a-launcher-folder-1.html" title="Create a launcher folder">
         <keyword ref="task-create-a-launcher-folder-1.html">Create a launcher folder</keyword>
     </section>
+    <section ref="task-create-a-new-project-file-1.html" title="Create a new project file">
+        <keyword ref="task-create-a-new-project-file-1.html">Create a new project file</keyword>
+    </section>
     <section ref="atask-create-a-new-project-tree-1.html" title="Create a new project tree">
         <keyword ref="atask-create-a-new-project-tree-1.html">Create a new project tree</keyword>
     </section>
@@ -188,8 +191,8 @@
     <section ref="fn-idep-1.html" title="idep()">
         <keyword ref="fn-idep-1.html">idep()</keyword>
     </section>
-    <section ref="over-image-prefix-and-sdk-location-1.html" title="Image, prefix and SDK location">
-        <keyword ref="over-image-prefix-and-sdk-location-1.html">Image, prefix and SDK location</keyword>
+    <section ref="over-image--prefix-and-sdk-location-1.html" title="Image, prefix and SDK location">
+        <keyword ref="over-image--prefix-and-sdk-location-1.html">Image, prefix and SDK location</keyword>
     </section>
     <section ref="var-includepath-1.html" title="INCLUDEPATH">
         <keyword ref="var-includepath-1.html">INCLUDEPATH</keyword>
@@ -283,6 +286,9 @@
     </section>
     <section ref="processingorder.html" title="Processing Order">
         <keyword ref="processingorder.html">Processing Order</keyword>
+    </section>
+    <section ref="over-project-files-1.html" title="Project Files">
+        <keyword ref="over-project-files-1.html">Project Files</keyword>
     </section>
     <section ref="over-project-trees-1.html" title="Project Trees">
         <keyword ref="over-project-trees-1.html">Project Trees</keyword>
@@ -386,8 +392,8 @@
     <section ref="var-vpath-1.html" title="VPATH">
         <keyword ref="var-vpath-1.html">VPATH</keyword>
     </section>
-    <section ref="bas-what-is-the-build-system-1.html" title="What is the build system?">
-        <keyword ref="bas-what-is-the-build-system-1.html">What is the build system?</keyword>
+    <section ref="bas-what-is-the-build-system--1.html" title="What is the build system?">
+        <keyword ref="bas-what-is-the-build-system--1.html">What is the build system?</keyword>
     </section>
     <section ref="changes.html" title="What's new?">
         <keyword ref="changes.html">What's new?</keyword>

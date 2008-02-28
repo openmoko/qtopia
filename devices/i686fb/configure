@@ -11,6 +11,5 @@
 -extra-qtopiacore-config "-qt-libpng"
 -extra-qtopiacore-config "-qt-zlib"
 -extra-qt-config -no-glib 
--D SYSINFO_GEEK_MODE
 -debug
 -extra-qt-config -no-glib 

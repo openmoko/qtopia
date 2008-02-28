@@ -1942,7 +1942,7 @@ void QContact::removeExistingPortrait()
 void QContact::saveScaledPortrait(const QImage &scaled)
 {
     QString extension;
-    char *format;
+    const char *format;
     if (scaled.format() == QImage::Format_ARGB32_Premultiplied
             || scaled.format() == QImage::Format_ARGB32)
     {

@@ -163,7 +163,7 @@ bool QThumbStylePrivate::handleMouseMove(QAbstractScrollArea *w, QWidget* /*t*/,
     return false;
 }
 
-bool QThumbStylePrivate::handleMouseRelease(QAbstractScrollArea * /*w*/, QWidget *t, QMouseEvent *e)
+bool QThumbStylePrivate::handleMouseRelease(QAbstractScrollArea * /*w*/, QWidget * /*t*/, QMouseEvent *e)
 {
     if (!e->spontaneous())
         return false;
@@ -261,7 +261,7 @@ QThumbStyle::QThumbStyle() : QPhoneStyle()
     int hstrutSize = qRound(30.0 * dpi / 100.0);
     int vstrutSize = qRound(20.0 * dpi / 100.0);
     d->editableStrut = QSize(hstrutSize, vstrutSize);
-    
+
     spinArrowWidth = qRound(12.0 * dpi / 100.0);
 }
 
@@ -369,7 +369,7 @@ QSize QThumbStyle::sizeFromContents(ContentsType type, const QStyleOption* opt,
             sz = sz.expandedTo(d->editableStrut);
         break; }
     case CT_SpinBox:
-        sz.setWidth(sz.width() + spinArrowWidth);
+        sz.setWidth(sz.width() + spinArrowWidth / 2);   //add a little padding
         break;
     default:
         sz = QPhoneStyle::sizeFromContents(type, opt, csz, widget);

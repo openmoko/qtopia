@@ -390,7 +390,7 @@ int DialupUI::writeSystemFiles()
 #ifdef QTOPIA_CELL
     const bool external = prop.value("Serial/Type").toString() == "external";
 #else
-    const bool external = true; //PDA doesn't have internal modem
+    const bool external = true; // doesn't have internal modem
 #endif
 
     if ( !external )

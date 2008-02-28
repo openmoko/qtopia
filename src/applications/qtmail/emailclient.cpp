@@ -494,95 +494,93 @@ void EmailClient::createEmailHandler()
 {
     if(emailHandler)
         return;
-        
-    //create the email handler
-     emailHandler = new EmailHandler();
-        
-     //connect it up
-        
-     connect(emailHandler, SIGNAL(updateReceiveStatus(const Client*, QString)),
-             this, SLOT(updateReceiveStatusLabel(const Client*, QString)) );
-     connect(emailHandler, SIGNAL(updateSendStatus(const Client*, QString)),
-             this, SLOT(updateSendStatusLabel(const Client*, QString)) );
-    
-     connect(emailHandler, SIGNAL(mailboxSize(int)),
-             this, SLOT(setTotalPopSize(int)) );
-     connect(emailHandler, SIGNAL(downloadedSize(int)),
-             this, SLOT(setDownloadedSize(int)) );
-     //smtp
-     connect(emailHandler, SIGNAL(transferredSize(int)),
-             this, SLOT(setTransferredSize(int)) );
-     connect(emailHandler, SIGNAL(mailSendSize(int)),
-             this, SLOT(setTotalSmtpSize(int)) );
-     connect(emailHandler, SIGNAL(mailSent(int)), 
-             this, SLOT(mailSent(int)) );
-     connect(emailHandler, SIGNAL(transmissionCompleted()), 
-             this, SLOT(transmissionCompleted()) );
-    
-     connect(emailHandler, SIGNAL(smtpError(int,QString&)), this,
-             SLOT(smtpError(int,QString&)) );
-     connect(emailHandler, SIGNAL(popError(int,QString&)), this,
-             SLOT(popError(int,QString&)) );
-#ifndef QTOPIA_NO_SMS
-     connect(emailHandler, SIGNAL(smsError(int,QString&)), this,
-             SLOT(smsError(int,QString&)) );
-#endif
-#ifndef QTOPIA_NO_MMS
-     connect(emailHandler, SIGNAL(mmsError(int,QString&)), this,
-             SLOT(mmsError(int,QString&)) );
-#endif
-     connect(emailHandler, SIGNAL(unresolvedUidlList(QString&,QStringList&)),
-             this, SLOT(unresolvedUidlArrived(QString&,QStringList&)) );
-     connect(emailHandler, SIGNAL(failedList(QStringList&)), this,
-             SLOT(failedList(QStringList&)) );
-        
-     connect(emailHandler, SIGNAL(mailArrived(QMailMessage)), this,
-             SLOT(mailArrived(QMailMessage)) );
-     connect(emailHandler, SIGNAL(mailTransferred(int)), this,
-             SLOT(allMailArrived(int)) );
-     //imap
-     connect(emailHandler, SIGNAL(serverFolders()), this,
-             SLOT(imapServerFolders()) );
-     connect(emailHandler, SIGNAL(nonexistentMessage(QMailId)), this,
-             SLOT(nonexistentMessage(QMailId)) );
-     connect(emailHandler, SIGNAL(expiredMessages(QStringList, QString, bool)), this,
-             SLOT(expiredMessages(QStringList, QString, bool)) );
-        
-     connect(emailHandler, SIGNAL(allMessagesReceived()), this,
-             SLOT(clientsSynchronised()) );
 
-     //set relevant accounts
-        
-     QListIterator<QMailAccount*> it = accountList->accountIterator();
-     while ( it.hasNext() ) {
-         QMailAccount *account = it.next();
-#if !defined(QTOPIA_NO_SMS) || !defined(QTOPIA_NO_MMS)
+    //create the email handler
+    emailHandler = new EmailHandler();
+
+    //connect it up
+    connect(emailHandler, SIGNAL(updateReceiveStatus(const Client*, QString)),
+            this, SLOT(updateReceiveStatusLabel(const Client*, QString)) );
+    connect(emailHandler, SIGNAL(updateSendStatus(const Client*, QString)),
+            this, SLOT(updateSendStatusLabel(const Client*, QString)) );
+
+    connect(emailHandler, SIGNAL(mailboxSize(int)),
+            this, SLOT(setTotalPopSize(int)) );
+    connect(emailHandler, SIGNAL(downloadedSize(int)),
+            this, SLOT(setDownloadedSize(int)) );
+    //smtp
+    connect(emailHandler, SIGNAL(transferredSize(int)),
+            this, SLOT(setTransferredSize(int)) );
+    connect(emailHandler, SIGNAL(mailSendSize(int)),
+            this, SLOT(setTotalSmtpSize(int)) );
+    connect(emailHandler, SIGNAL(mailSent(int)),
+            this, SLOT(mailSent(int)) );
+    connect(emailHandler, SIGNAL(transmissionCompleted()),
+            this, SLOT(transmissionCompleted()) );
+
+    connect(emailHandler, SIGNAL(smtpError(int,QString&)), this,
+            SLOT(smtpError(int,QString&)) );
+    connect(emailHandler, SIGNAL(popError(int,QString&)), this,
+            SLOT(popError(int,QString&)) );
 #ifndef QTOPIA_NO_SMS
-         if ( account->accountType() == QMailAccount::SMS )
-             emailHandler->setSmsAccount( account );
+    connect(emailHandler, SIGNAL(smsError(int,QString&)), this,
+            SLOT(smsError(int,QString&)) );
 #endif
 #ifndef QTOPIA_NO_MMS
-         if ( account->accountType() == QMailAccount::MMS ) 
-             emailHandler->setMmsAccount( account );
+    connect(emailHandler, SIGNAL(mmsError(int,QString&)), this,
+            SLOT(mmsError(int,QString&)) );
 #endif
+    connect(emailHandler, SIGNAL(unresolvedUidlList(QString&,QStringList&)),
+            this, SLOT(unresolvedUidlArrived(QString&,QStringList&)) );
+    connect(emailHandler, SIGNAL(failedList(QStringList&)), this,
+            SLOT(failedList(QStringList&)) );
+
+    connect(emailHandler, SIGNAL(mailArrived(QMailMessage)), this,
+            SLOT(mailArrived(QMailMessage)) );
+    connect(emailHandler, SIGNAL(mailTransferred(int)), this,
+            SLOT(allMailArrived(int)) );
+    //imap
+    connect(emailHandler, SIGNAL(serverFolders()), this,
+            SLOT(imapServerFolders()) );
+    connect(emailHandler, SIGNAL(nonexistentMessage(QMailId)), this,
+            SLOT(nonexistentMessage(QMailId)) );
+    connect(emailHandler, SIGNAL(expiredMessages(QStringList, QString, bool)), this,
+            SLOT(expiredMessages(QStringList, QString, bool)) );
+
+    connect(emailHandler, SIGNAL(allMessagesReceived()), this,
+            SLOT(clientsSynchronised()) );
+
+    //set relevant accounts
+#if !defined(QTOPIA_NO_SMS) || !defined(QTOPIA_NO_MMS)
+    QListIterator<QMailAccount*> it = accountList->accountIterator();
+    while ( it.hasNext() ) {
+        QMailAccount *account = it.next();
+#ifndef QTOPIA_NO_SMS
+        if ( account->accountType() == QMailAccount::SMS )
+            emailHandler->setSmsAccount( account );
 #endif
-     }
+#ifndef QTOPIA_NO_MMS
+        if ( account->accountType() == QMailAccount::MMS )
+            emailHandler->setMmsAccount( account );
+#endif
+    }
+#endif
 }
 
 void EmailClient::initActions()
 {
     if (selectAccountMenu)
         return; // Already inited
-    
+
     QMenu *actionContext = QSoftMenuBar::menuFor( mActionView );
     QMenu *folderContext = QSoftMenuBar::menuFor( folderView() );
     QMenu *messageContext = QSoftMenuBar::menuFor( messageView() );
-        
+
     if (!pm_folder)
         pm_folder = new QIcon(":icon/folder");
     if (!pm_trash)
         pm_trash = new QIcon(":icon/trash");
-    
+
     selectAccountMenu = new QMenu(mb);
     connect(selectAccountMenu, SIGNAL(triggered(QAction*)),
             this, SLOT(selectAccount(QAction*)));

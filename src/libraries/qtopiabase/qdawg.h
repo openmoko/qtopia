@@ -46,13 +46,13 @@ public:
     class QTOPIABASE_EXPORT Node {
         friend class QDawgPrivate;
         quint16 let;
-        // lower 14 bits  of val are not used unless 
+        // lower 14 bits  of val are not used unless
         // QTOPIA_INTERNAL_QDAWG_TRIE is defined
         // Upper two bits of val are (always) used for isWord and isLast
         quint16 val;
-        const static quint16 isword = 0x8000;
-        const static quint16 islast = 0x4000;
-        const static quint16 valmask = 0x3fff; // Maximum val
+        static const quint16 isword = 0x8000;
+        static const quint16 islast = 0x4000;
+        static const quint16 valmask = 0x3fff; // Maximum val
         qint32 offset;
         Node() { val = 0; /*set zero for better compression*/ }
     public:

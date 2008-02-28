@@ -102,8 +102,9 @@ void DirectPainterWidget::paint(QImage const& frame)
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
         QPainter    p(m_frameBufferImage);
         p.setClipRegion(paintRegion);
-        p.setWindow(0, 0, frame.width(), frame.height());
-        p.setViewport(m_destRect);
+        p.setWindow(m_windowRect);
+        p.setViewport(m_viewPort);
+        p.setWorldTransform(m_transform);
         p.drawImage(0, 0, frame);
 #else
         qt_screen->blit(frame, m_destTopLeft, paintRegion);
@@ -148,7 +149,23 @@ void DirectPainterWidget::calc(QRegion const& region)
                 scaled.scale(bounds.size(), Qt::KeepAspectRatio);
                 m_destRect.setSize(scaled);
             }
+
             m_destRect.moveCenter(bounds.center());
+
+            if (qt_screen->isTransformed()) {
+                m_windowRect = QRect(QPoint(0, 0), qt_screen->mapToDevice(m_videoSize));
+                m_viewPort = qt_screen->mapToDevice(m_destRect, QSize(qt_screen->width(), qt_screen->height()));
+                switch (qt_screen->transformOrientation()) {
+                    case 1: m_transform.translate(0, m_windowRect.height()); break;
+                    case 2: m_transform.translate(m_windowRect.width(), m_windowRect.height()); break;
+                    case 3: m_transform.translate(m_windowRect.width(), 0); break;
+                }
+                m_transform.rotate(360 - qt_screen->transformOrientation() * 90);
+            }
+            else {
+                m_windowRect = QRect(QPoint(0, 0), m_videoSize);
+                m_viewPort = m_destRect;
+            }
 #else
             m_destRect.moveCenter(bounds.center());
             m_destTopLeft = m_destRect.topLeft();

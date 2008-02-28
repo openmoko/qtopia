@@ -880,7 +880,7 @@
 <li>Memory Monitor</li>
 <li>Low Memory Handler</li>
 </ol>
-<p>Together these four components are responsible for the avoidance of OOM situation and if it should become necessary for the detection of immanent problems and the subsequent handling of these situations. The Memory Monitor and the Low Memory Handler can be customized by subclassing/replacing certain Qtopia server interface/tasks. The various <a href="qtopiaserver-memory.html">management classes</a> are part of the Qtopia server.</p>
+<p>Together these four components are responsible for the avoidance of OOM situation and if it should become necessary for the detection of immanent problems and the subsequent handling of these situations. The Memory Monitor and the Low Memory Handler can be customized by subclassing/replacing certain Qtopia server interface/tasks. The various <a href="qtopiaserver--memory.html">management classes</a> are part of the Qtopia server.</p>
 <a name="qtopia-hardware"></a>
 <h3>Qtopia Hardware</h3>
 <a name="accessories"></a>
@@ -932,7 +932,7 @@
 <p>If it is necessary to support a network bearer that is not yet supported by Qtopia, new plug-ins can be added by implementing the abstract <a href="qtopianetworkplugin.html">QtopiaNetworkPlugin</a> and <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> interfaces. An overview of network related classes and how they interact with each other can be found in the <a href="qnetworkdevice.html">QNetworkDevice</a> class documentation.</p>
 <a name="input-methods"></a>
 <h3>Input methods</h3>
-<p>Qtopia's input method handling consists of two parts. The IM backend is provided by the <a href="qtopiaserver-inputmethods.html">Qtopia server</a> which is responsible for the loading of input method plug-ins and <a href="userinput.html">input/output related Qtopia classes</a>. These classes build the framework for input method plug-ins.</p>
+<p>Qtopia's input method handling consists of two parts. The IM backend is provided by the <a href="qtopiaserver--inputmethods.html">Qtopia server</a> which is responsible for the loading of input method plug-ins and <a href="userinput.html">input/output related Qtopia classes</a>. These classes build the framework for input method plug-ins.</p>
 <p>The front-end implementation for Qtopia's IM support is provided via plug-ins. By default Qtopia provides a few reference implementations which demonstrate certain IM capabilities:</p>
 <p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Input method</th><th>source</th><th>Description</th></tr></thead>
@@ -1000,7 +1000,7 @@
 <p>Qtopia Phone Edition provides Telephony support that enables Qtopia devices to use GSM and Voice over IP (VoIP) functionality. The <a href="qtopia-telephony.html">Telephony Documentation</a> provides the main entry page into the telephony parts of Qtopia.</p>
 <a name="modem-integration"></a>
 <h4>Modem Integration</h4>
-<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony-modem.html">Qtopia Phone Modem Library</a>. The process of implementing a vendor-specific phone-vendor plug-in and multiplexer plug-in is covered in <a href="syscust-gsm.html">GSM Modem Integration</a> and <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a> respectively. Before starting it may be necessary to configure the Linux kernel to support the modem device. See <a href="#at-modem">AT Modem</a> for details on what is required for modems connected via a serial interface.</p>
+<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony--modem.html">Qtopia Phone Modem Library</a>. The process of implementing a vendor-specific phone-vendor plug-in and multiplexer plug-in is covered in <a href="syscust-gsm.html">GSM Modem Integration</a> and <a href="tut-multiplexing.html">Tutorial: Writing a Multiplexer Plug-in</a> respectively. Before starting it may be necessary to configure the Linux kernel to support the modem device. See <a href="#at-modem">AT Modem</a> for details on what is required for modems connected via a serial interface.</p>
 <p>The <tt>QTOPIA_PHONE_DEVICE</tt> macro in <tt>custom.h</tt> is used to specify the modem device. <tt>QTOPIA_PHONE_DEVICE</tt> can also be set as an environment variable. The format of <tt>QTOPIA_PHONE_DEVICE</tt> is</p>
 <pre>        &lt;device&gt;:&lt;baud rate&gt;</pre>
 <p>For example to specify <tt>/dev/ttyS0</tt> as the modem device with a baud rate of 115200, add the following preprocessor define to <tt>custom.h</tt></p>
@@ -1153,7 +1153,7 @@
 <p>Qtopia's <a href="qtopiaserverapplication.html#qtopia-server-widgets">Server widget concept</a> is the user interface customization with the most flexibility. It enables the replacement of widget components via abstract widget classes which define how the various main user interface components interact with each other.</p>
 <p align="center"><img src="images/UML-serverwidgets.png" alt="&quot;Server Widgets UML&quot;" /></p><p>The following table describes the purpose of the various abstract server widget:</p>
 <p><table width="90%" align="center" cellpadding="2" cellspacing="1" border="0">
-<thead><tr valign="top" class="qt-style"><th><a href="qtopiaserver-phoneui-ttsmartphone.html">Abstract widget</a></th><th>Description</th></tr></thead>
+<thead><tr valign="top" class="qt-style"><th><a href="qtopiaserver--phoneui--ttsmartphone.html">Abstract widget</a></th><th>Description</th></tr></thead>
 <tr valign="top" class="odd"><td><a href="qabstractserverinterface.html">QAbstractServerInterface</a></td><td>This is the main UI widget instantiated by the Qtopia server that is common to all Qtopia editions. The <a href="phonelauncher.html">PhoneLauncher</a> class implements this interface for the Qtopia Phone edition. The remaining abstract server widgets in this table are part of the Qtopia Phone edition and are expected by the <a href="phonelauncher.html">PhoneLauncher</a>.</td></tr>
 <tr valign="top" class="even"><td><a href="qabstractbrowserscreen.html">QAbstractBrowserScreen</a></td><td>This abstract server widget is Qtopia Phone specific and provides the main application browser. Users use it to navigate through and launch applications. The <a href="phonebrowserscreen.html">PhoneBrowserScreen</a> class implements Qtopia's default behaviour.</td></tr>
 <tr valign="top" class="odd"><td><a href="qabstractdialerscreen.html">QAbstractDialerScreen</a></td><td>This abstract server widget is Qtopia Phone specific and provides the dialer screen. Qtopia Phone provides two implementation for this server widget (<a href="phonequickdialerscreen.html">PhoneQuickDialerScreen</a> and <a href="phonetouchdialerscreen.html">PhoneTouchDialerScreen</a>). The decision which class is instanciated depends on whether Qtopia is used on a touchscreen or a keypad phone.</td></tr>

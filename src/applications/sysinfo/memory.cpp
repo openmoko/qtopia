@@ -91,30 +91,11 @@ void MemoryInfo::updateData()
 
         int realUsed = total - ( buffers + cached + memfree );
         data->clear();
-#ifdef SYSINFO_GEEK_MODE
-        // Geek mode
         data->addItem( tr("Used (%1 kB)").arg(realUsed), realUsed );
         data->addItem( tr("Buffers (%1 kB)").arg(buffers), buffers );
         data->addItem( tr("Cached (%1 kB)").arg(cached), cached );
         data->addItem( tr("Free (%1 kB)").arg(memfree), memfree );
         totalMem->setText( tr( "Total Memory: %1 kB" ).arg( total ) );
-#else
-        // User mode
-        //  - 'cached' is free-whenever-you-need-it
-        //  - 'buffers' is used-and-expensive-to-recover
-        realUsed += buffers;
-        memfree += cached;
-        QString unit = tr("kB");
-        if (total > 10240) {
-            realUsed = realUsed / 1024;
-            memfree = memfree / 1024;
-            total = total / 1024;
-            unit = tr("MB");
-        }
-        data->addItem( tr("Used (%1 %2)", "%1 = number, %2 = unit").arg(realUsed).arg(unit), realUsed );
-        data->addItem( tr("Free (%1 %2)", "%1 = number, %2 = unit").arg(memfree).arg(unit), memfree );
-        totalMem->setText( tr( "Total Memory: %1 %2", "%1 = 512 %2 = MB/kB" ).arg( total ).arg( unit ));
-#endif
         graph->repaint();
         legend->update();
     }

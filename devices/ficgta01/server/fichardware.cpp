@@ -121,7 +121,19 @@ void Ficgta01Hardware::shutdownRequested()
     QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
     e << false;
 
-    QFile powerFile("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
+    QFile powerFile;
+    QFile btPower;
+
+    if ( QFileInfo("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on").exists()) {
+//ficgta01
+        powerFile.setFileName("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
+        btPower.setFileName("/sys/bus/platform/devices/gta01-pm-bt.0/power_on");
+    } else {
+//ficgta02
+        powerFile.setFileName("/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on");
+        btPower.setFileName("/sys/bus/platform/devices/neo1973-pm-bt.0/power_on");
+    }
+
     if( !powerFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
     } else {
@@ -130,7 +142,6 @@ void Ficgta01Hardware::shutdownRequested()
         powerFile.close();
     }
 
-    QFile btPower("/sys/bus/platform/devices/gta01-pm-bt.0/power_on");
         if( !btPower.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
     } else {
@@ -138,7 +149,6 @@ void Ficgta01Hardware::shutdownRequested()
         out <<  "0";
         powerFile.close();
     }
-
 
 
     QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);

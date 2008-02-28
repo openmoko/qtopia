@@ -1,11 +1,11 @@
 PROJECTS*=\
-    plugins/qtopiacore/kbddrivers/ficgta01\
     plugins/audiohardware/ficgta01\
-    devtools 
+	devtools 
 
-	  
-
-
+!x11 {
+	PROJECTS*= plugins/qtopiacore/kbddrivers/ficgta01
+}
+	 
 enable_modem {
     for(p,PHONEVENDORS) {
         exists(plugins/phonevendors/$$p/$$tail($$p).pro):PROJECTS*=plugins/phonevendors/$$p

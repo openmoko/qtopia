@@ -12,7 +12,6 @@
 -no-modem
 -extra-qtopiacore-config "-qt-mouse-tslib" 
 -extra-qtopiacore-config "-depths 8,16,32"
--D SYSINFO_GEEK_MODE
 -D QT_QWS_NOKIA
 -release
 -extra-qt-config -no-glib 

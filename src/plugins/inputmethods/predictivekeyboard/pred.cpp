@@ -286,7 +286,7 @@ void WordPredict::addTouch(const QPoint &p)
     m_mPoints << move;
 
     QByteArray reduce;
-    for(char *alpha = "abcdefghijklmnopqrstuvwxyz"; *alpha; ++alpha) {
+    for(const char *alpha = "abcdefghijklmnopqrstuvwxyz"; *alpha; ++alpha) {
         int dist = distanceForPoint(p, *alpha);
         m_latestDfp[(int)*alpha] = dist;
         if(dist != -1)

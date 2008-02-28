@@ -19,6 +19,9 @@
 **
 ****************************************************************************/
 
+#include <QScreen>
+#include <QDebug>
+
 #include "gstreamersinkwidget.h"
 
 #include "gstreamerqtopiavideosink.h"
@@ -39,27 +42,37 @@ static GstVideoSinkClass*   parentClass;
 
 GstCaps* QtopiaVideoSink::get_caps(GstBaseSink* sink)
 {
-    Q_UNUSED(sink);
+    GstCaps* caps = gst_caps_copy(gst_pad_get_pad_template_caps(sink->sinkpad));
+    if (GST_CAPS_IS_SIMPLE(caps)) {
+        GstStructure*   data = gst_caps_get_structure(caps, 0);
+        int             bpp = QScreen::instance()->depth();
 
-    return 0;
+        if (bpp != 16 && bpp != 32)
+            bpp = 32;
+
+        gst_structure_set(data, "bpp", G_TYPE_INT, bpp, NULL);
+    }
+
+    return caps;
 }
 
 gboolean QtopiaVideoSink::set_caps(GstBaseSink* sink, GstCaps* caps)
 {
-    gboolean            rc = TRUE;
-    GstStructure*       data;
-    GValue const*       framerate;
-    QtopiaVideoSink*    self = G_TYPE_CHECK_INSTANCE_CAST(sink, QtopiaVideoSinkClass::get_type(), QtopiaVideoSink);
+    gboolean rc = TRUE;
 
-    data = gst_caps_get_structure(caps, 0);
+    if (GST_CAPS_IS_SIMPLE(caps)) {
+        GstStructure*       data = gst_caps_get_structure(caps, 0);
+        QtopiaVideoSink*    self = G_TYPE_CHECK_INSTANCE_CAST(sink, QtopiaVideoSinkClass::get_type(), QtopiaVideoSink);
 
-    gst_structure_get_int(data, "width", &self->width);
-    gst_structure_get_int(data, "height", &self->height);
-    gst_structure_get_int(data, "bpp", &self->bpp);
-    gst_structure_get_int(data, "depth", &self->depth);
-    framerate = gst_structure_get_value(data, "framerate");
+        gst_structure_get_int(data, "width", &self->width);
+        gst_structure_get_int(data, "height", &self->height);
+        gst_structure_get_int(data, "bpp", &self->bpp);
+        gst_structure_get_int(data, "depth", &self->depth);
 
-    self->widget->setVideoSize(self->width, self->height);
+        self->widget->setVideoSize(self->width, self->height);
+    }
+    else
+        rc = FALSE;
 
     return rc;
 }
@@ -77,7 +90,10 @@ GstFlowReturn QtopiaVideoSink::render(GstBaseSink* sink, GstBuffer* buf)
     {
         QtopiaVideoSink*    self = G_TYPE_CHECK_INSTANCE_CAST(sink, QtopiaVideoSinkClass::get_type(), QtopiaVideoSink);
 
-        self->widget->paint(QImage(GST_BUFFER_DATA(buf), self->width, self->height, QImage::Format_RGB16));
+        self->widget->paint(QImage(GST_BUFFER_DATA(buf),
+                                   self->width,
+                                   self->height,
+                                   self->bpp == 16 ? QImage::Format_RGB16 : QImage::Format_RGB32));
     }
     else
         rc = GST_FLOW_ERROR;
@@ -92,8 +108,7 @@ static GstStaticPadTemplate template_factory =
                             GST_STATIC_CAPS("video/x-raw-rgb, "
                                             "framerate = (fraction) [ 0, MAX ], "
                                             "width = (int) [ 1, MAX ], "
-                                            "height = (int) [ 1, MAX ],"
-                                            "bpp = (int) 16"));
+                                            "height = (int) [ 1, MAX ]"));
 
 void QtopiaVideoSink::base_init(gpointer g_class)
 {
@@ -127,7 +142,7 @@ void QtopiaVideoSinkClass::class_init(gpointer g_class, gpointer class_data)
     parentClass = reinterpret_cast<GstVideoSinkClass*>(g_type_class_peek_parent(g_class));
 
     // base
-//    gstbasesink_class->get_caps = get_caps;
+    gstBaseSinkClass->get_caps = QtopiaVideoSink::get_caps;
     gstBaseSinkClass->set_caps = QtopiaVideoSink::set_caps;
 //    gstbasesink_class->buffer_alloc = buffer_alloc;
 //    gstbasesink_class->get_times = get_times;

@@ -13,23 +13,24 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">PackageManager - Browser Integration<br /><span class="subtitle"></span>
 </h1>
-<p>This document describes the <tt>PackageManager</tt> service web- browser integration, and how a Qtopia package can be made available via a web-page.</p>
-<ul><li><a href="#packagemanager-service-web-browser-integration">PackageManager Service Web Browser Integration</a></li>
+<p>This document describes why and how to integrate a browser with <tt>PackageManager</tt> and how to make Qtopia packages available via a web-page.</p>
+<ul><li><a href="#use-case">Use Case</a></li>
+<li><a href="#web-browser-modification">Web-Browser Modification</a></li>
 <li><a href="#how-to-make-a-qtopia-package-available-via-a-web-page">How to Make a Qtopia Package Available via a Web Page</a></li>
-<ul><li><a href="#qtopia-package-descriptor-and-web-page-configuration">Qtopia Package Descriptor and Web Page Configuration</a></li>
+<ul><li><a href="#qtopia-package-descriptor-and-web-page">Qtopia Package Descriptor and Web Page</a></li>
 <li><a href="#web-server-configuration">Web Server Configuration</a></li>
 </ul>
 </ul>
-<a name="packagemanager-service-web-browser-integration"></a>
-<h2>PackageManager Service Web Browser Integration</h2>
-<p>The normal process for a user wanting to install a package is a sequence of steps such as:</p>
+<a name="use-case"></a>
+<h2>Use Case</h2>
+<p>The basic sequence for a user wanting to install a package is:</p>
 <ol type="1">
-<li>Invoke the <tt>PackageManager</tt></li>
-<li><tt>PackageManager</tt> connects to the web server and displays the list of packages offered</li>
-<li>the user selects the required package and installs it.</li>
+<li>Invoke the <tt>PackageManager</tt>.</li>
+<li>Use <tt>PackageManager</tt> to connect to a web server and display the list of packages offered.</li>
+<li>The user selects the required package and installs it</li>
 </ol>
-<p>While this approach works well, it binds a user to the pre-configured web server offered by the provider. The browser integration enables the user to visit any web site and install packages from there.</p>
-<p>The process is simplified to:</p>
+<p>While this approach is functional, there is little the content provider can do to advertise and differentiate their packages. The browser integration enables the user to visit any web site and install packages from there.</p>
+<p>The process is now becomes:</p>
 <ol type="1">
 <li>A web page offers a list of links to Qtopia package file <a href="sxe-pkgmgr-ctlfile.html#qpd-descriptor">descriptors</a> which are text files containing information about a package as well as an exact URL indicating the download location.</li>
 <li>The user clicks the required link and the descriptor is downloaded and passed to the <tt>PackageManager</tt>.</li>
@@ -37,14 +38,31 @@
 <li>The user clicks the install button and the package is downloaded and installed.</li>
 </ol>
 <p>This package behaves like any other package, that is, it can be un-installed and is subject to SXE security.</p>
+<a name="pkgmgr-browser-modification"></a><a name="web-browser-modification"></a>
+<h2>Web-Browser Modification</h2>
+<p>Upon downloading a descriptor file of mime type, <tt>application/qtopia-package</tt>, the browser needs to:</p>
+<ol type="1">
+<li>Create an instance of <a href="qdsservices.html">QDSServices</a> with the requestDataType, <tt>application/qtopia-package</tt> and attribute, <tt>install</tt>. (The responseDataType should be &quot;*&quot;).</li>
+<li>The <a href="qdsservices.html">QDSServices</a> object should contain a <a href="qdsserviceinfo.html">QDSServiceInfo</a> object corresponding to <tt>PackageManager</tt>, use that to create a <a href="qdsaction.html">QDSAction</a> object.</li>
+<li>Create a <a href="qdsdata.html">QDSData</a> object with the downloaded <tt>qpd</tt> file and <tt>application/qtopia-package</tt> mime type.</li>
+<li>Invoke the <tt>exec()</tt> function of the <a href="qdsaction.html">QDSAction</a> object with the <a href="qdsdata.html">QDSData</a> object as a parameter. Via the services framework, this will invoke <tt>PackageManager</tt> to begin the installation process and prompt the user to confirm installation.</li>
+</ol>
+<p>There are two ways to add this functionality to a web browser:</p>
+<ol type="A">
+<li>Integrate it into the web browser code (this may not always be possible due to licensing issues or if the web browser application is in binary format).</li>
+<li>Create an application invoked by the browser on recognition of a particular mime type. Contemporary browsers such as Firefox or Opera can be configured in this way. After the Qtopia package descriptor file is downloaded it is passed as a parameter to this application, which implements the above functionality of finding and invoking the <tt>PackageManager</tt> service.</li>
+</ol>
 <a name="how-to-make-a-qtopia-package-available-via-a-web-page"></a>
 <h2>How to Make a Qtopia Package Available via a Web Page</h2>
-<p>To make a Qtopia packages available via a web page a Qtopia package descriptor file needs to be provided for each package. A minor change of the web server configuration with regard to the mime types is required and is described <a href="#webconfig">below</a>.</p>
-<a name="qtopia-package-descriptor-and-web-page-configuration"></a>
-<h3>Qtopia Package Descriptor and Web Page Configuration</h3>
-<p>For every package offered for download a Qtopia package descriptor file must be provided. This file has the extension <a href="sxe-pkgmgr-ctlfile.html#qpd-descriptor"><tt>.qpd</tt></a> and contains the same information about the single package as is found in the <a href="sxe-pkgmgr-ctlfile.html#packages-list"><tt>packages.list</tt></a> file, together with a URL indicating the package download location.</p>
+<p>To make a Qtopia packages available via a web page:</p>
+<ul>
+<li>A Qtopia package descriptor file needs to be provided for each package.</li>
+<li>A minor change of the web server configuration with regard to the mime types is required.</li>
+</ul>
+<a name="qtopia-package-descriptor-and-web-page"></a>
+<h3>Qtopia Package Descriptor and Web Page</h3>
+<p>For every package offered for download a Qtopia package descriptor file must be provided. These files contain meta-data about the package which includes a URL indicating the package download location. The <tt>mkPackages</tt> script is used to generate descriptor file, further details can be found <a href="sxe-pkgmgr-ctlfile.html#qpd-descriptor">here</a>.</p>
 <p>The link on the web page points to the descriptor file and is processed by the <tt>PackageManager</tt> which extracts the URL and, upon confirmation by the user, downloads and installs the package.</p>
-<p>If support for different architectures is required, for example, <tt>ARM</tt> or <tt>i386</tt> a package and descriptor needs to be created for each supported architecture. The <tt>PackageManager</tt> will not download and install a package if it does not match the architecture of the device on which it is to run.</p>
 <a name="webconfig"></a><a name="web-server-configuration"></a>
 <h3>Web Server Configuration</h3>
 <p>For the browser to detect the Qtopia package descriptor the web server must set the appropriate mime type (<tt>application/qtopia-package</tt>) in the HTTP header for that file. This means that on the web server a new mime type mapping must be configured for the extension of the Qtopia package descriptor, which is <tt>*.qpd</tt>.</p>

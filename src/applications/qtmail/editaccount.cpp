@@ -53,6 +53,7 @@ static const QMailAccount::AuthType authenticationType[] = {
     QMailAccount::Auth_INCOMING
 };
 
+#ifndef QT_NO_OPENSSL
 static int authenticationIndex(QMailAccount::AuthType type)
 {
     const int numTypes = sizeof(authenticationType)/sizeof(QMailAccount::AuthType);
@@ -62,6 +63,7 @@ static int authenticationIndex(QMailAccount::AuthType type)
 
     return 0;
 };
+#endif
 
 
 class PortValidator : public QValidator
@@ -339,12 +341,13 @@ void EditAccount::emailModified()
 
 void EditAccount::authChanged(int index)
 {
-    QMailAccount::AuthType type = authenticationType[index];
-    bool enableFields =
+    bool enableFields;
 #ifndef QT_NO_OPENSSL
-        (type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
+    QMailAccount::AuthType type = authenticationType[index];
+    enableFields = (type == QMailAccount::Auth_LOGIN || type == QMailAccount::Auth_PLAIN);
 #else
-        false;
+    Q_UNUSED(index);
+    enableFields = false;
 #endif
 
     smtpUsernameInput->setEnabled(enableFields);

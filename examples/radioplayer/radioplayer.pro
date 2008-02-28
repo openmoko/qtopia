@@ -2,7 +2,6 @@ qtopia_project(qtopia app)
 TARGET=radioplayer
 CONFIG+=qtopia_main
 requires(!platform)
-requires(!media)
 
 DEFINES+=QTOPIA_DUMMY_RADIO
 

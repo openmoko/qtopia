@@ -50,7 +50,7 @@ public:
     {
         return m_current;
     }
-    
+
     int steps() const
     {
         return m_steps;
@@ -69,7 +69,7 @@ public:
     QLabel *m;
 
 protected:
-    void paintEvent(QPaintEvent *event)
+    void paintEvent(QPaintEvent * /*event*/)
     {
         int w = rect().width() - (3 * m_steps);
         barWidth = qRound(w / (m_steps - 1));
@@ -105,11 +105,11 @@ private:
     int barHeight;
 };
 
-class VolumeDialogImplPrivate 
+class VolumeDialogImplPrivate
 {
 public:
-    VolumeDialogImplPrivate(); 
-    ~VolumeDialogImplPrivate(); 
+    VolumeDialogImplPrivate();
+    ~VolumeDialogImplPrivate();
 
     QValueSpaceItem* m_vsVolume;
 };
@@ -133,7 +133,6 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     int dh = d.height();
     setGeometry(20*dw/100, 30*dh/100, 60*dw/100, 40*dh/100);
 
-    
     QColor c(Qt::black);
     c.setAlpha(255);     //XXX: Make fully opaque for now, for  DirectPainter widgets in the background
 
@@ -150,13 +149,13 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
 
     QIcon icon(":icon/sound");
     QIcon mute(":icon/mute");
-    
+
     QLabel* volumeLevel = new QLabel(this);
     volumeLevel->setAlignment(Qt::AlignRight | Qt::AlignCenter);
     volumeLevel->setMinimumWidth( fontMetrics().width("100%") );
     volumeLevel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
     connect(this, SIGNAL(setText(QString)), volumeLevel, SLOT(setText(QString)));
-    
+
     volumeWidget->l = new QLabel(this);
     volumeWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     volumeWidget->l->setPixmap(icon.pixmap(64, 64));
@@ -169,7 +168,7 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     hBox->addWidget(volumeWidget->l);
     hBox->addWidget(volumeWidget->m);
     hBox->addStretch();
-    
+
     QHBoxLayout *wp = new QHBoxLayout;
     wp->addWidget(volumeWidget);
     wp->addWidget(volumeLevel);
@@ -178,7 +177,6 @@ VolumeDialogImpl::VolumeDialogImpl( QWidget* parent, Qt::WFlags fl )
     vBox->addLayout(wp);
 
     connect(m_d->m_vsVolume, SIGNAL(contentsChanged()), this, SLOT(valueSpaceVolumeChanged()));
-
 }
 
 void VolumeDialogImpl::timerEvent( QTimerEvent *e )
@@ -189,7 +187,6 @@ void VolumeDialogImpl::timerEvent( QTimerEvent *e )
 
 void VolumeDialogImpl::setVolume( bool up)
 {
-    
     m_oldValue = volumeWidget->value();
     volumeWidget->setCurrent( up ? m_oldValue + 1 : m_oldValue - 1 );
     int value = volumeWidget->value();
@@ -213,7 +210,7 @@ void VolumeDialogImpl::valueSpaceVolumeChanged()
     int volume = m_d->m_vsVolume->value().toInt();
     int slot =   qBound(1,(int)::ceil(volume/(volumeWidget->steps()))+1,10);
     volumeWidget->setCurrent( slot );
-    
+
     QString str;
     str.setNum(volume);
     emit setText(str+"%");
@@ -222,7 +219,7 @@ void VolumeDialogImpl::valueSpaceVolumeChanged()
     {
         volumeWidget->m->hide();
         volumeWidget->l->show();
-    }    
+    }
     else
     {
         volumeWidget->l->hide();

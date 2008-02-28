@@ -32,6 +32,15 @@
 #include <qtimer.h>
 #include <qmetaobject.h>
 #include <QDebug>
+#if !defined(QTOPIA_HOST) && !defined(QTOPIA_DBUS_IPC)
+#if defined(Q_WS_QWS)
+#include <qcopchannel_qws.h>
+#define QTOPIA_REGULAR_QCOP
+#elif defined(Q_WS_X11)
+#include <qcopchannel_x11.h>
+#define QTOPIA_REGULAR_QCOP
+#endif
+#endif
 
 /*!
     \class QtopiaIpcAdaptor
@@ -91,6 +100,29 @@
            This is normally only needed if both sender and receiver are
            instances of QtopiaIpcAdaptor.
 */
+
+#ifdef QTOPIA_REGULAR_QCOP
+
+class QtopiaIpcAdaptorChannel : public QCopChannel
+{
+    // Don't need Q_OBJECT here.
+public:
+    QtopiaIpcAdaptorChannel( const QString& channel, QtopiaIpcAdaptor *adaptor )
+        : QCopChannel( channel, adaptor ) { this->adaptor = adaptor; }
+    ~QtopiaIpcAdaptorChannel() {}
+
+    void receive( const QString& msg, const QByteArray &data );
+
+private:
+    QtopiaIpcAdaptor *adaptor;
+};
+
+void QtopiaIpcAdaptorChannel::receive( const QString& msg, const QByteArray &data )
+{
+    adaptor->received( msg, data );
+}
+
+#endif
 
 class QtopiaIpcAdaptorPrivate
 {
@@ -509,10 +541,16 @@ bool QtopiaIpcAdaptor::connectRemoteToLocal
                 ( qApp, SIGNAL(appMessage(QString,QByteArray)),
                 this, SLOT(received(QString,QByteArray)) );
         } else {
+#ifdef QTOPIA_REGULAR_QCOP
+            // Short-cut the signal emits in QCopChannel and QtopiaChannel,
+            // for greater performance when dispatching incoming messages.
+            new QtopiaIpcAdaptorChannel( chan, this );
+#else
             QtopiaChannel *channel = new QtopiaChannel( chan, this );
             QObject::connect
                 ( channel, SIGNAL(received(QString,QByteArray)),
                   this, SLOT(received(QString,QByteArray)) );
+#endif
         }
         d->connected = true;
     }

@@ -2,6 +2,7 @@ qtopia_project(external lib)
 license(FREEWARE)
 TARGET		=   speex
 VERSION		=   1.0.0
+CONFIG         +=   warn_off
 requires(enable_voip)
 
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/examples/asterisk/speex/include

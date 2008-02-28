@@ -268,7 +268,10 @@ void GreenphoneHardware::delayedRead()
 
 void GreenphoneHardware::readDetectData(quint32 devices)
 {
-    detect_device_t detectData[26];
+    union {
+        quint32 changedDevices;
+        detect_device_t detectData[26];
+    };
 
     if (::read(detectFd, detectData, 104) < 104) {
         qWarning() << "Couldn't read from device omega_detect";
@@ -276,7 +279,7 @@ void GreenphoneHardware::readDetectData(quint32 devices)
     }
 
     if (devices == 0)
-        devices = reinterpret_cast<quint32*>(detectData)[0];
+        devices = changedDevices;
 
     quint32 mask = 0x00000001;
     int position = 0;

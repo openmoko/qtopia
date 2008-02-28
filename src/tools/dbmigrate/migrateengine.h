@@ -40,9 +40,9 @@ public:
     void setDatabase(const QSqlDatabase& database) { db=database; }
     const QSqlDatabase& database() { return db; }
     bool loadSchema(QTextStream &ts, bool transact=false);
-    bool check(bool result, int line, char *file, char *message);
-    bool exec(QSqlQuery &query, int line, char *file);
-    bool exec(const QString &query, int line, char *file);
+    bool check(bool result, int line, const char *file, const char *message);
+    bool exec(QSqlQuery &query, int line, const char *file);
+    bool exec(const QString &query, int line, const char *file);
     static QDBMigrationEngine *instance();
 private:
     bool checkIntegrity( const QSqlDatabase &database, bool printErrors );

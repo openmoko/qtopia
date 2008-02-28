@@ -388,6 +388,8 @@ void GenericComposer::setText( const QString &t, const QString &type )
             m_vCardData = t;
         }
     } else
+#else
+    Q_UNUSED(type);
 #endif
     {
         m_textEdit->setPlainText( t );

@@ -2086,6 +2086,8 @@ AbEditor *AddressbookWindow::editor(const QUniqueId &id)
         return abSimEditor;
     }
     else
+#else
+    Q_UNUSED(id);
 #endif
     {
         if (!abFullEditor)

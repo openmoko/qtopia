@@ -19,8 +19,6 @@
 **
 ****************************************************************************/
 
-#include <qwindowsystem_qws.h>
-
 #include <QtopiaIpcAdaptor>
 #include <QtopiaIpcEnvelope>
 #include <QtopiaServiceRequest>
@@ -32,6 +30,10 @@
 #include "systemsuspend.h"
 
 #include <qvaluespace.h>
+
+#ifdef Q_WS_QWS
+#include <qwindowsystem_qws.h>
+#endif
 
 class NeoSuspend : public SystemSuspendHandler
 {
@@ -95,6 +97,7 @@ bool NeoSuspend::wake()
     //Qt event loop (see qeventdispatcher_unix.cpp. We have to call
     //processEvents to give Qt a chance to sync its internal timer with
     //the hw clock
+#ifdef Q_WS_QWS
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QWSServer::screenSaverActivate( false );
     {
@@ -104,6 +107,7 @@ bool NeoSuspend::wake()
         e.send();
         QtopiaIpcEnvelope("QPE/NetworkState", "updateNetwork()"); //might have changed
     }
+#endif
 
     return true;
 }

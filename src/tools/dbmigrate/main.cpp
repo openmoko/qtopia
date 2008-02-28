@@ -36,7 +36,7 @@ int MAIN_FUNC( int argc, char** argv )
 {
     QSXE_SET_APP_KEY(argv[0]);
 
-    int user_version=0, i;
+    int i;
 
     QStringList args;
     for(i=1; i<argc; i++)

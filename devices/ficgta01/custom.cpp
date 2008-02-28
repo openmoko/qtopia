@@ -31,13 +31,24 @@
 #include <stdlib.h>
 #include <QProcess>
 #include <QFile>
+#include <QFileInfo>
+
 #include <QTextStream>
 #include <QDebug>
 
 
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
-    QFile maxBrightness("/sys/class/backlight/gta01-bl/max_brightness");
+
+    QFile maxBrightness;
+    if (QFileInfo("/sys/class/backlight/gta01-bl/max_brightness").exists() ) {
+        //ficgta01
+            maxBrightness.setFileName("/sys/class/backlight/gta01-bl/max_brightness");
+        } else {
+        //ficgta02
+            maxBrightness.setFileName("/sys/class/backlight/pcf50633-bl/max_brightness");
+        }
+
     QString strvalue;
     int value;
     if( !maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -45,7 +56,7 @@ QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
     } else {
         QTextStream in(&maxBrightness);
         in >> strvalue;
-    maxBrightness.close();
+        maxBrightness.close();
     }
 
 //     if(strvalue.isEmpty())
@@ -95,12 +106,21 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 
     }
 
-    QFile brightness("/sys/class/backlight/gta01-bl/brightness");
+    QFile brightness;
+    if (QFileInfo("/sys/class/backlight/gta01-bl/brightness").exists() ) {
+        brightness.setFileName("/sys/class/backlight/gta01-bl/brightness");
+        //ficgta01
+    } else {
+        brightness.setFileName("/sys/class/backlight/pcf50633-bl/brightness");
+        //ficgta02
+    }
+
     if( !brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
     } else {
         QTextStream out(&brightness);
         out << QString::number(b);
+        //ficgta01
         brightness.close();
     }
 }

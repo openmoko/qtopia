@@ -152,7 +152,8 @@ IaxTelephonyService::IaxTelephonyService
 {
     // Register our own audio driver with the iaxclient library.
     struct iaxc_audio_driver *driver = iaxc_get_audio_driver();
-    driver->name = "iaxagent";
+    // note driver->name pointer is not deleted in audioDestroy(..)
+    driver->name = (char *)("iaxagent");
     driver->devices = 0;
     driver->nDevices = 0;
     driver->priv = (void *)this;

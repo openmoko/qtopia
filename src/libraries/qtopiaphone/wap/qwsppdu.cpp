@@ -120,7 +120,7 @@ static const char * const contentTypeAssignments[] = {
 
 struct CharsetAssignment {
     quint32 number;
-    char *charset;
+    const char *charset;
 };
 
 static const CharsetAssignment charsetAssignments[] = {
@@ -179,7 +179,7 @@ private:
 struct WAPHeaderField {
     quint8 number;
     int version;
-    char *name;
+    const char *name;
     QWspDefaultCodec::Type type;
 };
 

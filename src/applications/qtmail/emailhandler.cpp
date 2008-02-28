@@ -493,6 +493,7 @@ void EmailHandler::acceptMail(const QMailMessage& mail, bool closeAfterSend)
         mmsClient->closeWhenDone();
 #else
     Q_UNUSED(mail);
+    Q_UNUSED(closeAfterSend);
 #endif
 }
 
@@ -612,6 +613,8 @@ void EmailHandler::pushMmsMessage(const QDSActionRequest& request)
 {
 #ifndef QTOPIA_NO_MMS
     mmsClient->pushMmsMessage(request);
+#else
+    Q_UNUSED(request);
 #endif
 }
 

@@ -18,7 +18,6 @@
 -extra-qtopiacore-config "-qt-zlib"
 -extra-qtopiacore-config "-qt-mouse-linuxtp"
 -extra-qt-config -no-glib 
--D SYSINFO_GEEK_MODE
 -extra-qtopiacore-config "-D QT_QWS_SCREEN_COORDINATES"
 -release
 -no-rpath

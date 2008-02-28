@@ -78,6 +78,7 @@ void setproctitle( const char *name )
 {
     int ret = prctl(PR_SET_NAME, (unsigned long)name, 0, 0, 0);
     Q_ASSERT(ret == 0);
+    Q_UNUSED(ret);
 }
 #elif defined(QTOPIA_SETPROC_ARGV0)
 char **QuickLauncher::argv0 = 0;

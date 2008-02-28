@@ -99,6 +99,8 @@ void VideoRingtone::playVideo(const QString& fileName)
 
     d->videoControl = new QMediaVideoControl(d->videoContent);
     connect(d->videoControl, SIGNAL(valid()), this, SIGNAL(videoWidgetReady()));
+#else
+    Q_UNUSED(fileName);
 #endif
 }
 

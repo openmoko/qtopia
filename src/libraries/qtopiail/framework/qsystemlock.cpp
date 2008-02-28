@@ -298,7 +298,7 @@ bool QSystemReadWriteLock::lockForRead(int milliSec)
    */
 bool QSystemReadWriteLock::lockForWrite(int milliSec)
 {
-    if(isNull());
+    if(isNull())
         return false;
 
     struct timespec ts;

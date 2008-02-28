@@ -63,7 +63,6 @@ signals:
     // Select key pressed
     void selected();
 
-    // Only Qtopia PDA
     // Stylus held
     void held( const QPoint& );
 

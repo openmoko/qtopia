@@ -68,6 +68,7 @@ class QTOPIABASE_EXPORT QtopiaIpcAdaptor : public QObject
     Q_OBJECT
     friend class QtopiaIpcSignalIntercepter;
     friend class QtopiaIpcSendEnvelope;
+    friend class QtopiaIpcAdaptorChannel;
 public:
     explicit QtopiaIpcAdaptor( const QString& channel, QObject *parent = 0 );
     ~QtopiaIpcAdaptor();

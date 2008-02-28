@@ -35,7 +35,6 @@ public:
     SlideShowUI( QWidget* parent = 0, Qt::WFlags f = 0 );
 
 signals:
-    // Only Qtopia PDA
     // Stylus pressed
     void pressed();
 

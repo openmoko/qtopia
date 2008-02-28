@@ -320,7 +320,7 @@ void WorldTime::beginNewTz()
         return;
     }
 
-    if(selButton = -2) {
+    if(selButton == -2) {
         selButton = 0;
         listCities.at(0)->setChecked(true);
         setButtonAvailable(0);

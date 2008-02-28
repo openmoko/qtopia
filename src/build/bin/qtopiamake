@@ -955,8 +955,9 @@ sub makeProject
     print OUT "# Input\n";
     print OUT @data;
     print OUT "\n";
-    print OUT "# SXE permissions required\n";
-    print OUT "pkg.domain=none\n";
+    print OUT "# Set this to trusted for full privileges\n";
+    print OUT "target.hint=sxe\n";
+    print OUT "target.domain=untrusted\n";
     print OUT "\n";
     close OUT;
 

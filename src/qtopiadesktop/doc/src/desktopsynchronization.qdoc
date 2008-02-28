@@ -9,7 +9,8 @@
 
 This documentation is aimed primarily at system integrators. A complete
 Desktop Synchronization solution will require some device-specific code
-and may involve writing device drivers.
+and may involve writing device drivers. It will also require
+\l{Building Qtopia Sync Agent}{building Qtopia Sync Agent}.
 
 \section1 Overview
 

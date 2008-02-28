@@ -102,7 +102,7 @@ void Configure::fileDialog()
     }
 }
 
-void Configure::textChanged( const QString &text )
+void Configure::textChanged( const QString & /*text*/ )
 {
     if ( sender() == serverNameLineEdit &&
             serverNameLineEdit->text().trimmed() != mData->server() )

@@ -42,7 +42,52 @@
 // Modified to work across 2 lines (\n separated)
 // reasonably optimised for fast execution,
 // although sacrifices space to do so.
-#define FLOATING_LISTWIDGETS
+
+class TwoLineFloatingTextListItem : public QListWidgetItem
+{
+public:
+    TwoLineFloatingTextListItem ( QListWidget * parent = 0, int type = QListWidgetItem::Type );
+    TwoLineFloatingTextListItem ( const QString & text, QListWidget * parent = 0, int type = QListWidgetItem::Type );
+    TwoLineFloatingTextListItem ( const QIcon & icon, const QString & text, QListWidget * parent = 0, int type = QListWidgetItem::Type );
+    TwoLineFloatingTextListItem ( const QListWidgetItem & other );
+    bool operator<( const QListWidgetItem& other ) const;
+};
+
+TwoLineFloatingTextListItem::TwoLineFloatingTextListItem ( QListWidget * parent, int type )
+: QListWidgetItem( parent, type ) {}
+
+TwoLineFloatingTextListItem::TwoLineFloatingTextListItem ( const QString & text, QListWidget * parent, int type )
+: QListWidgetItem( text, parent, type ) {}
+
+TwoLineFloatingTextListItem::TwoLineFloatingTextListItem ( const QIcon & icon, const QString & text, QListWidget * parent, int type )
+: QListWidgetItem( icon, text, parent, type ) {}
+
+TwoLineFloatingTextListItem::TwoLineFloatingTextListItem ( const QListWidgetItem & other )
+: QListWidgetItem( other )
+{
+    this->data( Qt::UserRole ) = other.data( Qt::UserRole);
+    this->data( Qt::UserRole + 1 ) = other.data( Qt::UserRole + 1 );
+}
+
+bool TwoLineFloatingTextListItem::operator<( const QListWidgetItem& other ) const
+{
+    // first, compare the country
+    QString thisFirst = this->data( Qt::UserRole + 1 ).toString();
+    QString otherFirst = other.data( Qt::UserRole + 1 ).toString();
+
+    if ( thisFirst < otherFirst )
+        return true;
+
+    if ( thisFirst > otherFirst )
+        return false;
+
+    // if the country is equal, compare the network name
+    if ( this->data( Qt::UserRole ).toString() < other.data( Qt::UserRole ).toString() )
+        return true;
+
+    return false;
+}
+
 class TwoLineFloatingTextList : public QListWidget
 {
     Q_OBJECT
@@ -120,16 +165,15 @@ void TwoLineFloatingTextList::newCurrentRow( int row )
     // first, regenerate the text of the old row if required.
     if ( oldRow != row && ( needToFloatFirst || needToFloatSecond ) ) {
         QListWidgetItem *old = item( oldRow );
-        firstLine = old->data( Qt::UserRole ).toString().section( '\n', 0, 0 );
-        secondLine = old->data( Qt::UserRole ).toString().section( '\n', 1, 1 );
-        old->setText( firstLine + "\n" + secondLine );
+        old->setText( old->data( Qt::UserRole ).toString() + "\n"
+                    + old->data( Qt::UserRole + 1 ).toString() );
     }
 
     // extract each line from this item.
     oldRow = row;
     QListWidgetItem *current = item( row );
-    firstLine = current->data( Qt::UserRole ).toString().section( '\n', 0, 0 );
-    secondLine = current->data( Qt::UserRole ).toString().section( '\n', 1, 1 );
+    firstLine = current->data( Qt::UserRole ).toString();
+    secondLine = current->data( Qt::UserRole + 1 ).toString();
 
     // Determine whether we need to float the lines.
     if ( fm->width( firstLine ) >= availableWidth ) {
@@ -154,7 +198,7 @@ void TwoLineFloatingTextList::newCurrentRow( int row )
         secondLineWidth = 0;
         firstLineMaxIndex = firstLine.length() - 1;
         secondLineMaxIndex = secondLine.length() - 1;
-        timer->start( 1200 ); //, this, SLOT(floatText()) );
+        timer->start( 1200 );
     } else {
         current->setText( firstLine + "\n" + secondLine );
     }
@@ -240,7 +284,7 @@ void TwoLineFloatingTextList::floatText()
         return;
     }
 
-    // display the lines for this QListWidgetItem
+    // display the lines for this TwoLineFloatingTextListItem
     current->setText( displayFirst + "\n" + displaySecond );
 
     // Display the current lines for 500 msec.
@@ -709,7 +753,7 @@ void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::Ava
     layout->addWidget( m_opList );
     QtopiaApplication::setMenuLike( m_opDlg, true );
 
-    QListWidgetItem *item = 0;
+    TwoLineFloatingTextListItem *item = 0;
     QString utran = tr("3G", "3g/umts/utran network");
     QString gsm = tr("GSM", "GSM network");
     foreach( QNetworkRegistration::AvailableOperator op, result ) {
@@ -720,11 +764,13 @@ void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::Ava
             name = name + " (" + utran  +")" ;
         QString country = countryForOperatorId( op.id );
         if ( !country.isEmpty() )
-            name = name + "\n" + "[ " + country + " ]";
+            country = "[ " + country + " ]";
         else
-            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
-        item = new QListWidgetItem( name, m_opList );
+            country = "[ " + tr( "Unknown" ) + " ]";
+
+        item = new TwoLineFloatingTextListItem( QString(name + "\n" + country), m_opList );
         item->setData( Qt::UserRole, name );
+        item->setData( Qt::UserRole + 1, country );
         switch ( op.availability ) {
         case QTelephony::OperatorUnavailable:
             item->setIcon( QIcon( ":icon/close" ) );
@@ -897,11 +943,12 @@ void PreferredOperatorsDialog::populateList()
         QString country = countryForOperatorId
             ( "2" + QString::number( resolved.at( i ).id ) );
         if ( !country.isEmpty() )
-            name = name + "\n" + "[ " + country + " ]";
+            country = "[ " + country + " ]";
         else
-            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
-        QListWidgetItem *item = new QListWidgetItem( name, m_list );
+            country = "[ " + tr( "Unknown" ) + " ]";
+        TwoLineFloatingTextListItem *item = new TwoLineFloatingTextListItem( QString(name + "\n" + country), m_list );
         item->setData( Qt::UserRole, name );
+        item->setData( Qt::UserRole + 1, country );
     }
     if ( resolved.count() > 0 )
         m_list->setCurrentRow( 0 );
@@ -942,12 +989,17 @@ void PreferredOperatorsDialog::initAddNetworkDlg()
         QString country = countryForOperatorId
             ( "2" + QString::number( m_operatorNames.at( i ).id ) );
         if ( !country.isEmpty() )
-            name = name + "\n" + "[ " + country + " ]";
+            country = "[ " + country + " ]";
         else
-            name = name + "\n" + "[ " + tr( "Unknown" ) + " ]";
-        QListWidgetItem *item = new QListWidgetItem( name, m_addNetworkList, m_operatorNames.at( i ).id );
+            country = "[ " + tr( "Unknown" ) + " ]";
+
+        TwoLineFloatingTextListItem *item = new TwoLineFloatingTextListItem( QString(name + "\n" + country), m_addNetworkList, m_operatorNames.at( i ).id );
         item->setData( Qt::UserRole, name );
+        item->setData( Qt::UserRole + 1, country );
     }
+
+    // now sort the list
+    m_addNetworkList->sortItems();
 
     connect( m_addNetworkList, SIGNAL(itemActivated(QListWidgetItem*)),
             this, SLOT(networkSelected(QListWidgetItem*)) );
@@ -1040,7 +1092,7 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
 
     oper.format = 2;
     oper.id = item->type();
-    oper.name = item->data( Qt::UserRole ).toString();
+    oper.name = item->data( Qt::UserRole ).toString() + "\n" + item->data( Qt::UserRole + 1 ).toString();
 
     // add new item to current list
     m_currentOpers.insert( oper.index - 1, oper );
@@ -1049,8 +1101,9 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
     for ( int i = oper.index; i < m_currentOpers.count(); i++ )
         updateIndex( i, true );
 
-    QListWidgetItem *newItem = new QListWidgetItem( oper.name );
-    newItem->setData( Qt::UserRole, oper.name );
+    TwoLineFloatingTextListItem *newItem = new TwoLineFloatingTextListItem( oper.name );
+    newItem->setData( Qt::UserRole, item->data( Qt::UserRole ).toString() );
+    newItem->setData( Qt::UserRole + 1, item->data( Qt::UserRole + 1 ).toString() );
     m_list->insertItem( oper.index - 1, newItem );
     m_list->setCurrentRow( oper.index - 1 );
 }
@@ -1099,7 +1152,7 @@ void PreferredOperatorsDialog::moveUp()
 
     swap( i - 1, i );
 
-    QListWidgetItem *item = m_list->takeItem( i );
+    TwoLineFloatingTextListItem *item = (TwoLineFloatingTextListItem *)m_list->takeItem( i );
     m_list->insertItem( i - 1, item );
     m_list->setCurrentRow( i - 1 );
 }
@@ -1112,7 +1165,7 @@ void PreferredOperatorsDialog::moveDown()
 
     swap( i, i + 1 );
 
-    QListWidgetItem *item = m_list->takeItem( i );
+    TwoLineFloatingTextListItem *item = (TwoLineFloatingTextListItem *)m_list->takeItem( i );
     m_list->insertItem( i + 1, item );
     m_list->setCurrentRow( i + 1 );
 }

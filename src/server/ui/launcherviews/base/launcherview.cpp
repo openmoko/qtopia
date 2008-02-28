@@ -193,8 +193,8 @@ LauncherView::LauncherView( QWidget* parent, Qt::WFlags fl )
         , contentSet(NULL)
         , model(NULL)
         , nColumns(1)
-        , mNeedGridSize(false)
         , mainLayout(NULL)
+        , mNeedGridSize(false)
 {
     init();
 }
@@ -257,6 +257,8 @@ void LauncherView::setBusy(bool on)
 
 void LauncherView::setBusy(const QModelIndex &index, bool on)
 {
+    Q_UNUSED(index);
+    Q_UNUSED(on);
 /*
     // Enable this code to display a wait icon next to the busy item.
     if ( on )
@@ -426,7 +428,7 @@ void LauncherView::calculateGridSize(bool force)
         if (Qtopia::mousePreferred())
             scalingFactor = 1.8;
 
-        int nbRow = qAbs(viewHeight / (fontMetrics().height() * scalingFactor));
+        int nbRow = int(qAbs(viewHeight / (fontMetrics().height() * scalingFactor)));
         iconHeight = qRound(viewHeight / nbRow);
 
         grSize = QSize((viewerWidth-(nColumns+1)*icons->spacing())/nColumns, iconHeight);

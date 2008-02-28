@@ -1041,8 +1041,8 @@ const char *dayToString(int d)
     }
 }
 
-static char *vCalDateTimeFormat = "yyyyMMddThhmmss"; // Z only if giving it in utc.
-static char *vCalDateFormat = "yyyyMMdd";
+static const char *vCalDateTimeFormat = "yyyyMMddThhmmss"; // Z only if giving it in utc.
+static const char *vCalDateFormat = "yyyyMMdd";
 
 static VObject *createVObject( const QAppointment &e )
 {

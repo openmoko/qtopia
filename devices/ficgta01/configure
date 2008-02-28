@@ -26,7 +26,6 @@
 -extra-qtopiacore-config "-D QT_QWS_SCREENCORDS" 
 -extra-qtopiacore-config "-D QT_QWS_DISABLE_FLUSHCLIPPING" 
 -extra-qt-config -no-glib 
--D SYSINFO_GEEK_MODE
 -release
 -verbose
 -no-samples

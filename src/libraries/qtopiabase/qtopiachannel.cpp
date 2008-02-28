@@ -51,7 +51,12 @@
 #include "dbusipccommon_p.h"
 #endif
 
-class QtopiaChannel_Private : public QObject
+class QtopiaChannel_Private
+#if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
+    : public QCopChannel
+#else
+    : public QObject
+#endif
 {
     Q_OBJECT
 
@@ -65,8 +70,9 @@ public:
                          const QString &msg,
                          const QByteArray &data);
 #elif defined(QTOPIA_REGULAR_QCOP)
-    QCopChannel *m_channel;
     QTimer *m_cleanupTimer;
+
+    void receive(const QString& msg, const QByteArray &data);
 
     struct Fragment
     {
@@ -84,7 +90,6 @@ private slots:
     void handleSignalReceived(const QByteArray &arr, const QDBusMessage &msg);
 #elif defined(QTOPIA_REGULAR_QCOP)
 private slots:
-    void receivedFragment(const QString& msg, const QByteArray &data);
     void cleanup();
 #endif
 
@@ -92,7 +97,7 @@ private slots:
 
 QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChannel *parent) :
 #if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
-        m_channel(0), m_fragments(0),
+        QCopChannel(channel, parent), m_fragments(0),
 #endif
         m_parent(parent)
 {
@@ -119,9 +124,6 @@ QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChann
         qFatal("dbc.connect failed!!");
 
 #elif defined(QTOPIA_REGULAR_QCOP)
-    m_channel = new QCopChannel(channel, parent);
-    QObject::connect(m_channel, SIGNAL(received(QString,QByteArray)),
-                     this, SLOT(receivedFragment(QString,QByteArray)));
     m_cleanupTimer = new QTimer();
     m_cleanupTimer->setSingleShot(true);
     connect(m_cleanupTimer, SIGNAL(timeout()), this, SLOT(cleanup()) );
@@ -134,8 +136,6 @@ QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChann
 QtopiaChannel_Private::~QtopiaChannel_Private()
 {
 #if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
-    if (m_channel)
-        delete m_channel;
     if (m_cleanupTimer)
         delete m_cleanupTimer;
     cleanup();
@@ -272,7 +272,7 @@ QString QtopiaChannel::channel() const
 #if defined(QTOPIA_DBUS_IPC)
     return m_data->m_channelName;
 #elif defined(QTOPIA_REGULAR_QCOP)
-    return m_data->m_channel->channel();
+    return m_data->channel();
 #else
     return QString();
 #endif
@@ -387,7 +387,7 @@ bool QtopiaChannel::flush()
 
 #if !defined(QTOPIA_DBUS_IPC) && defined(QTOPIA_REGULAR_QCOP)
 
-void QtopiaChannel_Private::receivedFragment(const QString& msg, const QByteArray &data)
+void QtopiaChannel_Private::receive(const QString& msg, const QByteArray &data)
 {
     // If this is not a fragmented message, then pass it on as-is.
     if ( !msg.endsWith( "_fragment_" ) ) {

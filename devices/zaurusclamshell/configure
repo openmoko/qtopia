@@ -11,7 +11,6 @@
 -extra-qtopiacore-config "-qt-mouse-tslib" 
 -extra-qtopiacore-config "-depths 8,16,32" 
 -extra-qtopiacore-config "-qt-kbd-sl5000" 
--D SYSINFO_GEEK_MODE
 -D QT_QWS_KERNELKEYMAP
 -release
 -extra-qt-config -no-glib 

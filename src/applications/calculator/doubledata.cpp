@@ -71,7 +71,7 @@ void DoubleData::set(double d) {
         }
     }
 
-    formattedOutput = roundDigits(formattedOutput, 12);
+    formattedOutput = roundDigits(formattedOutput, 11);
 
     if ( formattedOutput.at( 11 ) == QChar('.') && formattedOutput.at(12) != QChar('0') )
         systemEngine->setError( eSurpassLimits );

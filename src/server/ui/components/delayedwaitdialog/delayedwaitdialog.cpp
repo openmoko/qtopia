@@ -169,7 +169,7 @@ void DelayedWaitDialog::timerEvent( QTimerEvent *te )
 
 void DelayedWaitDialog::update()
 {
-    int static highlightIndex = 0;
+    static int highlightIndex = 0;
     int stepsToHighlightIndex = 0;
     for( int i = 0; i < NUMBEROFICON; ++i ) {
         stepsToHighlightIndex = i < highlightIndex ?

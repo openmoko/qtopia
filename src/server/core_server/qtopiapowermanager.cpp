@@ -111,7 +111,7 @@ static void applyLightSettings(QPowerStatus *p)
 }
 
 //--------------------------------------------------
-// customised power management for Phone and PDA
+// customised power management for Phone
 
 static QtopiaPowerManager *g_qtopiaPowerManager = 0;
 

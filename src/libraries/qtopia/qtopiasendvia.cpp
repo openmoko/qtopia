@@ -325,10 +325,12 @@ bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QSt
     QtopiaApplication::execDialog( dlg );
     delete dlg;
 #elif defined(QTOPIA_BLUETOOTH) // send straight to bluetooth
+    Q_UNUSED(parent);
     QtopiaServiceRequest req("BluetoothPush", "pushFile(QString,QString,QString,bool)");
     req << filename << mimetype << description << autodelete;
     req.send();
 #elif defined(QTOPIA_INFRARED) // send straight to infrared
+    Q_UNUSED(parent);
     QtopiaServiceRequest req("InfraredBeaming", "beamFile(QString,QString,QString,bool)");
     req << filename << mimetype << description << autodelete;
     req.send();
@@ -338,6 +340,7 @@ bool QtopiaSendVia::sendFile(QWidget *parent, const QString &filename, const QSt
     Q_UNUSED(parent);
     Q_UNUSED(filename);
     Q_UNUSED(mimetype);
+    Q_UNUSED(description);
     Q_UNUSED(autodelete);
 #endif
 

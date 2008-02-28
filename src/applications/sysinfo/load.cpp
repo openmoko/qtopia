@@ -38,7 +38,6 @@ LoadInfo::LoadInfo( QWidget *parent, Qt::WFlags f )
 
 void LoadInfo::init()
 {
-#ifdef SYSINFO_GEEK_MODE
     QVBoxLayout *vb = new QVBoxLayout( this );
 
     QString cpuInfo = getCpuInfo();
@@ -64,29 +63,23 @@ void LoadInfo::init()
     hb->addWidget( l );
     hb->addStretch(20);
     vb->addStretch(50);
-#endif
 }
 
 QPixmap LoadInfo::makeLabel( const QColor &col )
 {
     int h = fontMetrics().height();
     QPixmap pm( 20 , h );
-#ifdef SYSINFO_GEEK_MODE
     QPainter p( &pm );
     p.fillRect( pm.rect(), palette().background() );
     p.fillRect( 0, 0, 20, h, Qt::black );
     p.setPen( col );
     p.drawLine( 2, h/2, 17, h/2 );
-#else
-    (void)col; //Q_UNUSED
-#endif
     return pm;
 }
 
 QString LoadInfo::getCpuInfo()
 {
     QString info = tr("Type: ");
-#ifdef SYSINFO_GEEK_MODE
     bool haveInfo = false;
     QFile f( "/proc/cpuinfo" );
     if ( f.open( QFile::ReadOnly ) ) {
@@ -121,14 +114,12 @@ QString LoadInfo::getCpuInfo()
     if ( !haveInfo )
         info = QString();
 
-#endif
     return info;
 }
 
 Load::Load( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f ), lastUser(0), lastSys(0)
 {
-#ifdef SYSINFO_GEEK_MODE
     setMinimumHeight( 30 );
     QPalette pal(palette());
     pal.setColor(backgroundRole(), Qt::black);
@@ -149,20 +140,16 @@ Load::Load( QWidget *parent, Qt::WFlags f )
     gettimeofday( &last, 0 );
     first = true;
     timeout();
-#endif
 }
 
 Load::~Load()
 {
-#ifdef SYSINFO_GEEK_MODE
     delete [] userLoad;
     delete [] systemLoad;
-#endif
 }
 
 void Load::paintEvent( QPaintEvent * )
 {
-#ifdef SYSINFO_GEEK_MODE
     QPainter p( this );
 
     int h = height() - 5;
@@ -189,12 +176,10 @@ void Load::paintEvent( QPaintEvent * )
         p.drawLine( x1, h - int(userLoad[i-1] * mult),
                     x2, h - int(userLoad[i] * mult) );
     }
-#endif
 }
 
 void Load::timeout()
 {
-#ifdef SYSINFO_GEEK_MODE
     int user;
     int usernice;
     int sys;
@@ -244,5 +229,4 @@ void Load::timeout()
     } else if ( tdiff < 0 ) {
         last = now;
     }
-#endif
 }

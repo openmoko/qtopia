@@ -49,7 +49,7 @@ QDBMigrationEngine *QDBMigrationEngine::instance()
     return migrationEngine();
 }
 
-bool QDBMigrationEngine::check(bool result, int line, char *file, char *message)
+bool QDBMigrationEngine::check(bool result, int line, const char *file, const char *message)
 {
     if(result == false)
     {
@@ -61,7 +61,7 @@ bool QDBMigrationEngine::check(bool result, int line, char *file, char *message)
     return result;
 }
 
-bool QDBMigrationEngine::exec(QSqlQuery &query, int line, char *file)
+bool QDBMigrationEngine::exec(QSqlQuery &query, int line, const char *file)
 {
     QtopiaSql::instance()->logQuery(query);
     if(query.exec() == false)
@@ -77,7 +77,7 @@ bool QDBMigrationEngine::exec(QSqlQuery &query, int line, char *file)
         return true;
 }
 
-bool QDBMigrationEngine::exec(const QString &query, int line, char *file)
+bool QDBMigrationEngine::exec(const QString &query, int line, const char *file)
 {
     QSqlQuery qry(db);
     if(qry.exec(query) == false)

@@ -35,7 +35,7 @@
 <li>multi<p>The values here are compared to the <a href="var-projects-1.html">PROJECTS</a> variable and only enabled projects are addded. This cannot be used to package projects in multiple project roots. The other projects must not install <tt>.directory</tt> or <tt>.desktop</tt> files and should have <tt>CONFIG+=no_pkg</tt> to prevent duplicate packaging.</p>
 </li>
 </ul>
-<p>Note that <tt>pkg.domain</tt> is automatically set to include target.domain and the domains of any app/script you have installed with <a href="hint-sxe-1.html">hint=sxe</a> so you may not need to set it. However, this feature is only available for the default package and you must manually assign <tt>.domain</tt> for additional packages.</p>
+<p>Note that <tt>pkg.domain</tt> is automatically set to include target.domain and the domains of any app/script you have installed with <a href="hint-sxe-1.html">hint=sxe</a> so you should not need to set it. However, this feature is only available for the default package and you must manually assign <tt>.domain</tt> for additional packages.</p>
 <a name="package-limitations"></a>
 <h3>Package Limitations</h3>
 <p>There are restrictions on what can be installed. For example, <tt>.directory</tt> and <tt>.desktop</tt> files are handled differently. See <a href="task-create-a-launcher-folder-1.html#a-note-on-packages">A note on packages</a> for information about <tt>.directory</tt> files.</p>

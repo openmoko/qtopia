@@ -310,7 +310,7 @@ RingControl::RingControl(QObject *parent)
 }
 
 /*!
-  \internal 
+  \internal
   Destroy the RingControl.
  */
 RingControl::~RingControl()
@@ -801,11 +801,12 @@ void RingControl::stopRingtone( const QString& fileName )
 #ifdef MEDIA_SERVER
     if (d->soundcontrol) {
         // Check if the same ringtone is still the most recently played
-        if (QSound* sound = d->soundcontrol->sound()) 
+        if (QSound* sound = d->soundcontrol->sound())
             if (sound->fileName() == fileName)
                 sound->stop();
     }
 #elif defined(Q_WS_QWS)
+    Q_UNUSED(fileName);
     if (d->soundclient) {
         // No way to know that this is the same ringtone...
         d->soundclient->stop(0);

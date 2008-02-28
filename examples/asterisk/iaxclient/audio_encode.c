@@ -42,7 +42,9 @@ static struct iaxc_speex_settings speex_settings = {
   -1,   /* float quality */
   -1,   /* bitrate */
   0, 0, /* vbr, abr */
-  3     /* complexity */
+  3,    /* complexity */
+  0,    /* mode */
+  IAXC_SPEEX_TERMINATION_NONE /* termination_mode */
 };
 
 

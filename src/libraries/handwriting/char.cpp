@@ -33,7 +33,7 @@
 // should be internal, with class member access
 struct QIMPenSpecialKeys {
     uint code;
-    char *name;
+    const char *name;
     uint q23code;
 };
 

@@ -18,5 +18,4 @@
 -extra-qtopiacore-config "-qt-zlib"
 -extra-qtopiacore-config "-depths 8,16,32"
 -extra-qtopiacore-config "-qt-gfx-transformed"
--D SYSINFO_GEEK_MODE
 -extra-qt-config -no-glib 

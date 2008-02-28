@@ -43,15 +43,9 @@ VersionInfo::~VersionInfo()
 {
 }
 
-#ifndef SYSINFO_GEEK_MODE
-#define SYSINFO_GEEK_MODE
-#endif
-
 void VersionInfo::init()
 {
-#ifdef SYSINFO_GEEK_MODE
     setMinimumSize(QSize(16,400));
-#endif
     QFont boldFont = this->font();
     boldFont.setBold(true);
 
@@ -98,7 +92,6 @@ void VersionInfo::init()
     qtopiaCopyright1->setText( "Trolltech ASA" );
     vBoxLayout1->addWidget(qtopiaCopyright1);
 
-#ifdef SYSINFO_GEEK_MODE
     vBoxLayout1->addSpacing( 10 );
 
     QLabel *qtopiaBuild = new QLabel(this);
@@ -112,17 +105,16 @@ void VersionInfo::init()
         builder = builder.left( dotIndex );
     qtopiaBuild->setText(tr("Built by\n%1", "%1 = name").arg(builder));
     vBoxLayout1->addWidget(qtopiaBuild);
-    
+
     qtopiaBuild = new QLabel(this);
     qtopiaBuild->setText(tr("Built on %1","1=date").arg(__DATE__));
     vBoxLayout1->addWidget(qtopiaBuild);
-#endif
+
     QSpacerItem *spacerItem = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     vBoxLayout1->addItem(spacerItem);
     gridLayout1->addLayout(vBoxLayout1, 0, 1, 2, 1);
     vBoxLayout->addLayout(gridLayout1);
 
-#ifdef SYSINFO_GEEK_MODE
     QGridLayout *gridLayout2 = new QGridLayout;
     gridLayout2->setColumnMinimumWidth(0, 20 );
     gridLayout2->setSpacing( 4 );
@@ -166,5 +158,4 @@ void VersionInfo::init()
 
     gridLayout2->addLayout(vBoxLayout2, 0, 1, 2, 1);
     vBoxLayout->addLayout(gridLayout2);
-#endif
 }

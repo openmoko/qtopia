@@ -46,11 +46,11 @@ static const char * bell_xpm[] = {
 "    ..    ",
 "    ..    "};
 
-class Display : public QWidget
+class PhoneDisplay : public QWidget
 {
     Q_OBJECT
 public:
-    Display(QWidget *parent);
+    PhoneDisplay(QWidget *parent);
 
     void setSignalLevel(int l) { signalLevel = l; }
     void setBatteryLevel(int l) { batteryLevel = l; }
@@ -83,13 +83,13 @@ private:
     int tid;
 };
 
-Display::Display(QWidget *parent)
+PhoneDisplay::PhoneDisplay(QWidget *parent)
     : QWidget(parent), batteryLevel(0), signalLevel(0), missed(0), messages(0)
 {
     tid = startTimer(60*1000);
 }
 
-void Display::paintEvent(QPaintEvent *)
+void PhoneDisplay::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
     QPixmap pm(size());
@@ -118,14 +118,14 @@ void Display::paintEvent(QPaintEvent *)
     p.drawPixmap(0,0,pm);
 }
 
-void Display::timerEvent(QTimerEvent *e)
+void PhoneDisplay::timerEvent(QTimerEvent *e)
 {
     if (e->timerId() == tid) {
         update();
     }
 }
 
-void Display::drawSignal(QPainter *p, const QRect &r)
+void PhoneDisplay::drawSignal(QPainter *p, const QRect &r)
 {
     p->drawRect(r.x()+3, r.y(), 2, r.height());
     for (int i = 0; i < 4; i++)
@@ -139,7 +139,7 @@ void Display::drawSignal(QPainter *p, const QRect &r)
     }
 }
 
-void Display::drawBattery(QPainter *p, const QRect &r)
+void PhoneDisplay::drawBattery(QPainter *p, const QRect &r)
 {
     int w = 20;
     p->drawRect(r.x(), r.y(), w-2, r.height());
@@ -194,7 +194,7 @@ BasicDisplay::BasicDisplay(QWidget *parent, Qt::WFlags f)
     vb->setMargin(1);
     TitleBar *tb = new TitleBar(this);
     vb->addWidget(tb);
-    display = new Display(this);
+    display = new PhoneDisplay(this);
     vb->addWidget(display);
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desk = desktop->availableGeometry(desktop->primaryScreen());

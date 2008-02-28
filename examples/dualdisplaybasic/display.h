@@ -22,7 +22,7 @@
 #include <qframe.h>
 
 class QPhoneStatus;
-class Display;
+class PhoneDisplay;
 
 class BasicDisplay : public QFrame
 {
@@ -37,6 +37,6 @@ protected slots:
 
 private:
     QPhoneStatus *status;
-    Display *display;
+    PhoneDisplay *display;
 };
 

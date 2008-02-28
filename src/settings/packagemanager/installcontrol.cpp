@@ -303,7 +303,7 @@ bool InstallControl::installPackage( const InstallControl::PackageInfo &pkg, con
 /*!
   Uninstall the package \a pkg off the device.
 */
-void InstallControl::uninstallPackage( const InstallControl::PackageInfo &pkg, ErrorReporter *reporter ) const
+void InstallControl::uninstallPackage( const InstallControl::PackageInfo &pkg, ErrorReporter * /*reporter*/ ) const
 {
     SandboxUninstallJob job( &pkg, m_installMedia );
     job.terminateApps();

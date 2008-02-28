@@ -344,6 +344,8 @@ void QPluginManager::instanceDestroyed()
 #ifndef SINGLE_EXEC
     QMetaObject::invokeMethod(pluginLibraryManagerInstance(), "derefLibrary",
         Qt::QueuedConnection, Q_ARG(QPluginLoader *, lib));
+#else
+    Q_UNUSED(lib);
 #endif
 }
 
