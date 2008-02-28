@@ -112,7 +112,7 @@ public:
     CallScreen *callScreen(bool create = true) const;
     QAbstractDialerScreen *dialer(bool create = true) const;
     QAbstractHomeScreen *homeScreen() const;
-    CallHistory *callHistory() const { return mCallHistory; }
+    CallHistory *callHistory() const { return m_callHistory; }
 #endif
 
     QAbstractBrowserScreen* phoneBrowser(bool create = true) const;
@@ -198,7 +198,7 @@ private slots:
 private:
     friend class PhoneManager;
 
-    int updateTid;
+    int m_updateTid;
 
     PhoneHeader *header();
     PhoneHeader *m_header;
@@ -207,71 +207,71 @@ private:
     ContextLabel *context();
     ContextLabel *m_context;
 
-    mutable QAbstractBrowserScreen *stack;
+    mutable QAbstractBrowserScreen *m_stack;
     //HomeScreen *homeScreen;
     mutable QAbstractHomeScreen *m_homeScreen;
-    QMenu *documentsMenu;
-    int separatorId;
-    QBasicTimer multitaskingMultipressTimer;
-    int multitaskingcursor;
-    uint registrationMsgId;
+    QMenu *m_documentsMenu;
+    int m_separatorId;
+    QBasicTimer m_multitaskingMultipressTimer;
+    int m_multitaskingcursor;
+    uint m_registrationMessageId;
 #ifdef QTOPIA_PHONEUI
-    int messageCount;
-    int activeCalls;
-    QValueSpaceItem newMessages;
+    int m_messageCount;
+    int m_activeCalls;
+    QValueSpaceItem m_newMessages;
 #endif
-    QStringList iconPath;
-    bool slowUpdates;
+    QStringList m_iconPath;
+    bool m_slowUpdates;
 #ifdef QTOPIA_PHONEUI
-    QAbstractMessageBox *serviceMsgBox;
-    QAbstractMessageBox *CBSMessageBox;
+    QAbstractMessageBox *m_serviceMessageBox;
+    QAbstractMessageBox *m_CBSMessageBox;
 #endif
 
 #ifdef QTOPIA_PHONEUI
-    mutable CallScreen *mCallScreen;
+    mutable CallScreen *m_callScreen;
     mutable QAbstractDialerScreen *m_dialer;
 #endif
-    mutable QAbstractSecondaryDisplay *secondDisplay;
+    mutable QAbstractSecondaryDisplay *m_secondDisplay;
 
 #ifdef QTOPIA_PHONEUI
-    CallHistory *mCallHistory;
+    CallHistory *m_callHistory;
 
-    QAbstractMessageBox *missedMsgBox;
-    QAbstractMessageBox *messagesMsgBox;
-    QAbstractMessageBox *incomingMsgBox;
-    QAbstractMessageBox *dialingMsgBox;
-    QAbstractMessageBox *callTypeMsgBox;
+    QAbstractMessageBox *m_missedMessageBox;
+    QAbstractMessageBox *m_messagesMessageBox;
+    QAbstractMessageBox *m_incomingMessageBox;
+    QAbstractMessageBox *m_dialingMessageBox;
+    QAbstractMessageBox *m_callTypeMessageBox;
 #endif
 #ifdef QTOPIA_VOIP
-    QAbstractMessageBox *voipNoPresenceMsgBox;
+    QAbstractMessageBox *m_voipNoPresenceMessageBox;
 #endif
-    QAbstractMessageBox *warningMsgBox;
+    QAbstractMessageBox *m_warningMessageBox;
 
 #ifdef QTOPIA_PHONEUI
-    int alertedMissed;
-    bool messageBoxFull;
-    bool isSysMsg;
-    QString queuedCall;
-    QString queuedCallType;
-    QUniqueId queuedCallContact;
-    bool queuedIncoming;
+    int m_alertedMissed;
+    bool m_messageBoxFull;
+    bool m_isSystemMessage;
+    QString m_queuedCall;
+    QString m_queuedCallType;
+    QUniqueId m_queuedCallContact;
+    bool m_queuedIncoming;
 
-    bool waitingVoiceMailNumber;
+    bool m_waitingVoiceMailNumber;
 #endif
-    QSpeedDialFeedback *speeddialfeedback;
-    QString configuration;
+    QSpeedDialFeedback *m_speeddialfeedback;
+    QString m_configuration;
 
-    UIApplicationMonitor appMon;
+    UIApplicationMonitor m_appMon;
 
 #ifdef QTOPIA_PHONEUI
-    QServiceNumbers *serviceNumbers;
+    QServiceNumbers *m_serviceNumbers;
 #endif
 #ifdef QTOPIA_CELL
-    CellModemManager *cellModem;
-    GsmKeyActions *gsmKeyActions;
+    CellModemManager *m_cellModem;
+    GsmKeyActions *m_gsmKeyActions;
 #endif
 #ifdef QTOPIA_PHONEUI
-    bool dialerSpeedDialFeedbackActive;
+    bool m_dialerSpeedDialFeedbackActive;
 #endif
 };
 
