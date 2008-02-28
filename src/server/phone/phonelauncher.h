@@ -179,9 +179,6 @@ protected:
     void paintEvent(QPaintEvent *);
     void updateLauncherIconSize();
 
-private:
-    void showMessageBox(const QString& title, const QString& text, QAbstractMessageBox::Icon=QAbstractMessageBox::Information);
-
 private slots:
 #ifdef QTOPIA_CELL
     void unstructuredNotification (QSupplementaryServices::UnstructuredAction action, const QString& data);
@@ -214,7 +211,6 @@ private:
     //HomeScreen *homeScreen;
     mutable QAbstractHomeScreen *m_homeScreen;
     QMenu *m_documentsMenu;
-    QPointer<QAbstractMessageBox> m_warningBox;
     int m_separatorId;
     QBasicTimer m_multitaskingMultipressTimer;
     int m_multitaskingcursor;
