@@ -429,6 +429,13 @@ enable_hierarchicaldocumentview {
     DEFINES+=ENABLE_HIERARCHICAL_DOCUMENT_VIEW
 }
 
+x11 {
+    PHONE_HEADERS+=\
+        phone/phonelauncher_x11.h
+    PHONE_SOURCES+=\
+        phone/phonelauncher_x11.cpp
+}
+
 PHONE_UI_SOURCES=\
     phone/ui/phonelauncherview.cpp \
     phone/ui/griditem.cpp \
