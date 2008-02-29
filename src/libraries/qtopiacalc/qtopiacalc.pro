@@ -9,17 +9,19 @@ HEADERS = calculator.h engine.h data.h instruction.h stdinputwidgets.h
 SOURCES = calculator.cpp engine.cpp instruction.cpp stdinputwidgets.cpp
 
 # data types
-HEADERS += doubledata.h integerdata.h fractiondata.h
-SOURCES += doubledata.cpp integerdata.cpp fractiondata.cpp
+HEADERS += doubledata.h
+SOURCES += doubledata.cpp
 
 # instructions
-HEADERS += doubleinstruction.h integerinstruction.h fractioninstruction.h
-SOURCES += doubleinstruction.cpp integerinstruction.cpp fractioninstruction.cpp
+HEADERS += doubleinstruction.h
+SOURCES += doubleinstruction.cpp
 
 static:SOURCES += $(QPEDIR)/src/plugins/calculator/simple/simple.cpp
 static:HEADERS += $(QPEDIR)/src/plugins/calculator/simple/simple.h
+static:LIBS	+= -lqpe
 
 TARGET		= qtopiacalc
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
+win32:DLLDESTDIR = $(QPEDIR)/bin
 VERSION		= 1.6.0
 

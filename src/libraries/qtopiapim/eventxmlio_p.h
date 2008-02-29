@@ -74,18 +74,17 @@ class QTOPIAPIM_EXPORT EventXmlIO : public EventIO, public PimXmlIO {
 
   const QList<PrEvent>& events();
 
-  QValueList<Occurrence> getOccurrences(const QDate& from, const QDate& to) const;
-  QValueList<Occurrence> getOccurrencesInTZ(const QDate& from, const QDate& to,
-	  const QString &zone) const;
+  PrEvent eventForId( const QUuid &, bool *ok ) const;
+  QValueList<Occurrence> getOccurrencesInCurrentTZ(const QDate& from, const QDate& to) const;
 
   bool loadData();
   bool saveData();
 
   void updateEvent(const PimEvent& event);
   void removeEvent(const PimEvent& event);
-  void addEvent(const PimEvent& event, bool assignUid = TRUE );
+  QUuid addEvent(const PimEvent& event, bool assignUid = TRUE );
   void addException(const QDate &d, const PimEvent &p);
-  void addException(const QDate &d, const PimEvent &p, const PimEvent& event);
+  QUuid addException(const QDate &d, const PimEvent &p, const PimEvent& event);
 
   // find next alarm and set;
   // later will want to be more efficient.
@@ -97,7 +96,7 @@ class QTOPIAPIM_EXPORT EventXmlIO : public EventIO, public PimXmlIO {
   void ensureDataCurrent(bool forceReload = false);
 
 protected:
-  const char *recordStart() const { return "<event "; }
+  const char *recordStart() const { return "<event "; } // No tr
   const char *listStart() const
   { return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
   "<!DOCTYPE DATEBOOK>\n<events>\n"; }

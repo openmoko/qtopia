@@ -373,8 +373,8 @@ void QIMPenWidget::paintEvent( QPaintEvent * )
 	return;
 
     // draw the character set titles
-    QFont selFont( "helvetica", 8, QFont::Bold );
-    QFont font( "helvetica", 8 );
+    QFont selFont( "helvetica", 8, QFont::Bold ); // no tr
+    QFont font( "helvetica", 8 ); // no tr
     CharSetEntryIterator it( charSets );
     int spos = 0;
     for ( ; it.current(); ++it ) {

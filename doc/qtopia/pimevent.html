@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/event.cpp:40 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopiapim/event.cpp:40 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -40,11 +40,11 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>QString <a href="#description"><b>description</b></a> () const</div></li>
 <li><div class=fn>QString <a href="#location"><b>location</b></a> () const</div></li>
 <li><div class=fn>QDateTime <a href="#start"><b>start</b></a> () const</div></li>
-<li><div class=fn>QDateTime <a href="#startInTZ"><b>startInTZ</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const</div></li>
+<li><div class=fn>QDateTime <a href="#startInCurrentTZ"><b>startInCurrentTZ</b></a> () const</div></li>
 <li><div class=fn>QDateTime <a href="#end"><b>end</b></a> () const</div></li>
-<li><div class=fn>QDateTime <a href="#endInTZ"><b>endInTZ</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const</div></li>
+<li><div class=fn>QDateTime <a href="#endInCurrentTZ"><b>endInCurrentTZ</b></a> () const</div></li>
 <li><div class=fn>QString <a href="#notes"><b>notes</b></a> () const</div></li>
-<li><div class=fn>QString <a href="#timeZone"><b>timeZone</b></a> () const</div></li>
+<li><div class=fn>TimeZone <a href="#timeZone"><b>timeZone</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#hasAlarm"><b>hasAlarm</b></a> () const</div></li>
 <li><div class=fn>int <a href="#alarmDelay"><b>alarmDelay</b></a> () const</div></li>
 <li><div class=fn>SoundTypeChoice <a href="#alarmSound"><b>alarmSound</b></a> () const</div></li>
@@ -53,7 +53,7 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>int <a href="#frequency"><b>frequency</b></a> () const</div></li>
 <li><div class=fn>int <a href="#weekOffset"><b>weekOffset</b></a> () const</div></li>
 <li><div class=fn>QDate <a href="#repeatTill"><b>repeatTill</b></a> () const</div></li>
-<li><div class=fn>QDate <a href="#repeatTillInTZ"><b>repeatTillInTZ</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const</div></li>
+<li><div class=fn>QDate <a href="#repeatTillInCurrentTZ"><b>repeatTillInCurrentTZ</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#repeatForever"><b>repeatForever</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#showOnNearest"><b>showOnNearest</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#repeatOnWeekDay"><b>repeatOnWeekDay</b></a> ( int&nbsp;day ) const</div></li>
@@ -67,7 +67,7 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>void <a href="#setStart"><b>setStart</b></a> ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;time )</div></li>
 <li><div class=fn>void <a href="#setEnd"><b>setEnd</b></a> ( const&nbsp;QDateTime&nbsp;&amp;&nbsp;time )</div></li>
 <li><div class=fn>void <a href="#setNotes"><b>setNotes</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</div></li>
-<li><div class=fn>void <a href="#setTimeZone"><b>setTimeZone</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</div></li>
+<li><div class=fn>void <a href="#setTimeZone"><b>setTimeZone</b></a> ( const&nbsp;TimeZone&nbsp;&amp;&nbsp;zone )</div></li>
 <li><div class=fn>void <a href="#setAlarm"><b>setAlarm</b></a> ( int&nbsp;minutes, SoundTypeChoice&nbsp;s )</div></li>
 <li><div class=fn>void <a href="#clearAlarm"><b>clearAlarm</b></a> ()</div></li>
 <li><div class=fn>void <a href="#setRepeatType"><b>setRepeatType</b></a> ( RepeatType&nbsp;t )</div></li>
@@ -78,7 +78,6 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>void <a href="#setRepeatOnWeekDay"><b>setRepeatOnWeekDay</b></a> ( int&nbsp;day, bool&nbsp;enable )</div></li>
 <li><div class=fn>QDate <a href="#nextOccurrence"><b>nextOccurrence</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, bool&nbsp;*&nbsp;ok = 0 ) const</div></li>
 <li><div class=fn>QColor <a href="#color"><b>color</b></a> () const</div></li>
-<li><div class=fn>virtual QMap&lt;int, QString&gt; <b>fields</b> () const</div></li>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -165,13 +164,11 @@ returns the color associated with the event.
 </h3>
 
 <p> Returns when the first occurrence of the event starts.
-<p> <p>See also <a href="#endInTZ">endInTZ</a>() and <a href="#setEnd">setEnd</a>().
+<p> <p>See also <a href="#endInCurrentTZ">endInCurrentTZ</a>() and <a href="#setEnd">setEnd</a>().
 
-<h3 class=fn>QDateTime <a name="endInTZ"></a>PimEvent::endInTZ ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const
+<h3 class=fn>QDateTime <a name="endInCurrentTZ"></a>PimEvent::endInCurrentTZ () const
 </h3>
-Returns the end time of the event in timezone <em>zone</em>.
-If <em>zone</em> is NULL, returns the end time of the event
-in the current time zone.
+Returns the end time of the event in the current system timezone.
 <p> <p>See also <a href="#end">end</a>().
 
 <h3 class=fn>int <a name="frequency"></a>PimEvent::frequency () const
@@ -258,11 +255,9 @@ If the repeat type of the event is Weekly and the event is set to repeat on
 Returns the date the event will repeat until
 <p> <p>See also <a href="#repeatForever">repeatForever</a>() and <a href="#setRepeatTill">setRepeatTill</a>().
 
-<h3 class=fn>QDate <a name="repeatTillInTZ"></a>PimEvent::repeatTillInTZ ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const
+<h3 class=fn>QDate <a name="repeatTillInCurrentTZ"></a>PimEvent::repeatTillInCurrentTZ () const
 </h3>
-Returns the date the event will repeat till in timezone <em>zone</em>.
-If <em>zone</em> is NULL, returns the date the event will repeat till
-in the current time zone.
+Returns the date the event will repeat till in the current system timezone.
 <p> <p>See also <a href="#repeatTill">repeatTill</a>().
 
 <h3 class=fn><a href="pimevent.html#RepeatType-enum">RepeatType</a> <a name="repeatType"></a>PimEvent::repeatType () const
@@ -271,7 +266,7 @@ in the current time zone.
 <p> Returns the RepeatType of the event.
 <p> <p>See also <a href="#setRepeatType">setRepeatType</a>() and <a href="#RepeatType-enum">RepeatType</a>.
 
-<h3 class=fn>QUuid <a name="seriesUid"></a>PimEvent::seriesUid () const
+<h3 class=fn><a href="quuid.html">QUuid</a> <a name="seriesUid"></a>PimEvent::seriesUid () const
 </h3> 
 Returns the UID for the recurring event this event is an exception to.
 If this event does nto represent an exception to another repeating event,
@@ -300,7 +295,7 @@ Sets the description of the event to <em>text</em>.
 Sets the end time of the event to <em>time</em>.
 This will also change the duration of the event. <em>time</em> must be at least
 5 minutes after the start time of the event.
-<p> <p>See also <a href="#end">end</a>() and <a href="#endInTZ">endInTZ</a>().
+<p> <p>See also <a href="#end">end</a>() and <a href="#endInCurrentTZ">endInCurrentTZ</a>().
 
 <h3 class=fn>void <a name="setFrequency"></a>PimEvent::setFrequency ( int&nbsp;freq )
 </h3>
@@ -355,13 +350,15 @@ months that do not have 31 days, (or 28/29 in the case of Febuary).
 </h3>
 Sets the start time of the event to <em>time</em>.
 This will change the end time fo the event to maintain the same duration.
-<p> <p>See also <a href="#start">start</a>() and <a href="#startInTZ">startInTZ</a>().
+<p> <p>See also <a href="#start">start</a>() and <a href="#startInCurrentTZ">startInCurrentTZ</a>().
 
-<h3 class=fn>void <a name="setTimeZone"></a>PimEvent::setTimeZone ( const&nbsp;QString&nbsp;&amp;&nbsp;text )
+<h3 class=fn>void <a name="setTimeZone"></a>PimEvent::setTimeZone ( const&nbsp;TimeZone&nbsp;&amp;&nbsp;zone )
 </h3>
-Sets the time zone of the event to <em>text</em>.
+Sets the time zone of the event to <em>zone</em>.
 This will affect when the event occurs in UTC.  All day events cannot have
 a time zone set.
+<p> Setting the time zone to an invalid TimeZone will cause the event to
+have no associated time zone.
 <p> <p>See also <a href="#timeZone">timeZone</a>() and <a href="#isAllDay">isAllDay</a>().
 
 <h3 class=fn>bool <a name="showOnNearest"></a>PimEvent::showOnNearest () const
@@ -375,18 +372,16 @@ if the exact date the event would occur is not a valid date.
 </h3>
 
 <p> Returns when the first occurrence of the event starts.
-<p> <p>See also <a href="#startInTZ">startInTZ</a>() and <a href="#setStart">setStart</a>().
+<p> <p>See also <a href="#startInCurrentTZ">startInCurrentTZ</a>() and <a href="#setStart">setStart</a>().
 
-<h3 class=fn>QDateTime <a name="startInTZ"></a>PimEvent::startInTZ ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const
+<h3 class=fn>QDateTime <a name="startInCurrentTZ"></a>PimEvent::startInCurrentTZ () const
 </h3>
-Returns the start time of the event in timezone <em>zone</em>.
-If <em>zone</em> is NULL, returns the start time of the event
-in the current time zone.
+Returns the start time of the event in the current system timezone.
 <p> <p>See also <a href="#start">start</a>().
 
-<h3 class=fn>QString <a name="timeZone"></a>PimEvent::timeZone () const
+<h3 class=fn>TimeZone <a name="timeZone"></a>PimEvent::timeZone () const
 </h3>
-Returns the time zone of the event or a empty string if the event has
+Returns the time zone of the event or an invalid TimeZone if the event has
 no time zone.  All day events allways have no time zone.
 <p> <p>See also <a href="#setTimeZone">setTimeZone</a>() and <a href="#isAllDay">isAllDay</a>().
 

@@ -37,8 +37,12 @@ sub targetInfo{
 	if ($_ =~ /($targetPrefix\s*=\s*)(\w*-?\w*)/){
 	    $targetName = $2;
 	}
-	if ($_ =~ /(TEMPLATE\s*=\s*)(\w*)/){
-	    $targetType = $2;
+	if ($targetType eq ""){
+	    if ($_ =~ /(multiprocess:TEMPLATE\s*=\s*)(\w*)/){
+		$targetType = $2;
+	    }elsif ($_ =~ /(TEMPLATE\s*=\s*)(\w*)/)  {
+		$targetType = $2;
+	    }
 	}
 
 	if (($targetVersion ne "") && ($targetName ne "") && ($targetType ne "")){
@@ -71,22 +75,26 @@ my $tempDir = "";
 my $qtVersion ="qt2";
 my $componentType = "win32";
 my $QDESKTOP = "";
+#what type of path separator do we have
+my $sep;
 # what is the name of the make file to generate
 my $MAKEFILE = "Makefile"; 
-#what is our plaform , either win32 or unix
+#what is our platform , either win32 or unix
 my $platform;
 # What components are not ported yet
 my @unported;
 my $distCmds;
 my $allCmds;
 my $cleanCmds;
-
+my $vcDspFlags="";
+my @targetSpecs;
  
 # Read our options
 
-@optl = ("v", "c:s", "debug", "makefile:s", "qt3", "release","qtopiadesktop", "unix", "win32", "static", "dsp", "errorlog:s");
+@optl = ("v", "c:s", "debug", "makefile:s", "qt3", "release","qtopiadesktop", "unix", "win32", 
+	    "platform:s", "static", "dsp","console", "errorlog:s" );
 
-die "Usage configure  [v] (-win32|-unix) [-debug|-release] [dsp] [static] [-errorlog <errorfile>]\n\n" .
+die "Usage configure  [v] (-win32|-unix) [-debug|-release] [platfrom (sharp|ipaq)] [dsp] [static] [-errorlog <errorfile>]\n\n" .
 	"\t Option          Meaning\n" .
 	"\t ------          ----------\n" .
 	"\t  v              Be verbose used to debugging this script and your settings\n" .
@@ -96,10 +104,24 @@ die "Usage configure  [v] (-win32|-unix) [-debug|-release] [dsp] [static] [-erro
 	"\t  qtopiadesktop  Build for qtopiadesktop\n" .
 	"\t  unix           Run configure in Unix mode\n" .
 	"\t  win32          Run configure in Windows mode\n" .
+	"\t  platform       Type of platform either sharp or ipaq". 
 	"\t  dsp            Create dsp files: Not yet completed\n" .
+	"\t  console	    Under windows build applications as console apps".
 	"\t  errorlog       Supply the name of a file to use as an error log\n"
   unless ((GetOptions @optl)  && ($opt_win32 || $opt_unix)); 
 
+if ($opt_dsp){
+    if ($opt_makefile){
+        die "Can't specify name for dsp file"; 
+    }else{
+	$vcDspFlags=" -t vcgeneric ";
+    }
+}
+
+if ($opt_makefile){
+    # keep our sanity when sharing a directory with *nix
+    $MAKEFILE = $opt_makefile;
+}
 
 if ($opt_debug && $opt_release){   
     die "Choose either debug or release option but not both";
@@ -147,12 +169,13 @@ if($opt_qtopiadesktop){
 if ($opt_win32){
   $platform ="win32";
   $MAKE = "nmake ";
+  $sep = "\\";   
   if ($binType ne ""){
     $objectDir ="msvc/obj$QDESKTOP/$binType".$release;
   }else{  
     $objectDir ="msvc/obj$QDESKTOP/$release";
   }
-  $tmpDir ="msvc/moc$QDESKTOP/$release";
+  $tempDir ="msvc/moc$QDESKTOP/$release";
 
   if (!$opt_qtopiadesktop){
       if ($TMAKEPATH =~ /qws/){
@@ -168,6 +191,7 @@ if ($opt_win32){
 }else{
   $platform = "unix";
   $MAKE = "make ";
+  $sep = "/";
 }
 
   if ($opt_v) {
@@ -176,10 +200,23 @@ if ($opt_win32){
 
 if ($ENV{'TMAKE'}){
    $TMAKE ="$ENV{'TMAKE'} -". $platform. " $tmakePathFlags";
-   
 }else{
     $TMAKE ="tmake  -". $platform. " $tmakePathFlags";
 }
+
+if ($opt_platform){
+    # Setup for specified platform
+    if 	(($opt_platform =~ "sharp") ||  ($opt_platform =~ "ipaq")){
+	 my $cmdLine = "cp ../etc/defaultbuttons-". $opt_platform. ".conf ../etc/defaultbuttons.conf";
+	 if ($verbose){
+	    print "Runnnng $cmdLine\n";
+	 }
+	 `$cmdLine`;
+    }else{
+	die "Unknown platform $opt_platform"; 
+    }    
+}
+
 
 if ($opt_v){
   $verbose = "true";
@@ -212,9 +249,9 @@ if ($opt_errorlog){
 #   $objectDirFlags = " \"OBJECTS_DIR = $objectDir\" \"MOC_DIR = $tempDir\" \"INCLUDEPATH += $tempDir\" ";
 # }
 
-#if (!$opt_c){
-#    system "syncqtopia" || die "Unable to sync header files \n";
-#}
+if (!$opt_c){
+    system "syncqtopia" || die "Unable to sync header files \n";
+}
 
 my $base;
 my $proFile;
@@ -253,29 +290,34 @@ if (!$opt_c){
     my $libType;
     my $cmdLine;
     my $cmdResult;
-    my @targetSpecs;
 
     # This is a temporary measure to make it easier to compile, by avoiding components
     #    that have not been ported to WIN32 yet. These will be looked at after 
-    #    the core of Qtopia has been ported
+    #    the core of Qtopia has been ported. "libraries/qtopia1" is a special case as we make 
+    #	  one library for Qtopia for Windows as we can't split a class accross two libraries
     if ($opt_win32){
 	@unported = qw (3rdparty/applications/embeddedkonsole
 		       3rdparty/applications/keypebble
 		       3rdparty/tools/atd
 		       applications/mediaplayer
 		       applications/mediarecorder
+		       3rdparty/libraries/gsm 	
+		       3rdparty/libraries/libavcodec
+		       3rdparty/libraries/libavformat
 		       3rdparty/plugins/codecs/libmpeg3
 		       3rdparty/plugins/codecs/libffmpeg
+		       3rdparty/plugins/codecs/libffmpeg/libav
+		       3rdparty/plugins/codecs/libffmpeg/libavcodec
 		       3rdparty/plugins/obex
 		       3rdparty/plugins/obex/openobex
 		       3rdparty/plugins/textcodecs/jp
+		       libraries/qtopia1
 		       plugins/network/dialup		 
 		       plugins/codecs/wavplugin
 		       plugins/codecs/wavrecord
 		       applications/sysinfo
 		       games/go
 		       games/mindbreaker
-		       games/wordgame
 		       settings/light-and-power
 		       settings/systemtime
 		       settings/qipkg
@@ -304,6 +346,7 @@ if (!$opt_c){
 		#  not supported by the version of freetype in Qt embeded
 		if (($libName ne "") && ($libName ne "freetype")){
 		    print LIB_VERFILE "\tProject(\"LIBS /= s/${libName}.lib/${libName}${libVer}.lib/\");\n";
+		    print LIB_VERFILE "\tProject(\"TMAKE_LIBS /= s/${libName}.lib/${libName}${libVer}.lib/\");\n";
 		}
 	    }
 	}
@@ -313,11 +356,11 @@ if (!$opt_c){
 }
 
 if (!$opt_qtopiadesktop){
-    $TMAKE_FLAGS = "\"DEFINES +=QWS\" \"CONFIG += $qtVersion qtopia embedded \" $objectDirFlags"; 
+    $TMAKE_FLAGS = "\"CONFIG += $qtVersion qtopia embedded multiprocess dynamic \" $objectDirFlags"; 
 }else{
-    $TMAKE_FLAGS = "\"DEFINES +=QTOPIA_DESKTOP\" \"CONFIG += $qtVersion  qtopia \" $objectDirFlags"; 
+    $TMAKE_FLAGS = "\"DEFINES +=QTOPIA_DESKTOP\" \"CONFIG += $qtVersion  qtopia multiprocess dynamic \" $objectDirFlags"; 
 }
-if ($opt_win32 && $opt_debug){
+if ($opt_win32 && $opt_debug && $opt_console){
   $TMAKE_FLAGS = $TMAKE_FLAGS." \"CONFIG += console\"";
 }
 
@@ -328,14 +371,8 @@ if ($opt_win32){
 	$TMAKE_FLAGS = $TMAKE_FLAGS." \"DEFINES += QT_DLL \"";
 	if (!$opt_qt3){
 	  $TMAKE_FLAGS = $TMAKE_FLAGS." \"CONFIG -= thread \" \"TMAKE_LFLAGS += /NODEFAULTLIB:libc \"" ; # threads are broken under Qt2.3
-	    if ($opt_debug) {
-		$TMAKE_FLAGS = $TMAKE_FLAGS." \"TMAKE_CXXFLAGS += -MDd \" \"TMAKE_CFLAGS += -MDd \"";
-	    } else {
-		$TMAKE_FLAGS = $TMAKE_FLAGS." \"TMAKE_CXXFLAGS += -MD \" \"TMAKE_CFLAGS +=-MD \"";
-	    }
 	}
     }
-   $TMAKE_FLAGS = $TMAKE_FLAGS." \"DEFINES += UNICODE \"";
 }
 
 $TMAKE_FLAGS = $TMAKE_FLAGS." \"CONFIG += $tmakeConfigs ". $release. "\"";
@@ -348,11 +385,15 @@ if ($opt_v){
 
 
 # Create makefiles needed 
-if (!$opt_c){ 
+if (!$opt_c && !$opt_dsp){ 
     print "Generating makefiles\n";
     open (OUTPUT, ">$MAKEFILE")  ||  die "Unable to write to $MAKEFILE\n";
 }else{
-    print "Generating makefiles\n";
+    if (!$opt_dsp){
+	print "Generating makefiles\n";
+    }else{
+	print "Generating dsp files\n";
+    }
 }
 
 # commands to generate all targets
@@ -368,12 +409,15 @@ my $pluginFlags;
 my $runCompiler;
 my $unportedItem;
 my $baseWin32;
+my $moduleName;
 for $item (@components){
     if ($item =~ /(.*\/)([^\/]*$)/){
 	$base = $1.$2;
+	$moduleName = $2;
 	$proFile = $2.".pro";
     }else{        
 	$base = $item;
+	$moduleName = $item;
 	$proFile = $item.".pro";
     }
     $baseWin32 = join("\\", split(/\//, $base));
@@ -385,45 +429,56 @@ for $item (@components){
     }
     chdir("$QPEDIR/src/$base");	
     if (-e $proFile && $base ne "qt"){        
-	$cmdLine = "$TMAKE \"CONFIG += multiprocess\" $TMAKE_FLAGS -o $MAKEFILE $proFile";
+	if ($opt_dsp){
+		@targetSpecs = targetInfo("$proFile");
+		if ($targetSpecs[1] eq "lib"){
+	            $vcDspFlags = " -t vcgeneric ";
+		}else{
+		    $vcDspFlags = " -t vcapp ";
+		}		
+	    $MAKEFILE="$moduleName".".dsp";
+	}
+	$cmdLine = "$TMAKE $vcDspFlags $TMAKE_FLAGS -o $MAKEFILE $proFile";
 	if ($opt_v){
 	    print "Running command line: $cmdLine\n";
 	} 
         $result = `$cmdLine`;
-        if ($objectDir ne ""){ 
+        if (!$opt_dsp){
+	    if ($objectDir ne ""){ 
+		if ($opt_win32){
+		    $allCmds = $allCmds."\t-mkdir $QPEDIR\\src\\$baseWin32\\$objectDir\n";
+		}else{
+		    $allCmds = $allCmds."\t-mkdir $QPEDIR/src/$base/$objectDir\n";
+		}
+	    }
+	    if ($tempDir ne ""){ 
+		if ($opt_win32){
+		    $allCmds = $allCmds."\t-mkdir $QPEDIR\\src\\$baseWin32\\$tempDir\n";
+		}else{
+		    $allCmds = $allCmds."\t-mkdir $QPEDIR/src/$base/$tempDir\n";
+		}
+	    }
+	    # has this component been ported yet?
+	    $runCompiler = 1;
+	    foreach $unportedItem (@unported){
+		if ($unportedItem eq  $item){
+		    $runCompiler = 0;
+		    print "\nDisabled compile of $item\n"
+		}
+	    }
+	    if ($runCompiler){
+		if ($opt_win32){
+		    $allCmds = $allCmds."\tcd $QPEDIR\\src\\$baseWin32\n";
+		    $allCmds = $allCmds."\t$MAKE /F $MAKEFILE $errorOutputAppend\n";
+		}else{
+		    $allCmds = $allCmds."\t$MAKE -C $QPEDIR/src/$base -f $MAKEFILE $errorOutputAppend\n";
+		}
+	    }
 	    if ($opt_win32){
-		$allCmds = $allCmds."\t-mkdir $QPEDIR\\src\\$baseWin32\\$objectDir\n";
+		$cleanCmds = $cleanCmds."\tcd $QPEDIR\\src\\$baseWin32\n\t$MAKE /F $MAKEFILE clean $errorOutputAppend\n";
 	    }else{
-		$allCmds = $allCmds."\t-mkdir $QPEDIR/src/$base/$objectDir\n";
+		$cleanCmds = $cleanCmds."\t$MAKE -C $QPEDIR/src/$base -f $MAKEFILE clean $errorOutputAppend\n";
 	    }
-	}
-        if ($tempDir ne ""){ 
-	    if ($opt_win32){
-		$allCmds = $allCmds."\t-mkdir $QPEDIR\\src\\$base\\$tempDir\n";
-	    }else{
-		$allCmds = $allCmds."\t-mkdir $QPEDIR/src/$base/$tempDir\n";
-	    }
-	}
-	# has this component been ported yet?
-	$runCompiler = 1;
-	foreach $unportedItem (@unported){
-	    if ($unportedItem eq  $item){
-		$runCompiler = 0;
-		print "\nDisabled compile of $item\n"
-	    }
-	}
-	if ($runCompiler){
-	    if ($opt_win32){
-		$allCmds = $allCmds."\tcd $QPEDIR\\src\\$baseWin32\n";
-		$allCmds = $allCmds."\t$MAKE /F $MAKEFILE $errorOutputAppend\n";
-	    }else{
-		$allCmds = $allCmds."\t$MAKE -C $QPEDIR/src/$base -f $MAKEFILE $errorOutputAppend\n";
-	    }
-	}
-	if ($opt_win32){
-            $cleanCmds = $cleanCmds."\tcd $QPEDIR\\src\\$baseWin32\n\t$MAKE /F $MAKEFILE clean $errorOutputAppend\n";
-	}else{
-            $cleanCmds = $cleanCmds."\t$MAKE -C $QPEDIR/src/$base -f $MAKEFILE clean $errorOutputAppend\n";
 	}
     }else{
 	if ($verbose eq "true"){
@@ -437,7 +492,7 @@ for $item (@components){
 }
 
 
-if (!$opt_c ){
+if (!$opt_c  && !$opt_dsp){
     if ($opt_errorlog){
        # clean the error log first if it is  used
        $allCmds = "\techo \"\" $errorOutput\n".$allCmds;
@@ -446,12 +501,14 @@ if (!$opt_c ){
     if ($opt_qtopiadesktop){
 	if ($opt_win32){
 	    $allCmds =$allCmds."\tcd \$(QPEDIR)\\src\\qtopiadesktop\n" .
-	                       "\tconfigure.bat\n" .
-	                       "\tconfigure.bat\n" .
+	                       "\tconfigure.bat $release\n" .
+	                       "\tconfigure.bat $release\n" .
 			       "\t$MAKE";
+	    $cleanCmds = $cleanCmds."\tcd $QPEDIR\\src\\qtopiadesktop\n\t$MAKE /F $MAKEFILE clean $errorOutputAppend\n";
 	}else{
 	  $allCmds = $allCmds."\tcd \$(QPEDIR)/src/qtopiadesktop\n" .
 	                       "\tconfigure\n";
+          $cleanCmds = $cleanCmds."\t$MAKE -C $QPEDIR/src/qtopiadesktop/ -f $MAKEFILE clean $errorOutputAppend\n";
 	}
     }
    $allCmds = "\tsyncqtopia\n". $allCmds; 

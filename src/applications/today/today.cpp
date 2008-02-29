@@ -30,6 +30,7 @@
 #include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/services.h>
 #include <qtopia/datebookmonth.h>
+#include <qtopia/pluginloader.h>
 
 #include <qvaluelist.h>
 #include <qdir.h>
@@ -54,7 +55,7 @@ void Browser::setSource(const QString &name)
 static QValueList<TodayPlugin> pluginList;
 
 Today::Today(QWidget *parent, const char *name, WFlags fl)
-    : QMainWindow(parent, name, fl)
+    : QMainWindow(parent, name, fl), loader(0)
 {
     setCaption( tr("Today") );
 
@@ -175,36 +176,31 @@ void Today::sort()
 void Today::loadPlugins()
 {
     //reset old plugins
-    QValueList<TodayPlugin>::Iterator tit;
-    for ( tit = pluginList.begin(); tit != pluginList.end(); ++tit ) {
-	(*tit).library->unload();
-	delete (*tit).library;
+    if ( loader ) {
+	QValueList<TodayPlugin>::Iterator tit;
+	for ( tit = pluginList.begin(); tit != pluginList.end(); ++tit ) {
+	    loader->releaseInterface( (*tit).iface );
+	}
+	delete loader;
+	loader = 0;
     }
 
-    QString path = QPEApplication::qpeDir() + "plugins/today";
+    loader = new PluginLoader( "today" );
 
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir (path, "*.dll");
-#endif
-    QStringList list = dir.entryList();
+    QStringList list = loader->list();
     QStringList::Iterator it;
 
     uint count = 0;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	TodayInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
 
-	qDebug( "querying: %s", QString( path + "/" + *it ).latin1() );
-	if ( lib->queryInterface( IID_TodayPlugin, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    qDebug( "loading: %s", QString( path + "/" + *it ).latin1() );
+	if ( loader->queryInterface( *it, IID_TodayPlugin, (QUnknownInterface**)&iface ) == QS_OK ) {
+	    qDebug( "loaded: %s", (*it).latin1() );
 
 	    TodayPlugin plugin;
 	    plugin.active = TRUE;
 	    plugin.pos = count;
 
-	    plugin.library = lib;
 	    plugin.iface = iface;
 	    plugin.viewer = plugin.iface->object(this, "todayPlugin");
 	    if ( plugin.viewer ) {
@@ -218,9 +214,6 @@ void Today::loadPlugins()
 		qDebug("object function not implemented, cannot use plugin");
 	    }
 	    
-	} else {
-	    qDebug( "could not recognize %s", QString( path + "/" + *it ).latin1() );
-	    delete lib;
 	}
     }
 }
@@ -229,7 +222,7 @@ void Today::setupPluginMenu()
 {
     pluginSettings = new QPopupMenu(this);
 
-    pluginSettings->insertItem("Edit Today View", 0);
+    pluginSettings->insertItem(tr("Edit Today View"), 0);
     pluginSettings->insertSeparator();
     
     for (uint count = 0; count < pluginList.count(); count++) {
@@ -243,14 +236,14 @@ void Today::setupPluginMenu()
 void Today::updateView()
 {
     if ( pluginList.count() == 0 ) {
-	todayView->setText("No plugins found");
+	todayView->setText(tr("No plugins found"));
 	return;
     }
 
     QString txt = "<table><tr>";
     txt += "<td><a href=\"TodayOptions\"><img src=\"TodayApp\"></a></td>";
     txt += "<td><b> <big> <font color=#0000FF><a href=\"TodayDate\">" +
-	TimeString::longDateString( QDate::currentDate() ) +
+	TimeString::localYMD( QDate::currentDate(), TimeString::Long ) +
 	" </a> </font> </big> </b> <body></td>";
     txt += "</tr></table>";
 
@@ -275,8 +268,8 @@ void Today::updateView()
     }
 
     if ( count == 0 ) {
-	txt += " <p> <hr> <b> No plugins selected for display. <br>";
-	txt += "Click <a href=\"TodayPluginEdit\">here</a> to configure display.</b>";
+	txt += " <p> <hr> <b> "+tr("No plugins selected for display.")+"<br>";
+	txt += tr("Click <a href=\"TodayPluginEdit\">here</a> to configure display.")+"</b>";
     }
 
     txt += "</body>";
@@ -313,7 +306,7 @@ void Today::taskSelected(const QString &id)
 	QString command = id.left(pos);
 	QString param = id.mid(pos+1);
 
-	if ( command == "raise" ) {
+	if ( command == "raise" ) { // No tr
 	    {
 		QCString str = "QPE/Application/";
 		str += param.latin1();
@@ -321,7 +314,7 @@ void Today::taskSelected(const QString &id)
 	    }
 	} else if ( command == "qcop" ) {
 	    launchQCop( QStringList::split(':', param) );
-	}  else if ( command == "service" ) {
+	}  else if ( command == "service" ) { // No tr
 	}
     }
 }
@@ -349,7 +342,7 @@ void Today::launchQCop(const QStringList params)
 void Today::settingsMenuClicked(int id)
 {
     if ( id == 0 ) {
-        TodayOptions to(this, "options", TRUE);
+        TodayOptions to(this, "options", TRUE); // No tr
 	to.setPlugins( pluginList );
 	if ( QPEApplication::execDialog(&to) == QDialog::Accepted ) {
 	    update();
@@ -362,11 +355,11 @@ void Today::settingsMenuClicked(int id)
 	for (uint i = 0; i < pluginList.count(); i++) {
 	    if (pluginList[i].viewer->name() == target) {
 		
-		ConfigDialog configDialog(this, "editor", TRUE);
+		ConfigDialog configDialog(this, "editor", TRUE); // No tr
 		
 		/* Destructor of configDialog deletes the plugin widget	*/
 		QWidget *pWidget = pluginList[i].viewer->widget(&configDialog);
-		QString str = pluginList[i].viewer->name() + " settings";
+		QString str = tr("%1 settings", "eg. Calendar settings").arg(pluginList[i].viewer->name());
 		configDialog.setMainWidget(pWidget, tr(str) );
 		if ( QPEApplication::execDialog(&configDialog) == QDialog::Accepted ) {
 		    pluginList[i].viewer->accepted(pWidget);

@@ -327,19 +327,19 @@ void KeytabReader::parseTo(KeyTrans* kt)
 
 Loop:
   // syntax: ["key" KeyName { ("+" | "-") ModeName } ":" String/CommandName] ["#" Comment]
-  if (sym == SYMName && !strcmp(res.latin1(),"keyboard"))
+  if (sym == SYMName && !strcmp(res.latin1(),"keyboard")) // No tr
   {
-    getSymbol(); assertSyntax(sym == SYMString, "Header expected")
+    getSymbol(); assertSyntax(sym == SYMString, "Header expected") // No tr
     kt->hdr = res.latin1();
-    getSymbol(); assertSyntax(sym == SYMEol, "Text unexpected")
+    getSymbol(); assertSyntax(sym == SYMEol, "Text unexpected") // No tr
     getSymbol();                   // eoln
     goto Loop;
   }
-  if (sym == SYMName && !strcmp(res.latin1(),"key"))
+  if (sym == SYMName && !strcmp(res.latin1(),"key")) // No tr
   {
 //printf("line %3d: ",startofsym);
-    getSymbol(); assertSyntax(sym == SYMName, "Name expected")
-    assertSyntax(syms->keysyms[res], "Unknown key name")
+    getSymbol(); assertSyntax(sym == SYMName, "Name expected") // No tr
+    assertSyntax(syms->keysyms[res], "Unknown key name") // No tr
     int key = (int)syms->keysyms[res]-1;
 //printf(" key %s (%04x)",res.latin1(),(int)syms->keysyms[res]-1);
     getSymbol(); // + - :
@@ -350,12 +350,12 @@ Loop:
       bool on = !strcmp(res.latin1(),"+");
       getSymbol();
       // mode name
-      assertSyntax(sym == SYMName, "Name expected")
-      assertSyntax(syms->modsyms[res], "Unknown mode name")
+      assertSyntax(sym == SYMName, "Name expected") // No tr
+      assertSyntax(syms->modsyms[res], "Unknown mode name") // No tr
       int bits = (int)syms->modsyms[res]-1;
       if (mask & (1 << bits))
       {
-        fprintf(stderr,"%s(%d,%d): mode name used multible times.\n",path.ascii(),slinno,scolno);
+        fprintf(stderr,"%s(%d,%d): mode name used multible times.\n",path.ascii(),slinno,scolno); // No tr
       }
       else
       {
@@ -365,14 +365,14 @@ Loop:
 //printf(", mode %s(%d) %s",res.latin1(),(int)syms->modsyms[res]-1,on?"on":"off");
       getSymbol();
     }
-    assertSyntax(sym == SYMOpr && !strcmp(res.latin1(),":"), "':' expected")
+    assertSyntax(sym == SYMOpr && !strcmp(res.latin1(),":"), "':' expected") // No tr
     getSymbol();
     // string or command
-    assertSyntax(sym == SYMName || sym == SYMString,"Command or string expected")
+    assertSyntax(sym == SYMName || sym == SYMString,"Command or string expected") // No tr
     int cmd = 0;
     if (sym == SYMName)
     {
-      assertSyntax(syms->oprsyms[res], "Unknown operator name")
+      assertSyntax(syms->oprsyms[res], "Unknown operator name") // No tr
       cmd = (int)syms->oprsyms[res]-1;
 //printf(": do %s(%d)",res.latin1(),(int)syms->oprsyms[res]-1);
     }
@@ -387,10 +387,10 @@ Loop:
     KeyTrans::KeyEntry* ke = kt->addEntry(slinno,key,mode,mask,cmd,res);
     if (ke)
     {
-      fprintf(stderr,"%s(%d): keystroke already assigned in line %d.\n",path.ascii(),slinno,ke->ref);
+      fprintf(stderr,"%s(%d): keystroke already assigned in line %d.\n",path.ascii(),slinno,ke->ref); // No tr
     }
     getSymbol();
-    assertSyntax(sym == SYMEol, "Unexpected text")
+    assertSyntax(sym == SYMEol, "Unexpected text") // No tr
     goto Loop;
   }
   if (sym == SYMEol)
@@ -399,7 +399,7 @@ Loop:
     goto Loop;
   }
 
-  assertSyntax(sym == SYMEof, "Undecodable Line")
+  assertSyntax(sym == SYMEof, "Undecodable Line") // No tr
 
   buf->close();
   return;
@@ -459,12 +459,12 @@ void KeyTransSymbols::defOprSyms()
 void KeyTransSymbols::defModSyms()
 {
   // Modifier
-  defModSym("Shift",      BITS_Shift        );
-  defModSym("Control",    BITS_Control      );
+  defModSym("Shift",      BITS_Shift        ); // No tr
+  defModSym("Control",    BITS_Control      ); // No tr
   defModSym("Alt",        BITS_Alt          );
   // Modes
   defModSym("BsHack",     BITS_BsHack       ); // deprecated
-  defModSym("Ansi",       BITS_Ansi         );
+  defModSym("Ansi",       BITS_Ansi         ); // No tr
   defModSym("NewLine",    BITS_NewLine      );
   defModSym("AppCuKeys",  BITS_AppCuKeys    );
 }
@@ -472,28 +472,28 @@ void KeyTransSymbols::defModSyms()
 void KeyTransSymbols::defKeySyms()
 {
   // Grey keys
-  defKeySym("Escape",       Qt::Key_Escape      );
-  defKeySym("Tab",          Qt::Key_Tab         );
+  defKeySym("Escape",       Qt::Key_Escape      ); // No tr
+  defKeySym("Tab",          Qt::Key_Tab         ); // No tr
   defKeySym("Backtab",      Qt::Key_Backtab     );
-  defKeySym("Backspace",    Qt::Key_Backspace   );
-  defKeySym("Return",       Qt::Key_Return      );
-  defKeySym("Enter",        Qt::Key_Enter       );
-  defKeySym("Insert",       Qt::Key_Insert      );
-  defKeySym("Delete",       Qt::Key_Delete      );
-  defKeySym("Pause",        Qt::Key_Pause       );
-  defKeySym("Print",        Qt::Key_Print       );
+  defKeySym("Backspace",    Qt::Key_Backspace   ); // No tr
+  defKeySym("Return",       Qt::Key_Return      ); // No tr
+  defKeySym("Enter",        Qt::Key_Enter       ); // No tr
+  defKeySym("Insert",       Qt::Key_Insert      ); // No tr
+  defKeySym("Delete",       Qt::Key_Delete      ); // No tr
+  defKeySym("Pause",        Qt::Key_Pause       ); // No tr
+  defKeySym("Print",        Qt::Key_Print       ); // No tr
   defKeySym("SysReq",       Qt::Key_SysReq      );
-  defKeySym("Home",         Qt::Key_Home        );
-  defKeySym("End",          Qt::Key_End         );
-  defKeySym("Left",         Qt::Key_Left        );
-  defKeySym("Up",           Qt::Key_Up          );
-  defKeySym("Right",        Qt::Key_Right       );
-  defKeySym("Down",         Qt::Key_Down        );
-  defKeySym("Prior",        Qt::Key_Prior       );
-  defKeySym("Next",         Qt::Key_Next        );
-  defKeySym("Shift",        Qt::Key_Shift       );
-  defKeySym("Control",      Qt::Key_Control     );
-  defKeySym("Meta",         Qt::Key_Meta        );
+  defKeySym("Home",         Qt::Key_Home        ); // No tr
+  defKeySym("End",          Qt::Key_End         ); // No tr
+  defKeySym("Left",         Qt::Key_Left        ); // No tr
+  defKeySym("Up",           Qt::Key_Up          ); // No tr
+  defKeySym("Right",        Qt::Key_Right       ); // No tr
+  defKeySym("Down",         Qt::Key_Down        ); // No tr
+  defKeySym("Prior",        Qt::Key_Prior       ); // No tr
+  defKeySym("Next",         Qt::Key_Next        ); // No tr
+  defKeySym("Shift",        Qt::Key_Shift       ); // No tr
+  defKeySym("Control",      Qt::Key_Control     ); // No tr
+  defKeySym("Meta",         Qt::Key_Meta        ); // No tr
   defKeySym("Alt",          Qt::Key_Alt         );
   defKeySym("CapsLock",     Qt::Key_CapsLock    );
   defKeySym("NumLock",      Qt::Key_NumLock     );
@@ -535,27 +535,27 @@ void KeyTransSymbols::defKeySyms()
   defKeySym("F35",          Qt::Key_F35         );
   defKeySym("Super_L",      Qt::Key_Super_L     );
   defKeySym("Super_R",      Qt::Key_Super_R     );
-  defKeySym("Menu",         Qt::Key_Menu        );
+  defKeySym("Menu",         Qt::Key_Menu        ); // No tr
   defKeySym("Hyper_L",      Qt::Key_Hyper_L     );
   defKeySym("Hyper_R",      Qt::Key_Hyper_R     );
 
   // Regular keys
-  defKeySym("Space",        Qt::Key_Space       );
+  defKeySym("Space",        Qt::Key_Space       ); // No tr
   defKeySym("Exclam",       Qt::Key_Exclam      );
   defKeySym("QuoteDbl",     Qt::Key_QuoteDbl    );
   defKeySym("NumberSign",   Qt::Key_NumberSign  );
-  defKeySym("Dollar",       Qt::Key_Dollar      );
-  defKeySym("Percent",      Qt::Key_Percent     );
-  defKeySym("Ampersand",    Qt::Key_Ampersand   );
-  defKeySym("Apostrophe",   Qt::Key_Apostrophe  );
+  defKeySym("Dollar",       Qt::Key_Dollar      ); // No tr
+  defKeySym("Percent",      Qt::Key_Percent     ); // No tr
+  defKeySym("Ampersand",    Qt::Key_Ampersand   ); // No tr
+  defKeySym("Apostrophe",   Qt::Key_Apostrophe  ); // No tr
   defKeySym("ParenLeft",    Qt::Key_ParenLeft   );
   defKeySym("ParenRight",   Qt::Key_ParenRight  );
-  defKeySym("Asterisk",     Qt::Key_Asterisk    );
-  defKeySym("Plus",         Qt::Key_Plus        );
-  defKeySym("Comma",        Qt::Key_Comma       );
-  defKeySym("Minus",        Qt::Key_Minus       );
-  defKeySym("Period",       Qt::Key_Period      );
-  defKeySym("Slash",        Qt::Key_Slash       );
+  defKeySym("Asterisk",     Qt::Key_Asterisk    ); // No tr
+  defKeySym("Plus",         Qt::Key_Plus        ); // No tr
+  defKeySym("Comma",        Qt::Key_Comma       ); // No tr
+  defKeySym("Minus",        Qt::Key_Minus       ); // No tr
+  defKeySym("Period",       Qt::Key_Period      ); // No tr
+  defKeySym("Slash",        Qt::Key_Slash       ); // No tr
   defKeySym("0",            Qt::Key_0           );
   defKeySym("1",            Qt::Key_1           );
   defKeySym("2",            Qt::Key_2           );
@@ -566,13 +566,13 @@ void KeyTransSymbols::defKeySyms()
   defKeySym("7",            Qt::Key_7           );
   defKeySym("8",            Qt::Key_8           );
   defKeySym("9",            Qt::Key_9           );
-  defKeySym("Colon",        Qt::Key_Colon       );
-  defKeySym("Semicolon",    Qt::Key_Semicolon   );
-  defKeySym("Less",         Qt::Key_Less        );
-  defKeySym("Equal",        Qt::Key_Equal       );
-  defKeySym("Greater",      Qt::Key_Greater     );
-  defKeySym("Question",     Qt::Key_Question    );
-  defKeySym("At",           Qt::Key_At          );
+  defKeySym("Colon",        Qt::Key_Colon       ); // No tr
+  defKeySym("Semicolon",    Qt::Key_Semicolon   ); // No tr
+  defKeySym("Less",         Qt::Key_Less        ); // No tr
+  defKeySym("Equal",        Qt::Key_Equal       ); // No tr
+  defKeySym("Greater",      Qt::Key_Greater     ); // No tr
+  defKeySym("Question",     Qt::Key_Question    ); // No tr
+  defKeySym("At",           Qt::Key_At          ); // No tr
   defKeySym("A",            Qt::Key_A           );
   defKeySym("B",            Qt::Key_B           );
   defKeySym("C",            Qt::Key_C           );
@@ -600,13 +600,13 @@ void KeyTransSymbols::defKeySyms()
   defKeySym("Y",            Qt::Key_Y           );
   defKeySym("Z",            Qt::Key_Z           );
   defKeySym("BracketLeft",  Qt::Key_BracketLeft );
-  defKeySym("Backslash",    Qt::Key_Backslash   );
+  defKeySym("Backslash",    Qt::Key_Backslash   ); // No tr
   defKeySym("BracketRight", Qt::Key_BracketRight);
   defKeySym("AsciiCircum",  Qt::Key_AsciiCircum );
-  defKeySym("Underscore",   Qt::Key_Underscore  );
+  defKeySym("Underscore",   Qt::Key_Underscore  ); // No tr
   defKeySym("QuoteLeft",    Qt::Key_QuoteLeft   );
   defKeySym("BraceLeft",    Qt::Key_BraceLeft   );
-  defKeySym("Bar",          Qt::Key_Bar         );
+  defKeySym("Bar",          Qt::Key_Bar         ); // No tr
   defKeySym("BraceRight",   Qt::Key_BraceRight  );
   defKeySym("AsciiTilde",   Qt::Key_AsciiTilde  );
 }

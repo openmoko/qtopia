@@ -11,13 +11,13 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>250</width>
+            <width>246</width>
             <height>270</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Launcher Settings</string>
+        <string>Launcher</string>
     </property>
     <property>
         <name>layoutMargin</name>

@@ -3,4 +3,6 @@ Exec=netsetup
 Icon=PPPConnect
 Type=Application
 Name=Network
+Name[ja]=???
 Name[de]=Netzwerk
+CanFastload=0

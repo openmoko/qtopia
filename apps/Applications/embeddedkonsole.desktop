@@ -4,5 +4,6 @@ Exec=embeddedkonsole
 Icon=Terminal
 Type=Application
 Name=Terminal
+Name[ja]=???
 Name[de]=Kommando zeile
 Name[hu]=Terminál

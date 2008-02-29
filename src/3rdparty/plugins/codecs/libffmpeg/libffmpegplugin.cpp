@@ -21,6 +21,9 @@
 #include "libffmpegplugin.h"
 
 
+static const int AVSyncSlack = 200;
+
+
 LibFFMpegPlugin::LibFFMpegPlugin()
 {
     scaleContextDepth = -1;
@@ -31,6 +34,12 @@ LibFFMpegPlugin::LibFFMpegPlugin()
     scaleContextOutputWidth = -1;
     scaleContextOutputHeight = -1;
     scaleContextLineStride = -1;
+
+    audioCodecContext = 0;
+    videoCodecContext = 0;
+    audioScaleContext = 0;
+    strInfo = "";
+
     openFlag = FALSE;
     streamingFlag = FALSE;
     needPluginInit = TRUE;
@@ -269,8 +278,8 @@ const QString &LibFFMpegPlugin::fileInfo()
 }
 
 
-uchar bufferedSamples[AVCODEC_MAX_AUDIO_FRAME_SIZE * 16];
-int bufferedSamplesCount = 0;
+static uchar bufferedSamples[AVCODEC_MAX_AUDIO_FRAME_SIZE * 16];
+static int bufferedSamplesCount = 0;
 
 
 bool LibFFMpegPlugin::close()
@@ -708,7 +717,7 @@ bool LibFFMpegPlugin::supportsStreaming()
 }
 bool LibFFMpegPlugin::canStreamURL( const QUrl& url, const QString& mimetype )
 {
-    QString fileName = url.toString( false, false );
+    QString fileName = url.toString( true, false );
     // Support file://
     if ( fileName.left(7).lower() == "file://" )
 	return true;
@@ -838,7 +847,7 @@ bool LibFFMpegPlugin::sync()
     if ( haveBothTimeStamps ) {
 //	qDebug("have both time stamps %li %li", (long)currentVideoTimeStamp, (long)currentAudioTimeStamp );
 	// Are we too far ahead with the video?
-	if ( currentVideoTimeStamp > currentAudioTimeStamp + 70 ) {
+	if ( currentVideoTimeStamp > currentAudioTimeStamp + AVSyncSlack ) {
 	    printf("slow down video\n");
 	    skipNext++;
 	    // The w38.mpg example has a crazy video time stamp on the first video packet
@@ -851,7 +860,7 @@ bool LibFFMpegPlugin::sync()
 //	    currentVideoTimeStamp = currentAudioTimeStamp;
 	    return TRUE;
 	}
-	keepDecoding = ( currentAudioTimeStamp > currentVideoTimeStamp + 70 );
+	keepDecoding = ( currentAudioTimeStamp > currentVideoTimeStamp + AVSyncSlack );
 	if ( keepDecoding ) {
 //	    qDebug("audio ahead, decode more video 1");
 	}
@@ -927,7 +936,7 @@ bool LibFFMpegPlugin::sync()
 		currentVideoTimeStamp = currentAudioTimeStamp;
 		keepDecoding = FALSE;
 	    } else
-		keepDecoding = ( currentAudioTimeStamp > currentVideoTimeStamp + 70 );
+		keepDecoding = ( currentAudioTimeStamp > currentVideoTimeStamp + AVSyncSlack );
 
 	    if ( keepDecoding ) {
 //		qDebug("audio ahead, decode more video 3");
@@ -971,8 +980,8 @@ bool LibFFMpegPlugin::seek( long pos )
 	    avcodec_flush_buffers( videoCodecContext );
 
 	// Seek in to the file
-	if ( pos > 16000 )
-	    url_fseek( &streamContext->pb, pos - 16000, SEEK_SET );
+	if ( pos > 1000 )
+	    url_fseek( &streamContext->pb, pos - 1000, SEEK_SET );
 	else
 	    url_fseek( &streamContext->pb, 0, SEEK_SET );
 

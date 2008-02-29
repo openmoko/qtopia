@@ -93,7 +93,7 @@ QFont FontManager::unicodeFont( Spacing sp )
 		fontName = "Cyberbit";
 		size = 12;
 	    } else {
-		fontName = "Helvetica";
+		fontName = "Helvetica"; // No tr
 		size = 14;
 	    }
 	}

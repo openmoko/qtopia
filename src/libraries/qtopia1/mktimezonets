@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+#
+# Script for producing a .ts file from a .po file translation,
+# to allow translation of # zone.tab entries in TimeZone class.
+#
+
+if ( $#ARGV != 1 ) {
+    die "Usage: $0 /usr/share/zoneinfo/zone.tab ja.po\n";
+}
+
+sub readZoneTab {
+    my $file=$_[0];
+    open ZT, $file or die "open $file\n";
+    while (<ZT>) {
+	next if /^\s*#/;
+	if ( ($cc,$pos,$area,$city,$comment) = $_ =~ m{([A-Z][A-Z])\s+(\S+)\s+(\S+)/([^/\s]+)\s*(.*)\n} ) {
+	    $area =~ s/_/ /g;
+	    $city =~ s/_/ /g;
+	    ${"area$file"}{$pos}=$area;
+	    ${"city$file"}{$pos}=$city;
+	    #${"comment$file"}{$pos}=$comment if $comment;
+	}
+    }
+}
+
+sub readPo {
+    my $file=$_[0];
+    open PO, $file or die "open $file\n";
+    my %r;
+    while (<PO>) {
+	next if /^\s*#/;
+	if ( ($which,$area,$city) = $_ =~ m{msg(\S*)\s*"(.*)/(.*)"} ) {
+	    $area =~ s/_/ /g;
+	    $city =~ s/_/ /g;
+	    if ( $which eq "id" ) {
+		$idarea = $area;
+		$idcity = $city;
+	    } else {
+		$r{$idarea}=$area;
+		$r{$idcity}=$city;
+#print STDERR "\$r{$idcity}=$city\n";
+	    }
+	}
+    }
+    return %r;
+}
+
+readZoneTab($base=shift);
+%translation=readPo(shift);
+
+print "<!DOCTYPE TS><TS>
+<context>
+    <name>Timezone</name>
+";
+%map = ();
+for $t ( "area", "city", "comment" ) {
+    for $pos ( keys %{"$t$base"} ) {
+	$map{${"$t$base"}{$pos}}=$translation{${"$t$base"}{$pos}};
+    }
+}
+for $k ( keys %map ) {
+    if ( $map{$k} ne $k ) {
+	print "\t<message>\n";
+	print "\t\t<source>$k</source>\n";
+	if ( $map{$k} ne "" ) {
+	    print "\t\t<translation>",$map{$k},"</translation>\n";
+	} else {
+	    print "\t\t<translation type=\"unfinished\"></translation>\n";
+	}
+	print "\t</message>\n";
+    }
+}
+print "</context></TS>\n";

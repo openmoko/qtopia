@@ -30,9 +30,9 @@
 #include <qdialog.h>
 #include <qlayout.h>
 
-#include <qtopia/qlibrary.h>
 #include <qtopia/todayplugininterface.h>
 
+class PluginLoader;
 class QTimer;
 
 /*  Browser (impl. to catch setSource)	*/
@@ -54,7 +54,6 @@ public slots:
 /*  Today	*/
 
 struct TodayPlugin {
-    QLibrary *library;
     TodayInterface *iface;
     TodayPluginInterface *viewer;
     bool active;
@@ -98,6 +97,7 @@ private:
     Browser *todayView;
     QPopupMenu *pluginSettings;
     QTimer  *daytimer;
+    PluginLoader *loader;
 };
 
 class ConfigDialog: public QDialog

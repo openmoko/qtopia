@@ -19,6 +19,7 @@
 **********************************************************************/
 
 #include "todoentryimpl.h"
+#include "nulldb.h"
 
 #include <qtopia/categoryselect.h>
 #include <qtopia/datebookmonth.h>
@@ -117,15 +118,25 @@ void NewTaskDialog::init()
     s = new NewTaskDialogBase( sv->viewport() );
     sv->addChild( s );
 
+    setTabOrder(s->inputDescription, s->comboPriority);
+    setTabOrder(s->comboPriority, s->comboStatus);
+    setTabOrder(s->comboStatus, s->spinComplete);
+    setTabOrder(s->spinComplete, s->checkDue);
+    setTabOrder(s->checkDue, s->buttonDue);
+    setTabOrder(s->buttonDue, s->buttonStart);
+    setTabOrder(s->buttonStart, s->buttonEnd);
+    setTabOrder(s->buttonEnd, s->comboCategory);
+    
 #ifdef Q_WS_QWS
     s->buttonCancel->hide();
     s->buttonOk->hide();
 #else
+    setTabOrder(s->comboCategory, s->buttonCancel);
+    setTabOrder(s->buttonCancel, s->buttonOk);
+
     connect( s->buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
     connect( s->buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
 #endif
-
-    s->buttonStart->setAllowNullDate( TRUE );
 
     connect( s->buttonDue, SIGNAL( dateSelected( const QDate& ) ),
              this, SLOT( dueDateChanged( const QDate& ) ) );
@@ -140,7 +151,8 @@ void NewTaskDialog::init()
     s->buttonStart->setDate( QDate() );
     s->buttonEnd->setDate( current );
 
-    s->comboCategory->setCategories( todo.categories(), "Todo List", tr("Todo List") );
+    s->comboCategory->setCategories( todo.categories(), "Todo List", // No tr
+	tr("Todo List") );
 
     connect( s->checkDue, SIGNAL( clicked() ), this, SLOT( dueButtonToggled() ) );
     connect( s->comboStatus, SIGNAL( activated(int) ), this, SLOT( statusChanged() ) );
@@ -169,7 +181,21 @@ void NewTaskDialog::statusChanged()
 	s->buttonStart->setDate( QDate() );
 
     s->buttonEnd->setEnabled( t == PimTask::Completed );
-    s->spinComplete->setEnabled( t != PimTask::NotStarted && t != PimTask::Completed );
+
+    // status change may lead to percent complete change. Work it out.
+    s->spinComplete->blockSignals(TRUE);
+    if (t == PimTask::NotStarted) {
+	s->spinComplete->setValue(0);
+	s->spinComplete->setEnabled( FALSE );
+    } else if (t == PimTask::Completed) {
+	s->spinComplete->setValue(100);
+	s->spinComplete->setEnabled( FALSE );
+    } else  {
+	if (s->spinComplete->value() >= 100)
+	    s->spinComplete->setValue(99);
+	s->spinComplete->setEnabled( TRUE );
+    }
+    s->spinComplete->blockSignals(FALSE);
 }
 
 /*
@@ -229,11 +255,12 @@ PimTask NewTaskDialog::todoEntry()
 	todo.setPercentCompleted( 0 );
     } else {
 	todo.setCompleted( FALSE );
-	todo.setStatus( (PimTask::TaskStatus) s->comboStatus->currentItem() );
-
 	int percent = s->spinComplete->value();
-	if ( percent >= 100 )
-	    percent = 0;
+	if ( percent >= 100 ) {
+	    todo.setStatus( PimTask::Completed );
+	} else  {
+	    todo.setStatus( (PimTask::TaskStatus) s->comboStatus->currentItem() );
+	}
 	todo.setPercentCompleted( percent );
     }
 

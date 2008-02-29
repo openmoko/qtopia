@@ -2,7 +2,8 @@ Files: bin/performance apps/Applications/performance.desktop
 Priority: optional
 Section: qpe/other
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-10
 Depends: qpe-libqtopia
 Description: Graphics performance tester

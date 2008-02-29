@@ -26,9 +26,6 @@
 #include <qfile.h>
 #include <qpopupmenu.h>
 
-#include <stdlib.h>
-
-const char* servicecmd = "/etc/rc.d/init.d/irda";
 const char* servicefile = "/var/lock/subsys/irda";
 
 
@@ -45,12 +42,15 @@ IRReceiverApplet::IRReceiverApplet( QWidget *parent, const char *name )
     acc = new Accessory(Resource::loadIconSet("irreceive"),
 	    tr("IR Receiver"), menu, this);
     connect(acc, SIGNAL(activated(int)), this, SLOT(activate(int)));
-    tid = 0;
     setFixedWidth( 0 );
-    if ( QFile::exists(servicefile) )
-	setState(On);
-    else
-	setState(Off);
+    
+    if ( QFile::exists(servicefile) ) {
+	state = On;
+	acc->popup()->setItemChecked(it[(int) On],TRUE);
+    } else {
+	state = Off;
+	acc->popup()->setItemChecked(it[(int) Off],TRUE);
+    }
 
     QCopChannel* obexChannel = new QCopChannel( "QPE/Obex", this );
     connect( obexChannel, SIGNAL(received(const QCString&, const QByteArray&)),
@@ -59,35 +59,19 @@ IRReceiverApplet::IRReceiverApplet( QWidget *parent, const char *name )
 
 IRReceiverApplet::~IRReceiverApplet()
 {
-    if ( tid )
-	service("off"); // No tr
 }
 
 void IRReceiverApplet::obexMessage(const QCString& msg, const QByteArray&)
 {
-    if ( msg == "send(QString,QString,QString)"
-	|| msg == "send(QString)" )
-    {
-	if ( state == Off ) {
-	    setState(On1Item);
-	} else if ( state == On5Mins ) {
-	    killTimer(tid);
-	    tid = startTimer(5*60*1000);
+    if ( msg == "turnedOff()") {
+	if ( state != Off ) {
+	    state = Off;
+	    for (int i=0; i<4; i++) {
+		bool y = state==i;
+		acc->popup()->setItemChecked(it[i],y);
+	    }
 	}
-    } else if ( msg == "receiving()" ) {
-	if ( state == On1Item && tid ) {
-	    killTimer(tid);
-	    tid = 0;
-	}
-    } else if ( msg == "received()" || msg == "sent()" ) {
-	if ( state == On1Item )
-	    setState(Off);
     }
-}
-
-void IRReceiverApplet::setState(State s)
-{
-    activate(it[(int)s]);
 }
 
 void IRReceiverApplet::activate(int choice)
@@ -97,38 +81,26 @@ void IRReceiverApplet::activate(int choice)
 	acc->popup()->setItemChecked(it[i],y);
 	if ( y ) {
 	    state = (State)i;
-	    if ( tid ) {
-		killTimer(tid);
-		tid = 0;
-	    }
 	    switch ((State)i) {
 
 		case Off:
-		    service("stop"); // No tr
+		    QCopEnvelope("QPE/Obex", "turnOff()");
 		    break;
 		case On:
-		    service("start"); // No tr
+		    QCopEnvelope("QPE/Obex", "turnOn()");
 		    break;
 		case On5Mins:
-		    service("start"); // No tr
-		    tid = startTimer(5*60*1000);
-		    break;
+		    {
+			int t = 5;  // 5 minutes
+			QCopEnvelope("QPE/Obex", "turnOnTimed(int)")
+			    << t;
+			break;
+		    }
 		case On1Item:
-		    service("start"); // No tr
-		    tid = startTimer(1*60*1000);
+		    QCopEnvelope("QPE/Obex", "turnOn1Item()");
 		    break;
 	    }
 	}
     }
 }
 
-void IRReceiverApplet::timerEvent(QTimerEvent* e)
-{
-    if ( e->timerId() == tid )
-	setState(Off);
-}
-
-void IRReceiverApplet::service(const QString& command)
-{
-    system((QString(servicecmd) + " " + command).latin1());
-}

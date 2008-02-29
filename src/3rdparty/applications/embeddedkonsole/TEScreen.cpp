@@ -173,7 +173,7 @@ void TEScreen::setMargins(int top, int bot)
   top = top - 1;              // Adjust to internal lineno
   bot = bot - 1;              // Adjust to internal lineno
   if ( !( 0 <= top && top < bot && bot < lines ) )
-  { fprintf(stderr,"%s(%d) : setRegion(%d,%d) : bad range.\n",
+  { fprintf(stderr,"%s(%d) : setRegion(%d,%d) : bad range.\n", // No tr
                    __FILE__,__LINE__,top,bot);
     return;                   // Default error action: ignore
   }

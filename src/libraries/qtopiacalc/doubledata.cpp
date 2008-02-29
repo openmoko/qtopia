@@ -31,7 +31,7 @@ void DoubleData::set(double d) {
     edited = FALSE;
     formattedOutput.setNum(dbl,'g',16);
 
-    if (!strcmp(formattedOutput.latin1(),"nan")) {
+    if (!strcmp(formattedOutput.latin1(),"nan")) { // No tr
 	systemEngine->setError(eNotANumber);
 	return;
     } else if (!strcmp(formattedOutput.latin1(),"inf")) {
@@ -40,7 +40,8 @@ void DoubleData::set(double d) {
     }
 }
 void DoubleData::push(char c) {
-    if (formattedOutput.length() > 15)
+    if (formattedOutput.length() > 15 || 
+	    (formattedOutput == "0" && c == '0'))
 	return;
     QString tmpString = formattedOutput;
     if (!edited) {

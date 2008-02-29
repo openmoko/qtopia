@@ -120,6 +120,7 @@ void LightSettings::reject()
     set_fl(initbright);
 
     QDialog::reject();
+    close();
 }
 
 void LightSettings::accept()
@@ -129,6 +130,12 @@ void LightSettings::accept()
 
     // safe call, always one selected.
     powerTypeClicked( powerSource->id( powerSource->selected() ) );
+    
+    // Set settings for current power source
+    currentMode = &batteryMode;
+    powerStatus = PowerStatusManager::readStatus();
+    if ( powerStatus.acStatus() == PowerStatus::Online )
+	currentMode = &externalMode;
     
     {
 	Config config( "qpe" );
@@ -145,12 +152,6 @@ void LightSettings::accept()
 	config.write();
     }
 
-    // Set settings for current power source
-    currentMode = &batteryMode;
-    powerStatus = PowerStatusManager::readStatus();
-    if ( powerStatus.acStatus() == PowerStatus::Online )
-	currentMode = &externalMode;
-    
     set_fl( currentMode->initbright );
     
     int i_dim =      (currentMode->dim ? currentMode->intervalDim : 0);

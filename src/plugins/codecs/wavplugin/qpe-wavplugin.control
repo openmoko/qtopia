@@ -2,7 +2,8 @@ Files: plugins/codecs/libwavplugin.so.1.0.0 plugins/codecs/libwavplugin.so.1.0 p
 Priority: optional
 Section: qpe/plugins
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: WAV file plugin

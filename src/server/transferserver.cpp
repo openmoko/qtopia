@@ -64,7 +64,7 @@ extern "C" {
 #endif
 
 #include "transferserver.h"
-#include "qprocess.h"
+#include <qtopia/qprocess.h>
 
 const int block_size = 51200;
 
@@ -262,7 +262,7 @@ ServerPI::ServerPI( int socket, QObject *parent, const char* name )
 	for( int i = 0; i < 4; i++ )
 	    wait[i] = FALSE;
 
-	send( "220 Qtopia " QPE_VERSION " FTP Server" );
+	send( "220 Qtopia " QPE_VERSION " FTP Server" ); // No tr
 	state = Wait_USER;
 
 	dtp = new ServerDTP( this );
@@ -651,7 +651,7 @@ void ServerPI::process( const QString& message )
 		else {
 		    QString size = out.left( out.find("\t") );
 		    int guess = size.toInt()/5;
-		    if ( filePath.contains("doc") )
+		    if ( filePath.contains("doc") ) // No tr
 			guess *= 1000;
 		    qDebug("sending back gzip guess of %d", guess);
 		    send( "213 " + QString::number(guess) );
@@ -698,13 +698,13 @@ void ServerPI::process( const QString& message )
 
 bool ServerPI::backupRestoreGzip( const QString &file )
 {
-    return (file.find( "backup" ) != -1 &&
+    return (file.find( "backup" ) != -1 && // No tr
 	    file.findRev( ".tgz" ) == (int)file.length()-4 );
 }
 
 bool ServerPI::backupRestoreGzip( const QString &file, QStringList &targets )
 {
-  if ( file.find( "backup" ) != -1 &&
+  if ( file.find( "backup" ) != -1 && // No tr
        file.findRev( ".tgz" ) == (int)file.length()-4 ) {
       QFileInfo info( file );
       targets = info.dirPath( TRUE );
@@ -762,7 +762,7 @@ bool ServerPI::parsePort( const QString& pp )
 
 void ServerPI::dtpCompleted()
 {
-    send( "226 Closing data connection, file transfer successful" );
+    send( "226 Closing data connection, file transfer successful" ); // No tr
     if ( dtp->dtpMode() == ServerDTP::RetrieveFile ) {
 	QString fn = dtp->fileName();
 	if ( fn.right(8)==".desktop" && fn.find("/Documents/")>=0 ) {
@@ -778,14 +778,14 @@ void ServerPI::dtpFailed()
 {
     dtp->close();
     waitsocket = 0;
-    send( "451 Requested action aborted: local error in processing" );
+    send( "451 Requested action aborted: local error in processing" ); // No tr
 }
 
 void ServerPI::dtpError( int )
 {
     dtp->close();
     waitsocket = 0;
-    send( "451 Requested action aborted: local error in processing" );
+    send( "451 Requested action aborted: local error in processing" ); // No tr
 }
 
 bool ServerPI::sendList( const QString& arg )
@@ -825,7 +825,7 @@ bool ServerPI::sendList( const QString& arg )
 	    ++it;
 	}
 
-	ts << "total " << QString::number( total / 1024 ) << endl;
+	ts << "total " << QString::number( total / 1024 ) << endl; // No tr
 
 	it.toFirst();
 	while ( ( info = it.current() ) ) {
@@ -1000,12 +1000,12 @@ ServerDTP::ServerDTP( QObject *parent, const char* name)
   gzipProc = new QProcess( this, "gzipProc" );
   gzipProc->setCommunication( QProcess::Stdin | QProcess::Stdout );
 
-  createTargzProc = new QProcess( QString("tar"), this, "createTargzProc");
+  createTargzProc = new QProcess( QString("tar"), this, "createTargzProc"); // No tr
   createTargzProc->setCommunication( QProcess::Stdout );
   createTargzProc->setWorkingDirectory( QDir::rootDirPath() );
   connect( createTargzProc, SIGNAL( processExited() ), SLOT( targzDone() ) );
 
-  QStringList args = "tar";
+  QStringList args = "tar"; // No tr
   args += "-xv";
   retrieveTargzProc = new QProcess( args, this, "retrieveTargzProc" );
   retrieveTargzProc->setCommunication( QProcess::Stdin );
@@ -1071,9 +1071,8 @@ void ServerDTP::connected()
     bytes_written = 0;
     qDebug("==>start send tar process");
     if ( !createTargzProc->start() )
-      qWarning("Error starting %s or %s",
-	       createTargzProc->arguments().join(" ").latin1(),
-	       gzipProc->arguments().join(" ").latin1() );
+      qWarning("Error starting %s",
+	       createTargzProc->arguments().join(" ").latin1());
     break;
   case SendBuffer:
     if ( !buf.open( IO_ReadOnly) ) {
@@ -1224,34 +1223,18 @@ void ServerDTP::readyRead()
 
 void ServerDTP::writeTargzBlock()
 {
-    QByteArray block = gzipProc->readStdout();
+    QByteArray block = createTargzProc->readStdout();
     writeBlock( block.data(), block.size() );
     qDebug("writeTargzBlock %d", block.size());
-    if ( !createTargzProc->isRunning() ) {
-	qDebug("tar and gzip done");
-	emit completed();
-	mode = Idle;
-	disconnect( gzipProc, SIGNAL( readyReadStdout() ),
-		    this, SLOT( writeTargzBlock() ) );
-    }
 }
 
 void ServerDTP::targzDone()
 {
-    //qDebug("targz done");
+    qDebug("tar and gzip done");
+    emit completed();
+    mode = Idle;
     disconnect( createTargzProc, SIGNAL( readyReadStdout() ),
-		this, SLOT( gzipTarBlock() ) );
-    gzipProc->closeStdin();
-}
-
-void ServerDTP::gzipTarBlock()
-{
-    //qDebug("gzipTarBlock");
-    if ( !gzipProc->isRunning() ) {
-	//qDebug("auto start gzip proc");
-	gzipProc->start();
-    }
-    gzipProc->writeToStdin( createTargzProc->readStdout() );
+		    this, SLOT( writeTargzBlock() ) );
 }
 
 void ServerDTP::sendFile( const QString fn, const QHostAddress& host, Q_UINT16 port )
@@ -1281,17 +1264,13 @@ void ServerDTP::sendGzipFile( const QString &fn,
     mode = SendGzipFile;
     file.setName( fn );
 
-    QStringList args = "tar";
-    args += "-cv";
+    QStringList args = "targzip";
+    //args += "-cv";
     args += archiveTargets;
     qDebug("sendGzipFile %s", args.join(" ").latin1() );
     createTargzProc->setArguments( args );
     connect( createTargzProc,
-	     SIGNAL( readyReadStdout() ), SLOT( gzipTarBlock() ) );
-
-    gzipProc->setArguments( "gzip" );
-    connect( gzipProc, SIGNAL( readyReadStdout() ),
-	     SLOT( writeTargzBlock() ) );
+	     SIGNAL( readyReadStdout() ), SLOT( writeTargzBlock() ) );
 }
 
 void ServerDTP::gunzipDone()

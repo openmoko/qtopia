@@ -1,8 +1,9 @@
-Files: plugins/inputmethods/libqunikeyboard.so*
+Files: plugins/inputmethods/libqunikeyboard.so* plugins/inputmethods/qunikeyboard.desktop
 Priority: optional
 Section: qpe/inputmethods
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Unicode input method

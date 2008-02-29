@@ -50,6 +50,8 @@ protected:
     virtual void keyPressEvent(QKeyEvent*);
     virtual void keyReleaseEvent(QKeyEvent*);
     virtual void resizeEvent(QResizeEvent *e);
+    virtual void focusOutEvent(QFocusEvent *);
+    virtual void focusInEvent(QFocusEvent *);
  
 private slots:
     void increaseScore(int);

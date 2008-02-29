@@ -142,7 +142,7 @@
             </property>
             <property stdset="1">
                 <name>text</name>
-                <string>00. Jan-00. Jan</string>
+                <string>...</string>
             </property>
             <property stdset="1">
                 <name>alignment</name>

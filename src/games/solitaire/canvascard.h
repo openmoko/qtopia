@@ -26,14 +26,15 @@
 #include <qpixmap.h>
 #include <qpoint.h>
 #include <qcanvas.h>
+#include <qdatetime.h>
 #include "cardgame.h"
+#include "canvasitemtimer.h"
 
 
-// ### Just made the number up, is that what you do???
 static const int canvasCardId = 2434321;
 
 
-class CanvasCard : public Card, public QCanvasRectangle
+class CanvasCard : public Card, public AnimatedCanvasItem, public QCanvasRectangle
 {
 public:
     CanvasCard( eValue v, eSuit s, bool f, QCanvas *canvas );
@@ -42,31 +43,33 @@ public:
     int rtti () const { return canvasCardId; }
     void move(QPoint p) { QCanvasItem::move( p.x(), p.y() ); }
     void move(int x, int y) { QCanvasItem::move( x, y ); }
-    void animatedMove(int x, int y, int steps = 10);
-    void animatedMove() { animatedMove(savedX, savedY); }
+    void animatedMove(int x, int y, int msecs );
+    void animatedMove() { animatedMove( savedX, savedY, 1500 ); }
     void savePos(void) { savedX = (int)x(); savedY = (int)y(); }
     void moveToPile(int p) { Q_UNUSED(p); }
     void cardBackChanged();
     
-    /*virtual*/ void flipTo(int x, int y, int steps = 8);
-    /*virtual*/ void setPos( int x, int y, int z ) { setX( x ); setY( y ); setZ( z ); }
-    /*virtual*/ void showCard(void) { show(); }
-    /*virtual*/ void redraw(void) { hide(); show(); }
-    /*virtual*/ void draw(QPainter &p);
-
-    void advance(int stage);
+    void flipTo(int x, int y, int msecs );
+    void setPos( int x, int y, int z ) { setX( x ); setY( y ); setZ( z ); }
+    void showCard(void) { show(); }
+    void redraw(void) { hide(); show(); }
+    void draw(QPainter &p);
+    void updatePosition( double percent );
 
 protected:
-    /*virtual*/ void flip(void) { redraw(); }
+    void flip(void) { redraw(); }
 
 private:
     int destX, destY;
-    int animSteps;
-    int flipSteps;
+    double deltaX, deltaY;
+    bool origFace;
+
     bool flipping;
     int savedX, savedY;
     double scaleX, scaleY;
     int xOff, yOff;
+    QPixmap cachedPixmap;
+    bool haveCache;
 };
 
 

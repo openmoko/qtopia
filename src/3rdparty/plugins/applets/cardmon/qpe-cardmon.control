@@ -1,8 +1,9 @@
-Files: plugins/applets/libcardmonapplet.so* pics/cardmon/pcmcia.png
+Files: plugins/applets/libcardmonapplet.so* pics/cardmon/pcmcia.png plugins/applets/cardmonapplet.desktop
 Priority: optional
 Section: qpe/taskbar
 Maintainer: Devin Butterfield <dbutter@wireless.net>
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: CF/PCMCIA Card Monitor applet

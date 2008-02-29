@@ -93,6 +93,17 @@ void ParaShoot::resizeEvent(QResizeEvent *)
     }
 }
 
+void ParaShoot::focusOutEvent (QFocusEvent *) 
+{
+    if (!gamestopped)
+	canvas.setAdvancePeriod(-1);
+}
+
+void ParaShoot::focusInEvent (QFocusEvent *) 
+{
+    if (!gamestopped)
+	canvas.setAdvancePeriod(updatespeed);
+}
 
 void ParaShoot::showScore( int score, int level )
 {

@@ -95,7 +95,6 @@ private slots:
     void writeTargzBlock();
     void targzDone();
 
-    void gzipTarBlock();
     void tarExtractBlock();
     void gunzipDone();
     void extractTarDone();

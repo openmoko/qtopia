@@ -34,9 +34,9 @@ class DateEntry : public DateEntryBase
 
 public:
     DateEntry( bool startOnMonday, const QDateTime &start,
-	       const QDateTime &end, bool whichClock = FALSE,
+	       const QDateTime &end,
 	       QWidget* parent = 0, const char* name = 0 );
-    DateEntry( bool startOnMonday, const PimEvent &event, bool whichCLock = FALSE,
+    DateEntry( bool startOnMonday, const PimEvent &event,
 	       QWidget* parent = 0, const char* name = 0 );
     ~DateEntry();
 
@@ -47,9 +47,8 @@ public slots:
     void endDateTimeChanged( const QDateTime & );
     void startDateTimeChanged( const QDateTime & );
     void slotRepeat();
-    void set24HourClock( bool );
     void setWeekStartsMonday( bool );
-    void updateDateEdits(bool);
+    void allDayToggled(bool);
 
     void turnOnAlarm();
     void checkAlarmSpin(int);
@@ -64,7 +63,6 @@ private:
     void setRepeatLabel();
 
     PimEvent mEvent;
-    bool ampm;
     bool startWeekOnMonday;
 };
 

@@ -269,7 +269,7 @@ bool PimXmlIO::loadFile(const QString &filename)
 		if ( haveEnt )
 		    str = Qtopia::plainString( str );
 
-		if ( attr.lower() == "action" )
+		if ( attr.lower() == "action" ) // No tr
 		{
 		    action = value.toInt();
 		} else {
@@ -395,7 +395,7 @@ void PimXmlIO::updateJournal(const PimRecord &rec, journal_action action)
     QCString str;
     buf = recordStart();
     buf += recordToXml(&rec);
-    buf += " action=\"" + QString::number( (int)action ) + "\" ";
+    buf += " action=\"" + QString::number( (int)action ) + "\" "; // No tr
     buf += "/>\n";
     QCString cstr = buf.utf8();
     f.writeBlock( cstr.data(), cstr.length() );
@@ -435,6 +435,8 @@ QString PimXmlIO::recordToXml(const PimRecord *p)
     return out;
 }
 
+static int nextId = 0;
+
 int PimXmlIO::generateUid()
 {
 #ifdef QTOPIA_DESKTOP
@@ -443,13 +445,11 @@ int PimXmlIO::generateUid()
     static int sign = -1;
 #endif
 
-    static int nextId = 0;
-
     Config pimConfig( "pim" );
     pimConfig.setGroup("uid");
     if ( nextId == 0 ) {
 	// load from file
-	nextId = pimConfig.readNumEntry( "nextid", 0 );
+	nextId = pimConfig.readNumEntry( "nextId", 0 );
 	if ( !nextId )
 	    nextId = sign * (int) ::time(NULL);
     }
@@ -469,6 +469,14 @@ void PimXmlIO::assignNewUid( PimRecord *r) const
 void PimXmlIO::setUid( PimRecord &r, const QUuid &u) const
 {
     int id = uuidToInt(u);
+    if (nextId == 0) 
+	generateUid(); // init uid.  
+    if (id >= nextId) {
+	nextId = id + 1;
+	Config pimConfig( "pim" );
+	pimConfig.setGroup("uid");
+	pimConfig.writeEntry( "nextId", nextId );
+    }
     ((PrRecord &)r).setUid(u);
 }
 

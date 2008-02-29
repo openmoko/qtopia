@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/i18n.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/doc/i18n.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -37,8 +37,9 @@ document.
 <a name="1-1"></a><p> The process of internationalization produces Qt message files (<tt>.qm</tt> files).
 For applications, these files must be placed as follows:
 <p> &nbsp;&nbsp;/opt/Qtopia/i18n/<b>language</b>/<b>appname</b>.qm
-<p> The <b>language</b> is an ISO 639 language code, and <b>appname</b> is
-the application executable filename.
+<p> The <b>language</b> is an ISO 639 language code optionally followed by an underscore
+and an ISO 3166 territory, eg. "en", "en_GB", "ja", "ja_JP".
+The <b>appname</b> is the application executable filename.
 <p> For plugins, which are shared libraries, the files must be placed in
 the following directory:
 <p> &nbsp;&nbsp;/opt/Qtopia/i18n/<b>language</b>/<b>pluginname</b>.qm
@@ -129,6 +130,12 @@ to the <tt>.ts</tt> files so that future translators are similarly
 informed), and implementations will be changed as necessary/possible
 (which should hopefully be sufficient to complete the translation).
 </ol>
+<p> <h3> Qtopia and the Operating System
+</h3>
+<a name="1-6"></a><p> Qtopia uses UTF8 for all file formats. System functions are also expected to
+use UTF8 encoding. For example, with $LANG set to "ja", strftime() must return
+a string in UTF8 encoding. Depending on the underlying operating system, this may
+require that "ja" be an alias for the "ja_JP.utf8" locale.
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>

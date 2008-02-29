@@ -24,22 +24,23 @@
 #include <limits.h>
 #include <errno.h>
 #include <qdatastream.h>
+#include <qapplication.h>
 #include "qimpencombining.h"
 #include "qimpenchar.h"
 
 #define QIMPEN_MATCH_THRESHOLD	    200000
 
 const QIMPenSpecialKeys qimpen_specialKeys[] = {
-    { Qt::Key_Escape,		"[Esc]" },
-    { Qt::Key_Tab,		"[Tab]" },
-    { Qt::Key_Backspace,	"[BackSpace]" },
-    { Qt::Key_Return,		"[Return]" },
-    { QIMPenChar::Caps,		"[Uppercase]" },
-    { QIMPenChar::CapsLock,	"[Caps Lock]" },
-    { QIMPenChar::Shortcut,	"[Shortcut]" },
-    { QIMPenChar::Punctuation,  "[Punctuation]" },
-    { QIMPenChar::Symbol,	"[Symbol]" },
-    { QIMPenChar::Extended,	"[Extended]" },
+    { Qt::Key_Escape,		QT_TRANSLATE_NOOP("Handwriting","[Esc]") },
+    { Qt::Key_Tab,		QT_TRANSLATE_NOOP("Handwriting","[Tab]") },
+    { Qt::Key_Backspace,	QT_TRANSLATE_NOOP("Handwriting","[BackSpace]") },
+    { Qt::Key_Return,		QT_TRANSLATE_NOOP("Handwriting","[Return]") },
+    { QIMPenChar::Caps,		QT_TRANSLATE_NOOP("Handwriting","[Uppercase]") },
+    { QIMPenChar::CapsLock,	QT_TRANSLATE_NOOP("Handwriting","[Caps Lock]") },
+    { QIMPenChar::Shortcut,	QT_TRANSLATE_NOOP("Handwriting","[Shortcut]") },
+    { QIMPenChar::Punctuation,  QT_TRANSLATE_NOOP("Handwriting","[Punctuation]") },
+    { QIMPenChar::Symbol,	QT_TRANSLATE_NOOP("Handwriting","[Symbol]") },
+    { QIMPenChar::Extended,	QT_TRANSLATE_NOOP("Handwriting","[Extended]") },
     { Qt::Key_unknown,	        0 } };
 
 
@@ -93,7 +94,7 @@ QString QIMPenChar::name() const
 	int code = ch >> 16;
 	for ( int i = 0; qimpen_specialKeys[i].code != Qt::Key_unknown; i++ ) {
 	    if ( qimpen_specialKeys[i].code == code ) {
-		n = qimpen_specialKeys[i].name;
+		n = qApp->translate("Handwriting", qimpen_specialKeys[i].name);
 		break;
 	    }
 	}
@@ -272,7 +273,7 @@ bool QIMPenCharMatch::operator<=( const QIMPenCharMatch &m )
 QIMPenCharSet::QIMPenCharSet()
 {
     chars.setAutoDelete( TRUE );
-    desc = "Unnamed";
+    desc = qApp->translate("Handwriting","Unnamed","Character set name");
     csTitle = "abc";
     csType = Unknown;
     maxStrokes = 0;
@@ -284,7 +285,7 @@ QIMPenCharSet::QIMPenCharSet()
 QIMPenCharSet::QIMPenCharSet( const QString &fn )
 {
     chars.setAutoDelete( TRUE );
-    desc = "Unnamed";
+    desc = qApp->translate("Handwriting","Unnamed","Character set name");
     csTitle = "abc";
     csType = Unknown;
     maxStrokes = 0;
@@ -333,7 +334,7 @@ bool QIMPenCharSet::load( const QString &fn, Domain d )
 		csType = Upper;
 	    else if ( csTitle == "123" )
 		csType = Numeric;
-	    else if ( fn == "Combining" )
+	    else if ( fn == "Combining" ) // No tr
 		csType = Combining;
 	}
         while ( !ds.atEnd() ) {

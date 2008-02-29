@@ -121,7 +121,7 @@ CC	=	$(SYSCONF_CC) $(QT_C_MT)
 CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
 INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/src/settings/calibrate -I$(QPEDIR)/src/3rdparty/libraries/rsync
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lcrypt -luuid -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -ljpeg -Wl,-Bstatic -Wl,-whole-archive  -Wl,-no-whole-archive -Wl,-Bdynamic -lcrypt -luuid -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -137,10 +137,10 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 ####### Files
 
 HEADERS =	desktop.h \
-		qprocess.h \
 		appicons.h \
 		taskbar.h \
 		runningappbar.h \
+		applauncher.h \
 		stabmon.h \
 		inputmethods.h \
 		systray.h \
@@ -154,6 +154,7 @@ HEADERS =	desktop.h \
 		qcopbridge.h \
 		packageslave.h \
 		irserver.h \
+		firstuse.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/command.h \
@@ -173,10 +174,10 @@ HEADERS =	desktop.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
 SOURCES =	desktop.cpp \
-		qprocess.cpp \
 		appicons.cpp \
 		taskbar.cpp \
 		runningappbar.cpp \
+		applauncher.cpp \
 		stabmon.cpp \
 		inputmethods.cpp \
 		systray.cpp \
@@ -191,6 +192,7 @@ SOURCES =	desktop.cpp \
 		qcopbridge.cpp \
 		startmenu.cpp \
 		main.cpp \
+		firstuse.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c \
@@ -216,13 +218,12 @@ SOURCES =	desktop.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
-		qprocess_unix.cpp
+		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
 OBJECTS =	$(OBJECTS_DIR)/desktop.o \
-		$(OBJECTS_DIR)/qprocess.o \
 		$(OBJECTS_DIR)/appicons.o \
 		$(OBJECTS_DIR)/taskbar.o \
 		$(OBJECTS_DIR)/runningappbar.o \
+		$(OBJECTS_DIR)/applauncher.o \
 		$(OBJECTS_DIR)/stabmon.o \
 		$(OBJECTS_DIR)/inputmethods.o \
 		$(OBJECTS_DIR)/systray.o \
@@ -237,6 +238,7 @@ OBJECTS =	$(OBJECTS_DIR)/desktop.o \
 		$(OBJECTS_DIR)/qcopbridge.o \
 		$(OBJECTS_DIR)/startmenu.o \
 		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/firstuse.o \
 		$(OBJECTS_DIR)/base64.o \
 		$(OBJECTS_DIR)/buf.o \
 		$(OBJECTS_DIR)/checksum.o \
@@ -263,7 +265,6 @@ OBJECTS =	$(OBJECTS_DIR)/desktop.o \
 		$(OBJECTS_DIR)/version.o \
 		$(OBJECTS_DIR)/whole.o \
 		$(OBJECTS_DIR)/qrsync.o \
-		$(OBJECTS_DIR)/qprocess_unix.o \
 		$(OBJECTS_DIR)/shutdown.o \
 		$(OBJECTS_DIR)/syncdialog.o
 INTERFACES =    shutdown.ui \
@@ -273,10 +274,10 @@ UICDECLS =      shutdown.h \
 UICIMPLS =      shutdown.cpp \
 		syncdialog.cpp
 SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
-		$(MOC_DIR)/moc_qprocess.cpp \
 		$(MOC_DIR)/moc_appicons.cpp \
 		$(MOC_DIR)/moc_taskbar.cpp \
 		$(MOC_DIR)/moc_runningappbar.cpp \
+		$(MOC_DIR)/moc_applauncher.cpp \
 		$(MOC_DIR)/moc_inputmethods.cpp \
 		$(MOC_DIR)/moc_systray.cpp \
 		$(MOC_DIR)/moc_shutdownimpl.cpp \
@@ -288,15 +289,17 @@ SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
 		$(MOC_DIR)/moc_qcopbridge.cpp \
 		$(MOC_DIR)/moc_packageslave.cpp \
 		$(MOC_DIR)/moc_irserver.cpp \
+		$(MOC_DIR)/moc_firstuse.cpp \
 		$(MOC_DIR)/moc_shutdown.cpp \
 		$(MOC_DIR)/moc_syncdialog.cpp \
+		$(MOC_DIR)/desktop.moc \
 		$(MOC_DIR)/appicons.moc \
-		$(MOC_DIR)/qprocess_unix.moc
+		$(MOC_DIR)/taskbar.moc
 OBJMOC	=	$(OBJECTS_DIR)/moc_desktop.o \
-		$(OBJECTS_DIR)/moc_qprocess.o \
 		$(OBJECTS_DIR)/moc_appicons.o \
 		$(OBJECTS_DIR)/moc_taskbar.o \
 		$(OBJECTS_DIR)/moc_runningappbar.o \
+		$(OBJECTS_DIR)/moc_applauncher.o \
 		$(OBJECTS_DIR)/moc_inputmethods.o \
 		$(OBJECTS_DIR)/moc_systray.o \
 		$(OBJECTS_DIR)/moc_shutdownimpl.o \
@@ -308,6 +311,7 @@ OBJMOC	=	$(OBJECTS_DIR)/moc_desktop.o \
 		$(OBJECTS_DIR)/moc_qcopbridge.o \
 		$(OBJECTS_DIR)/moc_packageslave.o \
 		$(OBJECTS_DIR)/moc_irserver.o \
+		$(OBJECTS_DIR)/moc_firstuse.o \
 		$(OBJECTS_DIR)/moc_shutdown.o \
 		$(OBJECTS_DIR)/moc_syncdialog.o
 
@@ -376,6 +380,7 @@ REQUIRES=
 ####### Compile
 
 $(OBJECTS_DIR)/desktop.o: desktop.cpp \
+		$(MOC_DIR)/desktop.moc \
 		desktop.h \
 		shutdownimpl.h \
 		shutdown.h \
@@ -389,16 +394,13 @@ $(OBJECTS_DIR)/desktop.o: desktop.cpp \
 		packageslave.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/desktop.o desktop.cpp
 
-$(OBJECTS_DIR)/qprocess.o: qprocess.cpp \
-		qprocess.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess.o qprocess.cpp
-
 $(OBJECTS_DIR)/appicons.o: appicons.cpp \
 		$(MOC_DIR)/appicons.moc \
 		appicons.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appicons.o appicons.cpp
 
 $(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
+		$(MOC_DIR)/taskbar.moc \
 		startmenu.h \
 		inputmethods.h \
 		mrulist.h \
@@ -428,13 +430,18 @@ $(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
 		../games/qasteroids/toplevel.h \
 		../games/snake/interface.h \
 		../games/solitaire/canvascardwindow.h \
-		../settings/systemtime/settime.h
+		../settings/systemtime/settime.h \
+		../settings/appearance/appearance.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/taskbar.o taskbar.cpp
 
 $(OBJECTS_DIR)/runningappbar.o: runningappbar.cpp \
-		qprocess.h \
-		runningappbar.h
+		runningappbar.h \
+		applauncher.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/runningappbar.o runningappbar.cpp
+
+$(OBJECTS_DIR)/applauncher.o: applauncher.cpp \
+		applauncher.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/applauncher.o applauncher.cpp
 
 $(OBJECTS_DIR)/stabmon.o: stabmon.cpp \
 		stabmon.h
@@ -482,13 +489,11 @@ $(OBJECTS_DIR)/calibrate.o: $(QPEDIR)/src/settings/calibrate/calibrate.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/calibrate.o $(QPEDIR)/src/settings/calibrate/calibrate.cpp
 
 $(OBJECTS_DIR)/transferserver.o: transferserver.cpp \
-		transferserver.h \
-		qprocess.h
+		transferserver.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/transferserver.o transferserver.cpp
 
 $(OBJECTS_DIR)/packageslave.o: packageslave.cpp \
-		packageslave.h \
-		qprocess.h
+		packageslave.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packageslave.o packageslave.cpp
 
 $(OBJECTS_DIR)/irserver.o: irserver.cpp \
@@ -515,8 +520,19 @@ $(OBJECTS_DIR)/main.o: main.cpp \
 		stabmon.h \
 		launcher.h \
 		launcherview.h \
+		firstuse.h \
 		$(QPEDIR)/src/settings/calibrate/../calibrate/calibrate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
+
+$(OBJECTS_DIR)/firstuse.o: firstuse.cpp \
+		firstuse.h \
+		inputmethods.h \
+		applauncher.h \
+		desktop.h \
+		shutdownimpl.h \
+		shutdown.h \
+		../settings/calibrate/calibrate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/firstuse.o firstuse.cpp
 
 $(OBJECTS_DIR)/base64.o: $(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
@@ -764,12 +780,6 @@ $(OBJECTS_DIR)/qrsync.o: $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qrsync.o $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
 
-$(OBJECTS_DIR)/qprocess_unix.o: qprocess_unix.cpp \
-		$(MOC_DIR)/qprocess_unix.moc \
-		qprocess.h \
-		qcleanuphandler_p.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess_unix.o qprocess_unix.cpp
-
 shutdown.h: shutdown.ui
 	$(UIC) shutdown.ui -o $(INTERFACE_DECL_PATH)/shutdown.h
 
@@ -794,10 +804,6 @@ $(OBJECTS_DIR)/moc_desktop.o: $(MOC_DIR)/moc_desktop.cpp \
 		shutdown.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_desktop.o $(MOC_DIR)/moc_desktop.cpp
 
-$(OBJECTS_DIR)/moc_qprocess.o: $(MOC_DIR)/moc_qprocess.cpp \
-		qprocess.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qprocess.o $(MOC_DIR)/moc_qprocess.cpp
-
 $(OBJECTS_DIR)/moc_appicons.o: $(MOC_DIR)/moc_appicons.cpp \
 		appicons.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appicons.o $(MOC_DIR)/moc_appicons.cpp
@@ -809,6 +815,10 @@ $(OBJECTS_DIR)/moc_taskbar.o: $(MOC_DIR)/moc_taskbar.cpp \
 $(OBJECTS_DIR)/moc_runningappbar.o: $(MOC_DIR)/moc_runningappbar.cpp \
 		runningappbar.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_runningappbar.o $(MOC_DIR)/moc_runningappbar.cpp
+
+$(OBJECTS_DIR)/moc_applauncher.o: $(MOC_DIR)/moc_applauncher.cpp \
+		applauncher.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_applauncher.o $(MOC_DIR)/moc_applauncher.cpp
 
 $(OBJECTS_DIR)/moc_inputmethods.o: $(MOC_DIR)/moc_inputmethods.cpp \
 		inputmethods.h
@@ -856,6 +866,10 @@ $(OBJECTS_DIR)/moc_irserver.o: $(MOC_DIR)/moc_irserver.cpp \
 		irserver.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_irserver.o $(MOC_DIR)/moc_irserver.cpp
 
+$(OBJECTS_DIR)/moc_firstuse.o: $(MOC_DIR)/moc_firstuse.cpp \
+		firstuse.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_firstuse.o $(MOC_DIR)/moc_firstuse.cpp
+
 $(OBJECTS_DIR)/moc_shutdown.o: $(MOC_DIR)/moc_shutdown.cpp \
 		shutdown.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_shutdown.o $(MOC_DIR)/moc_shutdown.cpp
@@ -867,9 +881,6 @@ $(OBJECTS_DIR)/moc_syncdialog.o: $(MOC_DIR)/moc_syncdialog.cpp \
 $(MOC_DIR)/moc_desktop.cpp: desktop.h
 	$(MOC) desktop.h -o $(MOC_DIR)/moc_desktop.cpp
 
-$(MOC_DIR)/moc_qprocess.cpp: qprocess.h
-	$(MOC) qprocess.h -o $(MOC_DIR)/moc_qprocess.cpp
-
 $(MOC_DIR)/moc_appicons.cpp: appicons.h
 	$(MOC) appicons.h -o $(MOC_DIR)/moc_appicons.cpp
 
@@ -878,6 +889,9 @@ $(MOC_DIR)/moc_taskbar.cpp: taskbar.h
 
 $(MOC_DIR)/moc_runningappbar.cpp: runningappbar.h
 	$(MOC) runningappbar.h -o $(MOC_DIR)/moc_runningappbar.cpp
+
+$(MOC_DIR)/moc_applauncher.cpp: applauncher.h
+	$(MOC) applauncher.h -o $(MOC_DIR)/moc_applauncher.cpp
 
 $(MOC_DIR)/moc_inputmethods.cpp: inputmethods.h
 	$(MOC) inputmethods.h -o $(MOC_DIR)/moc_inputmethods.cpp
@@ -912,11 +926,17 @@ $(MOC_DIR)/moc_packageslave.cpp: packageslave.h
 $(MOC_DIR)/moc_irserver.cpp: irserver.h
 	$(MOC) irserver.h -o $(MOC_DIR)/moc_irserver.cpp
 
+$(MOC_DIR)/moc_firstuse.cpp: firstuse.h
+	$(MOC) firstuse.h -o $(MOC_DIR)/moc_firstuse.cpp
+
+$(MOC_DIR)/desktop.moc: desktop.cpp
+	$(MOC) desktop.cpp -o $(MOC_DIR)/desktop.moc
+
 $(MOC_DIR)/appicons.moc: appicons.cpp
 	$(MOC) appicons.cpp -o $(MOC_DIR)/appicons.moc
 
-$(MOC_DIR)/qprocess_unix.moc: qprocess_unix.cpp
-	$(MOC) qprocess_unix.cpp -o $(MOC_DIR)/qprocess_unix.moc
+$(MOC_DIR)/taskbar.moc: taskbar.cpp
+	$(MOC) taskbar.cpp -o $(MOC_DIR)/taskbar.moc
 
 $(MOC_DIR)/moc_shutdown.cpp: shutdown.h
 	$(MOC) shutdown.h -o $(MOC_DIR)/moc_shutdown.cpp
@@ -927,14 +947,14 @@ $(MOC_DIR)/moc_syncdialog.cpp: syncdialog.h
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <server.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <server.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease server.pro
 	$(QPEDIR)/bin/qtopia-linstall server.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

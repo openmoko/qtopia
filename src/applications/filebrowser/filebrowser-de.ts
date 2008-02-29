@@ -200,5 +200,10 @@
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Open in %1</source>
+        <comment>eg. text editor</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

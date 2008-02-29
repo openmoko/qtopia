@@ -22,7 +22,7 @@
 
 #include <qtopia/categories.h>
 #include <qtopia/categoryselect.h>
-#include <qtopia/datepicker.h>
+#include <qtopia/datetimeedit.h>
 #include <qtopia/timestring.h>
 
 #include <qcheckbox.h>
@@ -47,7 +47,7 @@ FindWidget::FindWidget( const QString &appName, QWidget *parent,
     // hide junk for the moment...
     lblStartDate->hide();
     cmdDate->hide();
-    QObject::connect( cmdDate, SIGNAL(dateSelected(const QDate &)),
+    QObject::connect( cmdDate, SIGNAL(valueChanged(const QDate &)),
 		      this, SLOT(setDate(const QDate &)) );
 
     QObject::connect( cmdFind, SIGNAL(clicked()),

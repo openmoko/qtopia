@@ -18,11 +18,10 @@
 **
 **********************************************************************/
 
-#include <qtopia/qlibrary.h>
+#include "pluginloader_p.h"
 #include "qpeapplication.h"
 #include "fontfactoryinterface.h"
 #include "fontdatabase.h"
-
 
 #ifdef QWS
 #include <qfontmanager_qws.h>
@@ -55,6 +54,7 @@ static QString fontFamily( const QString& key )
 #endif
 
 QValueList<FontFactory> *FontDatabase::factoryList = 0;
+PluginLoaderIntern *FontDatabase::loader = 0;
 
 /*!
   \class FontDatabase fontdatabase.h
@@ -169,44 +169,29 @@ void FontDatabase::loadRenderers()
 #if !defined(QT_NO_COMPONENT) && (QT_VERSION-0 < 0x030000)
     if ( !factoryList )
 	factoryList = new QValueList<FontFactory>;
+    if ( !loader )
+	loader = new PluginLoaderIntern("fontfactories");
 
     QValueList<FontFactory>::Iterator mit;
     for ( mit = factoryList->begin(); mit != factoryList->end(); ++mit ) {
 	qt_fontmanager->factories.setAutoDelete( false );
 	qt_fontmanager->factories.removeRef( (*mit).factory );
 	qt_fontmanager->factories.setAutoDelete( true );
-	(*mit).interface->release();
-	(*mit).library->unload();
-	delete (*mit).library;
+	loader->releaseInterface((*mit).interface);
     }
     factoryList->clear();
 
-    QString path = QPEApplication::qpeDir() + "plugins/fontfactories";
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir ( path, "*.dll");
-#endif
-
-    QStringList list = dir.entryList();
+    QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	FontFactoryInterface *iface = 0;
-#if (QT_VERSION-0 >= 0x030000)
-	QComLibrary *lib = new QComLibrary( path + "/" + *it );
-#else
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-#endif
-	if ( lib->queryInterface( IID_FontFactory, (QUnknownInterface**)&iface ) == QS_OK ) {
+	if ( loader->queryInterface( *it, IID_FontFactory, (QUnknownInterface**)&iface ) == QS_OK ) {
 	    FontFactory factory;
-	    factory.library = lib;
 	    factory.interface = iface;
 	    factory.factory = factory.interface->fontFactory();
 	    factoryList->append( factory );
 	    qt_fontmanager->factories.append( factory.factory );
 	    readFonts( factory.factory );
-	} else {
-	    delete lib;
 	}
     }
 #endif

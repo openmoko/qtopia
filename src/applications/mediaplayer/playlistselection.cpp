@@ -58,7 +58,7 @@ public:
 	    setPixmap( 0, f.pixmap() );
 	else
 	    setPixmap( 0, Resource::loadPixmap("UnknownDocument") );
-	setText( 0, f.name() );
+	setText( 0, f.name().lower() );
 
 	// Second Column
 	StorageInfo storage;
@@ -88,6 +88,20 @@ public:
 	QDate date = QFileInfo( file ).lastModified().date();
 	setText( 4, QString("%1 %1 %1").arg( date.monthName( date.month() ) ).arg( date.day() ).arg( date.year() ) );
 */
+    }
+
+    void paintCell( QPainter *p, const QColorGroup & cg, int column, int width, int alignment ) {
+	if ( column == 0 ) {
+	    bool updates = listView()->isUpdatesEnabled();
+	    listView()->setUpdatesEnabled( false );
+	    setText( 0, fl.name() );
+	    QListViewItem::paintCell( p, cg, column, width, alignment );
+	    setText( 0, fl.name().lower() );
+	    listView()->setUpdatesEnabled( updates );
+	} else {
+	    QListViewItem::paintCell( p, cg, column, width, alignment );
+	}
+	
     }
 
 private:
@@ -209,7 +223,8 @@ bool PlayListSelection::filtersMatch( const DocLnk& lnk )
 	QString comboLoc = d->locSel->currentText();
         if ( comboLoc == tr( "All Locations" ) )
 	    return TRUE;
-        if ( comboLoc == storage.fileSystemOf( lnk.file() )->name() )
+	const FileSystem *fileSystem = storage.fileSystemOf( lnk.file() );
+        if ( fileSystem && comboLoc == fileSystem->name() )
 	    return TRUE;
 	return FALSE;
     }

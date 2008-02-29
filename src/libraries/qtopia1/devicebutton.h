@@ -57,4 +57,6 @@ class QTOPIA_EXPORT DeviceButton {
   ServiceRequest m_HeldAction;
 };
 
+#define QTOPIA_DEFINED_DEVICEBUTTON
+#include <qtopia/qtopiawinexport.h>
 #endif

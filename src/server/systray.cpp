@@ -21,6 +21,7 @@
 #include <qtopia/qpeapplication.h>
 #include <qtopia/qlibrary.h>
 #include <qtopia/config.h>
+#include <qtopia/pluginloader.h>
 
 #include <qlayout.h>
 #include <qdir.h>
@@ -36,9 +37,8 @@
 #include "../plugins/applets/clockapplet/clockappletimpl.h"
 #endif
 
-SysTray::SysTray( QWidget *parent ) : QFrame( parent ), layout(0)
+SysTray::SysTray( QWidget *parent ) : QFrame( parent ), layout(0), loader(0)
 {
-    safety_tid = 0;
     //setFrameStyle( QFrame::Panel | QFrame::Sunken );
     loadApplets();
 }
@@ -54,7 +54,7 @@ static int compareAppletPositions(const void *a, const void *b)
     const TaskbarApplet* ab = *(const TaskbarApplet**)b;
     int d = ab->iface->position() - aa->iface->position();
     if ( d ) return d;
-    return QString::compare(ab->library->library(),aa->library->library());
+    return QString::compare(ab->name,aa->name);
 }
 
 void SysTray::loadApplets()
@@ -67,12 +67,12 @@ void SysTray::loadApplets()
 void SysTray::clearApplets()
 {
 #ifndef QT_NO_COMPONENTS
-    QValueList<TaskbarApplet*>::Iterator mit;
-    for ( mit = appletList.begin(); mit != appletList.end(); ++mit ) {
-	(*mit)->iface->release();
-	(*mit)->library->unload();
-	delete (*mit)->library;
-	delete (*mit);
+    if ( loader ) {
+	QValueList<TaskbarApplet*>::Iterator mit;
+	for ( mit = appletList.begin(); mit != appletList.end(); ++mit ) {
+	    loader->releaseInterface( (*mit)->iface );
+	    delete (*mit);
+	}
     }
 #endif
     appletList.clear();
@@ -80,52 +80,30 @@ void SysTray::clearApplets()
 	delete layout;
     layout = new QHBoxLayout( this, 0, 1 );
     layout->setAutoAdd(TRUE);
+    delete loader;
+    loader = 0;
 }
 
 void SysTray::addApplets()
 {
     hide();
+    delete loader;
+    loader = new PluginLoader( "applets" );
 #ifndef QT_NO_COMPONENTS
-    Config cfg( "Taskbar" );
-    cfg.setGroup( "Applets" );
-    bool safe = cfg.readBoolEntry("SafeMode",FALSE);
-    if ( safe && !safety_tid ) {
-	QMessageBox::warning(this, tr("Safe Mode"), tr("<P>A system startup error occurred, "
-		"and the system is now in Safe Mode. "
-		"Applets are not loaded in Safe Mode. "
-		"You can use the Taskbar settings to "
-		"enable applets that do not cause system error."), QMessageBox::Ok, 0);
-	return;
-    }
-    cfg.writeEntry("SafeMode",TRUE);
-    cfg.write();
-    QStringList exclude = cfg.readListEntry( "ExcludeApplets", ',' );
     QStringList faulty;
 
-    QString path = QPEApplication::qpeDir() + "plugins/applets";
-#ifndef Q_OS_WIN32    
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir (path, "*.dll");
-#endif
-    QStringList list = dir.entryList();
+    QStringList list = loader->list();
+    TaskbarApplet **applets = new TaskbarApplet* [list.count()];
     QStringList::Iterator it;
     int napplets=0;
-    TaskbarApplet **applets = new TaskbarApplet* [list.count()];
     for ( it = list.begin(); it != list.end(); ++it ) {
-        qDebug("Looking at loading dynamic library %s", (char*)(*it).latin1());
-	if ( exclude.find( *it ) != exclude.end() )
-	    continue;
 	TaskbarAppletInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-	if ( lib->queryInterface( IID_TaskbarApplet, (QUnknownInterface**)&iface ) == QS_OK ) {
+	if ( loader->queryInterface( *it, IID_TaskbarApplet, (QUnknownInterface**)&iface ) == QS_OK ) {
 	    TaskbarApplet *applet = new TaskbarApplet;
 	    applets[napplets++] = applet;
-	    applet->library = lib;
 	    applet->iface = iface;
+	    applet->name = *it;
 	} else {
-	    exclude += *it;
-
 #ifndef Q_OS_WIN32
 	    // Same as Taskbar settings uses
 	    QString name = (*it).mid(3);
@@ -141,16 +119,11 @@ void SysTray::addApplets()
                 name.truncate( sep );
             name[0] = name[0].upper();
 	    faulty += name; 
-
-	    delete lib;
+	    // we don't do anything with faulty anymore -
+	    // maybe we should.
 	}
     }
-    if ( faulty.count() ) {
-	QMessageBox::warning(this, tr("Applet Error"), tr("<P>The following applets could not be loaded. "
-		"They have been disabled. You can use the Taskbar settings to attempt to "
-		"re-enable them.<P><b>%1</b>.").arg(faulty.join("</b>, <b>")), QMessageBox::Ok, 0);
-    }
-    cfg.writeEntry( "ExcludeApplets", exclude, ',' );
+
     qsort(applets,napplets,sizeof(applets[0]),compareAppletPositions);
     while (napplets--) {
 	TaskbarApplet *applet = applets[napplets];
@@ -158,14 +131,6 @@ void SysTray::addApplets()
 	if ( applet->applet->maximumSize().width() <= 1 )
 	    applet->applet->hide();
 	appletList.append(applet);
-	QString lang = getenv( "LANG" );
-	QTranslator * trans = new QTranslator(qApp);
-	QString type = (*it).left( (*it).find(".") );
-	QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
-	if ( trans->load( tfn ))
-	    qApp->installTranslator( trans );
-	else
-	    delete trans;
     }
     delete [] applets;
 #else
@@ -175,18 +140,5 @@ void SysTray::addApplets()
     appletList.append( applet );
 #endif
     show();
-
-    if ( !safety_tid )
-	safety_tid = startTimer(5000);
 }
 
-void SysTray::timerEvent(QTimerEvent* e)
-{
-    if ( e->timerId() == safety_tid ) {
-	Config cfg( "Taskbar" );
-	cfg.setGroup( "Applets" );
-	cfg.writeEntry( "SafeMode", FALSE );
-	killTimer(safety_tid);
-	safety_tid = 0;
-    }
-}

@@ -53,7 +53,7 @@
 
 // settings
 #include "../settings/systemtime/settime.h"
-//#include "../settings/appearance/appearance.h"
+#include "../settings/appearance/appearance.h"
 
 /* #include "../settings/rotation/settings.h"
 #include "../settings/language/settings.h"
@@ -96,7 +96,7 @@ APP( "patience",CanvasCardWindow,1,0 )
 
 // settings
 APP( "systemtime",SetDateTime,1,0 )
-//APP( "appearance",AppearanceSettings,1,0 )
+APP( "appearance",AppearanceSettings,1,0 )
 //APP( "light-and-power",LightSettings,1,0 )
 
 /* APP( "sound",SoundSettings,1,0 ) */

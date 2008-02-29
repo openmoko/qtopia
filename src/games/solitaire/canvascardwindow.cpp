@@ -29,13 +29,23 @@
 #include <qmainwindow.h>
 #include <qpopupmenu.h>
 #include <qstyle.h>
+#include <qlayout.h>
+
+
+enum GameType
+{
+    SolitaireGame,
+    FreecellGame
+};
 
 
 CanvasCardWindow::CanvasCardWindow(QWidget* parent, const char* name, WFlags f) :
-    QMainWindow(parent, name, f), canvas(1, 1), snapOn(TRUE), cardBack(0), gameType(0),
-    cardGame(0), drawThree(TRUE)
+    QMainWindow(parent, name, f), resizeTimeout( this, "resizeTimeout" ), canvas(1, 1),
+    snapOn(TRUE), cardBack(0), gameType(0), drawThree(TRUE), cardGame(0) , resizing( false )
 {
     setIcon( Resource::loadPixmap( "cards" ) );
+
+    connect( &resizeTimeout, SIGNAL( timeout() ), this, SLOT( doResize() ) );
 
     // Create Playing Area for Games
     if ( QPixmap::defaultDepth() < 12 ) {
@@ -52,59 +62,34 @@ CanvasCardWindow::CanvasCardWindow(QWidget* parent, const char* name, WFlags f) 
     canvas.setAdvancePeriod(30);
 #endif
 
-
-#ifdef _PATIENCE_USE_ACCELS_
-    QPEMenuBar* menu = menuBar();
-
-    QPopupMenu* file = new QPopupMenu;
-    file->insertItem(tr("Patience"), this, SLOT(initPatience()), CTRL+Key_F);
-    file->insertItem(tr("Freecell"), this, SLOT(initFreecell()), CTRL+Key_F);
-    menu->insertItem(tr("&Game"), file);
-    
-    menu->insertSeparator();
-
-    settings = new QPopupMenu;
-    settings->insertItem(tr("&Change Card Backs"), this, SLOT(changeCardBacks()), Key_F2);
-    snap_id = settings->insertItem(tr("&Snap To Position"), this, SLOT(snapToggle()), Key_F3);
-    settings->setCheckable(TRUE);
-    menu->insertItem(tr("&Settings"),settings);
-
-    menu->insertSeparator();
-
-    QPopupMenu* help = new QPopupMenu;
-    help->insertItem(tr("&About"), this, SLOT(help()), Key_F1);
-    help->setItemChecked(dbf_id, TRUE);
-    menu->insertItem(tr("&Help"),help);
-#else
     QMenuBar* menu = menuBar();
 
     QPopupMenu* file = new QPopupMenu;
+
+#ifdef _PATIENCE_USE_ACCELS_
+    file->insertItem(tr("&Patience"), this, SLOT(initPatience()), Key_F2);
+    file->insertItem(tr("&Freecell"), this, SLOT(initFreecell()), Key_F3);
+    menu->insertItem(tr("&Play"), file);
+#else
     file->insertItem(tr("Patience"), this, SLOT(initPatience()));
     file->insertItem(tr("Freecell"), this, SLOT(initFreecell()));
     menu->insertItem(tr("Play"), file);
+#endif
     
     menu->insertSeparator();
 
     settings = new QPopupMenu;
     settings->setCheckable(TRUE);
-    settings->insertItem(tr("Change Card Backs"), this, SLOT(changeCardBacks()));
-    snap_id = settings->insertItem(tr("Snap To Position"), this, SLOT(snapToggle()));
-    QString m;
-
-    drawId = settings->insertItem(tr("Turn One Card"), this, SLOT(drawnToggle()));
-    menu->insertItem(tr("Settings"),settings);
-
-#endif
+    snapId = settings->insertItem(tr("Snap To Position"), this, SLOT(snapToggle()));
+    changeId = 0;
+    drawId = 0;
+    menu->insertItem(tr("&Settings"),settings);
 
     menu->show();
 
-    // We need a dummy canvas view to get the correct size first
-    // before we layout the cards in the resize handling code
-    QCanvasView blankView( &canvas, this, "blankView" );
-    setCentralWidget( &blankView );
-
-    // wait for resize/show event
-    resizeEvent( 0 );
+    // Temporary initial QCanvasView until a game is loaded or a new game started
+    canvasView = new QCanvasView( &canvas, this );
+    setCentralWidget( canvasView );
 }
 
 
@@ -116,30 +101,21 @@ CanvasCardWindow::~CanvasCardWindow()
 
 void CanvasCardWindow::initGame()
 {
+{
     Config cfg("Patience");
     cfg.setGroup( "GlobalSettings" );
     snapOn = cfg.readBoolEntry( "SnapOn", TRUE);
-    settings->setItemChecked(snap_id, snapOn);
+    settings->setItemChecked(snapId, snapOn);
     gameType = cfg.readNumEntry( "GameType", -1 );
     drawThree = cfg.readBoolEntry( "DrawThree", TRUE);
     cardBack = cfg.readNumEntry( "CardBack", 0 );
+}
     CardMetrics::setCardBack( cardBack );
 
     if ( gameType == 0 ) {
-	cardGame = new PatienceCardGame( &canvas, snapOn, this );
-	cardGame->setNumberToDraw(drawThree ? 3 : 1);
-	setCaption(tr("Patience"));
-	setCentralWidget(cardGame);
-	cardGame->readConfig( cfg );
-	setCardBacks();
-	updateDraw();
+	initGame( false, 0 );
     } else if ( gameType == 1 ) {
-	cardGame = new FreecellCardGame( &canvas, snapOn, this );
-	setCaption(tr("Freecell"));
-	setCentralWidget(cardGame);
-	cardGame->readConfig( cfg );
-	setCardBacks();
-	updateDraw();
+	initGame( false, 1 );
     } else {
 	// Probably there isn't a config file or it is broken
 	// Start a new game
@@ -159,6 +135,7 @@ void CanvasCardWindow::closeGame()
 	cfg.writeEntry( "CardBack", cardBack );
 	cardGame->writeConfig( cfg );
 	delete cardGame;
+	setCentralWidget( canvasView );
     }
 }
 
@@ -169,57 +146,117 @@ void CanvasCardWindow::showEvent( QShowEvent * )
 }
 
 
-void CanvasCardWindow::resizeEvent( QResizeEvent * )
+void CanvasCardWindow::resizeEvent( QResizeEvent *re )
 {
-    if ( !centralWidget() ) 
-	return;
+    if ( !resizing ) {
+	closeGame();
+	resizing = true;
+    }
 
-    QSize s = centralWidget()->size();
-    int fw = style().defaultFrameWidth();
-    canvas.resize( s.width() - fw - 2, s.height() - fw - 2);
+    QMainWindow::resizeEvent( re );
 
-    CardMetrics::loadMetrics( width(), height() );
+    QWidget *theView = centralWidget();
+    if ( theView ) {
+	if ( theView->inherits("QCanvasView") ) {
+	    QCanvasView *currentView = (QCanvasView*)theView;
+	    if ( currentView ) {
+		QSize s = currentView->viewport()->size();
+		canvas.resize( s.width(), s.height() );
+	    }
+	}
 
-    // Reinitialise *everything* so it is layed out correctly
-    closeGame();
-    initGame();
+    }
+
+    resizeTimeout.start( 100, TRUE );
+}
+
+
+void CanvasCardWindow::doResize()
+{
+    if ( resizing ) {
+
+	QSize s = canvas.size();
+	QWidget *theView = centralWidget();
+	if ( theView ) {
+	    if ( theView->inherits("QCanvasView") ) {
+		QCanvasView *currentView = (QCanvasView*)theView;
+		if ( currentView ) {
+		    s = currentView->viewport()->size();
+		}
+	    }
+	}
+	CardMetrics::loadMetrics( s.width(), s.height() );
+	initGame();
+	canvas.resize( s.width(), s.height() );
+
+	resizing = false;
+    }
+}
+
+
+void CanvasCardWindow::initGame( bool newGame, int type )
+{
+    if ( type == SolitaireGame ) {
+	if ( !changeId )
+	    changeId = settings->insertItem(tr("Change Card Backs"), this, SLOT(changeCardBacks()));
+	if ( !drawId )
+	    drawId = settings->insertItem(tr("Turn One Card"), this, SLOT(drawnToggle()));
+    } else {
+	if ( changeId ) {
+	    settings->removeItem( changeId );
+	    changeId = 0;
+	}
+	if ( drawId ) {
+	    settings->removeItem( drawId );
+	    drawId = 0;
+	}
+    }
+
+    // Create New Game 
+    if ( newGame && cardGame ) 
+	delete cardGame;
+
+    if ( type == SolitaireGame )
+        cardGame = new PatienceCardGame( &canvas, snapOn, this );
+    else
+	cardGame = new FreecellCardGame( &canvas, snapOn, this );
+
+    cardGame->setNumberToDraw(drawThree ? 3 : 1);
+    gameType = type;
+    if ( type == SolitaireGame )
+	setCaption(tr("Patience"));
+    else
+	setCaption(tr("Freecell"));
+    setCentralWidget(cardGame);
+    if ( newGame )
+	cardGame->newGame();
+    else {
+	Config cfg("Patience");
+	cfg.setGroup( "GlobalSettings" );
+	cardGame->readConfig( cfg );
+    }
+    setCardBacks();
+    if ( type == SolitaireGame )
+	updateDraw();
 }
 
 
 void CanvasCardWindow::initPatience()
 {
-    // Create New Game 
-    if ( cardGame )
-	delete cardGame;
-    cardGame = new PatienceCardGame( &canvas, snapOn, this );
-    cardGame->setNumberToDraw(drawThree ? 3 : 1);
-    gameType = 0;
-    setCaption(tr("Patience"));
-    setCentralWidget(cardGame);
-    cardGame->newGame();
-    setCardBacks();
-    updateDraw();
+    initGame( true, SolitaireGame );
 }
 
 
 void CanvasCardWindow::initFreecell()
 {
-    // Create New Game
-    if ( cardGame ) 
-	delete cardGame;
-    cardGame = new FreecellCardGame( &canvas, snapOn, this );
-    gameType = 1;
-    setCaption(tr("Freecell"));
-    setCentralWidget(cardGame);
-    cardGame->newGame();
-    setCardBacks();
+    initGame( true, FreecellGame );
 }
 
 
 void CanvasCardWindow::snapToggle()
 {
     snapOn = !snapOn;
-    settings->setItemChecked(snap_id, snapOn);
+    settings->setItemChecked(snapId, snapOn);
     cardGame->toggleSnap();
 }
 

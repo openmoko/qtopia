@@ -166,7 +166,7 @@ void ControlWidgetBase::loadImages()
     }
     for ( int button = 0; button < buttonCount; button++ ) {
 	if ( !tmpButtonMaskLoaded[button] ) {
-	    QString filename = skinType + "_mask_" + buttons[button].skinImage;
+	    QString filename = skinType + "_mask_" + buttons[button].skinImage; // No tr
 	    cfg.readEntry(filename,filename);
 	    filename = skinPath + filename;
 	    QString file = Resource::findPixmap( filename );

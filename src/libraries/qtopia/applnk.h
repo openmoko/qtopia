@@ -85,6 +85,8 @@ public:
     QString property(const QString& key) const;
 
     bool setLocation( const QString& docPath );
+
+    bool isDocLnk() const;
     
 #ifdef QTOPIA_INTERNAL_PRELOADACCESS
 // MOC_SKIP_BEGIN

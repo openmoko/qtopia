@@ -292,6 +292,7 @@ void Mine::paint( QPainter* p, const QColorGroup &cg, const QRect& cr )
 MineField::MineField( QWidget* parent, const char* name )
 : QScrollView( parent, name )
 {
+    viewport()->setBackgroundMode( NoBackground );
     setState( GameOver );
 
     setSizePolicy( QSizePolicy( QSizePolicy::Maximum, QSizePolicy::Maximum ) );
@@ -397,7 +398,11 @@ void MineField::setAvailableRect( const QRect &r )
 {
     availableRect = r;
     int newCellSize = findCellSize();
-    if ( newCellSize != cellSize ) {
+
+
+    if ( newCellSize == cellSize ) {
+	setCellSize( cellSize );
+    } else {
 	viewport()->setUpdatesEnabled( FALSE );
 	setCellSize( newCellSize );
 	viewport()->setUpdatesEnabled( TRUE );
@@ -419,8 +424,6 @@ int MineField::findCellSize()
 
 void MineField::setCellSize( int cellsize )
 {
-    cellSize = cellsize;
-    
     int b = 2;
     
     int w2 = cellsize*numCols;
@@ -429,7 +432,8 @@ void MineField::setCellSize( int cellsize )
     int w = QMIN( availableRect.width(), w2+b );
     int h = QMIN( availableRect.height(), h2+b );
     
-    resizeContents( w2, h2 );
+    if ( cellsize != cellSize )
+	resizeContents( w2, h2 );
 
     if ( availableRect.height() < h2 &&
 	 availableRect.width() - w > style().scrollBarExtent().width() ) {
@@ -438,6 +442,7 @@ void MineField::setCellSize( int cellsize )
     
     setGeometry( availableRect.x() + (availableRect.width()-w)/2,
 	    availableRect.y() + (availableRect.height()-h)/2, w, h );
+    cellSize = cellsize;
 }
 
 
@@ -617,10 +622,14 @@ void MineField::updateMine( int row, int col )
 
     if ( flagAction != NoAction ) {
 	if ( m->state() == Mine::Flagged ) {
-	    --mineguess;
-	    emit mineCount( mineguess );
-	    if ( m->isMined() )
-		--minecount;
+	    if (mineguess > 0) {
+		--mineguess;
+		emit mineCount( mineguess );
+		if ( m->isMined() )
+		    --minecount;
+	    } else {
+		m->setState(Mine::Hidden);
+	    }
 	} else if ( wasFlagged ) {
 	    ++mineguess;
 	    emit mineCount( mineguess );

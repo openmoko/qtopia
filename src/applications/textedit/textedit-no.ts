@@ -146,5 +146,13 @@ Continue anyway?</source>
         <source>Unnamed</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Empty Text</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

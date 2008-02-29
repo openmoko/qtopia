@@ -2,10 +2,6 @@
 <context>
     <name>TaskbarSettingsBase</name>
     <message>
-        <source>Taskbar Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Load applets:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -23,6 +19,10 @@
     </message>
     <message>
         <source>Adds the contents of the Launcher as menus in the Q-Menu.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Taskbar</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

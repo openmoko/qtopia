@@ -133,7 +133,7 @@ public:
 		// correct the position taking in to account the card is not
     		// yet flipped, but will become flipped
     		top = QPoint( top.x() - 1, top.y() - 3 );
-		((CanvasCard*)newTopCard)->flipTo( top.x(), top.y() );
+		((CanvasCard*)newTopCard)->flipTo( top.x(), top.y(), 400 );
 		top = QPoint( top.x(), top.y() + offsetDown );
 	    }
     	    setNextX( top.x() );

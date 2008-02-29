@@ -34,6 +34,7 @@
 #ifndef Q_OS_WIN32
 #include <pwd.h>
 #include <unistd.h>
+#include <grp.h>
 #endif
 
 // No tr() anywhere in this file
@@ -66,6 +67,11 @@ int main( int argc, char *argv[] )
 		exit(1);
 	    }
 	    int uid =  pwd->pw_uid;
+	    int gid =  pwd->pw_gid;
+	    if ( initgroups( username, gid ) != 0 ) {
+		fprintf( stderr, "Could not chg group for user:%s\n", username );
+		exit(1);
+	    }
 
 	    if ( setuid( uid ) != 0 ) {
 		fprintf( stderr, "Could not run as user %s\n", username );

@@ -51,30 +51,24 @@
 #include <qsettings.h>
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
 #ifndef Q_OS_WIN32
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
 #else
-#include <process.h>
-#include <io.h>
 #include <sys/locking.h>
+#include <io.h>
 #include <string.h> // for strerror function
 #include <stdlib.h>
-#include <windows.h>
-#include <winbase.h>
 #endif
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifdef Q_WS_QWS
 
 Global::Command* Global::builtin=0;
 QGuardedPtr<QWidget> *Global::running=0;
-
-#include <qwindowsystem_qws.h> // for qwsServer
 
 //#include "quickexec_p.h"
 class Emitter : public QObject {
@@ -93,71 +87,6 @@ signals:
     void setDocument(const QString&);
 };
 
-
-class StartingAppList : public QObject {
-    Q_OBJECT
-public:
-    static void add( const QString& name );
-    static bool isStarting( const QString name );
-private slots:
-    void handleNewChannel( const QString &);
-private:
-    StartingAppList( QObject *parent=0, const char* name=0 ) ;
-
-    QDict<QTime> dict;
-    static StartingAppList *appl;
-};
-
-StartingAppList* StartingAppList::appl = 0;
-
-StartingAppList::StartingAppList( QObject *parent, const char* name )
-    :QObject( parent, name )
-{
-#ifdef Q_WS_QWS
-#if QT_VERSION >= 232 && !defined(QT_NO_COP)
-    connect( qwsServer, SIGNAL( newChannel(const QString&)),
-	     this, SLOT( handleNewChannel(const QString&)) );
-    dict.setAutoDelete( TRUE );
-#endif
-#endif
-}
-
-void StartingAppList::add( const QString& name )
-{
-#if QT_VERSION >= 232  && !defined(QT_NO_COP)
-    if ( !appl )
-	appl = new StartingAppList;
-    QTime *t = new QTime;
-    t->start();
-    appl->dict.insert( "QPE/Application/" + name, t );
-#endif
-}
-
-bool StartingAppList::isStarting( const QString name )
-{
-#if QT_VERSION >= 232  && !defined(QT_NO_COP)
-    if ( appl ) {
-	QTime *t  = appl->dict.find( "QPE/Application/" + name );
-	if ( !t )
-	    return FALSE;
-	if ( t->elapsed() > 10000 ) {
-	    // timeout in case of crash or something
-	    appl->dict.remove( "QPE/Application/" + name );
-	    return FALSE;
-	}
-	return TRUE;
-    }
-#endif
-    return FALSE;
-}
-
-void StartingAppList::handleNewChannel( const QString & name )
-{
-#if QT_VERSION >= 232  && !defined(QT_NO_COP)
-//   qDebug("Removing application %s from starting list.", name.latin1());
-  dict.remove( name );
-#endif
-}
 
 static bool docDirCreated = FALSE;
 static QDawg* fixed_dawg = 0;
@@ -283,7 +212,7 @@ const QDawg& Global::fixedDawg()
 */
 const QDawg& Global::addedDawg()
 {
-    return dawg("local");
+    return dawg("local"); // No tr
 }
 
 /*!
@@ -301,7 +230,7 @@ const QDawg& Global::dawg(const QString& name)
     if ( !r ) {
 	r = new QDawg;
 	named_dawg->insert(name,r);
-	QString dawgfilename = applicationFileName("Dictionary", name) + ".dawg";
+	QString dawgfilename = applicationFileName("Dictionary", name) + ".dawg"; // No tr
 	QFile dawgfile(dawgfilename);
 	if ( dawgfile.open(IO_ReadOnly) )
 	    r->readFile(dawgfilename);
@@ -319,7 +248,7 @@ const QDawg& Global::dawg(const QString& name)
 */
 void Global::addWords(const QStringList& wordlist)
 {
-    addWords("local",wordlist);
+    addWords("local",wordlist); // No tr
 }
 
 /*!
@@ -335,7 +264,7 @@ void Global::addWords(const QString& dictname, const QStringList& wordlist)
     QStringList all = d.allWords() + wordlist;
     d.createFromWords(all);
 
-    QString dawgfilename = applicationFileName("Dictionary", dictname) + ".dawg";
+    QString dawgfilename = applicationFileName("Dictionary", dictname) + ".dawg"; // No tr
     QFile dawgfile(dawgfilename);
     if ( dawgfile.open(IO_WriteOnly) ) {
 	d.write(&dawgfile);
@@ -448,6 +377,7 @@ bool Global::isBuiltinCommand( const QString &name )
 	    return TRUE;
 	}
     }
+    
     return FALSE;
 }
 
@@ -496,6 +426,7 @@ bool Global::terminateBuiltin( const QString& n )
 	    return TRUE;
 	}
     }
+
     return FALSE;
 }
 
@@ -514,6 +445,7 @@ void Global::terminate( const AppLnk* app )
 #endif
 }
 
+
 /*!
   Low-level function to run command \a c.
 
@@ -523,80 +455,7 @@ void Global::terminate( const AppLnk* app )
 */
 void Global::invoke(const QString &c)
 {
-    // Convert the command line in to a list of arguments
-    QStringList list = QStringList::split(QRegExp("  *"),c);
-
-#ifndef QT_NO_COP
-    QString ap=list[0];
-    // see if the application is already running
-    // XXX should lock file /tmp/qcop-msg-ap
-    if ( QCopChannel::isRegistered( ("QPE/Application/" + ap).latin1() ) ) {
-//       qDebug("QCop channel %s is registered.", ap.latin1());
-      // If the channel is already register, the app is already running, so show it.
-      { QCopEnvelope env( ("QPE/Application/" + ap).latin1(), "raise()" ); }
-	QCopEnvelope e("QPE/System", "notBusy(QString)" );
-	e << ap;
-	return;
-    }
-    // XXX should unlock file /tmp/qcop-msg-ap
-    //see if it is being started
-    if ( StartingAppList::isStarting( ap ) ) {
-//       qDebug("App %s is starting.", ap.latin1());
-//	QCopEnvelope e("QPE/System", "notBusy(QString)" );
-//	e << ap;
-	return;
-    }
-
-#endif
-
-#ifdef QT_NO_QWS_MULTIPROCESS
-    QMessageBox::warning( 0, "Error", "Could not find the application " + c, "Ok", 0, 0, 0, 1 );
-#else
-
-    QStrList slist;
-    unsigned j;
-    for ( j = 0; j < list.count(); j++ )
-	slist.append( list[j].utf8() );
-
-    const char **args = new const char *[slist.count() + 1];
-    for ( j = 0; j < slist.count(); j++ )
-	args[j] = slist.at(j);
-    args[j] = NULL;
-
-#ifndef QT_NO_COP
-    // an attempt to show a wait...
-    // more logic should be used, but this will be fine for the moment...
-    QCopEnvelope ( "QPE/System", "busy()" );
-#endif
-
-#ifndef Q_OS_WIN32
-#ifdef HAVE_QUICKEXEC
-    QString libexe = QPEApplication::qpeDir()+"binlib/lib"+args[0] + ".so";
-    qDebug("libfile = %s", libexe.latin1() );
-    if ( QFile::exists( libexe ) ) {
-	qDebug("calling quickexec %s", libexe.latin1() );
-	quickexecv( libexe.utf8().data(), (const char **)args );
-    } else
-#endif
-    {
-	if ( !::vfork() ) {
-	    for ( int fd = 3; fd < 100; fd++ )
-		::close( fd );
-	    ::setpgid( ::getpid(), ::getppid() );
-	    // Try bindir first, so that foo/bar works too
-	    ::execv( QPEApplication::qpeDir()+"bin/"+args[0], (char * const *)args );
-	    ::execvp( args[0], (char * const *)args );
-	    _exit( -1 );
-	}
-    }
-#else
-    qDebug("Doing spawn %s: args %s", args[0], args[1]);
-    spawnvp(_P_NOWAIT,args[0], args);
-#endif
-    StartingAppList::add( list[0] );
-#endif //QT_NO_QWS_MULTIPROCESS
-
-    delete [] args;
+    qDebug("Global::invoke does not work anymore");
 }
 
 /*!
@@ -608,67 +467,17 @@ void Global::invoke(const QString &c)
 */
 void Global::execute( const QString &c, const QString& document )
 {
-    if ( qApp->type() != QApplication::GuiServer ) {
-//       qDebug("Global: Asking the server to execute %s", c.latin1());
-	// ask the server to do the work
 #ifndef QT_NO_COP
-	if ( document.isNull() ) {
-	    QCopEnvelope e( "QPE/System", "execute(QString)" );
-	    e << c;
-	} else {
-	    QCopEnvelope e( "QPE/System", "execute(QString,QString)" );
-	    e << c << document;
-	}
-#endif
-	return;
-    }
-
-    // Attempt to execute the app using a builtin class for the app first
-    // else try and find it in the bin directory
-    if (builtin) {
-	for (int i = 0; builtin[i].file; i++) {
-	    if ( builtin[i].file == c ) {
-		if ( running[i] ) {
-		    if ( !document.isNull() && builtin[i].documentary )
-			setDocument(running[i], document);
-		    running[i]->raise();
-		    running[i]->show();
-		    running[i]->setActiveWindow();
-		} else {
-		    running[i] = builtin[i].func( builtin[i].maximized );
-		}
-#ifndef QT_NO_COP
-		QCopEnvelope e("QPE/System", "notBusy(QString)" );
-		e << c; // that was quick ;-)
-#endif
-		return;
-	    }
-	}
-    }
-
-    //Global::invoke(c, document);
-
-    // Convert the command line in to a list of arguments
-    QStringList list = QStringList::split(QRegExp("  *"),c);
-
-#ifndef QT_NO_COP
-    QString ap=list[0];
-
-//     qDebug("executing %s", ap.latin1() );
-    if ( ap == "suspend" ) {
-	QWSServer::processKeyEvent( 0xffff, Qt::Key_F34, FALSE, TRUE, FALSE );
-	return;
-    }
-
-    /* if need be, sending a qcop message will result in an invoke, see
-       preceeding function */
-    invoke(ap);
-//     { QCopEnvelope env( ("QPE/Application/" + ap).latin1(), "raise()" ); }
-    if ( !document.isEmpty() ) {
-	QCopEnvelope env( ("QPE/Application/" + ap).latin1(), "setDocument(QString)" );
-	env << document;
+    if ( document.isNull() ) {
+	QCopEnvelope e( "QPE/System", "execute(QString)" );
+	e << c;
+    } else {
+	QCopEnvelope e( "QPE/System", "execute(QString,QString)" );
+	e << c << document;
     }
 #endif
+    return;
+
 }
 
 /*!
@@ -733,7 +542,6 @@ void Global::findDocuments(DocLnkSet* folder, const QString &mimefilter)
 	    folder->appendFrom(ide);
 	}
     }
-
 }
 #endif // Q_WS_QWS
 

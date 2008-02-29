@@ -309,7 +309,7 @@ void QIMPenInput::wordPicked( const QString &w )
     int bs = matcher->word().length();
     int i;
     for ( i = 0; i < bs; i++ )
-	keypress( Qt::Key_Backspace << 16 );
+	keypress( (Qt::Key_Backspace << 16)|0xffff );
 
     for ( i = 0; i < (int)w.length(); i++ )
 	keypress( w[i].unicode() );
@@ -339,7 +339,7 @@ void QIMPenInput::strokeEntered( QIMPenStroke * )
 
 void QIMPenInput::erase()
 {
-    keypress( Qt::Key_Backspace << 16 );
+    keypress( (Qt::Key_Backspace << 16)|0xffff );
 }
 
 void QIMPenInput::matchedCharacters( const QIMPenCharMatchList &cl )
@@ -459,7 +459,7 @@ void QIMPenInput::keypress( uint scan_uni )
 
 void QIMPenInput::handleExtended( const QString &ex )
 {
-    if ( ex.find( "Select" ) == 0 ) {
+    if ( ex.find( "Select" ) == 0 ) {	// No tr
 	QString set = ex.mid( 7 );
 	qDebug( "Select new profile: %s", set.latin1() );
 	selectProfile( set );
@@ -499,13 +499,13 @@ void QIMPenInput::setup()
 
 void QIMPenInput::backspace()
 {
-    keypress( Qt::Key_Backspace << 16 );
+    keypress( (Qt::Key_Backspace << 16) | 0xffff );
     matcher->backspace();
 }
 
 void QIMPenInput::enter()
 {
-    keypress( Qt::Key_Return << 16 );
+    keypress( (Qt::Key_Return << 16) | '\r' );
     matcher->resetState();
 }
 

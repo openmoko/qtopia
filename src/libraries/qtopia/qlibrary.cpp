@@ -44,6 +44,12 @@
 #define QT_NO_LIBRARY_UNLOAD
 #endif
 
+#ifdef QTOPIA_FAKE_COMPONENT
+QDict<QUnknownInterface> *fakeFiles = 0;
+#endif
+
+#ifndef QTOPIA_FAKE_COMPONENT
+
 /* Platform independent QLibraryPrivate implementations */
 #ifndef QT_LITE_COMPONENT
 
@@ -108,6 +114,7 @@ void QLibraryPrivate::killTimer()
     unloadTimer = 0;
 #endif
 }
+#endif // QTOPIA_FAKE_COMPONENT
 
 /*!
   \class QLibrary qlibrary.h
@@ -152,11 +159,17 @@ void QLibraryPrivate::killTimer()
   \sa setPolicy(), unload()
 */
 QLibrary::QLibrary( const QString& filename, Policy pol )
-    : libfile( filename ), libPol( pol ), entry( 0 )
+    :  libfile( filename ), libPol( pol ), entry(0)
 {
+#ifndef QTOPIA_FAKE_COMPONENT
     d = new QLibraryPrivate( this );
     if ( pol == Immediately )
 	load();
+#else
+    if (!fakeFiles)
+	fakeFiles = new QDict<QUnknownInterface> ();
+    load();
+#endif
 }
 
 /*!
@@ -167,6 +180,7 @@ QLibrary::QLibrary( const QString& filename, Policy pol )
 */
 QLibrary::~QLibrary()
 {
+#ifndef QTOPIA_FAKE_COMPONENT
     if ( libPol == Manual || !unload() ) {
 	if ( entry ) {
 	    entry->release();
@@ -174,10 +188,12 @@ QLibrary::~QLibrary()
 	}
     }
     delete d;
+#endif
 }
 
 void QLibrary::createInstanceInternal()
 {
+#ifndef QTOPIA_FAKE_COMPONENT
     if ( libfile.isEmpty() )
 	return;
 
@@ -216,8 +232,12 @@ void QLibrary::createInstanceInternal()
 	    unload();
 	}
     }
+#else
+    entry = (*fakeFiles)[library()];
+#endif
 }
 
+#ifndef QTOPIA_FAKE_COMPONENT
 /*!
   Returns the address of the exported symbol \a symb. The library gets
   loaded if necessary. The function returns NULL if the symbol could
@@ -268,6 +288,7 @@ void *QLibrary::resolve( const QString &filename, const char *symb )
     QLibrary lib( filename, Manual );
     return lib.resolve( symb );
 }
+#endif
 
 /*!
   Returns whether the library is loaded.
@@ -276,7 +297,11 @@ void *QLibrary::resolve( const QString &filename, const char *symb )
 */
 bool QLibrary::isLoaded() const
 {
+#ifndef QTOPIA_FAKE_COMPONENT
     return d->pHnd != 0;
+#else
+    return entry ? TRUE : FALSE;
+#endif
 }
 
 /*!
@@ -284,7 +309,18 @@ bool QLibrary::isLoaded() const
 */
 bool QLibrary::load()
 {
+#ifndef QTOPIA_FAKE_COMPONENT
     return d->loadLibrary();
+#else
+    QString rhs = library();
+    if (rhs.findRev('/') != -1 )
+	rhs = rhs.mid( rhs.findRev('/')+1 );
+    entry = (*fakeFiles)[rhs];
+    if (entry)
+	return TRUE;
+    else
+	return FALSE;
+#endif
 }
 
 /*!
@@ -306,6 +342,7 @@ bool QLibrary::load()
 */
 bool QLibrary::unload( bool force )
 {
+#ifndef QTOPIA_FAKE_COMPONENT
     if ( !d->pHnd )
 	return TRUE;
 
@@ -364,6 +401,10 @@ bool QLibrary::unload( bool force )
     d->pHnd = 0;
     return TRUE;
 #endif
+#else
+    entry = 0;
+    return TRUE;
+#endif
 }
 
 /*!
@@ -374,7 +415,13 @@ void QLibrary::setPolicy( Policy pol )
 {
     libPol = pol;
 
-    if ( libPol == Immediately && !d->pHnd )
+    if ( libPol == Immediately && 
+#ifndef QTOPIA_FAKE_COMPONENT
+	    !d->pHnd
+#else
+	entry 
+#endif
+    )
 	load();
 }
 

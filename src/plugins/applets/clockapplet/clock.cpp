@@ -44,11 +44,7 @@ LauncherClock::LauncherClock( QWidget *parent ) : QLabel( parent )
 {
     setFont( QFont( "Helvetica", 10, QFont::Normal ) );
     connect( qApp, SIGNAL( timeChanged() ), this, SLOT( updateTime( ) ) );
-    connect( qApp, SIGNAL( clockChanged( bool ) ),
-	     this, SLOT( slotClockChanged( bool ) ) );
-    Config config( "qpe" );
-    config.setGroup( "Time" );
-    ampmFormat = config.readBoolEntry( "AMPM", TRUE );
+    TimeString::connectChange( this, SLOT( updateTime() ) );
     timerId = 0;
     updateTime();
     show();
@@ -98,17 +94,7 @@ void LauncherClock::timerEvent( QTimerEvent *e )
 void LauncherClock::updateTime( void )
 {
     QTime tm = QDateTime::currentDateTime().time();
-    QString s;
-    if( ampmFormat ) {
-	int hour = tm.hour(); 
-	if (hour == 0)
-	    hour = 12;
-	if (hour > 12)
-	    hour -= 12;
-	s.sprintf( "%2d%c%02d %s", hour, ':', tm.minute(), (tm.hour() >= 12) ? "PM" : "AM" );
-    } else
-	s.sprintf( "%2d%c%02d", tm.hour(), ':', tm.minute() );
-    setText( s );
+    setText( TimeString::localHM(tm) );
 
     if ( timerId )
 	killTimer( timerId );
@@ -117,8 +103,3 @@ void LauncherClock::updateTime( void )
     timerId = startTimer( ms );
 }
 
-void LauncherClock::slotClockChanged( bool pm )
-{
-    ampmFormat = pm;
-    updateTime();
-}

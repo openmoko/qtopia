@@ -42,6 +42,10 @@
 #include <unistd.h>
 #endif
 
+
+void removeBusinessCard();
+void updateBusinessCard(const PimContact &);
+
 SortedContacts::SortedContacts()
     : SortedRecords<PimContact>()
 {}
@@ -209,19 +213,33 @@ bool ContactXmlIO::internalUpdateRecord(PimRecord *r)
  * Returns the full contact list.  This is guaranteed
  * to be current against what is stored by other apps.
  */
-QList<PrContact>& ContactXmlIO::contacts() {
+const QList<PrContact>& ContactXmlIO::contacts() {
   ensureDataCurrent();
   return m_Contacts;
 }
 
-/**
- * Returns the filtered contact list.  This is guaranteed
- * to be current against what is stored by other apps.
- */
-const SortedContacts &ContactXmlIO::sortedContacts()
+const SortedContacts& ContactXmlIO::sortedContacts() {
+    ensureDataCurrent();
+    return m_Filtered;
+}
+
+PrContact ContactXmlIO::contactForId( const QUuid &u, bool *ok ) const
 {
-  ensureDataCurrent();
-  return m_Filtered;
+    QListIterator<PrContact> it(m_Contacts);
+
+    PrContact *p;
+    for (; it.current(); ++it ) {
+	p = *it;
+	if (u == p->uid()) {
+	    if (ok)
+		*ok = TRUE;
+	    return *p;
+	}
+    }
+
+    if (ok)
+	*ok = FALSE;
+    return PrContact();
 }
 
 /**
@@ -239,15 +257,6 @@ bool ContactXmlIO::saveData()
 	}
     }
     return FALSE;
-}
-
-QValueList<PimContact> ContactXmlIO::contactValueList() const
-{
-    QValueList<PimContact> r;
-    for ( QListIterator<PrContact> it(m_Contacts); it.current(); ++it ) {
-	r.append( *(it.current() ) );
-    }
-    return r;
 }
 
 void ContactXmlIO::clear()
@@ -269,22 +278,24 @@ void ContactXmlIO::setContacts( const QValueList<PimContact> &l )
     m_Filtered.sort();
 }
 
-void ContactXmlIO::addContact(const PimContact &contact, bool newUid )
+QUuid ContactXmlIO::addContact(const PimContact &contact, bool newUid )
 {
+    QUuid u;
     if (accessMode() == ReadOnly)
-	return;
+	return u;
 
     PrContact *cnt = new PrContact((const PrContact &)contact);
 
     if (cnt->customField("BusinessCard") == "TRUE") {
 	// set the config.
-	Config cfg("Security");
-	cfg.setGroup("Sync");
-	cfg.writeEntry("ownername", cnt->fullName());
+	updateBusinessCard(*cnt);
     }
 
     if ( newUid || cnt->uid().isNull() )
 	assignNewUid(cnt);
+
+    u = cnt->uid();
+
     if (internalAddRecord(cnt )) {
 	needsSave = TRUE;
 	m_Filtered.sort();
@@ -298,6 +309,7 @@ void ContactXmlIO::addContact(const PimContact &contact, bool newUid )
 	}
 #endif
     }
+    return u;
 }
 
 bool ContactXmlIO::removeContact(const PimContact &contact)
@@ -309,9 +321,7 @@ bool ContactXmlIO::removeContact(const PimContact &contact)
 
     if (cnt->customField("BusinessCard") == "TRUE") {
 	// set the config.
-	Config cfg("Security");
-	cfg.setGroup("Sync");
-	cfg.writeEntry("ownername", "");
+	removeBusinessCard();
     }
 
     if ( !internalRemoveRecord(cnt) )
@@ -340,9 +350,7 @@ void ContactXmlIO::updateContact(const PimContact &contact)
 
     if (cnt->customField("BusinessCard") == "TRUE") {
 	// set the config.
-	Config cfg("Security");
-	cfg.setGroup("Sync");
-	cfg.writeEntry("ownername", cnt->fullName());
+	updateBusinessCard(*cnt);
     }
 
     if (internalUpdateRecord(cnt)) {
@@ -491,3 +499,25 @@ void ContactXmlIO::setAsPersonal(const QUuid &u)
     }
 }
 
+QString businessCardName() {
+    return Global::applicationFileName("addressbook",
+	    "businesscard.vcf");
+}
+
+void updateBusinessCard(const PimContact &cnt)
+{
+    Config cfg("Security");
+    cfg.setGroup("Sync");
+    cfg.writeEntry("ownername", cnt.fullName());
+
+    PimContact::writeVCard( businessCardName(), cnt);
+}
+
+void removeBusinessCard()
+{
+    Config cfg("Security");
+    cfg.setGroup("Sync");
+    cfg.writeEntry("ownername", "");
+
+    QFile::remove( businessCardName() );
+}

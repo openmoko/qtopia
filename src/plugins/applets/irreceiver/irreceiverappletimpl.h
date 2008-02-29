@@ -24,7 +24,7 @@
 
 class IRReceiverApplet;
 
-class QTOPIA_PLUGIN_EXPORT IRReceiverAppletImpl : public TaskbarNamedAppletInterface
+class QTOPIA_PLUGIN_EXPORT IRReceiverAppletImpl : public TaskbarAppletInterface
 {
 public:
     IRReceiverAppletImpl();
@@ -35,12 +35,9 @@ public:
 
     virtual QWidget *applet( QWidget *parent );
     virtual int position() const;
-    virtual QString name() const;
-    virtual QPixmap icon() const;
 
 private:
     IRReceiverApplet *irreceiver;
-    QPixmap *icn;
     ulong ref;
 };
 

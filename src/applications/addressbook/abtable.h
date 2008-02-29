@@ -65,9 +65,12 @@ public:
     void setFields(QValueList<int> f);
     QValueList<int> fields();
 
+    void setCurrentCell(int, int);
+
 public slots:
     void reload(const SortedContacts &c);
     void findNext( const QString &str, int category );
+    void fitHeadersToWidth();
 
 signals:
     void currentChanged();
@@ -81,10 +84,13 @@ protected:
     void setFields(QValueList<int> f, QStringList);
     int defaultFieldSize(PimContact::ContactFields f);
     QValueList<int> defaultFields();
+    int minimumFieldSize(PimContact::ContactFields);
+    void calcFieldSizes(int oldSize, int size);
     
     virtual void keyPressEvent( QKeyEvent *e );
     void contentsMousePressEvent( QMouseEvent *e );
     void contentsMouseReleaseEvent( QMouseEvent *e );
+    void resizeEvent( QResizeEvent *e );
 
     void fontChange(const QFont &);
      int rowHeight( int ) const;
@@ -120,8 +126,6 @@ private:
 
     void paintCell ( QPainter * p, int row, int col,
 	    const QRect & cr, bool selected );
-
-    void setCurrentCell(int, int);
 
     void resizeData(int) { }
     QTableItem * item(int, int) const { return 0; }

@@ -30,6 +30,8 @@ static int Piecekey[4][4] = { {6, 0, 4, 3 }, {0, 6, 2, 1 }, { 1, 3, 5, 0 }, {2, 
 
 Snake::Snake(QCanvas* c)
 {
+   paused = FALSE;
+   deadSnake = FALSE;
    canvas = c; 
    score = 0;
    snakelist.setAutoDelete(true);
@@ -208,12 +210,14 @@ void Snake::detectCrash()
        }
        // check if snake hit obstacles
        if ( (item->rtti()==1600) && (item->collidesWith(head)) ) {
+	     deadSnake = TRUE;
              emit dead();
              autoMoveTimer->stop();
              return;
        }
        // check if snake hit border
        if ( (item->rtti()==1700) && (item->collidesWith(head)) ) {
+	     deadSnake = TRUE;
              emit dead();
              autoMoveTimer->stop();
              return;
@@ -222,6 +226,7 @@ void Snake::detectCrash()
     //check if snake hit itself
     for (uint i = 3; i < snakelist.count(); i++) {
        if (head->collidesWith(snakelist.at(i)) ) {
+	   deadSnake = TRUE;
             emit dead(); 
             autoMoveTimer->stop();
             return;
@@ -238,6 +243,16 @@ void Snake::setScore(int amount)
 int Snake::getScore()
 {
    return score;
+}
+
+void Snake::pause() {
+    if (!deadSnake) {
+	if (paused) 
+	    autoMoveTimer->start(speed);
+	else
+	    autoMoveTimer->stop();
+	paused = !paused;
+    }
 }
 
 Snake::~Snake()

@@ -95,6 +95,9 @@ public:
 signals:
     void clickedPos(int, int);
 
+public slots:
+    void timeStringChanged();
+
 protected:
     QSize sizeHint() const;
     void contentsMousePressEvent(QMouseEvent *e)
@@ -116,11 +119,6 @@ protected:
 
     QWidget *createEditor(int,int,bool) const { return 0; }
 
-protected slots:
-
-    //void keyPressEvent(QKeyEvent *e ) {
-//	e->ignore();
- //   }
 
 private:
     void setupLabels();
@@ -129,6 +127,10 @@ private:
     int pressedRow, pressedCol;
 };
 
+void DatePickerTable::timeStringChanged()
+{
+    setupLabels();
+}
 
 DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     : QHBox( parent, name )
@@ -151,7 +153,9 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     for ( int i = 0; i < 12; ++i )
 	month->insertItem( Calendar::nameOfMonth( i + 1 ) );
 
-    year = new QSpinBox( 1970, 2037, 1, this );
+    // this is almost certainly wrong on the other end.  
+    // date is a uint + 1752 some day.  Thats a lot of days, 11 M years or so.
+    year = new QSpinBox( 1753, 3000, 1, this );
 
     next = new QToolButton( this );
     next->setIconSet( Resource::loadIconSet( "forward" ) );
@@ -330,6 +334,7 @@ QPEDatePicker::QPEDatePicker( QWidget *parent, const char *name, bool ac)
 	     this, SLOT( calendarChanged(int, int) ) );
     connect( qApp, SIGNAL(weekChanged(bool)), this,
 	     SLOT(setWeekStartsMonday(bool)) );
+    TimeString::connectChange(table, SLOT(timeStringChanged()));
     setDate(QDate::currentDate());
     setFocusPolicy(StrongFocus);
     setFocus();
@@ -495,124 +500,4 @@ void QPEDatePicker::keyPressEvent( QKeyEvent *e )
 	    break;
     }
 }
-
-//---------------------------------------------------------------------------
-
-
-QPEDateButton::QPEDateButton( QWidget *parent, const char * name, bool longDate,
-			      bool allowNullDate )
-    :QPushButton( parent, name ), longFmt(longDate)
-{
-    noneButton = 0;
-    init();
-    setLongFormat(longDate);
-    setAllowNullDate( allowNullDate );
-}
-
-void QPEDateButton::setLongFormat( bool l )
-{
-    longFmt = l;
-    updateButtonText();
-}
-
-void QPEDateButton::init()
-{
-#if defined(_WS_QWS_)
-    //df = ::DateFormat('/', ::DateFormat::MonthDayYear, ::DateFormat::MonthDayYear);
-    df = TimeString::currentDateFormat();
-#endif
-    QPopupMenu *popup = new QPopupMenu( this );
-    monthView = new QPEDatePicker( popup, 0, TRUE);
-    noneButton = new QPushButton(tr("None"), popup);
-
-    //
-    // Geometry information for the QPEDatePicker widget is
-    // setup by the QPopupMenu (parent).  However at 176x220,
-    // the widget hangs off the side of the screen.  Force the
-    // widget to be bounded by the desktop width.
-    //
-    monthView->setMaximumWidth(qApp->desktop()->width());
-
-    popup->insertItem( monthView );
-
-    popup->insertItem( noneButton );
-    connect(noneButton, SIGNAL( clicked() ), this, SLOT(setNull()));
-
-    connect( monthView, SIGNAL( dateClicked( const QDate &) ),
-	    this, SLOT( setDate( const QDate &) ) );
-    connect( monthView, SIGNAL( dateClicked( const QDate &) ),
-	    this, SIGNAL( dateSelected( const QDate &) ) );
-    connect( qApp, SIGNAL(dateFormatChanged(DateFormat)), this, SLOT(setDateFormat(DateFormat)));
-    setPopup( popup );
-    popup->setFocusPolicy(NoFocus);
-    setDate( QDate::currentDate() );
-    setSizePolicy( QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed) );
-}
-
-void QPEDateButton::setAllowNullDate( bool b )
-{
-    if ( b )
-	noneButton->show();
-    else noneButton->hide();
-}
-
-bool QPEDateButton::allowNullDate() const
-{
-    return noneButton->isVisible();
-}
-
-void QPEDateButton::setWeekStartsMonday( bool b )
-{
-    weekStartsMonday = b;
-    monthView->setWeekStartsMonday( weekStartsMonday );
-}
-
-void QPEDateButton::setDate( int y, int m, int d )
-{
-    setDate( QDate( y,m,d) );
-}
-
-void QPEDateButton::setNull()
-{
-    popup()->close();
-    setDate( QDate() );
-    emit dateSelected( QDate() );
-}
-
-void QPEDateButton::updateButtonText()
-{
-    if ( currDate.isValid() ) {
-#if defined(_WS_QWS_)
-	setText( longFmt ? TimeString::longDateString( currDate, df ) :
-		TimeString::shortDate( currDate, df ) );
-#else
-	//setText( longFmt ? currDate.toString( "ddd MMMM d yy" ) : currDate.toString("dd/MM/yyyy"));
-	setText( longFmt ? currDate.toString( "ddd MMMM d yy" ) : currDate.toString(Qt::LocalDate));
-#endif
-	monthView->setDate( currDate.year(), currDate.month(), currDate.day() );
-    }
-    else {
-	setText( tr("None") );
-    }
-}
-
-QDate QPEDateButton::date() const
-{
-    return currDate;
-}
-
-void QPEDateButton::setDate( const QDate &d )
-{
-    if ( d != currDate ) {
-	currDate = d;
-	updateButtonText();
-    }
-}
-
-void QPEDateButton::setDateFormat( DateFormat f )
-{
-    df = f;
-    updateButtonText();
-}
-
 #include "datepicker.moc"

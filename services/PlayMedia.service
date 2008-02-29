@@ -2,6 +2,8 @@
 Actions = openURL(QString,QString)
 Icon = MediaPlayer 
 Name = Play Media
+Name[ja] = ???
 [openURL(QString,QString)]
 Icon = MediaPlayer 
 Name = Open Media File
+Name[ja] = ???

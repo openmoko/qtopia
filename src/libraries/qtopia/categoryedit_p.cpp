@@ -250,7 +250,7 @@ QString categoryFileName()
 #else
         dir.mkdir(dir.path());
 #endif
-    return dir.path() + "/" + "Categories" + ".xml";
+    return dir.path() + "/" + "Categories" + ".xml"; // No tr
 #endif // QTOPIA_DESKTOP
 }
 

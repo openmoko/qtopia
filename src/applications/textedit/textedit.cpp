@@ -29,7 +29,6 @@
 #include <qtopia/qpemenubar.h>
 #include <qtopia/qpetoolbar.h>
 #include <qtopia/docproperties.h>
-//#include <qtopia/finddialog.h>
 #include <qtopia/fontdatabase.h>
 
 #include <qaction.h>
@@ -135,8 +134,11 @@ static int nfontsizes;
 static int *fontsize;
 
 TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
-    : QMainWindow( parent, name, f ), bFromDocView( FALSE )
+    : QMainWindow( parent, name, f )
 {
+    connect(qApp, SIGNAL(appMessage(const QCString&, const QByteArray&)),
+	    this, SLOT(message(const QCString&, const QByteArray&)));
+
     doc = 0;
 
     setToolBarsMovable( FALSE );
@@ -172,7 +174,7 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     a->addTo( bar );
     a->addTo( file );
 
-    a = new QAction( tr( "Properties" ), Resource::loadIconSet( "fileproperties" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Properties" ), Resource::loadIconSet( "mediaplayer/info" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( fileName() ) );
     a->setWhatsThis( tr("Change properties") );
     a->addTo( bar );
@@ -275,7 +277,7 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     fixed->addTo( font );
 
     searchBar = new QPEToolBar(this);
-    addToolBar( searchBar,  "Search", QMainWindow::Top, TRUE );
+    addToolBar( searchBar,  tr("Search"), QMainWindow::Top, TRUE );
 
     searchBar->setHorizontalStretchable( TRUE );
 
@@ -555,12 +557,12 @@ void TextEdit::newFile( const DocLnk &f )
     editorStack->raiseWidget( editor );
     editor->setFocus();
     doc = new DocLnk(nf);
+    setReadOnly(FALSE);
     updateCaption();
 }
 
 void TextEdit::setDocument(const QString& f)
 {
-    bFromDocView = TRUE;
     DocLnk nf(f);
     nf.setType("text/plain");
     openFile(nf);
@@ -658,7 +660,7 @@ QString TextEdit::calculateName(QString rt) {
     if ( docname.length() > 40 )
 	docname = docname.left(40);
     if ( docname.isEmpty() )
-	docname = "Empty Text";
+	docname = tr("Empty Text");
     return docname;
 }
 
@@ -668,9 +670,8 @@ void TextEdit::fileName()
 	newFile(DocLnk());
     if (doc->name().isEmpty())
 	doc->setName(calculateName(editor->text()));
-    DocPropertiesDialog *lp = new DocPropertiesDialog(doc);
-    lp->showMaximized();
-    lp->exec();
+    DocPropertiesDialog *lp = new DocPropertiesDialog(doc, this);
+    QPEApplication::execDialog( lp );
     delete lp;
     updateCaption(doc->name());
 }
@@ -696,20 +697,34 @@ void TextEdit::updateCaption( const QString &name )
     }
 }
 
-void TextEdit::closeEvent( QCloseEvent *e )
-{
-    if ( editorStack->visibleWidget() == editor && !bFromDocView ) {
-	e->ignore();
-	fileOpen();
-    } else {
-	bFromDocView = FALSE;
-	e->accept();
-    }
-}
-	
 void TextEdit::accept()
 {
     fileOpen();
 }	
+
+void TextEdit::message(const QCString& msg, const QByteArray& data)
+{
+    if ( msg == "viewFile(QString)" || msg == "openFile(QString)" ) {
+	QDataStream d(data,IO_ReadOnly);
+	QString filename;
+	d >> filename;
+	DocLnk dc;
+	dc.setFile(filename);
+	dc.setType("text/plain");
+	openFile(dc);
+	showEditTools();
+	updateCaption( filename );
+	if ( msg == "viewFile(QString)" )
+	    setReadOnly(TRUE);
+	QPEApplication::setKeepRunning();
+    }
+}
+
+void TextEdit::setReadOnly(bool y)
+{
+    editor->setReadOnly(y);
+    if ( y )
+	editor->setEdited(FALSE);
+}
 
 #include "textedit.moc"

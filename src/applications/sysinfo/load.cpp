@@ -71,7 +71,7 @@ QString LoadInfo::getCpuInfo()
 
 	while ( !ts.atEnd() ) {
 	    QString s = ts.readLine();
-	    if ( s.find( "model name" ) == 0 ) {
+	    if ( s.find( "model name" ) == 0 ) { // No tr
 		info += s.mid( s.find( ':' ) + 2 );
 		haveInfo = TRUE;
 	    } else if ( s.find( "cpu MHz" ) == 0 ) {
@@ -79,12 +79,12 @@ QString LoadInfo::getCpuInfo()
 		info += " " + QString::number( mhz, 'f', 0 );
 		info += "MHz";
 		break;
-	    } else if ( s.find( "Processor" ) == 0 ) {
+	    } else if ( s.find( "Processor" ) == 0 ) { // No tr
 		info += s.mid( s.find( ':' ) + 2 );
 		haveInfo = TRUE;
 		break;
 #ifdef __MIPSEL__
-	    } else if ( s.find( "cpu model" ) == 0 ) {
+	    } else if ( s.find( "cpu model" ) == 0 ) { // No tr
 		info += " " + s.mid( s.find( ':' ) + 2 );
 		break;
 	    } else if ( s.find( "cpu" ) == 0 ) {

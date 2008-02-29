@@ -78,10 +78,9 @@ void setOnceAWeek( PimEvent &e )
  */
 
 DateEntry::DateEntry( bool startOnMonday, const QDateTime &start,
-		      const QDateTime &end, bool whichClock, QWidget* parent,
+		      const QDateTime &end, QWidget* parent,
 		      const char* name )
     : DateEntryBase( parent, name ),
-      ampm( whichClock ),
       startWeekOnMonday( startOnMonday )
 {
     init();
@@ -99,19 +98,18 @@ static void addOrPick( QComboBox* combo, const QString& t )
     combo->setEditText(t);
 }
 
-DateEntry::DateEntry( bool startOnMonday, const PimEvent &event, bool whichClock,
+DateEntry::DateEntry( bool startOnMonday, const PimEvent &event,
                       QWidget* parent,  const char* name )
     : DateEntryBase( parent, name ), mEvent(event),
-      ampm( whichClock ),
       startWeekOnMonday( startOnMonday )
 {
     init();
-    if (!mEvent.timeZone().isEmpty()) {
-	timezone->setCurrentZone(mEvent.timeZone());
-	qDebug("setting current zone");
+    if (mEvent.timeZone().isValid()) {
+	timezone->setCurrentZone(mEvent.timeZone().id());
     }
     setDates(mEvent.start(),mEvent.end());
-    comboCategory->setCategories( mEvent.categories(), "Calendar", tr("Calendar") );
+    comboCategory->setCategories( mEvent.categories(), "Calendar", // No tr
+	    tr("Calendar") );
     if(!mEvent.description().isEmpty())
 	addOrPick( comboDescription, mEvent.description() );
     if(!mEvent.location().isEmpty())
@@ -204,37 +202,34 @@ void DateEntry::init()
 #endif
 
     // XXX enable these two lines to be able to specify local time events.
-    //timezone->setLocalIncluded(TRUE);
-    //timezone->setCurrentZone("None");
+    timezone->setLocalIncluded(TRUE);
+    timezone->setCurrentZone("None");
 
     comboDescription->setInsertionPolicy(QComboBox::AtCurrent);
     comboLocation->setInsertionPolicy(QComboBox::AtCurrent);
 
-    startButton->setClock(ampm);
-    endButton->setClock(ampm);
-
     setTabOrder(comboDescription, comboLocation);
-    setTabOrder(comboLocation, (QWidget *)comboCategory->child("category combo"));
+    setTabOrder(comboLocation, (QWidget *)comboCategory->child("category combo")); // No tr
 #ifndef QTOPIA_DESKTOP
-    setTabOrder((QWidget *)comboCategory->child("category combo"),
-	    (QWidget *)comboCategory->child("category button"));
-    setTabOrder((QWidget *)comboCategory->child("category button"), 
-	    (QWidget *)startButton->child("date"));
+    setTabOrder((QWidget *)comboCategory->child("category combo"), // No tr
+	    (QWidget *)comboCategory->child("category button")); // No tr
+    setTabOrder((QWidget *)comboCategory->child("category button"),  // No tr
+	    (QWidget *)startButton->child("date")); // No tr
 #else
-    setTabOrder((QWidget *)comboCategory->child("category combo"),
-	    (QWidget *)startButton->child("date"));
+    setTabOrder((QWidget *)comboCategory->child("category combo"), // No tr
+	    (QWidget *)startButton->child("date")); // No tr
 #endif
-    setTabOrder((QWidget *)startButton->child("date"), 
-	    (QWidget *)startButton->child("time"));
-    setTabOrder((QWidget *)startButton->child("time"), 
-	    (QWidget *)endButton->child("date"));
-    setTabOrder((QWidget *)endButton->child("date"), 
-	    (QWidget *)endButton->child("time"));
-    setTabOrder((QWidget *)endButton->child("time"), checkAllDay);
+    setTabOrder((QWidget *)startButton->child("date"),  // No tr
+	    (QWidget *)startButton->child("time")); // No tr
+    setTabOrder((QWidget *)startButton->child("time"),  // No tr
+	    (QWidget *)endButton->child("date")); // No tr
+    setTabOrder((QWidget *)endButton->child("date"),  // No tr
+	    (QWidget *)endButton->child("time")); // No tr
+    setTabOrder((QWidget *)endButton->child("time"), checkAllDay); // No tr
     setTabOrder(checkAllDay, (QWidget *)timezone->child("timezone combo"));
     setTabOrder((QWidget *)timezone->child("timezone combo"),
-	    (QWidget *)timezone->child("timezone button"));
-    setTabOrder((QWidget *)timezone->child("timezone button"), comboSound);
+	    (QWidget *)timezone->child("timezone button")); // No tr
+    setTabOrder((QWidget *)timezone->child("timezone button"), comboSound); // No tr
     setTabOrder(comboSound, spinAlarm);
     setTabOrder(spinAlarm, repeatSelect);
     setTabOrder(repeatSelect, endDateSelect);
@@ -253,11 +248,11 @@ void DateEntry::init()
 
 
     connect( checkAllDay, SIGNAL(toggled(bool)),
-	     this, SLOT(updateDateEdits(bool)) );
+	     this, SLOT(allDayToggled(bool)) );
 
     connect( repeatSelect, SIGNAL(activated(int)),
 	    this, SLOT(setRepeatType(int)));
-    connect( endDateSelect, SIGNAL(dateSelected(const QDate &)),
+    connect( endDateSelect, SIGNAL(valueChanged(const QDate &)),
 	    this, SLOT(setEndDate(const QDate &)));
 
     connect( spinAlarm, SIGNAL(valueChanged(int)),
@@ -310,6 +305,7 @@ void DateEntry::slotRepeat()
 
     if ( QPEApplication::execDialog(e) ) {
 	 mEvent = e->event();
+	 endDateSelect->setEnabled(TRUE);
     }
     setRepeatLabel();
 }
@@ -335,9 +331,9 @@ PimEvent DateEntry::event()
     // don't set the time if theres no need too
 
     if (timezone->currentZone() != "None")
-	mEvent.setTimeZone(timezone->currentZone());
+	mEvent.setTimeZone(TimeZone(timezone->currentZone()));
     else
-	mEvent.setTimeZone(QString::null);
+	mEvent.setTimeZone(TimeZone());
 
     // we only have one type of sound at the moment... LOUD!!!
     switch (comboSound->currentItem()) {
@@ -393,17 +389,13 @@ void DateEntry::setAlarmEnabled( bool alarmPreset, int presetTime, PimEvent::Sou
     }
 }
 
-void DateEntry::set24HourClock( bool whichClock )
-{
-    ampm = whichClock;
-    startButton->setClock(ampm);
-    endButton->setClock(ampm);
-}
-
-void DateEntry::updateDateEdits(bool b)
+void DateEntry::allDayToggled(bool b)
 {
     startButton->setTimeEnabled(!b);
     endButton->setTimeEnabled(!b);
+    comboSound->setEnabled(!b);
+    comboSound->setCurrentItem(0);
+    spinAlarm->setEnabled(!b);
 }
 
 void DateEntry::turnOnAlarm()
@@ -444,7 +436,6 @@ void DateEntry::setRepeatType(int i)
 	    break;
 	case 4:
 	default:
-	    endDateSelect->setEnabled(TRUE);
 	    slotRepeat();
 	    break;
     }

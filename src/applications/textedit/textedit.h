@@ -50,10 +50,9 @@ public:
 public slots:
     void setDocument(const QString&);
 
-protected:
-    void closeEvent( QCloseEvent *e );
-
 private slots:
+    void message(const QCString& msg, const QByteArray& data);
+
     void fileNew();
     void fileRevert();
     void fileOpen();
@@ -92,6 +91,7 @@ private:
     void updateCaption( const QString &name=QString::null );
     void setFontSize(int sz, bool round_down_not_up);
     void setupFontSizes(void);
+    void setReadOnly(bool);
 
 private:
     QWidgetStack *editorStack;
@@ -102,7 +102,6 @@ private:
     QAction *pasteAction;
     DocLnk *doc;
     bool searchVisible;
-    bool bFromDocView;
     QAction *zin, *zout;
     bool zinE,zoutE,zoomOutLast;
     int variableFontSize;

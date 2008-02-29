@@ -3,7 +3,7 @@
     <name>SetDateTime</name>
     <message>
         <source>Set System Time</source>
-        <translation>Systemuhr stellen</translation>
+        <translation type="obsolete">Systemuhr stellen</translation>
     </message>
     <message>
         <source>Time Zone</source>
@@ -40,6 +40,10 @@
     <message>
         <source>Date format</source>
         <translation>Datumsformat</translation>
+    </message>
+    <message>
+        <source>Date/Time</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

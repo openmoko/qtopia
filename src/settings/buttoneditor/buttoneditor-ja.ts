@@ -3,18 +3,22 @@
     <name>ButtonEditorDialog</name>
     <message>
         <source>Configure Hardware Buttons</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">ハードウェアボタンの設定</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation type="unfinished"></translation>
+        <translation>ホーム</translation>
     </message>
     <message>
         <source>No action</source>
-        <translation type="unfinished"></translation>
+        <translation>アクションがありません</translation>
     </message>
     <message>
         <source>No buttons!</source>
+        <translation>ボタンがありません!</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -22,15 +26,15 @@
     <name>ButtonRow</name>
     <message>
         <source>buttonrow</source>
-        <translation type="unfinished"></translation>
+        <translation>ボタンの列</translation>
     </message>
     <message>
         <source>BTN</source>
-        <translation type="unfinished"></translation>
+        <translation>BTN</translation>
     </message>
     <message>
         <source>Hold:</source>
-        <translation type="unfinished"></translation>
+        <translation>保留:</translation>
     </message>
 </context>
 </TS>

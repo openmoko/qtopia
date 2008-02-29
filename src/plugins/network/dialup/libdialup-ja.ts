@@ -3,233 +3,233 @@
     <name>DialupBase</name>
     <message>
         <source>Dial-up </source>
-        <translation type="unfinished"></translation>
+        <translation>ダイアルアップ</translation>
     </message>
     <message>
         <source>Account</source>
-        <translation type="unfinished"></translation>
+        <translation>アカウント</translation>
     </message>
     <message>
         <source>Username:</source>
-        <translation type="unfinished"></translation>
+        <translation>ユーザー名:</translation>
     </message>
     <message>
         <source>Password:</source>
-        <translation type="unfinished"></translation>
+        <translation>パスワード:</translation>
     </message>
     <message>
         <source>Phone:</source>
-        <translation type="unfinished"></translation>
+        <translation>電話番号:</translation>
     </message>
     <message>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>名前:</translation>
     </message>
     <message>
         <source>Modem</source>
-        <translation type="unfinished"></translation>
+        <translation>モデム</translation>
     </message>
     <message>
         <source>AT-dial:</source>
-        <translation type="unfinished"></translation>
+        <translation>ATダイアル:</translation>
     </message>
     <message>
         <source>ATDT</source>
-        <translation type="unfinished"></translation>
+        <translation>ATDT</translation>
     </message>
     <message>
         <source>ATDP</source>
-        <translation type="unfinished"></translation>
+        <translation>ATDP</translation>
     </message>
     <message>
         <source>Speed:</source>
-        <translation type="unfinished"></translation>
+        <translation>速度：</translation>
     </message>
     <message>
         <source>4800</source>
-        <translation type="unfinished"></translation>
+        <translation>4800</translation>
     </message>
     <message>
         <source>9600</source>
-        <translation type="unfinished"></translation>
+        <translation>9600</translation>
     </message>
     <message>
         <source>19200</source>
-        <translation type="unfinished"></translation>
+        <translation>19200</translation>
     </message>
     <message>
         <source>38400</source>
-        <translation type="unfinished"></translation>
+        <translation>38400</translation>
     </message>
     <message>
         <source>57600</source>
-        <translation type="unfinished"></translation>
+        <translation>57600</translation>
     </message>
     <message>
         <source>115200</source>
-        <translation type="unfinished"></translation>
+        <translation>115200</translation>
     </message>
     <message>
         <source>Wait time:</source>
-        <translation type="unfinished"></translation>
+        <translation>待ち時間:</translation>
     </message>
     <message>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <source>sec</source>
-        <translation type="unfinished"></translation>
+        <translation>秒</translation>
     </message>
     <message>
         <source>Flow control:</source>
-        <translation type="unfinished"></translation>
+        <translation>フローコントロール:</translation>
     </message>
     <message>
         <source>Hardware flow control</source>
-        <translation type="unfinished"></translation>
+        <translation>ハードウェアのフローコントロール</translation>
     </message>
     <message>
         <source>Demand Dialing</source>
-        <translation type="unfinished"></translation>
+        <translation>ダイアル呼び出しの要求</translation>
     </message>
     <message>
         <source>Manual connect and disconnect</source>
-        <translation type="unfinished"></translation>
+        <translation>手動接続と手動切断</translation>
     </message>
     <message>
         <source> seconds</source>
-        <translation type="unfinished"></translation>
+        <translation>秒</translation>
     </message>
     <message>
         <source>Idle timeout:</source>
-        <translation type="unfinished"></translation>
+        <translation>アイドルの時間切れ:</translation>
     </message>
     <message>
         <source>Automatic connect and disconnect</source>
-        <translation type="unfinished"></translation>
+        <translation>自動接続と自動切断</translation>
     </message>
     <message>
         <source>Manual connect, automatic disconnect</source>
-        <translation type="unfinished"></translation>
+        <translation>手動接続、自動切断</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished"></translation>
+        <translation>ネットワーク</translation>
     </message>
     <message>
         <source>Auto-detect name servers</source>
-        <translation type="unfinished"></translation>
+        <translation>ネームサーバーの自動検出</translation>
     </message>
     <message>
         <source>Gateway</source>
-        <translation type="unfinished"></translation>
+        <translation>ゲートウェイ</translation>
     </message>
     <message>
         <source>Auto-detect routing</source>
-        <translation type="unfinished"></translation>
+        <translation>ルートの自動検出</translation>
     </message>
     <message>
         <source>First DNS</source>
-        <translation type="unfinished"></translation>
+        <translation>第1DNS</translation>
     </message>
     <message>
         <source>Second DNS</source>
-        <translation type="unfinished"></translation>
+        <translation>第2DNS</translation>
     </message>
     <message>
         <source>Proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシ</translation>
     </message>
 </context>
 <context>
     <name>PppMon</name>
     <message>
         <source>Waiting for activity</source>
-        <translation type="unfinished"></translation>
+        <translation>アクティビティ待機中</translation>
     </message>
     <message>
         <source>Initializing modem</source>
-        <translation type="unfinished"></translation>
+        <translation>モデムの初期化中</translation>
     </message>
     <message>
         <source>Connecting</source>
-        <translation type="unfinished"></translation>
+        <translation>接続中</translation>
     </message>
     <message>
         <source>Authenticating</source>
-        <translation type="unfinished"></translation>
+        <translation>認証中</translation>
     </message>
     <message>
         <source>No dialtone</source>
-        <translation type="unfinished"></translation>
+        <translation>発信音がありません</translation>
     </message>
     <message>
         <source>No carrier</source>
-        <translation type="unfinished"></translation>
+        <translation>キャリアがありません</translation>
     </message>
     <message>
         <source>Number is busy</source>
-        <translation type="unfinished"></translation>
+        <translation>回線は使用中です</translation>
     </message>
     <message>
         <source>Timed out</source>
-        <translation type="unfinished"></translation>
+        <translation>時間切れです</translation>
     </message>
     <message>
         <source>Connection failed</source>
-        <translation type="unfinished"></translation>
+        <translation>接続に失敗しました</translation>
     </message>
     <message>
         <source>Authentication Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>認証に失敗しました</translation>
     </message>
     <message>
         <source>Connected</source>
-        <translation type="unfinished"></translation>
+        <translation>接続されました</translation>
     </message>
 </context>
 <context>
     <name>ProxiesPageBase</name>
     <message>
         <source>Proxy Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシ設定</translation>
     </message>
     <message>
         <source>No proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシがありません</translation>
     </message>
     <message>
         <source>Auto configure proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシの自動設定</translation>
     </message>
     <message>
         <source>Set proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシの設定</translation>
     </message>
     <message>
         <source>Config:</source>
-        <translation type="unfinished"></translation>
+        <translation>設定:</translation>
     </message>
     <message>
         <source>Port:</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート:</translation>
     </message>
     <message>
         <source>HTTP:</source>
-        <translation type="unfinished"></translation>
+        <translation>HTTP:</translation>
     </message>
     <message>
         <source>FTP:</source>
-        <translation type="unfinished"></translation>
+        <translation>FTP:</translation>
     </message>
     <message>
         <source>Host:</source>
-        <translation type="unfinished"></translation>
+        <translation>ホスト:</translation>
     </message>
     <message>
         <source>No proxies for:</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシがありません:</translation>
     </message>
 </context>
 </TS>

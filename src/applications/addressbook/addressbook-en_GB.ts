@@ -95,6 +95,26 @@
         <comment>Person&apos;s name suffix</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Edit Contact Details</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Describes the spoken name phonetically.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>e.g. Husband or Wife.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preferred format for the contact name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Occupation or job description.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AbSettings</name>
@@ -131,6 +151,14 @@
     <message>
         <source>BM</source>
         <comment>Business mobile</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Male</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Female</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -268,10 +296,6 @@ VCards already in your addressbook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Edit Address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Contacts - My Personal Details</source>
         <translation type="unfinished"></translation>
     </message>
@@ -344,6 +368,18 @@ VCards already in your addressbook</source>
         <source>Set current entry as your business card.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View list of Contacts.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit to width</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EmailDialogBase</name>
@@ -366,6 +402,14 @@ VCards already in your addressbook</source>
     </message>
     <message>
         <source>Move Down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

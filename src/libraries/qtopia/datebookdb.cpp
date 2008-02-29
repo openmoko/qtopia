@@ -705,24 +705,24 @@ void DateBookDB::loadFile( const QString &strFile )
 
     QAsciiDict<int> dict( 97 );
     dict.setAutoDelete( TRUE );
-    dict.insert( "description", new int(FDescription) );
-    dict.insert( "location", new int(FLocation) );
-    dict.insert( "categories", new int(FCategories) );
+    dict.insert( "description", new int(FDescription) ); // No tr
+    dict.insert( "location", new int(FLocation) ); // No tr
+    dict.insert( "categories", new int(FCategories) ); // No tr
     dict.insert( "uid", new int(FUid) );
-    dict.insert( "type", new int(FType) );
-    dict.insert( "alarm", new int(FAlarm) );
-    dict.insert( "sound", new int(FSound) );
+    dict.insert( "type", new int(FType) ); // No tr
+    dict.insert( "alarm", new int(FAlarm) ); // No tr
+    dict.insert( "sound", new int(FSound) ); // No tr
     dict.insert( "rtype", new int(FRType) );
     dict.insert( "rweekdays", new int(FRWeekdays) );
     dict.insert( "rposition", new int(FRPosition) );
     dict.insert( "rfreq", new int(FRFreq) );
     dict.insert( "rhasenddate", new int(FRHasEndDate) );
     dict.insert( "enddt", new int(FREndDate) );
-    dict.insert( "start", new int(FRStart) );
-    dict.insert( "end", new int(FREnd) );
-    dict.insert( "note", new int(FNote) );
-    dict.insert( "created", new int(FCreated) );
-    dict.insert( "action", new int(FAction) );
+    dict.insert( "start", new int(FRStart) ); // No tr
+    dict.insert( "end", new int(FREnd) ); // No tr
+    dict.insert( "note", new int(FNote) ); // No tr
+    dict.insert( "created", new int(FCreated) ); // No tr
+    dict.insert( "action", new int(FAction) ); // No tr
     dict.insert( "actionkey", new int(FActionKey) );
     dict.insert( "actionorig", new int (FJournalOrigHadRepeat) );
 
@@ -738,7 +738,7 @@ void DateBookDB::loadFile( const QString &strFile )
 
     int i = 0;
     char *point;
-    while ( (dt+i !=0) && (( point = strstr( dt+i, "<event " ) ) != 0 )) {
+    while ( (dt+i !=0) && (( point = strstr( dt+i, "<event " ) ) != 0 )) { // No tr
 	i = point - dt;
 	// if we are reading in events in the general case,
 	// we are just adding them, so let the actions represent that...
@@ -827,19 +827,19 @@ void DateBookDB::loadFile( const QString &strFile )
 		alarmTime = value.toInt();
 		break;
 	    case FSound:
-		alarmSound = value == "loud" ? Event::Loud : Event::Silent;
+		alarmSound = value == "loud" ? Event::Loud : Event::Silent; // No tr
 		break;
 		// recurrence stuff
 	    case FRType:
-		if ( value == "Daily" )
+		if ( value == "Daily" ) // No tr
 		    rp.type = Event::Daily;
-		else if ( value == "Weekly" )
+		else if ( value == "Weekly" ) // No tr
 		    rp.type = Event::Weekly;
 		else if ( value == "MonthlyDay" )
 		    rp.type = Event::MonthlyDay;
 		else if ( value == "MonthlyDate" )
 		    rp.type = Event::MonthlyDate;
-		else if ( value == "Yearly" )
+		else if ( value == "Yearly" ) // No tr
 		    rp.type = Event::Yearly;
 		else
 		    rp.type = Event::NoRepeat;
@@ -972,7 +972,7 @@ bool DateBookDB::save()
     }
 
     for ( it = eventList.begin(); it != eventList.end(); ++it ) {
-	buf = "<event";
+	buf = "<event"; // No tr
         (*it).save( buf );
         buf += " />\n";
 	str = buf.utf8();
@@ -984,7 +984,7 @@ bool DateBookDB::save()
 	}
     }
     for ( it = repeatEvents.begin(); it != repeatEvents.end(); ++it ) {
-        buf = "<event";
+        buf = "<event"; // No tr
         (*it).save( buf );
         buf += " />\n";
 	str = buf.utf8();
@@ -1078,9 +1078,9 @@ bool DateBookDB::saveJournalEntry( const Event &evOld, journal_action action,
     QFile f( dateBookJournalFile() );
     if ( !f.open( IO_WriteOnly|IO_Append ) )
         return false;
-    QString buf = "<event";
+    QString buf = "<event"; // No tr
     ev.save( buf );
-    buf += " action=";
+    buf += " action="; // No tr
     buf += "\"" + QString::number(action) + "\"";
     buf += " actionkey=\"" + QString::number(key) + "\"";
     buf += " actionorig=\"" + QString::number(origHadRepeat) +"\"";

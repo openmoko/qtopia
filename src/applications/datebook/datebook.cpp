@@ -233,8 +233,7 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
 
     timingOther = t.elapsed();
     viewDay();
-    connect( qApp, SIGNAL(clockChanged(bool)),
-             this, SLOT(changeClock(bool)) );
+    TimeString::connectChange(this, SLOT(changeClock()) );
     connect( qApp, SIGNAL(weekChanged(bool)),
              this, SLOT(changeWeek(bool)) );
 
@@ -271,7 +270,7 @@ DateBook::~DateBook()
 
 void DateBook::showSettings()
 {
-    DateBookSettings frmSettings( ampm, this );
+    DateBookSettings frmSettings( this );
     frmSettings.setStartTime( startTime );
     frmSettings.setAlarmPreset( aPreset, presetTime );
 
@@ -420,7 +419,7 @@ void DateBook::initExceptionMb() {
 	    QMessageBox::No | QMessageBox::Default, QMessageBox::Cancel, this);
 
     exceptionMb->setButtonText(QMessageBox::Yes, tr("All"));
-    exceptionMb->setButtonText(QMessageBox::No, tr("Single"));
+    exceptionMb->setButtonText(QMessageBox::No, tr("Single","1 event, not all"));
     exceptionMb->setTextFormat(RichText);
 }
 
@@ -505,15 +504,13 @@ void DateBook::editOccurrence( const Occurrence &ev )
     sv->setHScrollBarMode( QScrollView::AlwaysOff );
     vb->addWidget( sv );
     VScrollBox *vsb = new VScrollBox( &editDlg );
-    entry = new DateEntry( onMonday, e, ampm, vsb, "editor" );
+    entry = new DateEntry( onMonday, e, vsb, "editor" ); // No tr
 
     // connect the qApp stuff.
-    connect( qApp, SIGNAL( clockChanged( bool ) ),
-	     entry, SLOT( set24HourClock( bool ) ) );
     connect( qApp, SIGNAL(weekChanged(bool)),
 	     entry, SLOT(setWeekStartsMonday(bool)) );
 
-    entry->timezone->setEnabled(FALSE);
+    //entry->timezone->setEnabled(FALSE);
     sv->addChild( vsb );
 
     while (QPEApplication::execDialog(&editDlg) ) {
@@ -524,8 +521,9 @@ void DateBook::editOccurrence( const Occurrence &ev )
 			error, "Fix it", "Continue", 0, 0, 1) == 0)
 		continue;
 	}
+	QUuid u;
 	if (asException) {
-	    db->addException(ev.date(),ev.event(), newEv);
+	    u = db->addException(ev.date(),ev.event(), newEv);
 	} else {
 	    if (affectsExceptions(newEv, e)) {
 		if (QMessageBox::warning(this, tr("Calendar"),
@@ -540,8 +538,15 @@ void DateBook::editOccurrence( const Occurrence &ev )
 		newEv.clearExceptions();
 	    }
 	    db->updateEvent(newEv);
+	    u = newEv.uid();
 	}
 	emit newEvent();
+	if ( views->visibleWidget() == dayView ) {
+	    bool ok;
+	    PimEvent e = db->find( u, &ok );
+	    if ( ok )
+		dayView->setCurrentEvent( e );
+	}
 	break;
     }
 }
@@ -655,7 +660,7 @@ void DateBook::showDay( const QDate &dt )
 void DateBook::initDay()
 {
     if ( !dayView ) {
-	dayView = new DayView( db, ampm, onMonday, views, "day view" );
+	dayView = new DayView( db, onMonday, views, "day view" ); // No tr
 	views->addWidget( dayView, DAY );
 	dayView->setDayStarts( startTime );
 	connect( this, SIGNAL( newEvent() ),
@@ -676,16 +681,13 @@ void DateBook::initDay()
 	// qApp connections
 	connect( qApp, SIGNAL(weekChanged(bool)),
 		dayView, SLOT(setStartOnMonday(bool)) );
-
-	connect( qApp, SIGNAL(clockChanged(bool)),
-		dayView, SLOT(set24HourClock(bool)) );
     }
 }
 
 void DateBook::initWeek()
 {
     if ( !weekView ) {
-	weekView = new WeekView( db, ampm, onMonday, views, "week view" );
+	weekView = new WeekView( db, onMonday, views, "week view" ); // No tr
 	weekView->setDayStarts( startTime );
 	views->addWidget( weekView, WEEK );
 	connect( weekView, SIGNAL( dateActivated( const QDate & ) ),
@@ -696,16 +698,13 @@ void DateBook::initWeek()
 	// qApp connections
 	connect( qApp, SIGNAL(weekChanged(bool)),
 		weekView, SLOT(setStartOnMonday(bool)) );
-
-	connect( qApp, SIGNAL(clockChanged(bool)),
-		weekView, SLOT(setTwelveHour(bool)) );
     }
 }
 
 void DateBook::initMonth()
 {
     if ( !monthView ) {
-	monthView = new MonthView( db, views, "month view", FALSE );
+	monthView = new MonthView( db, views, "month view", FALSE ); // No tr
 	views->addWidget( monthView, MONTH );
 	connect( monthView, SIGNAL( dateClicked( const QDate &) ),
              this, SLOT( showDay( const QDate &) ) );
@@ -720,7 +719,6 @@ void DateBook::loadSettings()
     {
 	Config config( "qpe" );
 	config.setGroup("Time");
-	ampm = config.readBoolEntry( "AMPM", TRUE );
 	onMonday = config.readBoolEntry( "MONDAY" );
     }
 
@@ -769,8 +767,8 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 	    msg += "<CENTER><B>" + item.event().description() + "</B>"
 		+ "<BR>" + item.event().location() + "<BR>";
 
-	    if (!item.event().timeZone().isEmpty()) {
-		QString tzText = item.event().timeZone();
+	    if (item.event().timeZone().isValid()) {
+		QString tzText = item.event().timeZone().id();
 		int i = tzText.find('/');
 		tzText = tzText.mid( i + 1 );
 		tzText = tzText.replace(QRegExp("_"), " ");
@@ -779,7 +777,7 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 	    }
 
 
-	    msg += TimeString::dateString(item.event().start(),ampm)
+	    msg += TimeString::localYMDHMS(item.event().start())
 		+ (warn
 			? " " + tr("(in %1 minutes)").arg(warn)
 			: QString(""))
@@ -851,8 +849,8 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 	Occurrence o = db->find(u, QDate::currentDate(), &ok);
 
 	if (ok) {
-	    viewDay( o.startInTZ().date() );
-	    //dayView->selectDate( o.startInTZ().date() );
+	    viewDay( o.startInCurrentTZ().date() );
+	    //dayView->selectDate( o.startInCurrentTZ().date() );
 	    dayView->setCurrentItem(o);
 	    needShow = TRUE;
 	}
@@ -867,8 +865,8 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 	Occurrence o = db->find(u, date, &ok);
 
 	if (ok) {
-	    viewDay( o.startInTZ().date() );
-	    //dayView->selectDate( o.startInTZ().date() );
+	    viewDay( o.startInCurrentTZ().date() );
+	    //dayView->selectDate( o.startInCurrentTZ().date() );
 	    dayView->setCurrentItem(o);
 	    needShow = TRUE;
 	}
@@ -932,9 +930,8 @@ void DateBook::timerEvent( QTimerEvent *e )
     }
 }
 
-void DateBook::changeClock( bool newClock )
+void DateBook::changeClock()
 {
-    ampm = newClock;
     // repaint the affected objects...
     if (dayView) dayView->redraw();
     if (weekView) weekView->redraw();
@@ -1075,7 +1072,7 @@ bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QStr
     ev.setNotes( notes );
 
     VScrollBox *vsb = new VScrollBox( &newDlg );
-    e = new DateEntry( onMonday, ev, ampm, vsb );
+    e = new DateEntry( onMonday, ev, vsb );
     e->setAlarmEnabled( aPreset, presetTime, PimEvent::Loud );
     sv->addChild( vsb );
     qDebug( "newDlg sizeHint(): %d,%d", newDlg.sizeHint().width(), newDlg.sizeHint().height() );
@@ -1089,10 +1086,19 @@ bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QStr
 				       error, tr("Fix it"), tr("Continue"), 0, 0, 1 ) == 0 )
 		continue;
 	}
-	db->addEvent( ev );
+	QUuid id = db->addEvent( ev );
 	emit newEvent();
+	if ( views->visibleWidget() == dayView ) {
+	    dayView->clearSelectedDates();
+	    bool ok;
+	    PimEvent e = db->find( id, &ok );
+	    if ( ok )
+		dayView->setCurrentEvent( e );
+	}
 	return TRUE;
     }
+    if ( views->visibleWidget() == dayView )
+	dayView->clearSelectedDates();
     return FALSE;
 }
 
@@ -1235,7 +1241,7 @@ void DateBook::slotDoFind( const QString& txt, const QDate &dt,
 	    searchForward, &ok);
 
     if ( ok ) {
-	dayView->selectDate( o.startInTZ().date() );
+	dayView->selectDate( o.startInCurrentTZ().date() );
 	dayView->setCurrentItem(o);
     }
 }

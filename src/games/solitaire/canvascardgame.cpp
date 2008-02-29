@@ -23,6 +23,7 @@
 #include "canvascard.h"
 #include "canvascardgame.h"
 #include "cardmetrics.h"
+#include "canvasitemtimer.h"
 
 #include <qtopia/resource.h>
 #include <qtopia/config.h>
@@ -40,19 +41,19 @@
 extern int highestZ;
 
 
-class CanvasCardPile : public QCanvasRectangle
+class CanvasCardPile : public AnimatedCanvasItem, public QCanvasRectangle
 {
 public:
-    CanvasCardPile( CanvasCardGame *ccg, QCanvas *canvas ) : QCanvasRectangle( canvas ), parent( ccg ) { 
+    CanvasCardPile( CanvasCardGame *ccg, QCanvas *canvas ) : AnimatedCanvasItem(), QCanvasRectangle( canvas ), parent( ccg ) { 
 	pile = new QPixmap( 0, 0 );
 	firstCard = NULL;
     }
 
     void addCards( CanvasCard *card );
-    void advance(int stage);
-    void animatedMove() { animatedMove(savedX, savedY); }
+    void animatedMove() { animatedMove(savedX, savedY, 400); }
     void savePos(void) { savedX = (int)x(); savedY = (int)y(); }
-    void animatedMove(int x2, int y2, int steps = 7 );
+    void animatedMove(int x2, int y2, int msecs );
+    void updatePosition( double percent );
 
 protected:
     virtual void draw( QPainter& p );
@@ -63,6 +64,7 @@ private:
     QImage doubleBuffer;
     CanvasCard *firstCard;
     int destX, destY;
+    double deltaX, deltaY;
     int savedX, savedY;
     int animSteps;
 };
@@ -123,31 +125,37 @@ void CanvasCardPile::addCards( CanvasCard *card )
 }
 
 
-void CanvasCardPile::advance(int stage)
+void CanvasCardPile::updatePosition( double percent )
 {
-    if ( stage==1 ) {
-	if ( animSteps-- <= 0 ) {
-	    CanvasCard *item = firstCard;
-	    while (item) {
-		item->show();
-		item = (CanvasCard *)item->getCardPile()->cardInfront(item);
-	    }
-	    setVelocity(0,0);
-	    setAnimated(FALSE);
-	    parent->cancelMoving();
-	    hide();
-	    move(destX,destY); // exact
+    double percentLeft = 1.0 - percent;
+    double x = destX - percentLeft * deltaX;
+    double y = destY - percentLeft * deltaY;
+
+    if ( percent == 1.0 ) {
+	CanvasCard *item = firstCard;
+	while (item) {
+	    item->show();
+	    item = (CanvasCard *)item->getCardPile()->cardInfront(item);
 	}
+//	setVelocity(0,0);
+//	setAnimated(FALSE);
+	parent->cancelMoving();
+	hide();
+	move( x, y );
+    } else {
+	move( x, y );
+	hide();
+	show();
+//	redraw();
     }
-    QCanvasRectangle::advance(stage);
 }
 
 
-void CanvasCardPile::animatedMove(int x2, int y2, int steps )
+void CanvasCardPile::animatedMove(int x2, int y2, int msecs )
 {
     destX = x2;
     destY = y2;
-
+/*
     double x1 = x(), y1 = y(), dx = x2 - x1, dy = y2 - y1;
 
     // Ensure a good speed
@@ -158,6 +166,10 @@ void CanvasCardPile::animatedMove(int x2, int y2, int steps )
     setVelocity(dx/steps, dy/steps);
 
     animSteps = steps;
+*/
+    deltaX = x2 - x();
+    deltaY = y2 - y();
+    new CanvasItemTimer( this, msecs );
 }
 
 
@@ -186,9 +198,9 @@ void CanvasCardGame::gameWon() {
     for (; it != list.end(); ++it) {
 	if ( (*it)->rtti() == canvasCardId ) {
 	    // disperse the cards everywhere
-	    int x = 300 - rand() % 1000;
-	    int y = 300 + rand() % 200;
-	    ((CanvasCard *)*it)->animatedMove( x, y, 50 );
+	    int x = width() - rand() % 1000;
+	    int y = height() + rand() % 200;
+	    ((CanvasCard *)*it)->animatedMove( x, y, 400 );
 	}
     }
 }

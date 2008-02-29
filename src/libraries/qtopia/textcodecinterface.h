@@ -31,7 +31,7 @@ class QTextCodec;
 #endif
 #endif
 
-struct QTOPIA_EXPORT TextCodecInterface : public QUnknownInterface
+struct TextCodecInterface : public QUnknownInterface
 {
 public:
     virtual QStringList names() const = 0;

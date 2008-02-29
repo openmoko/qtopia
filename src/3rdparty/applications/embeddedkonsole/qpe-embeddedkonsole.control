@@ -2,7 +2,8 @@ Files: bin/embeddedkonsole apps/Applications/embeddedkonsole.desktop pics/konsol
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-13
 Depends: qpe-libqtopia, ptydevs
 Description: KDE's konsole (shell terminal)

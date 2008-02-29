@@ -49,7 +49,7 @@ HEADERS	=   calendar.h \
 	    backend/vobject_p.h \
 	    styleinterface.h \
 	    windowdecorationinterface.h \
-	    qdawg.h
+	    qdawg.h 
 
 SOURCES	=   calendar.cpp \
 	    global.cpp \
@@ -87,13 +87,13 @@ SOURCES	=   calendar.cpp \
 	    backend/event.cpp \
 	    backend/contact.cpp \
 	    categorymenu.cpp \
-	categoryedit_p.cpp \
-	categoryselect.cpp \
-	categorywidget.cpp \
-	backend/vcc_yacc.cpp \
-	backend/vobject.cpp \
-	mediarecorderplugininterface.cpp \
-	qdawg.cpp
+	    categoryedit_p.cpp \
+	    categoryselect.cpp \
+	    categorywidget.cpp \
+	    backend/vcc_yacc.cpp \
+	    backend/vobject.cpp \
+	    mediarecorderplugininterface.cpp \
+	    qdawg.cpp
 	
 # Qt 3 compatibility
 qt2:CONFIG+=notqt2unix notqt2win 
@@ -119,7 +119,8 @@ embedded:HEADERS +=	fontmanager.h \
 			networkinterface.h \
 			qcopenvelope_qws.h \
 			power.h \
-			ir.h
+			ir.h \
+			pluginloader_p.h
 
 embedded:SOURCES += 	fontmanager.cpp \
 			fontdatabase.cpp \
@@ -128,11 +129,13 @@ embedded:SOURCES += 	fontmanager.cpp \
 		   	networkinterface.cpp \
 	    		qcopenvelope_qws.cpp \
 	    		power.cpp \
-			ir.cpp
+			ir.cpp \
+			pluginloader_p.cpp
 
 INCLUDEPATH += $(QPEDIR)/include
 win32:INCLUDEPATH += $(QPEDIR)/src/server
-unix:LIBS		+= -ldl -lcrypt -lm
+dynamic:unix:LIBS	+= -ldl
+unix:LIBS	+= -lcrypt -lm
 win32:LIBS	+= rpcrt4.lib
 
 INTERFACES += passwordbase_p.ui \
@@ -140,7 +143,8 @@ INTERFACES += passwordbase_p.ui \
 
 TARGET = qpe
 qdesktop:TARGET	= qd-qpe
-DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
+DESTDIR		= $(QPEDIR)/lib
+win32:DLLDESTDIR = $(QPEDIR)/bin
 VERSION		= 1.5.2 # Note: this is the library version. The Qtopia version is different
 win32:DEFINES += QTOPIA_MAKEDLL QTOPIA_PLUGIN_MAKEDLL\
 		QTOPIA_INTERNAL_APPLNKASSIGN QTOPIA_INTERNAL_FSLP QTOPIA_INTERNAL_PRELOADACCESS QTOPIA_INTERNAL_FD 
@@ -164,20 +168,23 @@ win32emb:HEADERS +=	$$QTOPIA1DIR/services.h \
 			$$QTOPIA1DIR/devicebuttonmanager.h \
 		    	$$QTOPIA1DIR/devicebutton.h \
 			$$QTOPIA1DIR/qwizard.h	\
-    			$$QTOPIA1DIR/docproperties.h
+    			$$QTOPIA1DIR/docproperties.h \
+			$$QTOPIA1DIR/pluginloader.h
 		    
 
 win32emb:SOURCES +=  	$$QTOPIA1DIR/services.cpp \
 			$$QTOPIA1DIR/devicebuttonmanager.cpp \
 			$$QTOPIA1DIR/devicebutton.cpp \
 			$$QTOPIA1DIR/qwizard.cpp \
-    			$$QTOPIA1DIR/docproperties.cpp
-	    
+    			$$QTOPIA1DIR/docproperties.cpp \
+			$$QTOPIA1DIR/pluginloader.cpp \
+			$$QTOPIA1DIR/pluginloaderlib.cpp
 
 win32:HEADERS	+=  $$QTOPIA1DIR/accessory.h \
 	    	    $$QTOPIA1DIR/datepicker.h \
 		    $$QTOPIA1DIR/datetimeedit.h \
-		    $$QTOPIA1DIR/fieldmapimpl.h
+		    $$QTOPIA1DIR/fieldmapimpl.h \
+		    $$QTOPIA1DIR/timezone.h 
 
 win32:SOURCES	+=  $$QTOPIA1DIR/applnk1.cpp \
 		    $$QTOPIA1DIR/categories1.cpp \
@@ -191,9 +198,13 @@ win32:SOURCES	+=  $$QTOPIA1DIR/applnk1.cpp \
 		    $$QTOPIA1DIR/global1.cpp \
 		    $$QTOPIA1DIR/storage1.cpp \
 		    $$QTOPIA1DIR/resource1.cpp \
-		    $$QTOPIA1DIR/fieldmapimpl.cpp
+		    $$QTOPIA1DIR/fieldmapimpl.cpp \
+		    $$QTOPIA1DIR/timezone.cpp \
+		    $$QTOPIA1DIR/timestring1.cpp \
+		    $$QTOPIA1DIR/timeconversion1.cpp
+		
 
-win32emb:INTERFACES +=	$$QTOPIA1DIR/docpropertiesbase_p.ui 
+win32emb:INTERFACES +=	
 win32emb:DEPENDPATH +=  $$QTOPIA1DIR
 
 qt3:CONFIG += notqt3win32 notqt3unix

@@ -110,6 +110,7 @@ void AudioDevice::getVolume( unsigned int& leftVolume, unsigned int& rightVolume
     leftVolume = volume & 0xFFFF;
     rightVolume = volume >> 16;
 #else
+# if 0
     int mixerHandle = open( "/dev/mixer", O_RDWR );
     if ( mixerHandle >= 0 ) {
         ioctl( mixerHandle, MIXER_READ(0), &volume );
@@ -118,12 +119,21 @@ void AudioDevice::getVolume( unsigned int& leftVolume, unsigned int& rightVolume
 	qDebug( "get volume of audio device failed" );
     leftVolume  = ((volume & 0x00FF) << 16) / 100;
     rightVolume = ((volume & 0xFF00) <<  8) / 100;
+# else
+    Config cfg("Sound");
+    cfg.setGroup("System");
+    volume = cfg.readNumEntry("Volume",0);
+    leftVolume  = ((volume & 0x00FF) << 16) / 100;
+    rightVolume = leftVolume;
+# endif
 #endif
 }
 
+bool tempMute = FALSE;
 
 void AudioDevice::setVolume( unsigned int leftVolume, unsigned int rightVolume, bool muted ) {
     AudioDevicePrivate::muted = muted;
+    tempMute = ( rightVolume == 0 && leftVolume == 0 );
     if ( muted ) {
 	AudioDevicePrivate::leftVolume = leftVolume;
 	AudioDevicePrivate::rightVolume = rightVolume;
@@ -170,7 +180,7 @@ void AudioDevice::setVolume( unsigned int leftVolume, unsigned int rightVolume, 
 # endif
 
 #endif
-//    qDebug( "setting volume to: 0x%x", volume ); 
+//    qDebug( "setting volume to: 0x%x", volume );
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
     // Send notification that the volume has changed
     QCopEnvelope( "QPE/System", "volumeChange(bool)" ) << muted; 
@@ -285,6 +295,8 @@ void AudioDevice::volumeChanged( bool muted )
 
 void AudioDevice::write( char *buffer, unsigned int length )
 {
+    if ( tempMute )
+	return;
 #ifdef Q_OS_WIN32
     // returns immediately and (to be implemented) emits completedIO() when finished writing
     WAVEHDR *lpWaveHdr = (WAVEHDR *)malloc( sizeof(WAVEHDR) );

@@ -113,8 +113,8 @@ QMemoryFileData::~QMemoryFileData()
 }
 
 
-/*!
-  Initialize the memory map returning non-null if sucessful
+/*
+ As this function is in both _unix and _win, its documentation is in qmemoryfile.cpp
  */
 QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags, 
 					 uint size )
@@ -264,9 +264,9 @@ QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags,
 }
 
 
-/*!
+/*
   \internal
-  Close memory file and free any memory used
+ As this function is in both _unix and _win, its documentation is in qmemoryfile.cpp
  */
 void QMemoryFile::closeData(QMemoryFileData *memoryFile)
 {

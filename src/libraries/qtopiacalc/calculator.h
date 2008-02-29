@@ -37,7 +37,7 @@
 #include <qtopia/qlibrary.h>
 #endif
 
-struct Plugin {
+struct CalculatorPlugin {
     CalculatorInterface *interface;
     QLibrary *library;
     QWidget *widget;
@@ -54,12 +54,14 @@ public:
 	  QWidget * p = 0, const char *n = 0, WFlags fl=0);
    ~Calculator ();
 
+   void keyPressEvent(QKeyEvent *e);
+
 private:
    QVBoxLayout *calculatorLayout;
 #ifndef QT_NO_COMPONENT
-   QValueList<Plugin> *pluginList;
    QWidgetStack *pluginWidgetStack;
    QComboBox *modeBox;
+   QValueList<CalculatorPlugin> *pluginList;
 #endif
    QLineEdit *LCD;
 };

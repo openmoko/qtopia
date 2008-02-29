@@ -23,6 +23,7 @@
 
 #include <qmainwindow.h>
 #include <qcanvas.h>
+#include <qtimer.h>
 
 
 class CanvasCardGame;
@@ -41,6 +42,7 @@ public slots:
     void changeCardBacks();
     void snapToggle();
     void drawnToggle();
+    void doResize();
 
 private slots:
     void initFreecell();
@@ -52,21 +54,26 @@ protected:
 
     void updateDraw();
 private:
+    void initGame( bool newGame, int type );
     void initGame();
     void closeGame();
 
+    QTimer resizeTimeout;
+    
     QCanvas canvas;
+    QCanvasView *canvasView;
     bool snapOn;
-    bool drawThree;
-    int drawId;
     int cardBack;
+    int drawId;
     int gameType;
+    bool drawThree;
     CanvasCardGame *cardGame;
 
     QPopupMenu* options;
     QPopupMenu* settings;
-    int dbf_id;
-    int snap_id;
+    int snapId;
+    int changeId;
+    bool resizing;
 };
 
 

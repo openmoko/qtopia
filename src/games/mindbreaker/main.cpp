@@ -26,8 +26,8 @@ int main( int argc, char **argv )
 {
     QPEApplication a( argc, argv );
 
-    MindBreaker w(0, "new window");
-    w.setCaption("Mind Breaker");
+    MindBreaker w;
+    w.setCaption(MindBreaker::tr("Mind Breaker"));
     QPEApplication::setInputMethodHint( &w, QPEApplication::AlwaysOff );
     a.showMainWidget(&w);
 

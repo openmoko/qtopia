@@ -26,6 +26,7 @@
 #include <qradiobutton.h>
 #include <qbuttongroup.h>
 #include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
 
 
 // Default quality settings, if not yet set in the configuration.
@@ -43,7 +44,7 @@ static const char * const ConfigSections[MaxQualities] = {
 
 
 ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderPluginList *_plugins, QWidget *parent, const char *name, WFlags f )
-    : ConfigureRecorderBase( parent, name, f )
+    : ConfigureRecorderBase( parent, name, TRUE, f )
 {
     qualities = _qualities;
     plugins = _plugins;
@@ -88,13 +89,46 @@ ConfigureRecorder::ConfigureRecorder( QualitySetting *_qualities, MediaRecorderP
 	     this, SLOT( setSampleRate(int) ) );
     connect( format, SIGNAL( activated(int) ),
 	     this, SLOT( setFormat(int) ) );
-    connect( reset, SIGNAL( clicked() ),
-	     this, SLOT( resetQuality() ) );
 }
 
 
 ConfigureRecorder::~ConfigureRecorder()
 {
+}
+
+
+static void copyQualities( QualitySetting *dest, QualitySetting *src, int num )
+{
+    while ( num > 0 ) {
+	dest->frequency = src->frequency;
+	dest->channels = src->channels;
+	dest->mimeType = src->mimeType;
+	dest->formatTag = src->formatTag;
+	++dest;
+	++src;
+	--num;
+    }
+}
+
+void ConfigureRecorder::processPopup()
+{
+    QualitySetting savedQualities[MaxQualities];
+    int savedQuality;
+
+    // Save the current quality settings, in case we have to cancel.
+    copyQualities( savedQualities, qualities, MaxQualities );
+    savedQuality = quality;
+
+    // Update the configuration dialog's display with the current state.
+    setQuality( quality );
+
+    // Process the dialog.
+    if ( QPEApplication::execDialog( this ) != QDialog::Accepted) {
+
+	// Copy the saved configuration back.
+	copyQualities( qualities, savedQualities, MaxQualities );
+	quality = savedQuality;
+    }
 }
 
 
@@ -203,31 +237,20 @@ void ConfigureRecorder::resetQuality()
 
 void ConfigureRecorder::updateConfig( int channels, int frequency, const QString& mimeType, const QString& formatTag )
 {
-    bool changed = FALSE;
-
     if ( channels != qualities[quality].channels ) {
 	qualities[quality].channels = channels;
-	changed = TRUE;
     }
 
     if ( frequency != qualities[quality].frequency ) {
 	qualities[quality].frequency = frequency;
-	changed = TRUE;
     }
 
     if ( mimeType != qualities[quality].mimeType ) {
 	qualities[quality].mimeType = mimeType;
-	changed = TRUE;
     }
 
     if ( formatTag != qualities[quality].formatTag ) {
 	qualities[quality].formatTag = formatTag;
-	changed = TRUE;
-    }
-
-    // Save the configuration if it has changed non-trivially.
-    if ( changed ) {
-	saveConfig();
     }
 }
 

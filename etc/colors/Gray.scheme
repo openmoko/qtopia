@@ -1,3 +1,6 @@
+[Global]
+Name = Gray
+Name[ja] = ???
 [Colors]
 Background = #E0E0E0
 Button = #D0D0D0

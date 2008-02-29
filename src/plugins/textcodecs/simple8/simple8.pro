@@ -1,3 +1,5 @@
+singleprocess:singleprocess=true
+
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on release
 win32:CONFIG += dll

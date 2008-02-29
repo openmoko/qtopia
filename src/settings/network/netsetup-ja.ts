@@ -3,69 +3,69 @@
     <name>AddNetworkSettingBase</name>
     <message>
         <source>Add Network Service</source>
-        <translation type="unfinished"></translation>
+        <translation>ネットワークサービスの追加</translation>
     </message>
     <message>
         <source>&lt;P&gt;These are the network services available to be added.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;P&gt;追加できるネットワークサービスです。</translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>追加</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取り消し</translation>
     </message>
 </context>
 <context>
     <name>NetworkSettings</name>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>エラー</translation>
     </message>
     <message>
         <source>&lt;p&gt;Only one %1 can be added. Remove the current one, or change its Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;%1がひとつだけ追加できます。現在のものを削除するか、プロパティを変更してください</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished"></translation>
+        <translation>ネットワーク</translation>
     </message>
 </context>
 <context>
     <name>NetworkSettingsBase</name>
     <message>
         <source>Network</source>
-        <translation type="unfinished"></translation>
+        <translation>ネットワーク</translation>
     </message>
     <message>
         <source>Current</source>
-        <translation type="unfinished"></translation>
+        <translation>現在</translation>
     </message>
     <message>
         <source>&lt;p&gt;This is the state of your running network services.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;実行中のネットワークサービスの状態です。</translation>
     </message>
     <message>
         <source>Services</source>
-        <translation type="unfinished"></translation>
+        <translation>サービス</translation>
     </message>
     <message>
         <source>Add...</source>
-        <translation type="unfinished"></translation>
+        <translation>追加...</translation>
     </message>
     <message>
         <source>&lt;P&gt;These are the network services you currently have available.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;P&gt;現在、利用可能なネットワークサービスです。</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>削除</translation>
     </message>
     <message>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>プロパティ</translation>
     </message>
 </context>
 </TS>

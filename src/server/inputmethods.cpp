@@ -26,6 +26,7 @@
 #include <qtopia/inputmethodinterface.h>
 #include <qtopia/qlibrary.h>
 #include <qtopia/global.h>
+#include <qtopia/pluginloader.h>
 
 #include <qpopupmenu.h>
 #include <qpushbutton.h>
@@ -72,17 +73,16 @@ static const int inputWidgetStyle = QWidget::WStyle_Customize |
 				    QWidget::WGroupLeader;
 
 InputMethods::InputMethods( QWidget *parent ) :
-    QWidget( parent, "InputMethods", WStyle_Tool | WStyle_Customize )
+    QWidget( parent, "InputMethods", WStyle_Tool | WStyle_Customize ),
+    mkeyboard(0), imethod(0), loader(0)
 {
-    mkeyboard = 0;
-    imethod = 0;
-
     QHBoxLayout *hbox = new QHBoxLayout( this );
 
     kbdButton = new QToolButton( this );
     kbdButton->setFocusPolicy(NoFocus);
     kbdButton->setToggleButton( TRUE );
-    kbdButton->setFixedHeight( parent->sizeHint().height() );
+    if (parent->sizeHint().height() > 0)
+	kbdButton->setFixedHeight( parent->sizeHint().height() );
     kbdButton->setFixedWidth( 32 );
     kbdButton->setAutoRaise( TRUE );
     kbdButton->setUsesBigPixmap( TRUE );
@@ -92,7 +92,8 @@ InputMethods::InputMethods( QWidget *parent ) :
     kbdChoice = new QToolButton( this );
     kbdChoice->setFocusPolicy(NoFocus);
     kbdChoice->setPixmap( QPixmap( (const char **)tri_xpm ) );
-    kbdChoice->setFixedHeight( parent->sizeHint().height() );
+    if (parent->sizeHint().height() > 0)
+	kbdChoice->setFixedHeight( parent->sizeHint().height() );
     kbdChoice->setFixedWidth( 13 );
     kbdChoice->setAutoRaise( TRUE );
     hbox->addWidget( kbdChoice );
@@ -104,14 +105,16 @@ InputMethods::InputMethods( QWidget *parent ) :
 
     imButton = new QWidgetStack( this ); // later a widget stack
     imButton->setFocusPolicy(NoFocus);
-    imButton->setFixedHeight( parent->sizeHint().height() );
+    if (parent->sizeHint().height() > 0)
+	imButton->setFixedHeight( parent->sizeHint().height() );
     imButton->setFixedWidth( 32 );
     hbox->addWidget(imButton);
 
     imChoice = new QToolButton( this );
     imChoice->setFocusPolicy(NoFocus);
     imChoice->setPixmap( QPixmap( (const char **)tri_xpm ) );
-    imChoice->setFixedHeight( parent->sizeHint().height() );
+    if (parent->sizeHint().height() > 0)
+	imChoice->setFixedHeight( parent->sizeHint().height() );
     imChoice->setFixedWidth( 13 );
     imChoice->setAutoRaise( TRUE );
     hbox->addWidget( imChoice );
@@ -145,7 +148,7 @@ void InputMethods::showInputMethod(const QString& name)
     QValueList<InputMethod>::Iterator it;
     InputMethod *im = 0;
     for ( it = inputMethodList.begin(); it != inputMethodList.end(); ++it, i++ ) {
-	QString lname = (*it).library->library().mid((*it).library->library().findRev('/') + 1);
+	QString lname = (*it).libName.mid((*it).libName.findRev('/') + 1);
 	if ( (*it).name() == name || lname == name ) {
 	    im = &(*it);
 	    break;
@@ -171,24 +174,24 @@ QRect InputMethods::inputRect() const
 
 void InputMethods::unloadInputMethods()
 {
+    if ( loader ) {
 #ifndef QT_NO_COMPONENT
-    int i;
-    // reverse order of load
-    for ( i = inputMethodList.count()-1; i >= 0; i-- ) {
-	InputMethod &im = inputMethodList[i];
-	im.release();
-	im.library->unload();
-	delete im.library;
-    }
-    for ( i = inputModifierList.count()-1; i >= 0; i-- ) {
-	InputMethod &im = inputModifierList[i];
-	im.release();
-	im.library->unload();
-	delete im.library;
-    }
+	int i;
+	// reverse order of load
+	for ( i = inputMethodList.count()-1; i >= 0; i-- ) {
+	    InputMethod &im = inputMethodList[i];
+	    loader->releaseInterface( im.iface() );
+	}
+	for ( i = inputModifierList.count()-1; i >= 0; i-- ) {
+	    InputMethod &im = inputModifierList[i];
+	    loader->releaseInterface( im.iface() );
+	}
 #endif
-    inputMethodList.clear();
-    inputModifierList.clear();
+	inputMethodList.clear();
+	inputModifierList.clear();
+	delete loader;
+	loader = 0;
+    }
 }
 
 void InputMethods::loadInputMethods()
@@ -199,48 +202,28 @@ void InputMethods::loadInputMethods()
 
     unloadInputMethods();
 
-    QString path = QPEApplication::qpeDir() + "plugins/inputmethods";
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir (path, "*.dll");
-#endif
-    QStringList list = dir.entryList();
+    loader = new PluginLoader( "inputmethods" );
+
+    QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	InputMethodInterface *iface = 0;
 	ExtInputMethodInterface *eface = 0;
 
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-
-	//qDebug("loading input method %s", (*it).latin1());
-	if ( lib->queryInterface( IID_InputMethod, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    //qDebug("old input method");
+	if ( loader->queryInterface( *it, IID_InputMethod, (QUnknownInterface**)&iface ) == QS_OK ) {
+	    qDebug("old input method");
 	    InputMethod input;
-	    input.library = lib;
 	    input.newIM = FALSE;
+	    input.libName = *it;
 	    input.interface = iface;
 	    input.widget = input.interface->inputMethod( 0, inputWidgetStyle );
 	    input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
 	    inputMethodList.append( input );
-
-	    QString type = (*it).left( (*it).find(".") );
-	    QStringList langs = Global::languageList();
-	    for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
-		QString lang = *lit;
-		QTranslator * trans = new QTranslator(qApp);
-		QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
-		if ( trans->load( tfn ))
-		    qApp->installTranslator( trans );
-		else
-		    delete trans;
-	    }
-
-	} else if ( lib->queryInterface( IID_ExtInputMethod, (QUnknownInterface**)&eface ) == QS_OK ) {
-	    //qDebug("new input method");
+	} else if ( loader->queryInterface( *it, IID_ExtInputMethod, (QUnknownInterface**)&eface ) == QS_OK ) {
+	    qDebug("new input method");
 	    InputMethod input;
-	    input.library = lib;
 	    input.newIM = TRUE;
+	    input.libName = *it;
 	    input.extInterface = eface;
 	    input.widget = input.extInterface->keyboardWidget( 0, inputWidgetStyle );
 	    // may be either a simple, or advanced.
@@ -257,9 +240,6 @@ void InputMethods::loadInputMethods()
 		}
 	    }
 
-	} else {
-	    //qDebug("unkown");
-	    delete lib;
 	}
     }
 #else
@@ -308,7 +288,7 @@ void InputMethods::chooseKbd()
 
     QString imname;
     if (imethod)
-	imname = imethod->library->library().mid(imethod->library->library().findRev('/') + 1);
+	imname = imethod->libName.mid(imethod->libName.findRev('/') + 1);
 
     int i = 0;
     int firstDepKbd = 0;
@@ -398,7 +378,7 @@ void InputMethods::updateKeyboards(InputMethod *im)
     uint count;
 
     if ( im ) {
-	QString imname = im->library->library().mid(im->library->library().findRev('/') + 1);
+	QString imname = im->libName.mid(im->libName.findRev('/') + 1);
 
 	if ( mkeyboard && !keyboardCompatible(mkeyboard, imname) ) {
 	    kbdButton->setOn( FALSE );

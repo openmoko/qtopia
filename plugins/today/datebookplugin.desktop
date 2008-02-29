@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Calendar
+Comment=Displays today's events.
+X-QPE-Library=libdatebookplugin.so

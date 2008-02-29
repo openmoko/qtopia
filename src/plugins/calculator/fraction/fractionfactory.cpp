@@ -25,9 +25,7 @@
 #include <qstringlist.h>
 
 QWidget * FractionInterface::create (QWidget *parent) {
-    if ( !input )
-	input = new FormFraction(parent,"Fraction",0);
-    return input;
+    return new FormFraction(parent,"Fraction",0);
 }
 
 #ifndef QT_NO_COMPONENT

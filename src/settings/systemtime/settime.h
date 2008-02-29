@@ -60,7 +60,7 @@ protected:
     QSpinBox *sbMin;
 };
 
-class QPEDateButton;
+class QPEDateEdit;
 
 class SetDateTime : public QDialog
 {
@@ -78,7 +78,7 @@ protected:
     virtual void done(int);
 
     SetTime *time;
-    QPEDateButton *date;
+    QPEDateEdit *date;
     TimeZoneSelector *tz;
     QComboBox *weekStartCombo;
     QComboBox *ampmCombo;

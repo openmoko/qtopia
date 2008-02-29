@@ -146,5 +146,13 @@ Continue anyway?</source>
         <source>Fixed-width fonts make some documents more readable.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Empty Text</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

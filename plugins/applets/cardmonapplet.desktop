@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=CF Card monitor
+Comment=Monitors the CF card slot.
+X-QPE-Library=libcardmonapplet.so

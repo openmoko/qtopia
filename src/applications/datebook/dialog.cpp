@@ -35,7 +35,7 @@ FindDialog::FindDialog( const QString &appName, QWidget *parent,
     setCaption( tr("Find") );
     QVBoxLayout *vb;
     vb = new QVBoxLayout( this );
-    fw = new FindWidget( appName, this, "Find Widget" );
+    fw = new FindWidget( appName, this, "Find Widget" ); // No tr
     vb->addWidget( fw );
     QObject::connect( fw, SIGNAL(signalFindClicked(const QString&,
 						   bool,bool,int)),

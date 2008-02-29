@@ -1,1 +1,2 @@
-perl  %QPEDIR%\src\configure.pl -win32 %1 %2 %3 %4 %5 %6 %7 %8 %9 
+cd  %QPEDIR%\src
+perl  %QPEDIR%\src\configure.pl %1 %2 %3 %4 %5 %6 %7 %8 %9 

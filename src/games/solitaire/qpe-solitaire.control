@@ -2,7 +2,8 @@ Files: bin/patience apps/Games/patience.desktop pics/cards
 Priority: optional
 Section: qpe/games
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Game: solitaire card games

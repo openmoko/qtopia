@@ -327,7 +327,7 @@ int QJisCodec::heuristicNameMatch(const char* hint) const
 {
     int score = 0;
     bool ja = FALSE;
-    if (qstrnicmp(hint, "ja_JP", 5) == 0 || qstrnicmp(hint, "japan", 5) == 0) {
+    if (qstrnicmp(hint, "ja_JP", 5) == 0 || qstrnicmp(hint, "japan", 5) == 0) { // No tr
 	score += 3;
 	ja = TRUE;
     } else if (qstrnicmp(hint, "ja", 2) == 0) {

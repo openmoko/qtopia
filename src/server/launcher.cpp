@@ -116,6 +116,14 @@ void CategoryTabWidget::nextTab()
     }
 }
 
+void CategoryTabWidget::showTab(const QString& id)
+{
+    if ( categoryBar ) {
+	int idx = ids.findIndex( id );
+	categoryBar->setCurrentTab( idx );
+    }
+}
+
 void CategoryTabWidget::addItem( const QString& linkfile )
 {
     int i=0;
@@ -124,14 +132,29 @@ void CategoryTabWidget::addItem( const QString& linkfile )
 	delete app;
 	app=0;
     }
-    if ( !app || !app->file().isEmpty() ) {
-	// A document
+    if ( !app || app->fileKnown() && !app->file().isEmpty() ) {
 	delete app;
 	app = new DocLnk(linkfile);
 	if ( app->fileKnown() ) {
+	    // A document
 	    ((LauncherView*)(stack->widget(ids.count()-1)))->addItem(app);
 	} else {
-	    ((LauncherView*)(stack->widget(ids.count()-1)))->sort();
+	    // A removed link
+	    LauncherView *v = 0;
+	    for ( QStringList::Iterator it=ids.begin(); it!=ids.end(); ++it) {
+		if ( linkfile.find("apps/"+*it+"/") > 0 ) {
+		    // an app
+		    v = view(*it);
+		    if ( v ) {
+			v->sort();
+			QCopEnvelope e("QPE/TaskBar","reloadApps()");
+			break;
+		    }
+		}
+	    }
+	    if ( !v ) { // must have been a document
+		((LauncherView*)(stack->widget(ids.count()-1)))->sort();
+	    }
 	    delete app;
 	}
 	return;
@@ -140,13 +163,16 @@ void CategoryTabWidget::addItem( const QString& linkfile )
     for ( QStringList::Iterator it=ids.begin(); it!=ids.end(); ++it) {
 	if ( !(*it).isEmpty() ) {
 	    QRegExp tf(*it,FALSE,TRUE);
-	    if ( tf.match(app->type()) >= 0 ) {
+	    if ( tf.match(app->type()) >= 0
+	    || app->type()=="Application" && linkfile.find("apps/"+*it+"/")>0 ) { // No tr
 		((LauncherView*)stack->widget(i))->addItem(app);
-		return;
+		app = 0;
+		break;
 	    }
 	    i++;
 	}
     }
+    delete app; // If it's still left
 
     QCopEnvelope e("QPE/TaskBar","reloadApps()");
 }
@@ -405,11 +431,11 @@ void CategoryTabBar::layoutTabs()
 	    h += vframe;
 	    w += hframe;
 
-	    QRect tr(x, 0,
+	    QRect totr(x, 0,
 		mode == Even ? eventabwidth : w * (width()-1)/required, h);
-	    t->setRect(tr);
-	    x += tr.width() - overlap;
-	    r = r.unite(tr);
+	    t->setRect(totr);
+	    x += totr.width() - overlap;
+	    r = r.unite(totr);
 	} else if ( i != middleTab ) {
 	    int w = hiddenTabWidth;
 	    int ih = 0;
@@ -611,7 +637,7 @@ Launcher::~Launcher()
 
 static bool isVisibleWindow(int wid)
 {
-#ifdef QWS
+#ifdef Q_WS_QWS
     const QList<QWSWindow> &list = qwsServer->clientWindows();
     QWSWindow* w;
     for (QListIterator<QWSWindow> it(list); (w=it.current()); ++it) {
@@ -689,6 +715,12 @@ void Launcher::nextView()
     tabs->nextTab();
 }
 
+void Launcher::showTab(const QString& id)
+{
+    tabs->showTab(id);
+    raise();
+}
+
 
 void Launcher::select( const AppLnk *appLnk )
 {
@@ -720,7 +752,9 @@ void Launcher::properties( AppLnk *appLnk )
     } else {
 	in_lnk_props = TRUE;
 	got_lnk_change = FALSE;
-	DocPropertiesDialog prop(appLnk);
+	DocPropertiesDialog prop(appLnk,0,
+	    appLnk->isDocLnk() ? "document-properties" // No tr
+	    : "apps-properties"); // No tr
 	prop.showMaximized();
 	prop.exec();
 	in_lnk_props = FALSE;
@@ -740,8 +774,9 @@ void Launcher::updateLink(const QString& link)
 	tabs->updateLink(link);
 }
 
+#ifdef Q_WS_QWS
 
-#if 1 //### quick demo hack
+
 typedef struct KeyOverride {
     ushort scan_code;
     QWSServer::KeyMap map;
@@ -771,14 +806,21 @@ static const KeyOverride jp109keys[] = {
    { 0x00, {   0,          0x0000  , 0x0000  , 0x0000  } }
 };
 
-static void setJP109Keys() 
+static void setKeyboardLayout( const QString &kb ) 
 {
-    QIntDict<QWSServer::KeyMap> *om = new QIntDict<QWSServer::KeyMap>(37);
-    const KeyOverride *k = jp109keys;
-    while ( k->scan_code ) {
-	om->insert( k->scan_code, &k->map ); 
-	k++;
-    }
+    //quick demo version that can be extended 
+
+    QIntDict<QWSServer::KeyMap> *om = 0;
+    if ( kb == "us101" ) { // No tr
+	om = 0;
+    } else if ( kb == "jp109" ) {
+	om = new QIntDict<QWSServer::KeyMap>(37);
+	const KeyOverride *k = jp109keys;
+	while ( k->scan_code ) {
+	    om->insert( k->scan_code, &k->map );
+	    k++;
+	}
+    } 
     QWSServer::setOverrideKeys( om );
 }
 
@@ -864,12 +906,12 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 	for ( ; it.current(); ++it ) {
 	    int k4 = (*it)->blockSize()/256;
 	    if ( (*it)->isRemovable() ) {
-		s += (*it)->name() + "=" + (*it)->path() + "/Documents "
+		s += (*it)->name() + "=" + (*it)->path() + "/Documents " // No tr
 		     + QString::number( (*it)->availBlocks() * k4/4 )
 		     + "K " + (*it)->options() + ";";
 	    } else if ( (*it)->disk() == "/dev/mtdblock1" ||
 		      (*it)->disk() == "/dev/mtdblock/1" ) {
-		s += (*it)->name() + "=" + homeDir + "/Documents "
+		s += (*it)->name() + "=" + homeDir + "/Documents " // No tr
 		     + QString::number( (*it)->availBlocks() * k4/4 )
 		     + "K " + (*it)->options() + ";";
 	    } else if ( (*it)->name().contains( "Hard Disk") &&
@@ -877,7 +919,7 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 		      (*it)->path().length() > hardDiskHomePath.length() ) {
 		hardDiskHomePath = (*it)->path();
 		hardDiskHome =
-		    (*it)->name() + "=" + homeDir + "/Documents "
+		    (*it)->name() + "=" + homeDir + "/Documents " // No tr
 		    + QString::number( (*it)->availBlocks() * k4/4 )
 		    + "K " + (*it)->options() + ";";
 	    }
@@ -943,7 +985,7 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 		    fake = TRUE;
 	    }
 	    if (fake) {
-		contents += "[Desktop Entry]\n";
+		contents += "[Desktop Entry]\n"; // No tr
 		contents += "Categories = " + // No tr
 		    cats.labels("Document View",doc->categories()).join(";") + "\n"; // No tr
 		contents += "Name = "+doc->name()+"\n"; // No tr
@@ -964,7 +1006,7 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 
 	delete docsFolder;
 	docsFolder = 0;
-#ifdef QWS
+#ifdef Q_WS_QWS
     } else if ( msg == "setMouseProto(QString)" ) {
 	QString mice;
 	stream >> mice;
@@ -987,11 +1029,7 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
     } else if ( msg == "setKeyboardLayout(QString)" ) {
 	QString kb;
 	stream >> kb;
-	//### quick demo hack that we can extend later 
-	if ( kb == "us101" )
-	    QWSServer::setOverrideKeys( 0 );
-	else
-	    setJP109Keys();
+	setKeyboardLayout( kb );
 #endif
     }
 }

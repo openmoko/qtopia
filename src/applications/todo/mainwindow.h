@@ -52,6 +52,7 @@ private:
 
 class TodoView : public QTextView
 {
+    Q_OBJECT
 public:
     TodoView( QWidget *parent = 0, const char *name = 0)
     	: QTextView(parent, name) {}
@@ -60,7 +61,14 @@ public:
     {
     	setText( task.toRichText() );
     }
+
+signals:
+    void done();
+    void previous();
+    void next();
     
+protected:
+    void keyPressEvent( QKeyEvent *);
 };
 
 class TodoWindow : public QMainWindow
@@ -83,6 +91,8 @@ protected slots:
     void slotEdit();
     void slotListView();
     void slotDetailView();
+    void viewPrevious();
+    void viewNext();
     void setShowCompleted( int );
     void currentEntryChanged( int r, int c );
     void slotFind( bool s );
@@ -94,6 +104,7 @@ protected slots:
     void slotBeam();
     void beamDone( Ir * );
     void catSelected(int);
+    void catChanged();
     void configure();
 
 protected:
@@ -114,6 +125,7 @@ private:
     TodoXmlIO tasks;
     TodoTable *table;
     TodoView *tView;
+    QAction *listAction;
     QAction *editAction;
     QAction *deleteAction;
     QAction *findAction;
@@ -122,7 +134,7 @@ private:
     QLineEdit *searchEdit;
     QPopupMenu *contextMenu, *catMenu;
     CategorySelect *catSelect;
-    QHBox *vb;
+    QWidget *listView;
 };
 
 #endif

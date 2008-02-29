@@ -27,7 +27,7 @@
 class ConversionInterface : public CalculatorInterface
 {
 public:
-    ConversionInterface():CalculatorInterface(){input = 0;};
+    ConversionInterface():CalculatorInterface(){};
     virtual ~ConversionInterface(){};
 
 #ifndef QT_NO_COMPONENT
@@ -39,7 +39,6 @@ public:
     const char * pluginName() { return "Conversion"; };
 
 private:
-    FormConversion *input;
     ulong ref;
 };
 

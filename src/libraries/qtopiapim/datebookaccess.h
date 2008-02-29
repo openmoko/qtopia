@@ -69,6 +69,8 @@ public:
   void removeEvent(const PimEvent& event);
   void addEvent(const PimEvent& event);
 
+  PimEvent eventForId(const QUuid &, bool *ok = 0) const;
+
 signals:
   void dateBookUpdated();
 

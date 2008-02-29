@@ -51,7 +51,7 @@ TZCombo::TZCombo( QWidget *p, const char* n )
     if (parent()->inherits("TimeZoneSelector")) {
 	if ( ((TimeZoneSelector *)parent())->localIncluded() ) {
 	    // overide to the 'local' type.
-	    tz = "None";
+	    tz = "None"; // No tr
 	}
     }
     if ( !tz.isNull() ) {
@@ -93,14 +93,14 @@ void TZCombo::updateZones()
     identifiers.clear();
     int curix=0;
     QString tz = getenv("TZ");
-    bool tzFound = FALSE;
+    bool tzFound = FALSE; // found the current timezone.
     Config cfg("WorldTime");
     cfg.setGroup("TimeZones");
     int listIndex = 0;
     if (parent()->inherits("TimeZoneSelector")) {
 	if ( ((TimeZoneSelector *)parent())->localIncluded() ) {
 	    // overide to the 'local' type.
-	    identifiers.append( "None" );
+	    identifiers.append( "None" ); // No tr
 	    insertItem( tr("None") );
 	    if ( cur == tr("None"))
 		curix = 0;
@@ -108,10 +108,12 @@ void TZCombo::updateZones()
 	}
     }
     int cfgIndex = 0;
+    bool configEmpty = TRUE;
     while (1) {
 	QString zn = cfg.readEntry("Zone"+QString::number(cfgIndex), QString::null);
 	if ( zn.isNull() )
 	    break;
+	configEmpty = FALSE;
 	if ( zn == tz )
 	    tzFound = TRUE;
 	QString nm = cfg.readEntry("ZoneName"+QString::number(cfgIndex));
@@ -122,7 +124,7 @@ void TZCombo::updateZones()
 	++cfgIndex;
 	++listIndex;
     }
-    if ( !listIndex ) {
+    if ( configEmpty ) {
         QStringList list = timezoneDefaults();
         for ( QStringList::Iterator it = list.begin(); it!=list.end(); ++it ) {
 	    QString zn = *it;
@@ -206,7 +208,7 @@ TimeZoneSelector::TimeZoneSelector(QWidget* p, const char* n) :
     // build the combobox before we do any updates...
     cmbTz = new TZCombo( this, "timezone combo" );
 
-    cmdTz = new QToolButton( this, "timezone button" );
+    cmdTz = new QToolButton( this, "timezone button" ); // No tr
     cmdTz->setIconSet( qtopia_internal_loadIconSet( "citytime_icon" ) );
     cmdTz->setMaximumSize( cmdTz->sizeHint() );
 

@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Screen Resizer
+Comment=Developer utility to quickly test user interfaces on smaller screens.
+X-QPE-Library=libscreensizeapplet.so

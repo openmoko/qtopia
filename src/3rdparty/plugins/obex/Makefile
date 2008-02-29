@@ -140,38 +140,38 @@ HEADERS =	qir.h \
 		qirserver.h \
 		qobex.h \
 		receivedialog.h \
-		senddialog.h
+		sendwindow.h
 SOURCES =	qir.cpp \
 		qirserver.cpp \
 		qobex.cpp \
 		receivedialog.cpp \
-		senddialog.cpp
+		sendwindow.cpp
 OBJECTS =	$(OBJECTS_DIR)/qir.o \
 		$(OBJECTS_DIR)/qirserver.o \
 		$(OBJECTS_DIR)/qobex.o \
 		$(OBJECTS_DIR)/receivedialog.o \
-		$(OBJECTS_DIR)/senddialog.o \
+		$(OBJECTS_DIR)/sendwindow.o \
 		$(OBJECTS_DIR)/receivedialogbase.o \
-		$(OBJECTS_DIR)/senddialogbase.o
+		$(OBJECTS_DIR)/sendwidgetbase.o
 INTERFACES =    receivedialogbase.ui \
-		senddialogbase.ui
+		sendwidgetbase.ui
 UICDECLS =      receivedialogbase.h \
-		senddialogbase.h
+		sendwidgetbase.h
 UICIMPLS =      receivedialogbase.cpp \
-		senddialogbase.cpp
+		sendwidgetbase.cpp
 SRCMOC	=	$(MOC_DIR)/moc_qir.cpp \
 		$(MOC_DIR)/moc_qirserver.cpp \
 		$(MOC_DIR)/moc_receivedialog.cpp \
-		$(MOC_DIR)/moc_senddialog.cpp \
+		$(MOC_DIR)/moc_sendwindow.cpp \
 		$(MOC_DIR)/moc_receivedialogbase.cpp \
-		$(MOC_DIR)/moc_senddialogbase.cpp \
+		$(MOC_DIR)/moc_sendwidgetbase.cpp \
 		$(MOC_DIR)/qirserver.moc
 OBJMOC	=	$(OBJECTS_DIR)/moc_qir.o \
 		$(OBJECTS_DIR)/moc_qirserver.o \
 		$(OBJECTS_DIR)/moc_receivedialog.o \
-		$(OBJECTS_DIR)/moc_senddialog.o \
+		$(OBJECTS_DIR)/moc_sendwindow.o \
 		$(OBJECTS_DIR)/moc_receivedialogbase.o \
-		$(OBJECTS_DIR)/moc_senddialogbase.o
+		$(OBJECTS_DIR)/moc_sendwidgetbase.o
 
 
 ####### Implicit rules
@@ -242,8 +242,8 @@ $(OBJECTS_DIR)/qir.o: qir.cpp \
 		qirserver.h \
 		receivedialog.h \
 		receivedialogbase.h \
-		senddialog.h \
-		senddialogbase.h
+		sendwindow.h \
+		sendwidgetbase.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qir.o qir.cpp
 
 $(OBJECTS_DIR)/qirserver.o: qirserver.cpp \
@@ -264,11 +264,11 @@ $(OBJECTS_DIR)/receivedialog.o: receivedialog.cpp \
 		qirserver.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/receivedialog.o receivedialog.cpp
 
-$(OBJECTS_DIR)/senddialog.o: senddialog.cpp \
-		senddialog.h \
-		senddialogbase.h \
+$(OBJECTS_DIR)/sendwindow.o: sendwindow.cpp \
+		sendwindow.h \
+		sendwidgetbase.h \
 		qirserver.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/senddialog.o senddialog.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sendwindow.o sendwindow.cpp
 
 receivedialogbase.h: receivedialogbase.ui
 	$(UIC) receivedialogbase.ui -o $(INTERFACE_DECL_PATH)/receivedialogbase.h
@@ -276,17 +276,17 @@ receivedialogbase.h: receivedialogbase.ui
 receivedialogbase.cpp: receivedialogbase.ui
 	$(UIC) receivedialogbase.ui -i receivedialogbase.h -o receivedialogbase.cpp
 
-senddialogbase.h: senddialogbase.ui
-	$(UIC) senddialogbase.ui -o $(INTERFACE_DECL_PATH)/senddialogbase.h
+sendwidgetbase.h: sendwidgetbase.ui
+	$(UIC) sendwidgetbase.ui -o $(INTERFACE_DECL_PATH)/sendwidgetbase.h
 
-senddialogbase.cpp: senddialogbase.ui
-	$(UIC) senddialogbase.ui -i senddialogbase.h -o senddialogbase.cpp
+sendwidgetbase.cpp: sendwidgetbase.ui
+	$(UIC) sendwidgetbase.ui -i sendwidgetbase.h -o sendwidgetbase.cpp
 
 $(OBJECTS_DIR)/receivedialogbase.o: receivedialogbase.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/receivedialogbase.o receivedialogbase.cpp
 
-$(OBJECTS_DIR)/senddialogbase.o: senddialogbase.cpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/senddialogbase.o senddialogbase.cpp
+$(OBJECTS_DIR)/sendwidgetbase.o: sendwidgetbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sendwidgetbase.o sendwidgetbase.cpp
 
 $(OBJECTS_DIR)/moc_qir.o: $(MOC_DIR)/moc_qir.cpp \
 		qir.h
@@ -301,18 +301,18 @@ $(OBJECTS_DIR)/moc_receivedialog.o: $(MOC_DIR)/moc_receivedialog.cpp \
 		receivedialogbase.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_receivedialog.o $(MOC_DIR)/moc_receivedialog.cpp
 
-$(OBJECTS_DIR)/moc_senddialog.o: $(MOC_DIR)/moc_senddialog.cpp \
-		senddialog.h \
-		senddialogbase.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_senddialog.o $(MOC_DIR)/moc_senddialog.cpp
+$(OBJECTS_DIR)/moc_sendwindow.o: $(MOC_DIR)/moc_sendwindow.cpp \
+		sendwindow.h \
+		sendwidgetbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_sendwindow.o $(MOC_DIR)/moc_sendwindow.cpp
 
 $(OBJECTS_DIR)/moc_receivedialogbase.o: $(MOC_DIR)/moc_receivedialogbase.cpp \
 		receivedialogbase.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_receivedialogbase.o $(MOC_DIR)/moc_receivedialogbase.cpp
 
-$(OBJECTS_DIR)/moc_senddialogbase.o: $(MOC_DIR)/moc_senddialogbase.cpp \
-		senddialogbase.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_senddialogbase.o $(MOC_DIR)/moc_senddialogbase.cpp
+$(OBJECTS_DIR)/moc_sendwidgetbase.o: $(MOC_DIR)/moc_sendwidgetbase.cpp \
+		sendwidgetbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_sendwidgetbase.o $(MOC_DIR)/moc_sendwidgetbase.cpp
 
 $(MOC_DIR)/moc_qir.cpp: qir.h
 	$(MOC) qir.h -o $(MOC_DIR)/moc_qir.cpp
@@ -323,8 +323,8 @@ $(MOC_DIR)/moc_qirserver.cpp: qirserver.h
 $(MOC_DIR)/moc_receivedialog.cpp: receivedialog.h
 	$(MOC) receivedialog.h -o $(MOC_DIR)/moc_receivedialog.cpp
 
-$(MOC_DIR)/moc_senddialog.cpp: senddialog.h
-	$(MOC) senddialog.h -o $(MOC_DIR)/moc_senddialog.cpp
+$(MOC_DIR)/moc_sendwindow.cpp: sendwindow.h
+	$(MOC) sendwindow.h -o $(MOC_DIR)/moc_sendwindow.cpp
 
 $(MOC_DIR)/qirserver.moc: qirserver.cpp
 	$(MOC) qirserver.cpp -o $(MOC_DIR)/qirserver.moc
@@ -332,20 +332,20 @@ $(MOC_DIR)/qirserver.moc: qirserver.cpp
 $(MOC_DIR)/moc_receivedialogbase.cpp: receivedialogbase.h
 	$(MOC) receivedialogbase.h -o $(MOC_DIR)/moc_receivedialogbase.cpp
 
-$(MOC_DIR)/moc_senddialogbase.cpp: senddialogbase.h
-	$(MOC) senddialogbase.h -o $(MOC_DIR)/moc_senddialogbase.cpp
+$(MOC_DIR)/moc_sendwidgetbase.cpp: sendwidgetbase.h
+	$(MOC) sendwidgetbase.h -o $(MOC_DIR)/moc_sendwidgetbase.cpp
 
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <obex.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <obex.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease obex.pro
 	$(QPEDIR)/bin/qtopia-linstall obex.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

@@ -3,3 +3,5 @@ Type=Application
 Exec=appservices
 Icon=AppServices
 Name=Application Services
+Name[ja]=???
+CanFastload=0

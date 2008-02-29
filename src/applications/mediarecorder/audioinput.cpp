@@ -562,9 +562,24 @@ void AudioInputPrivate::open( AudioInput *input, bool trialOpen )
     value = (int)channels;
     ioctl( fd, SNDCTL_DSP_CHANNELS, &value );
     devChannels = (unsigned int)value;
+#ifdef QT_QWS_SL5XXX
+    // The Sharp Zaurus audio input device has a bug that causes it
+    // to halve the specified frequency when set to stereo, so we
+    // have to double the value before setting.
+    if ( channels == 2 ) {
+	value = (int)(frequency * 2);
+	ioctl( fd, SNDCTL_DSP_SPEED, &value );
+	devFrequency = frequency;
+    } else {
+	value = (int)frequency;
+	ioctl( fd, SNDCTL_DSP_SPEED, &value );
+	devFrequency = (unsigned int)value;
+    }
+#else
     value = (int)frequency;
     ioctl( fd, SNDCTL_DSP_SPEED, &value );
     devFrequency = (unsigned int)value;
+#endif
 
     // Resample the input signal if it differs by more than 50 Hz
     // from the requested frequency rate.

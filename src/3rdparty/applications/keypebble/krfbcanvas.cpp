@@ -44,7 +44,7 @@ void KRFBCanvas::setViewScale( int s )
 
 void KRFBCanvas::openConnection()
 {
-  KVNCConnectDlg dlg( connection_, this, "connect dialog" );
+  KVNCConnectDlg dlg( connection_, this, "connect dialog" ); // No tr
   if ( dlg.exec() ) {
     QCString host = dlg.hostname().latin1();
     password = dlg.password();

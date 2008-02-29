@@ -22,11 +22,14 @@
 #define QIR_H
 
 #include <qobject.h>
+#include <qtimer.h>
 
 class QCopChannel;
 class QIrServer;
 class ReceiveDialog;
-class SendDialog;
+class SendWindow;
+
+class IrPowerSave;
 
 class QIr : public QObject
 {
@@ -36,19 +39,54 @@ public:
     ~QIr();
 
 public slots:
-    void receiving( int, const QString&, const QString &);
-    void progress( int size );
     void obexMessage(const QCString&, const QByteArray&);
+    void traySocket( const QCString&, const QByteArray &);
 
-    void dialogDestroyed();
-    void sendDialogDestroyed();
-    void done();
+    void receiveInit();
+    void received( const QString&, const QString &);
+    void receiveError();
+
+    void beamNext();
+    void beamDone();
+    void beamError();
     
 private:
     QIrServer *obexServer;
-    QCopChannel *obexChannel;
-    ReceiveDialog *receiveDialog;
-    SendDialog *sendDialog;
+    QCopChannel *obexChannel, *trayChannel;
+    
+    ReceiveDialog *receiveWindow;
+    SendWindow *sendWindow;
+    IrPowerSave *ips;
+};
+
+class IrPowerSave : public QObject
+{
+    Q_OBJECT
+public:
+    IrPowerSave( QObject *parent = 0, const char *name = 0);
+    ~IrPowerSave();
+    
+    enum State { Off, On, OnMinutes, On1Item };
+
+    void initBeam();
+    void beamingDone(bool received = FALSE);
+
+public slots:
+    void obexMessage(const QCString&, const QByteArray&);
+    
+private slots:
+    void timeout();
+
+private:
+    void applyReceiveState(State s);
+    void service(const QString &);
+
+private:
+    State state;
+    bool running;
+    bool inUse;
+    int time;
+    QTimer *timer;
 };
 
 #endif

@@ -63,7 +63,8 @@ public slots:
     void pass();
     void resign();
     void newGame();
-    void setTwoplayer( bool );
+    void setOneplayer( );
+    void setTwoplayer( );
     void setHandicap( int );
 signals:
     void showScore( const QString& );
@@ -85,8 +86,8 @@ private:
     void showStone( int x, int y, enum bVal );
     void reportPrisoners(int,int);
     
-    inline int x2board( int x ) { return (x-bx+d/2)/d; }
-    inline int y2board( int y ) { return (y-by+d/2)/d; }
+    inline int x2board( int x ) { return d > 0 ? (x-bx+d/2)/d : 0; }
+    inline int y2board( int y ) { return d > 0 ? (y-by+d/2)/d : 0; }
 
     void endGame();
 

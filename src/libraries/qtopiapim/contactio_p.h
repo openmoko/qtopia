@@ -76,6 +76,8 @@ public:
 
     virtual ContactIteratorMachine *begin() const = 0;
 
+    virtual PrContact contactForId( const QUuid &, bool *ok ) const = 0;
+
     virtual PrContact personal() const = 0;
     virtual void setAsPersonal(const QUuid &) = 0;
 

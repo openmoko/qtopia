@@ -17,37 +17,17 @@
 ** not clear to you.
 **
 **********************************************************************/
-
 #include "card.h"
 
-#include <qtopia/config.h>
 
-#include <qpoint.h>
-#include <qlist.h>
+Card::Card( eValue v, eSuit s, bool f ) :
+    val(v), suit(s), faceUp(f), showing(FALSE), ix(0), iy(0), iz(0), cardPile(NULL)
+{
+}
 
-/*
-Card( eValue v, eSuit s, bool f ) :
-    val(v), suit(s), faceUp(f), showing(FALSE), ix(0), iy(0), iz(0), cardPile(NULL) { }
-virtual ~Card() { }
-eValue getValue() { return val; }
-eSuit getSuit() { return suit; }
-CardPile *getCardPile() { return cardPile; }
-bool isFacing() { return faceUp; }
-bool isShowing() { return showing; }
-bool isRed() { return ((suit == diamonds) || (suit == hearts)); }
-int getX(void) { return ix; }
-int getY(void) { return iy; }
-int getZ(void) { return iz; }
-void setCardPile(CardPile *p) { cardPile = p; }
-void setFace(bool f) { faceUp = f; }
-void flip(void) { flipTo(getX(), getY()); }
-virtual void setPos(int x, int y, int z) { ix = x; iy = y; iz = z; }
-virtual void move(int x, int y) { ix = x; iy = y; }
-virtual void move(QPoint p) { ix = p.x(); iy = p.y(); }
-virtual void flipTo(int x, int y, int steps = 8) { ix = x; iy = y; faceUp = !faceUp; redraw(); Q_UNUSED(steps); }
-virtual void showCard(void) { showing = TRUE; }
-virtual void hideCard(void) { showing = FALSE; }
-virtual void redraw(void) { }
-*/
+
+Card::~Card()
+{
+}
 
 

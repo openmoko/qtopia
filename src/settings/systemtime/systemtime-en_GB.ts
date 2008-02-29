@@ -2,10 +2,6 @@
 <context>
     <name>SetDateTime</name>
     <message>
-        <source>Set System Time</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Time Zone</source>
         <translation type="unfinished"></translation>
     </message>
@@ -39,6 +35,10 @@
     </message>
     <message>
         <source>Date format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Date/Time</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

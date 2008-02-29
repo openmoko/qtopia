@@ -62,7 +62,7 @@ FormFraction::FormFraction(QWidget *parent,const char *name,WFlags fl)
 }
 
 void FormFraction::showEvent ( QShowEvent *e ) {
-    sys.setAccType("FRACTION");
+    sys.setAccType("Fraction"); // No tr
     QWidget::showEvent(e);
 }
 

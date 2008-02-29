@@ -31,6 +31,7 @@ class QCopChannel;
 class QPEApplicationData;
 struct QWSEvent;
 struct QWSKeyEvent;
+class PluginLibraryManager;
 
 class QTOPIA_EXPORT QPEApplication : public QApplication
 {
@@ -60,14 +61,14 @@ public:
 	AlwaysOff,
 	AlwaysOn
     };
-    
+
     enum screenSaverHint {
 	Disable = 0,
 	DisableLightOff = 1,
 	DisableSuspend = 2,
 	Enable = 100
     };
-    
+
     static void setInputMethodHint( QWidget *, InputMethodHint );
     static InputMethodHint inputMethodHint( QWidget * );
 
@@ -75,6 +76,7 @@ public:
     void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
     static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
     static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
+    static void setTempScreenSaverMode(screenSaverHint);
 
     static void setKeepRunning();
     bool keepRunning() const;
@@ -95,12 +97,13 @@ signals:
     void flush();
     void reload();
     void linkChanged( const QString &linkFile );
-    
+
 private slots:
     void systemMessage( const QCString &msg, const QByteArray &data );
     void pidMessage( const QCString &msg, const QByteArray &data );
     void removeSenderFromStylusDict();
     void hideOrQuit();
+    void pluginLibraryManager(PluginLibraryManager**);
 
 protected:
     bool qwsEventFilter( QWSEvent * );

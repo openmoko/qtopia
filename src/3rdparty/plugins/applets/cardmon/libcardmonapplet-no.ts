@@ -20,9 +20,5 @@
 </context>
 <context>
     <name>Taskbar Applet</name>
-    <message>
-        <source>Card Monitor</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 </TS>

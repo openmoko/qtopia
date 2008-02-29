@@ -2,7 +2,8 @@ Files: plugins/codecs/libmadplugin.so.1.0.0 plugins/codecs/libmadplugin.so.1.0 p
 Priority: optional
 Section: qpe/plugins
 Maintainer: John Ryland <jryland@trolltech.com>
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-4
 Depends: qpe-base ($QPE_VERSION)
 Description: MP3 file plugin using libmad

@@ -19,7 +19,7 @@
 **********************************************************************/
 
 #include <qnamespace.h>
-#if (QT_VERSION-0 >= 0x030000)
+#if !(QT_VERSION-0 < 0x030000)
 #include <qlibrary.h>
 #include <private/qcom_p.h>
 #include <private/qcomlibrary_p.h>
@@ -36,7 +36,11 @@
 
 #include <qtopia/qcom.h>
 
+#ifndef QTOPIA_FAKE_COMPONENT
 class QLibraryPrivate;
+#else
+#include <qdict.h>
+#endif
 
 class QTOPIA_EXPORT QLibrary
 {
@@ -51,8 +55,10 @@ public:
     QLibrary( const QString& filename, Policy = Delayed );
     ~QLibrary();
 
+#ifndef QTOPIA_FAKE_COMPONENT
     void *resolve( const char* );
     static void *resolve( const QString &filename, const char * );
+#endif
 
     bool unload( bool force = FALSE );
     bool isLoaded() const;
@@ -65,10 +71,12 @@ public:
     QRESULT queryInterface( const QUuid&, QUnknownInterface** );
 
 private:
-    bool load();
     void createInstanceInternal();
-
+#ifndef QTOPIA_FAKE_COMPONENT
     QLibraryPrivate *d;
+#endif
+
+    bool load();
 
     QString libfile;
     Policy libPol;

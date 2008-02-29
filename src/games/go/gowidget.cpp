@@ -81,9 +81,21 @@ GoMainWidget::GoMainWidget( QWidget *parent, const char* name, WFlags fl) :
 
     QPopupMenu *file = new QPopupMenu( this );
 
-    QAction *a = new QAction( tr( "New Game" ), QString::null, 0, this, 0 );
-    connect( a, SIGNAL( activated() ), go, SLOT( newGame() ) );
+    QAction *a = new QAction( tr( "Single player game" ), QString::null, 0, this, 0 );
+    connect( a, SIGNAL( activated() ), go, SLOT( setOneplayer() ) );
     a->addTo( file );
+
+    a = new QAction( tr( "Two player game" ),  QString::null, 0, this, 0 );
+    connect( a, SIGNAL( activated() ), go, SLOT( setTwoplayer() ) );
+    a->addTo( file );
+    
+    mb->insertItem( tr( "Game" ), file );
+    
+    QLabel *turnLabel = new QLabel( toolbar );
+    turnLabel->setBackgroundMode( PaletteButton );
+    connect( go, SIGNAL(showTurn(const QPixmap&)), 
+	     turnLabel, SLOT(setPixmap(const QPixmap&)) );
+    turnLabel->setPixmap(go->currentPebble());
 
     a = new QAction( tr( "Pass" ), Resource::loadIconSet( "pass" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), go, SLOT( pass() ) );
@@ -94,20 +106,6 @@ GoMainWidget::GoMainWidget( QWidget *parent, const char* name, WFlags fl) :
     a = new QAction( tr( "Resign" ), Resource::loadIconSet( "reset" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), go, SLOT( resign() ) );
     a->addTo( file );
-
-    a = new QAction( tr( "Two player option" ),  QString::null, 0, this, 0 );
-    a->setToggleAction( TRUE );
-    a->setOn(go->isTwoPlayer());
-    connect( a, SIGNAL( toggled(bool) ), go, SLOT( setTwoplayer(bool) ) );
-    a->addTo( file );
-    
-    mb->insertItem( tr( "Game" ), file );
-    
-    QLabel *turnLabel = new QLabel( toolbar );
-    turnLabel->setBackgroundMode( PaletteButton );
-    connect( go, SIGNAL(showTurn(const QPixmap&)), 
-	     turnLabel, SLOT(setPixmap(const QPixmap&)) );
-    turnLabel->setPixmap(go->currentPebble());
 
     
     QLabel * scoreLabel = new QLabel( toolbar );
@@ -139,7 +137,7 @@ GoWidget::GoWidget( QWidget *parent, const char* name) :
 	QWidget( parent, name ) 
 {
     if ( self )
-	fatal( "Only one Go widget allowed" );
+	fatal( "Only one Go widget allowed" ); // No tr
     self = this;
     twoplayer = FALSE;
 
@@ -463,9 +461,16 @@ void GoWidget::reportPrisoners( int blackcnt, int whitecnt )
     emit showScore( scoreString );
 }
 
-void GoWidget::setTwoplayer( bool b )
+void GoWidget::setOneplayer(void)
 {
-    twoplayer = b;
+    twoplayer = FALSE;
+    newGame();
+}
+
+void GoWidget::setTwoplayer(void)
+{
+    twoplayer = TRUE;
+    newGame();
 }
 
 void GoWidget::setHandicap( int h )

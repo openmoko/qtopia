@@ -21,11 +21,14 @@
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/calc/doubleinstruction.h>
-//#include <qtopia/calc/fractioninstruction.h>
-//#include <qtopia/calc/integerinstruction.h>
+#ifdef ENABLE_FRACTION
+#include <qtopia/calc/fractioninstruction.h>
+#endif
+#ifdef ENABLE_INTEGER
+#include <qtopia/calc/integerinstruction.h>
+#endif
 
 //#define QTEST
-// Braces
 
 // Braces
 class iBraceOpen:public Instruction {
@@ -42,7 +45,7 @@ public:
 };
 
 BraceOpen::BraceOpen():InstructionDescription() {
-    instructionName = "Open brace";
+    instructionName = "Open brace"; // No tr
     typeOne = typeTwo = type = "NONE";
     precedence = 50;
 };
@@ -121,9 +124,10 @@ Engine::Engine() {
     registerInstruction(da);
     da = new DoubleNegate();
     registerInstruction(da);
-    // Fraction
-#ifdef TYPE_CONVERSION
-    da = new ConvertFractionFraction();
+#ifdef ENABLE_FRACTION
+    da = new FractionCopy();
+    registerInstruction(da);
+    da = new FractionFactory();
     registerInstruction(da);
     da = new ConvertDoubleFraction();
     registerInstruction(da);
@@ -137,7 +141,8 @@ Engine::Engine() {
     registerInstruction(da);
     da = new ConvertFractionDouble();
     registerInstruction(da);
-    // Integer
+#endif
+#ifdef ENABLE_INTEGER
     da = new ConvertIntDouble();
     registerInstruction(da);
 #endif
@@ -199,6 +204,8 @@ qDebug("None found by that name");
 	return new Instruction();
     }
 
+    Instruction *ret;
+
     // Try to match exactly at first
     for (it = 0; it < shortList.count(); it++) {
 	tmp = shortList.at(it);
@@ -209,7 +216,7 @@ qDebug("Matched %s %s %s",tmp->instructionName.latin1(),
 	tmp->typeOne.latin1(),
 	tmp->typeTwo.latin1());
 #endif
-	    Instruction *ret = tmp->getInstruction();
+	    ret = tmp->getInstruction();
 	    ret->num = d->num;
 	    return ret;
 	}
@@ -219,6 +226,42 @@ qDebug("No match found");
 #endif
     // Search for conversions that will let what we have work
     // Eventually weighting should be here as well...
+    for (it = 0; it < shortList.count(); it++) {
+	tmp = shortList.at(it);
+	InstructionDescription *tmp2;
+	// Search for ops that only require one side to be converted
+	for (uint it2 = 0; it < list.count(); it2++) {
+	    tmp2 = shortList.at(it2);
+	    if ( tmp->typeTwo == currentType &&
+		    tmp2->typeOne == currentType &&
+		    tmp2->typeTwo == tmp->typeOne ) {
+		// Convert
+		ret = tmp2->getInstruction();
+		ret->num = d->num;
+		// eval
+		delete ret;
+		// crash here...
+
+		// Now return the actual instruction
+		ret = tmp->getInstruction();
+		ret->num = d->num;
+		return ret;
+	    } else if ( tmp->typeOne == currentType &&
+		    tmp->typeOne == currentType &&
+		    tmp2->type == tmp->typeTwo) {
+		// Convert
+		ret = tmp2->getInstruction();
+		ret->num = d->num;
+		acc = ret->eval(acc);
+		delete ret;
+
+		// Now return the actual instruction
+		ret = tmp->getInstruction();
+		ret->num = d->num;
+		return ret;
+	    }
+	}
+    }
     return new Instruction();
 }
 // Stack
@@ -277,20 +320,18 @@ void Engine::dualReset() {
 }
 void Engine::softReset() {
     decimalPlaces = -1;
-    if (acc)
-	acc->clear();
-    else
-	executeInstructionOnStack("Factory",stack);
-    state = sStart;
-    updateDisplay();
-}
-void Engine::softReset2() {
-    decimalPlaces = -1;
+#ifdef NEW_STYLE_STACK
     if (dStack.isEmpty())
-	executeInstructionOnStack2("Factory",dStack);
+	executeInstructionOnStack("Factory",dStack); // No tr
     if (dStack.isEmpty())
 	qDebug("factory didnt work");
     dStack.top()->clear();
+#else
+    if (acc)
+	acc->clear();
+    else
+	executeInstructionOnStack("Factory",stack); // No tr
+#endif
     state = sStart;
     updateDisplay();
 }
@@ -321,6 +362,7 @@ qDebug("  - comparing %s for %s",id->instructionName.latin1(),id->type.latin1())
     }
     return 0;
 }
+#ifdef NEW_STYLE_STACK
 void Engine::immediateInstruction(QString name) {
 #ifdef QTEST
 qDebug("immediateInstruction(%s)",name.latin1());
@@ -331,8 +373,11 @@ qDebug("immediateInstruction(%s)",name.latin1());
     secondaryReset = FALSE;
     executeInstructionOnStack(name,stack);
     updateDisplay();
+    state = sStart;
 }
-void Engine::pushInstruction2(QString name) {
+#endif
+#ifdef NEW_STYLE_STACK
+void Engine::pushInstruction(QString name) {
     if (state == sError)
 	return;
     InstructionDescription *id = resolveDescription(name);
@@ -341,9 +386,10 @@ void Engine::pushInstruction2(QString name) {
     previousInstructionsPrecedence = id->precedence;
     secondaryReset = FALSE;
     if (!id->precedence) {
-	executeInstructionOnStack2(name,dStack);
+	executeInstructionOnStack(name,dStack);
 	updateDisplay();
 	delete id;
+	state = sStart;
 	return;
     }
     if (!iStack.isEmpty()
@@ -360,7 +406,7 @@ void Engine::pushInstruction2(QString name) {
 	}
     }
 
-    Instruction *copy = resolveInstruction("Copy");
+    Instruction *copy = resolveInstruction("Copy"); // No tr
     if (!copy)
 	return;
     id->num = copy->eval(acc);
@@ -370,6 +416,7 @@ void Engine::pushInstruction2(QString name) {
     stack.push(id);
     state = sStart;
 }
+#else
 void Engine::pushInstruction(InstructionDescription *i) {
     if (state == sError)
 	return;
@@ -379,6 +426,7 @@ void Engine::pushInstruction(InstructionDescription *i) {
 	executeInstructionOnStack(i->instructionName,stack);
 	updateDisplay();
 	delete i;
+	state = sStart;
 	return;
     }
     if (!stack.isEmpty()
@@ -397,7 +445,7 @@ void Engine::pushInstruction(InstructionDescription *i) {
     InstructionDescription *id = resolveDescription(i->instructionName);
     if (!id)
 	return;
-    Instruction *copy = resolveInstruction("Copy");
+    Instruction *copy = resolveInstruction("Copy"); // No tr
     if (!copy)
 	return;
     i->num = copy->eval(acc);
@@ -407,6 +455,26 @@ void Engine::pushInstruction(InstructionDescription *i) {
     stack.push(i);
     state = sStart;
 }
+#endif
+#ifdef NEW_STYLE_STACK
+void Engine::pushChar(char c) {
+    if (state == sError)
+	return;
+    if (dStack.isEmpty())
+	executeInstructionOnStack("Factory",dStack); // No tr
+    if (dStack.isEmpty()) {
+	setError(eNoDataFactory);
+	return;
+    }
+    if (state == sStart) {
+	softReset();
+	state = sAppend;
+    }
+    dStack.top()->push(c);
+    secondaryReset = FALSE;
+    updateDisplay();
+}
+#else
 void Engine::pushChar(char c) {
     if (!checkState())
 	return;
@@ -418,52 +486,39 @@ void Engine::pushChar(char c) {
     secondaryReset = FALSE;
     updateDisplay();
 }
-void Engine::pushChar2(char c) {
-    if (state == sError)
-	return;
-    if (dStack.isEmpty())
-	executeInstructionOnStack2("Factory",dStack);
-    if (dStack.isEmpty()) {
-	setError(eNoDataFactory);
-	return;
-    }
-    if (state == sStart) {
-	softReset2();
-	state = sAppend;
-    }
-    dStack.top()->push(c);
-    secondaryReset = FALSE;
-    updateDisplay();
-}
+#endif
 void Engine::delChar() {
     if (!checkState())
 	return;
     acc->del();
     updateDisplay();
 }
+#ifdef NEW_STYLE_STACK
 void Engine::updateDisplay() {
     if (state == sError)
 	return;
-    if (!acc)
-	executeInstructionOnStack("Factory",stack);
-    if (lcd)
-	lcd->setText(acc->getFormattedOutput());
-}
-void Engine::updateDisplay2() {
-    if (state == sError)
-	return;
     if (dStack.isEmpty())
-	executeInstructionOnStack2("Factory",dStack);
+	executeInstructionOnStack("Factory",dStack); // No tr
     if (dStack.isEmpty())
 	qDebug("still empty, type = %s, state = %d,stack size = %d",currentType.latin1(),state,dStack.count());
     if (lcd) 
 	lcd->setText(dStack.top()->getFormattedOutput());
 }
+#else
+void Engine::updateDisplay() {
+    if (state == sError)
+	return;
+    if (!acc)
+	executeInstructionOnStack("Factory",stack); // No tr
+    if (lcd)
+	lcd->setText(acc->getFormattedOutput());
+}
+#endif
 bool Engine::checkState() {
     if (state == sError)
 	return FALSE;
     if (!acc) //stack.isEmpty())
-	executeInstructionOnStack("Factory",stack);
+	executeInstructionOnStack("Factory",stack); // No tr
     if (!acc) //stack.isEmpty())
 	return FALSE;
     if (currentType == "NONE")
@@ -472,12 +527,31 @@ bool Engine::checkState() {
 }
 
 // Memory
+#ifdef NEW_STYLE_STACK
+void Engine::memorySave() {
+    if (state == sError)
+	return;
+    if (dStack.isEmpty())
+	return;
+
+    QStack<Data> tmp;
+    if (!mem) {
+	executeInstructionOnStack("Factory",tmp); // No tr
+	mem = tmp.pop();
+    }
+    tmp.push(dStack.pop());
+    tmp.push(mem);
+    executeInstructionOnStack("Add",tmp); // No tr
+
+    state = sStart;
+}
+#else
 void Engine::memorySave() {
     if (!checkState())
 	return;
 
     if (!mem) {
-	Instruction *factory = resolveInstruction("Factory");
+	Instruction *factory = resolveInstruction("Factory"); // No tr
 	if (!factory) {
 	    setError(eNoDataFactory);
 	    return;
@@ -489,7 +563,7 @@ void Engine::memorySave() {
 qDebug("creating the new memory data at %p, value = %s" ,mem,mem->getFormattedOutput().latin1());
 #endif
     }
-    Instruction *add = resolveInstruction("Add");
+    Instruction *add = resolveInstruction("Add"); // No tr
     if (!add)
 	return;
     add->num = acc; 
@@ -498,7 +572,7 @@ qDebug("creating the new memory data at %p, value = %s" ,mem,mem->getFormattedOu
 #ifdef QTEST
 qDebug("adding the new memory data to the old at %p, value = %s" ,mem,mem->getFormattedOutput().latin1());
 #endif
-    Instruction *factory = resolveInstruction("Factory");
+    Instruction *factory = resolveInstruction("Factory"); // No tr
     if (factory) {
 	Data *memCmp = factory->eval(acc);
 	if (memCmp) {
@@ -510,23 +584,7 @@ qDebug("adding the new memory data to the old at %p, value = %s" ,mem,mem->getFo
     }
     state = sStart;
 }
-void Engine::memorySave2() {
-    if (state == sError)
-	return;
-    if (dStack.isEmpty())
-	return;
-
-    QStack<Data> tmp;
-    if (!mem) {
-	executeInstructionOnStack2("Factory",tmp);
-	mem = tmp.pop();
-    }
-    tmp.push(dStack.pop());
-    tmp.push(mem);
-    executeInstructionOnStack2("Add",tmp);
-
-    state = sStart;
-}
+#endif
 void Engine::memoryRecall() {
     softReset();
     if (!mem)
@@ -534,7 +592,7 @@ void Engine::memoryRecall() {
 #ifdef QTEST
 qDebug("contents of memory at memoryRecall() = %s", mem->getFormattedOutput().latin1());
 #endif
-    Instruction *copy = resolveInstruction("Copy");
+    Instruction *copy = resolveInstruction("Copy"); // No tr
     if (!copy)
 	return;
     if (acc)
@@ -566,7 +624,7 @@ void Engine::setError(Error e){
 	    break;
 	case eNonPositive:
 	    s = qApp->translate("Engine",
-		    "Not a positive number");
+		    "Input not a positive number");
 	    break;
 	case eNonInteger:
 	    s = qApp->translate("Engine",
@@ -589,15 +647,14 @@ void Engine::setError(Error e){
 		    "No data factory found");
 	case eError:
 	default:
-	    s = qApp->translate("Engine",
-		    "Error");
+	    // let setError(QString) pick it up
 	    break;
     }
     setError(s);
 }
 void Engine::setError(QString s) {
     if (s.isEmpty())
-	s = "Error";
+	s = qApp->translate("Engine","Error");
     state = sError;
     lcd->setText(s);
 }
@@ -617,33 +674,8 @@ void Engine::setDisplay(QLineEdit *l) {
     kMark->move( 4, 14 );
     kMark->hide();
 }
-// this function is convoluted because acc is not (yet) the top of the stack
-void Engine::executeInstructionOnStack(QString name,QStack<InstructionDescription> ds) {
-    Instruction *i = resolveInstruction(name);
-    if (name == "Factory") {
-	if (!i)
-	    setError(eNoDataFactory);
-	else {
-	    if (acc) {
-		InstructionDescription *id = new InstructionDescription();
-		id->num = acc;
-		stack.push(id);
-	    }
-	    acc = i->eval(new Data());
-	    delete i;
-	}
-	return;
-    }
-
-    if (!acc) // i->argCount)
-	executeInstructionOnStack("Factory",ds);
-    if (state == sError)
-	return;
-
-    acc = i->eval(acc);
-    delete i;
-}
-void Engine::executeInstructionOnStack2(QString name,QStack<Data> ds) {
+#ifdef NEW_STYLE_STACK
+void Engine::executeInstructionOnStack(QString name,QStack<Data> ds) {
     InstructionDescription *id = resolveDescription(name);
     if (!id) {
 #ifdef QTEST
@@ -652,16 +684,20 @@ qDebug("desc not found for %s",name.latin1());
 	return;
     }
     Instruction *i = resolveInstruction(id);
-    if (name == "Factory") {
+    if (name == "Factory") { // No tr
 	if (!i) {
 #ifdef QTEST
 qDebug("Instruction not found for %s",name.latin1());
 #endif
 	    setError(eNoDataFactory);
 	} else {
+#ifdef QTEST
 qDebug("before eval stack size is %d",ds.count());
+#endif
 	    ds.push(i->eval(0));
+#ifdef QTEST
 qDebug("after eval stack size is %d",ds.count());
+#endif
 	    delete id;
 	    delete i;
 	}
@@ -673,8 +709,8 @@ qDebug("Instruction not found for %s",name.latin1());
 #endif
 	return;
     }
-    while (iStack.count() < uint(id->argCount)) // might be better to
-	executeInstructionOnStack2("Factory",ds); // just bail out
+    while (iStack.count() < uint(id->argCount)) // might be better to just bail out
+	executeInstructionOnStack("Factory",ds); // No tr
     if (state == sError) {
 #ifdef QTEST
 qDebug("trouble in recursive call");
@@ -702,32 +738,61 @@ qDebug("Error in evaluating %s",name.latin1());
 qDebug("end");
 #endif
 }
+#else
+// this function is convoluted because acc is not (yet) the top of the stack
+void Engine::executeInstructionOnStack(QString name,QStack<InstructionDescription> ds) {
+    Instruction *i = resolveInstruction(name);
+    if (name == "Factory") { // No tr
+	if (!i) {
+	    setError(eNoDataFactory);
+	} else {
+	    if (acc) {
+		InstructionDescription *id = new InstructionDescription();
+		id->num = acc;
+		stack.push(id);
+	    }
+	    acc = i->eval(new Data());
+	    delete i;
+	}
+	return;
+    }
 
+    if (!acc) // i->argCount)
+	executeInstructionOnStack("Factory",ds); // No tr
+    if (state == sError)
+	return;
+
+    acc = i->eval(acc);
+    delete i;
+}
+#endif
+#ifdef NEW_STYLE_STACK
+void Engine::setAccType(QString type) {
+    if (currentType == type)
+	return;
+    currentType = type;
+    if (dStack.isEmpty()) {
+	executeInstructionOnStack("Factory",dStack); // No tr
+	state = sStart;
+    } else {
+	executeInstructionOnStack("Convert",dStack); // No tr
+    }
+    updateDisplay();
+}
+#else
 void Engine::setAccType(QString type) {
     if (currentType == type)
 	return;
     currentType = type;
     if (!acc) {
-	executeInstructionOnStack("Factory",stack);
+	executeInstructionOnStack("Factory",stack); // No tr
 	state = sStart;
     } else {
-	executeInstructionOnStack("Convert",stack);
+	executeInstructionOnStack("Convert",stack); // No tr
     }
     updateDisplay();
 }
-void Engine::setAccType2(QString type) {
-qDebug("setAccType2");
-    if (currentType == type)
-	return;
-    currentType = type;
-    if (dStack.isEmpty()) {
-	executeInstructionOnStack2("Factory",dStack);
-	state = sStart;
-    } else {
-	executeInstructionOnStack2("Convert",dStack);
-    }
-    updateDisplay();
-}
+#endif
 QString Engine::getDisplay() {
     return acc->getFormattedOutput();
 }

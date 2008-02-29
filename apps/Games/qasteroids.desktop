@@ -4,5 +4,6 @@ Exec=qasteroids
 Icon=Asteroids
 Type=Application
 Name=Asteroids
+Name[ja]=???
 Name[hu]=Asteroids
 Name[de]=Asteroiden

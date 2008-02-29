@@ -124,7 +124,8 @@ $(OBJECTS_DIR)/todotable.o: todotable.cpp \
 
 $(OBJECTS_DIR)/todoentryimpl.o: todoentryimpl.cpp \
 		todoentryimpl.h \
-		todoentry.h
+		todoentry.h \
+		nulldb.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoentryimpl.o todoentryimpl.cpp
 
 $(OBJECTS_DIR)/main.o: main.cpp \

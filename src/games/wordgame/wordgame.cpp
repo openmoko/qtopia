@@ -50,8 +50,13 @@
 #include <qgroupbox.h>
 
 #include <stdlib.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
 #include <pwd.h>
+#else
+#include <stdlib.h> // needed for rand()
+#include <time.h>
+#endif
 #include <sys/types.h>
 
 enum RuleEffects {
@@ -119,6 +124,9 @@ const char* sampleWGR=
 WordGame::WordGame( QWidget* parent, const char* name, WFlags fl ) :
     QMainWindow(parent, name, fl)
 {
+#ifdef Q_OS_WIN32
+     srand( (unsigned)time( NULL ) );
+#endif
     landscape=qApp->desktop()->width() > qApp->desktop()->height();
     if ( qApp->desktop()->width() < 240 ) {
 	tile_smallw = 10;
@@ -162,6 +170,7 @@ WordGame::WordGame( QWidget* parent, const char* name, WFlags fl ) :
     board = 0;
     bag = 0;
     racks = 0;
+    nplayers = 0;
 
     aiheart = new QTimer(this);
     connect(aiheart, SIGNAL(timeout()), this, SLOT(think()));
@@ -183,13 +192,25 @@ void WordGame::writeConfig()
     cfg.writeEntry("CurrentPlayer",gameover ? 0 : player+1);
     if ( !gameover ) {
 	cfg.writeEntry("Rules",rules);
-	bag->writeConfig(cfg);
-	board->writeConfig(cfg);
-	scoreinfo->writeConfig(cfg);
+	if (bag) {
+	    bag->writeConfig(cfg);
+	}
+	if (board) {
+	    board->writeConfig(cfg);
+	}
+	if (scoreinfo) {
+	    scoreinfo->writeConfig(cfg);
+	}
     }
     for (int p=0; p<nplayers; p++) {
 	cfg.setGroup("Player"+QString::number(p+1));
-	if ( gameover ) cfg.clearGroup(); else rack(p)->writeConfig(cfg);
+	if ( gameover ) {
+	    cfg.clearGroup();
+	} else {
+	    if (rack(p)) {
+		rack(p)->writeConfig(cfg);
+	    }
+	}
     }
 }
 
@@ -247,6 +268,7 @@ void WordGame::openGameSelector(const QStringList& /* initnames */)
     newgame->show();
 
     connect(newgame->buttonOk, SIGNAL(clicked()), this, SLOT(startGame()));
+    setCaption(tr("Word Game"));
 }
 
 void WordGame::startGame()
@@ -298,8 +320,12 @@ bool WordGame::loadRules(const QString &name)
 
     QTextStream ts( &file );
 
-    QString title = name;
-    title.truncate( title.length() - 6 );
+    QString title = "Word Game";
+    if (name) {
+	title += " - " + name;
+	title.truncate( title.length() - 6 );
+    }
+
     setCaption( title );
 
     QString shapepixmap;
@@ -366,7 +392,7 @@ void NewGame::updateRuleSets()
     rules->clear();
 
     QString rulesDir = Global::applicationFileName( "wordgame", "" );
-    QDir dir( rulesDir, "*.rules" );
+    QDir dir( rulesDir, "*.rules" ); // No tr
     ruleslist = dir.entryList();
     if ( ruleslist.isEmpty() ) {
 	// Provide a sample
@@ -561,7 +587,7 @@ void WordGame::readyRack(int i)
 
 Rack* WordGame::rack(int i) const
 {
-    return (Rack*)racks->widget(i);
+    return racks ? (Rack*)racks->widget(i) : NULL;
 }
 
 void WordGame::think()
@@ -1440,7 +1466,11 @@ void Bag::add(const Tile& t)
 
 Tile Bag::takeRandom()
 {
+#ifndef Q_OS_WIN32
     Tile* rp = tiles.take(random()%tiles.count());
+#else
+    Tile* rp = tiles.take(rand()%tiles.count());
+#endif
     Tile r=*rp;
     return r;
 }

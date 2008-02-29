@@ -2,7 +2,8 @@ Files: bin/launchersettings apps/Settings/Launcher.desktop pics/launcher.png
 Priority: optional
 Section: qpe/settings
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Launcher settings dialog

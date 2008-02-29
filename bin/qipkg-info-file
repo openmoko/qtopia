@@ -1,0 +1,2 @@
+#!/bin/sh
+zcat "$1" | tar -xOf - ./control.tar.gz | zcat -dc - | tar -xOf - ./control

@@ -30,7 +30,7 @@ int mancount;
 
 Man::Man(QCanvas* canvas) :
     QCanvasSprite(0, canvas),
-    splat("lose")
+    splat("lose") // No tr
 {
     manarray = new QCanvasPixmapArray();
     QString m0 = Resource::findPixmap("parashoot/man0001");
@@ -45,7 +45,7 @@ Man::Man(QCanvas* canvas) :
 
 Man::Man(QCanvas* canvas, int x, int y) :
     QCanvasSprite(0, canvas),
-    splat("bang")
+    splat("bang") // No tr
 {
     manarray = new QCanvasPixmapArray();
     QString m0 = Resource::findPixmap("parashoot/man0001");
@@ -95,10 +95,10 @@ void Man::advance(int phase)
 	} else if (xVelocity() == -2.0) {
 	    //
 	    // There's been a resize event while this Man has
-	    // been on the ground.  No neat solution, kill this
-	    // Man.
+	    // been on the ground.  Move the man back to the
+	    // new ground location.  This is not neat.
 	    //
-	    dead = TRUE;
+	    move(x(), canvas()->height()-26);
 	}
     }
 } 

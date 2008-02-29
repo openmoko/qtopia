@@ -24,8 +24,6 @@
 
 FormSimple::FormSimple(QWidget *parent,const char *name,WFlags fl)
 	:QWidget(parent,name,fl) {
-    if ( !name )
-	setName( "Simple" );
     QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred,FALSE);
 
     QVBoxLayout *vbl = new QVBoxLayout(this);
@@ -69,7 +67,7 @@ FormSimple::FormSimple(QWidget *parent,const char *name,WFlags fl)
 }
 
 void FormSimple::showEvent ( QShowEvent *e ) {
-    systemEngine->setAccType("DOUBLE");
+    systemEngine->setAccType("Double"); // No tr
     QWidget::showEvent(e);
 }
 

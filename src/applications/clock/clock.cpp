@@ -53,14 +53,11 @@ static const int magic_countdown = 2292923;
 
 static void toggleScreenSaver( bool on )
 {
-#ifndef QT_NO_COP
-    QCopEnvelope e("QPE/System", "setScreenSaverMode(int)" );
-    e << (on ? QPEApplication::Enable: QPEApplication::DisableSuspend );
-#endif
+    QPEApplication::setTempScreenSaverMode(on ? QPEApplication::Enable : QPEApplication::DisableSuspend);  
 }
 
 Clock::Clock( QWidget * parent, const char *, WFlags f )
-    : ClockBase( parent, "clock", f ), swatch_splitms(99), init(FALSE)
+    : ClockBase( parent, "clock", f ), swatch_splitms(99), init(FALSE) // No tr
 {
     alarmDlg = 0;
     alarmDlgLabel = 0;
@@ -84,7 +81,7 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     analogClock->display( QTime::currentTime() );
     clockLcd->setNumDigits( 5 );
     clockLcd->setFixedWidth( clockLcd->sizeHint().width() );
-    date->setText( TimeString::longDateString( QDate::currentDate() ) );
+    date->setText( TimeString::localYMD( QDate::currentDate(), TimeString::Long ) );
     if ( qApp->desktop()->width() < 200 )
 	date->setFont( QFont("Helvetica", 14, QFont::Bold) );
     if ( qApp->desktop()->height() > 240 ) {
@@ -115,11 +112,11 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     QVBoxLayout *lvb = new QVBoxLayout( lapFrame );
     nextLapBtn = new QToolButton( UpArrow, lapFrame );
     connect( nextLapBtn, SIGNAL(clicked()), this, SLOT(nextLap()) );
-    nextLapBtn->setAccel( Key_Down );
+    nextLapBtn->setAccel( Key_Up );
     lvb->addWidget( nextLapBtn );
     prevLapBtn = new QToolButton( DownArrow, lapFrame );
     connect( prevLapBtn, SIGNAL(clicked()), this, SLOT(prevLap()) );
-    prevLapBtn->setAccel( Key_Up );
+    prevLapBtn->setAccel( Key_Down );
     prevLapBtn->setMinimumWidth( 15 );
     lvb->addWidget( prevLapBtn );
     prevLapBtn->setEnabled( FALSE );
@@ -149,7 +146,7 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     connect( dailyEnabled, SIGNAL(toggled(bool)), this, SLOT(enableDaily(bool)) );
     cdLcd->display( "00:00" );
 
-    Config cConfig( "Clock" );
+    Config cConfig( "Clock" ); // No tr
     cConfig.setGroup( "Daily Alarm" );
 
     QStringList days;
@@ -168,6 +165,7 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
 	hb->addWidget( dayBtn[i] );
 	dayBtn[i]->setToggleButton( TRUE );
 	dayBtn[i]->setOn( TRUE );
+	dayBtn[i]->setFocusPolicy( StrongFocus );
 	connect( dayBtn[i], SIGNAL(toggled(bool)), this, SLOT(applyDailyAlarm()) );
     }
 
@@ -238,7 +236,7 @@ void Clock::updateClock()
 	clockLcd->display( s );
 	clockLcd->repaint( FALSE );
 	analogClock->display( QTime::currentTime() );
-	date->setText( TimeString::longDateString( QDate::currentDate() ) );
+	date->setText( TimeString::localYMD( QDate::currentDate(), TimeString::Long ) );
     } else if ( tabs->currentPageIndex() == 1 ) {
 	int totalms = swatch_totalms;
 	if ( swatch_running )
@@ -313,7 +311,7 @@ void Clock::stopStartStopWatch()
     updateLap();
     prevLapBtn->setEnabled( swatch_dispLap );
     nextLapBtn->setEnabled( swatch_dispLap < swatch_currLap );
-    stopStart->setAccel( Key_Space );
+    stopStart->setAccel( Key_Return );
 }
 
 void Clock::resetStopWatch()
@@ -420,7 +418,7 @@ void Clock::tabChanged( QWidget * )
     } else if ( tabs->currentPageIndex() == 1 ) {
 	if ( !swatch_running )
 	    t->stop();
-	stopStart->setAccel( Key_Space );
+	stopStart->setAccel( Key_Return );
     } else if ( tabs->currentPageIndex() == 2 ) {
 	t->start(1000);
     }

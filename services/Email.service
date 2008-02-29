@@ -2,9 +2,12 @@
 Actions = writeMail();writeMail(QMap(QString,QString));writeMail(QString,QString)
 Icon = EMail
 Name = Email
+Name[ja] = ???
 [writeMail()]
 Icon = EMail
 Name = Compose Email
+Name[ja] = ???
 [writeMail(QString,QString)]
 Icon = EMail
 Name = Compose Email
+Name[ja] = ???

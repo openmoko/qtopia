@@ -2,7 +2,8 @@ Files: lib/libqpepim.so.$VERSION_MAJ lib/libqpepim.so.$VERSION_MAJ.$VERSION_MIN 
 Priority: optional
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-10
 License: GPL
 Depends: qpe-libqtopia

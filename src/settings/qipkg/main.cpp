@@ -18,7 +18,7 @@
 **
 **********************************************************************/
 
-#include "packagemanager.h"
+#include "packagewizard.h"
 
 #include <qtopia/qpeapplication.h>
 
@@ -26,7 +26,7 @@ int main( int argc, char ** argv )
 {
     QPEApplication a( argc, argv );
 
-    PackageManager mw;
+    PackageWizard mw;
     a.showMainDocumentWidget( &mw );
     
     return a.exec();

@@ -1,8 +1,9 @@
-Files: plugins/inputmethods/libqkeyboard.so*
+Files: plugins/inputmethods/libqkeyboard.so* plugins/inputmethods/qkeyboard.desktop
 Priority: optional
 Section: qpe/inputmethods
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Keyboard input method

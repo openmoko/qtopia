@@ -113,7 +113,7 @@ void KRFBConnection::gotRFBConnection()
   decoder_ = new KRFBDecoder( this );
   CHECK_PTR( decoder_ );
 
-  buffer_ = new KRFBBuffer( decoder_, this, "RFB Buffer" );
+  buffer_ = new KRFBBuffer( decoder_, this, "RFB Buffer" ); // No tr
   CHECK_PTR( buffer_ );
   decoder_->setBuffer( buffer_ );
 

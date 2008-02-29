@@ -5,6 +5,7 @@ Icon=AddressBook
 Type=Application
 MimeType=text/x-vcard
 Name=Contacts
+Name[ja]=???
 Name[no]=Adressebok
 Name[de]=Adressbuch
 Name[hu]=Címtár

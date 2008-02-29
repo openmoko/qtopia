@@ -126,7 +126,7 @@ void QTrie::dump(int indent)
 	for (int in=0; in<indent; in++)
 	    fputc(' ',stderr);
 	fprintf(stderr," %c %d %s %p\n",(*it).letter.unicode(),
-	    s->key,s->isword?"word":"",s);
+	    s->key,s->isword?"word":"",s); // No tr
 	s->dump(indent+2);
     }
 }

@@ -22,6 +22,7 @@
 #include "filebrowser.h"
 
 #include <qtopia/resource.h>
+#include <qtopia/config.h>
 #include <qtopia/global.h>
 #include <qtopia/mimetype.h>
 #include <qtopia/applnk.h>
@@ -147,8 +148,20 @@ bool FileItem::isLib()
 
 int FileItem::launch()
 {
-    DocLnk doc( fileInfo.filePath(), FALSE );
-    doc.execute();
+    MimeType mt(fileInfo.filePath());
+    QString type = mt.id();
+    Config cfg(Service::appConfig("Open/"+type),Config::File);
+    cfg.setGroup("Standard");
+    if ( cfg.readNumEntry("Version") > 100 ) {
+	// Use Open service
+	QCopEnvelope e(Service::channel("Open/"+type), "openFile(QString)");
+	e << fileInfo.filePath();
+    } else {
+	// Use setDocument()
+	DocLnk doc( fileInfo.filePath(), FALSE );
+	doc.execute();
+    }
+
     listView()->clearSelection();
     return 1;
 }
@@ -575,10 +588,13 @@ void FileView::newFolder()
 void FileView::viewAsText()
 {
     FileItem * i = (FileItem *) currentItem();
-    QCopEnvelope e(Service::channel("Open/text/*"), "setDocument(QString)");
+    Config cfg(Service::appConfig("View/text/plain"),Config::File);
+    cfg.setGroup("Standard");
+    const char* msg = "setDocument(QString)";
+    if ( cfg.readNumEntry("Version") > 100 )
+	msg = "viewFile(QString)";
+    QCopEnvelope e(Service::channel("View/text/*"), msg);
     e << i->getFilePath();
-
-//    Global::execute( "textedit", i->getFilePath() );
 }
 
 void FileView::itemClicked( QListViewItem * i)
@@ -669,7 +685,7 @@ void FileView::showFileMenu()
 
     if ( !i->isDir() ) {
 		if ( app )
-			m->insertItem( app->pixmap(), tr( "Open in " + app->name() ), this, SLOT( run() ) );
+			m->insertItem( app->pixmap(), tr("Open in %1","eg. text editor").arg(app->name()), this, SLOT( run() ) );
 		else if( i->isExecutable() )
 			m->insertItem( Resource::loadIconSet( i->text( 0 ) ), tr( "Run" ), this, SLOT( run() ) );
 

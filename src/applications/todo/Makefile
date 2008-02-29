@@ -237,7 +237,8 @@ $(OBJECTS_DIR)/todotable.o: todotable.cpp \
 
 $(OBJECTS_DIR)/todoentryimpl.o: todoentryimpl.cpp \
 		todoentryimpl.h \
-		todoentry.h
+		todoentry.h \
+		nulldb.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoentryimpl.o todoentryimpl.cpp
 
 $(OBJECTS_DIR)/main.o: main.cpp \
@@ -287,14 +288,14 @@ $(MOC_DIR)/moc_todoentry.cpp: todoentry.h
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <todo.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <todo.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease todo.pro
 	$(QPEDIR)/bin/qtopia-linstall todo.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

@@ -114,7 +114,7 @@ static struct {
 
 
 KRFBDecoder::KRFBDecoder( KRFBConnection *con )
-  : QObject( con, "RFB Decoder" )
+  : QObject( con, "RFB Decoder" ) // No tr
 {
   assert( con );
   assert( con->state() == KRFBConnection::Connected );
@@ -995,8 +995,8 @@ void KRFBDecoder::sendKeyReleaseEvent( QKeyEvent *event )
 }
 
 //
-// The RFB protocol spec says "For most ordinary keys, the 'keysym'
-// is the same as the corresponding ASCII value.", but doesn't
+// The RFB protocol spec says 'For most ordinary keys, the 'keysym'
+// is the same as the corresponding ASCII value.', but doesn't
 // elaborate what the most ordinary keys are.  The spec also lists
 // a set (possibly subset, it's unspecified) of mappings for
 // "other common keys" (backspace, tab, return, escape, etc).

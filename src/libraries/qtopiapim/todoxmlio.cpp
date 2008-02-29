@@ -230,18 +230,42 @@ TaskIteratorMachine *TodoXmlIO::begin() const
  * Returns the full task list.  This is guaranteed
  * to be current against what is stored by other apps.
  */
-QList<PrTask>& TodoXmlIO::tasks() {
+const QList<PrTask>& TodoXmlIO::tasks() {
   ensureDataCurrent();
   return m_Tasks;
 }
 
-/**
- * Returns the filtered task list.  This is guaranteed
- * to be current against what is stored by other apps.
- */
 const SortedTasks& TodoXmlIO::sortedTasks() {
-  ensureDataCurrent();
-  return m_Filtered;
+    ensureDataCurrent();
+    return m_Filtered;
+}
+
+
+PrTask TodoXmlIO::taskForId( const QUuid &u, bool *ok ) const
+{
+    QListIterator<PrTask> it(m_Tasks);
+
+    PrTask *p;
+    for (; it.current(); ++it ) {
+	p = *it;
+	if (u == p->uid()) {
+	    if (ok)
+		*ok = TRUE;
+	    return *p;
+	}
+    }
+
+    if (ok)
+	*ok = FALSE;
+    return PrTask();
+}
+
+void TodoXmlIO::clear()
+{
+    cFilter = -2;
+    m_Filtered.clear();
+    m_Tasks.clear();
+    needsSave = TRUE;
 }
 
 /**
@@ -303,14 +327,19 @@ QString TodoXmlIO::recordToXml(const PimRecord *p)
     return out;
 }
 
-void TodoXmlIO::addTask(const PimTask &task, bool assignUid )
+QUuid TodoXmlIO::addTask(const PimTask &task, bool assignUid )
 {
+    QUuid u;
     if (accessMode() == ReadOnly)
-	return;
+	return u;
 
     PrTask *tsk = new PrTask((const PrTask &)task);
+
     if ( assignUid || tsk->uid().isNull() )
 	assignNewUid(tsk);
+    
+    u = tsk->uid();
+
     if (internalAddRecord(tsk)) {
 	needsSave = TRUE;
 	m_Filtered.sort();
@@ -325,6 +354,7 @@ void TodoXmlIO::addTask(const PimTask &task, bool assignUid )
 #endif
 	}
     }
+    return u;
 }
 
 void TodoXmlIO::removeTask(const PimTask &task)
@@ -383,7 +413,7 @@ void TodoXmlIO::ensureDataCurrent(bool forceReload)
 
 const char *TodoXmlIO::recordStart() const
 {
-    static char *s = "<Task ";
+    static char *s = "<Task "; // No tr
     return s;
 }
 

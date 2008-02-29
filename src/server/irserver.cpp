@@ -21,7 +21,7 @@
 
 #include "irserver.h"
 
-#include <qtopia/qlibrary.h>
+#include <qtopia/pluginloader.h>
 #include <qtopia/qpeapplication.h>
 
 #include <qtranslator.h>
@@ -32,48 +32,27 @@
 #include <qdir.h>
 
 IrServer::IrServer( QObject *parent, const char *name )
-  : QObject( parent, name ), lib(0), obexIface(0)
+  : QObject( parent, name ), obexIface(0)
 {
-    QString path = QPEApplication::qpeDir() + "plugins/obex/";
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir( path, "*.dll");
-#endif
-    QStringList list = dir.entryList();
+    loader = new PluginLoader( "obex" );
+    QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	ObexInterface *iface = 0;
-	QLibrary *trylib = new QLibrary( path + *it );
-	if ( trylib->queryInterface( IID_ObexInterface, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	if ( loader->queryInterface( *it, IID_ObexInterface, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 	    obexIface = iface;
-	    lib = trylib;
 	    qDebug("found obex lib" );
-	    QString lang = getenv( "LANG" );
-	    QTranslator * trans = new QTranslator(qApp);
-	    QString type = (*it).left( (*it).find(".") );
-	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
-	    qDebug("tr for obex: %s", tfn.latin1() );
-	    if ( trans->load( tfn ))
-		qApp->installTranslator( trans );
-	    else
-		delete trans;
-
 	    break;
-	} else {
-	    delete trylib;
 	}
     }
-    if ( !lib )
+    if ( !obexIface )
 	qDebug("could not load IR plugin" );
 }
 
 IrServer::~IrServer()
 {
     if ( obexIface )
-	obexIface->release();
-    if ( lib )
-	lib->unload();
-    delete lib;
+	loader->releaseInterface( obexIface );
+    delete loader;
 }
 

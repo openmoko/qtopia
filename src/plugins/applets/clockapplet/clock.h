@@ -32,7 +32,6 @@ public:
 
 protected slots:
     void updateTime( void );
-    void slotClockChanged( bool pm );
 
 protected:
     void mousePressEvent( QMouseEvent * );

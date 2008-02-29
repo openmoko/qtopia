@@ -24,8 +24,13 @@
 #include <qvaluelist.h>
 #include <qdir.h>
 #include <qtopia/config.h>
+#include <qtopia/pluginloader.h>
 #else
 #include "../../plugins/calculator/simple/simple.h"
+#endif
+
+#ifndef NEW_STYLE_STACK
+#include "doubleinstruction.h"
 #endif
 
 #include "calculator.h"
@@ -38,12 +43,15 @@ Calculator::Calculator(
 #ifdef QTEST
 	int argc,char **argv,
 #endif
-	QWidget * p, const char *n,WFlags fl) : QWidget (p, n, fl)
+	QWidget * p, const char *n,WFlags fl) : QWidget (p, n, fl),
+	pluginWidgetStack(NULL)
 {
+    pluginList = new QValueList<CalculatorPlugin>();
+    modeBox = 0;
     systemEngine = new Engine();
-    // Load plugins
     calculatorLayout = new QVBoxLayout(this);
     LCD = new QLineEdit(this);
+    LCD->setFocusPolicy(QWidget::NoFocus);
     QFont f = LCD->font();
     f.setPointSize(f.pointSize()*2);
     LCD->setFont(f);
@@ -51,43 +59,40 @@ Calculator::Calculator(
     calculatorLayout->addWidget(LCD);
     systemEngine->setDisplay(LCD);
 
+    // Load plugins
 #ifndef QT_NO_COMPONENT
-    QString path = QPEApplication::qpeDir() + "plugins/calculator";
-#ifndef Q_OS_WIN32
-    QDir dir (path, "lib*.so");
-#else
-    QDir dir (path, "*.dll");
-#endif
-    QStringList list = dir.entryList();
-
-    pluginList = new QValueList<Plugin>();
-    QStringList::Iterator it;
-    for (it = list.begin(); it != list.end(); ++it) {
-	CalculatorInterface *iface = 0;
-	QLibrary *lib = new QLibrary(path + "/" + *it);
-	Plugin plugin;
-	if (lib->queryInterface(IID_Calc, (QUnknownInterface **)&iface) == QS_OK) {
-		plugin.library = lib;
-		plugin.interface = iface;
-		pluginList->append(plugin);
-	} else {
-	    delete lib;
+    if ( !pluginList->count() ) {
+	PluginLoader loader( "calculator" );
+	QStringList list = loader.list();
+	QStringList::Iterator it;
+	for (it = list.begin(); it != list.end(); ++it) {
+	    CalculatorInterface *iface = 0;
+	    CalculatorPlugin plugin;
+	    if (loader.queryInterface(*it,IID_Calc, (QUnknownInterface **)&iface) == QS_OK) {
+		    plugin.interface = iface;
+		    pluginList->append(plugin);
+	    }
 	}
     }
 
     if (!pluginList->count()) {
-	LCD->setText("No plugins have been found");
+	LCD->setText(qApp->translate("Calculator","No plugins have been found"));
     } else {
 	LCD->setAlignment(Qt::AlignRight);
+	QValueList<CalculatorPlugin>::Iterator current;
+	// Only one plugin, dont use the modeBox
 	if (pluginList->count() == 1) {
-	    calculatorLayout->addWidget((*(pluginList->at(0))).interface->create(this));
+	    current = pluginList->at(0);
+	    (*current).widget = (*current).interface->create(this);
+	    calculatorLayout->addWidget((*current).widget);
+	// Many plugins, use the modeBox
 	} else {
 	    modeBox = new QComboBox(this);
 	    calculatorLayout->addWidget(modeBox);
 
 	    pluginWidgetStack = new QWidgetStack(this);
 	    for (uint it2 = 0; it2 < pluginList->count(); it2++) {
-		QValueList<Plugin>::Iterator current = pluginList->at(it2);
+		current = pluginList->at(it2);
 		(*current).widget = (*current).interface->create(this);
 #ifdef QTEST
 		QString tmp((*current).widget->name());
@@ -116,25 +121,60 @@ Calculator::Calculator(
     }
 #else
     LCD->setAlignment(Qt::AlignRight);
-    FormSimple *si = new FormSimple(this,"Simple",0);
+    FormSimple *si = new FormSimple(this);
     calculatorLayout->addWidget(si);
 #endif
 }
 
 Calculator::~Calculator()
 {
-#ifndef QT_NO_COMPONENT
-    Config config("calculator");
-    config.setGroup("View");
-    config.writeEntry("lastView", modeBox->currentItem() );
-#endif
-    /* this was segfaulting on shutdown
+    if (modeBox) {
+	Config config("calculator");
+	config.setGroup("View");
+	config.writeEntry("lastView", modeBox->currentItem() );
+	delete modeBox;
+    }
     delete LCD;
-    delete modeBox;
-    delete pluginWidgetStack;
     delete systemEngine;
-    delete pluginList;
+    if (pluginWidgetStack)
+	delete pluginWidgetStack;
     delete calculatorLayout;
-    */
+    delete pluginList;
 }
 
+void Calculator::keyPressEvent(QKeyEvent *e) {
+    int key = e->key();
+    switch (key) {
+	// backspace
+	case Qt::Key_Backtab:
+	case Qt::Key_Backspace:
+	case Qt::Key_Delete:
+	    systemEngine->delChar();
+	    break;
+	// evaluate
+	case Qt::Key_Enter:
+	case Qt::Key_Return:
+	case Qt::Key_Equal:
+	    systemEngine->evaluate();
+	    break;
+#ifndef NEW_STYLE_STACK
+	// basic mathematical keys
+	case Qt::Key_Plus:
+	    systemEngine->pushInstruction(new AddDoubleDouble());
+	    break;
+	case Qt::Key_Asterisk:
+	    systemEngine->pushInstruction(new MultiplyDoubleDouble());
+	    break;
+	case Qt::Key_Minus:
+	    systemEngine->pushInstruction(new SubtractDoubleDouble());
+	    break;
+	case Qt::Key_Slash:
+	    systemEngine->pushInstruction(new DivideDoubleDouble());
+	    break;
+#endif
+	default:
+	    QChar qc = e->text().at(0);
+	    if ( qc.isPrint() && !qc.isSpace() )
+		systemEngine->pushChar(qc.latin1());
+    }
+}

@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>221</width>
+            <width>220</width>
             <height>337</height>
         </rect>
     </property>
@@ -201,13 +201,18 @@
                         <property stdset="1">
                             <name>font</name>
                             <font>
-                                <pointsize>18</pointsize>
+                                <family>helvetica</family>
+                                <pointsize>16</pointsize>
                                 <bold>1</bold>
                             </font>
                         </property>
                         <property stdset="1">
                             <name>text</name>
                             <string>...</string>
+                        </property>
+                        <property stdset="1">
+                            <name>textFormat</name>
+                            <enum>RichText</enum>
                         </property>
                         <property stdset="1">
                             <name>alignment</name>

@@ -25,14 +25,16 @@
 #include <qtextcodec.h>
 #include <qlist.h>
 
-class QTOPIA_PLUGIN_EXPORT Simple8Impl : public TextCodecInterface
+class Simple8Impl : public TextCodecInterface
 {
 public:
     Simple8Impl();
     virtual ~Simple8Impl();
 
+#ifndef QT_NO_COMPONENT
     QRESULT queryInterface( const QUuid&, QUnknownInterface** );
     Q_REFCOUNT
+#endif
 
     virtual QStringList names() const;
     virtual QTextCodec *createForName( const QString &name );

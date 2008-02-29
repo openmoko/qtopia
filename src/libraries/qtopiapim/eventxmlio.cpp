@@ -237,7 +237,11 @@ QString EventXmlIO::recordToXml(const PimRecord *p)
 	    fit != data.end(); ++fit ) {
 
 	int key = fit.key();
-	if ( !hasAlarm && ( key == PimEvent::HasAlarm || key == PimEvent::SoundType) || key == PimEvent::AlarmDelay)
+	if ( !hasAlarm && ( key == PimEvent::HasAlarm || key == PimEvent::SoundType || key == PimEvent::AlarmDelay) )
+	    continue;
+	if ( key == PimEvent::SoundType && fit.data() == "silent" ) // No tr ; skip default
+	    continue;
+	if ( key == PimEvent::AlarmDelay && fit.data() == "0" ) // skip default
 	    continue;
 	if ( !hasRepeat )  {
 	    if (key == PimEvent::RepeatPattern || key == PimEvent::RepeatWeekdays || key == PimEvent::RepeatFrequency )
@@ -269,20 +273,29 @@ const QList<PrEvent>& EventXmlIO::events()
     return m_PrEvents;
 }
 
-/*!
- Returns the events between \a from and \a to where \a from and \a to are in local time.
- */
-QValueList<Occurrence> EventXmlIO::getOccurrences(const QDate& from, const QDate& to) const
+PrEvent EventXmlIO::eventForId(const QUuid &u, bool *ok) const
 {
-    QString localZone = QString::fromLocal8Bit( getenv( "TZ" ) );
-    return getOccurrencesInTZ(from, to, localZone);
+    QListIterator<PrEvent> it(m_PrEvents);
+
+    PrEvent *p;
+    for (; it.current(); ++it ) {
+	p = *it;
+	if (u == p->uid()) {
+	    if (ok)
+		*ok = TRUE;
+	    return *p;
+	}
+    }
+
+    if (ok)
+	*ok = FALSE;
+    return PrEvent();
 }
 
 /*!
- Returns the events between \a from and \a to where \a from and \a to are in
- in the time zone \a zone.
+ Returns the events between \a from and \a to where \a from and \a to are in local time.
  */
-QValueList<Occurrence> EventXmlIO::getOccurrencesInTZ(const QDate& from, const QDate& to, const QString &zone) const
+QValueList<Occurrence> EventXmlIO::getOccurrencesInCurrentTZ(const QDate& from, const QDate& to) const
 {
     QValueList<Occurrence> results;
 
@@ -299,7 +312,7 @@ QValueList<Occurrence> EventXmlIO::getOccurrencesInTZ(const QDate& from, const Q
 	while (ok && date <= to.addDays(1)) {
 	    // loose check succeed, tight check on TZ now.
 	    Occurrence o(date, e);
-	    if (o.startInTZ(zone).date() <= to && o.endInTZ(zone) >= from)
+	    if (o.startInCurrentTZ().date() <= to && o.endInCurrentTZ() >= from)
 		results.append(o);
 	    date = e.nextOccurrence(date.addDays(duration), &ok);
 	}
@@ -307,15 +320,18 @@ QValueList<Occurrence> EventXmlIO::getOccurrencesInTZ(const QDate& from, const Q
     return results;
 }
 
-void EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
+QUuid EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
 {
+    QUuid u;
     if (accessMode() == ReadOnly)
-	return;
+	return u;
 
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 
     if ( assignUid || ev->uid().isNull() )
 	assignNewUid(ev);
+
+    u = ev->uid();
 
     if (internalAddRecord(ev)) {
 	needsSave = TRUE;
@@ -332,6 +348,7 @@ void EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
 #endif
 	}
     }
+    return u;
 }
 
 void EventXmlIO::addException(const QDate &d, const PimEvent &p)
@@ -358,15 +375,17 @@ void EventXmlIO::addException(const QDate &d, const PimEvent &p)
     }
 }
 
-void EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent& event)
+QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent& event)
 {
+    QUuid u;
     if (accessMode() == ReadOnly)
-	return;
+	return u;
 
     PrEvent *parent = new PrEvent((const PrEvent &)p);
     PrEvent *ev = new PrEvent((const PrEvent &)event);
 
     assignNewUid(ev);
+    u = ev->uid();
 
     ev->setParentUid(parent->uid());
     parent->addException(d);
@@ -393,6 +412,7 @@ void EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent&
 	}
 #endif
     }
+    return u;
 }
 
 void EventXmlIO::removeEvent(const PimEvent &event)
@@ -473,7 +493,6 @@ void EventXmlIO::ensureDataCurrent(bool forceReload)
 bool EventXmlIO::nextAlarm( const PrEvent &ev, QDateTime& when, int& warn)
 {
     QDateTime now = QDateTime::currentDateTime();
-    QString where = QString::fromLocal8Bit( getenv("TZ") );
     bool ok;
     warn = ev.alarmDelay();
 
@@ -482,8 +501,8 @@ bool EventXmlIO::nextAlarm( const PrEvent &ev, QDateTime& when, int& warn)
     while (ok) {
 	Occurrence o(next, ev);
 	// only need to check in TZ... want to shift in orig time
-	if (now <= o.startInTZ(where).addSecs(-60*ev.alarmDelay())) {
-	    when = o.startInTZ(where).addSecs(-60*ev.alarmDelay());
+	if (now <= o.startInCurrentTZ().addSecs(-60*ev.alarmDelay())) {
+	    when = o.startInCurrentTZ().addSecs(-60*ev.alarmDelay());
 	    return TRUE;
 	}
 	next = ev.nextOccurrence(

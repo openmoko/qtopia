@@ -29,8 +29,10 @@
 #include <qtopia/applnk.h>
 #include <qtopia/global.h>
 #include <qtopia/resource.h>
+#include <qtopia/mimetype.h>
 
 #include <qdict.h>
+#include <qdir.h>
 
 #include <stdlib.h>
 
@@ -49,7 +51,6 @@ StartMenu::StartMenu(QWidget *parent) : QLabel( parent )
     setFocusPolicy( NoFocus );
     //setFlat( startButtonIsFlat );
 
-    apps = 0;
     launchMenu = 0;
     reloadApps();
 }
@@ -63,7 +64,6 @@ void StartMenu::mousePressEvent( QMouseEvent * )
 
 StartMenu::~StartMenu()
 {
-    delete apps;
 }
 
 
@@ -97,7 +97,7 @@ void StartMenu::createMenu()
 //	launchMenu = new PopupWithLaunchSideThing( this, &popupMenuSidePixmap );
  //   else
         launchMenu = new StartPopupMenu( this );
-    loadMenu( apps, launchMenu );
+    loadMenu( launchMenu );
 }
 
 void StartMenu::reloadApps()
@@ -107,13 +107,9 @@ void StartMenu::reloadApps()
     bool ltabs = cfg.readBoolEntry("LauncherTabs",TRUE);
     bool lot = cfg.readBoolEntry("LauncherOther",TRUE);
     bool lt = ltabs || lot;
-    if ( launchMenu && apps && !lt )
+    if ( launchMenu && !lt )
 	return; // nothing to do
 
-    if ( lt ) {
-	delete apps;
-	apps = new AppLnkSet( QPEApplication::qpeDir() + "apps" );
-    }
     if ( launchMenu ) {
 	int i;
 	for (i=0; i<(int)launchMenu->count(); i++) {
@@ -125,7 +121,7 @@ void StartMenu::reloadApps()
 	}
 	while (i<(int)launchMenu->count())
 	    launchMenu->removeItemAt(i);
-	loadMenu(apps,launchMenu);
+	loadMenu(launchMenu);
     } else {
 	createMenu();
     }
@@ -133,88 +129,69 @@ void StartMenu::reloadApps()
 
 void StartMenu::itemSelected( int id )
 {
-    const AppLnk *app = apps->find( id );
-    if ( app )
-	app->execute();
+    if ( id >= 0 && id < ntabs ) {
+	emit tabSelected(tabs[id]);
+    } else if ( id >= 20 && id < 20+nother ) {
+	other.at(id-20)->execute();
+    }
 }
 
-bool StartMenu::loadMenu( AppLnkSet *folder, QPopupMenu *menu )
+bool StartMenu::loadMenu( QPopupMenu *menu )
 {
-    bool result = FALSE;
-
     Config cfg("Taskbar");
     cfg.setGroup("Menu");
 
     bool ltabs = cfg.readBoolEntry("LauncherTabs",TRUE);
     bool lot = cfg.readBoolEntry("LauncherOther",TRUE);
     bool sepfirst = !ltabs && !lot;
+
+    tabs.clear();
+    other.setAutoDelete(TRUE);
+    other.clear();
+    ntabs = 0;
+    nother = 0;
+
+    bool f=TRUE;
     if ( ltabs || lot ) {
-	QDict<QPopupMenu> typpop;
-	QStringList typs = folder->types();
-	for (QStringList::Iterator tit=typs.begin(); tit!=typs.end(); ++tit) {
-	    if ( !(*tit).isEmpty() ) {
-		QPopupMenu *new_menu;
-		if ( ltabs ) {
-		    new_menu = new StartPopupMenu( menu );
-		    connect( new_menu, SIGNAL(activated(int)), SLOT(itemSelected(int)) );
-		    menu->insertItem( folder->typePixmap(*tit), *tit, new_menu );
-		} else {
-		    new_menu = (QPopupMenu*)1;
+	QDir dir( MimeType::appsFolderName(), QString::null, QDir::Name );
+	for (int i=0; i<(int)dir.count(); i++) {
+	    QString d = dir[i];
+	    Config cfg(dir.path()+"/"+d+"/.directory",Config::File);
+	    if ( cfg.isValid() ) {
+		QString nm = cfg.readEntry("Name");
+		QString ic = cfg.readEntry("Icon");
+		if ( !!nm && !!ic ) {
+		    tabs.append(d);
+		    menu->insertItem( Resource::loadIconSet(ic), nm, ntabs++ );
 		}
-		typpop.insert(*tit, new_menu);
+	    } else if ( lot && d.right(8)==".desktop") {
+		AppLnk* applnk = new AppLnk(dir.path()+"/"+d);
+		if ( applnk->isValid() ) {
+		    if ( applnk->type() == "Separator" ) { // No tr
+			if ( lot ) {
+			    menu->insertSeparator();
+			    sepfirst = f && !ltabs;
+			}
+			delete applnk;
+		    } else {
+			f = FALSE;
+			other.append(applnk);
+			menu->insertItem( Resource::loadIconSet(applnk->icon()),
+				applnk->name(), 20+nother++ );
+		    }
+		} else {
+		    delete applnk;
+		}
 	    }
 	}
 
-	QListIterator<AppLnk> it( folder->children() );
-	bool f=TRUE;
-	for ( ; it.current(); ++it ) {
-	    AppLnk *app = it.current();
-	    if ( app->type() == "Separator" ) { // No tr
-		if ( lot ) {
-		    menu->insertSeparator();
-		    sepfirst = f && !ltabs;
-		}
-	    } else {
-		f = FALSE;
-		QString t = app->type();
-		QPopupMenu* pmenu = typpop.find(t);
-		bool sort = FALSE;
-		if ( ltabs ) {
-		    sort = pmenu;
-		    if ( !pmenu && lot )
-			pmenu = menu;
-		} else {
-		    if ( !pmenu )
-			pmenu = menu;
-		    else
-			pmenu = 0;
-		}
-		if ( pmenu ) {
-		    QString t = app->name();
-		    t.replace(QRegExp("&"),"&&"); // escape shortcut character
-		    int idx=-1;
-		    if ( sort ) {
-			// Overall, sorting takes O(n^3), because of text() is O(n)
-			// Fortunately, 20^3 is still small. If it is a problem, this
-			// whole function needs a re-write.
-			for (idx=0; idx < (int)pmenu->count() && pmenu->text(pmenu->idAt(idx)) < t; ++idx)
-			    ;
-		    }
-		    QIconSet i = Resource::loadIconSet(app->icon());
-		    if (i.pixmap().isNull()) {
-			i = Resource::loadIconSet("UnknownDocument");
-		    }
-		    pmenu->insertItem( i, t, app->id(), idx );
-		}
-		result=TRUE;
-	    }
-	}
 	if ( !menu->count() )
 	    sepfirst = TRUE;
     }
 
     launchMenu->setName(sepfirst ? "accessories" : "accessories_need_sep"); // No tr
 
+    bool result = nother || ntabs;
     if ( result )
 	connect( menu, SIGNAL(activated(int)), SLOT(itemSelected(int)) );
 
@@ -230,12 +207,6 @@ void StartMenu::launch()
         launchMenu->hide();
     else
         launchMenu->popup( QPoint( 1, y ) );
-}
-
-const AppLnk* StartMenu::execToLink(const QString& appname)
-{
-    const AppLnk* a = apps->findExec( appname );
-    return a;
 }
 
 void StartPopupMenu::keyPressEvent( QKeyEvent *e )

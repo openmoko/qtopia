@@ -85,15 +85,19 @@
         <source>Image load failed</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialogBase</name>
     <message>
         <source>Preferences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Slide Show</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -121,7 +125,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Rotate clockwise</source>
+        <source>Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Slideshow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rotation on loading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clockwise</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Counter clockwise</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scale up small pictures</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

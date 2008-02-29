@@ -15,7 +15,7 @@
     </message>
     <message>
         <source> seconds</source>
-        <translation> Sekunden</translation>
+        <translation type="obsolete"> Sekunden</translation>
     </message>
     <message>
         <source>Light off after</source>
@@ -59,6 +59,10 @@
     </message>
     <message>
         <source>The brighter the screen light, the more battery power is used.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>seconds</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

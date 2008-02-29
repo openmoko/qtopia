@@ -44,8 +44,11 @@ Keyboard::Keyboard(QWidget* parent, const char* name, WFlags f) :
     setPalette(QPalette(QColor(220,220,220))); // Gray
 
     picks = new KeyboardPicks( this );
+// under Win32 we may not have smallsmooth font 
+#ifndef Q_OS_WIN32
     picks->setFont( QFont( "smallsmooth", 9 ) );
     setFont( QFont( "smallsmooth", 9 ) );
+#endif
     picks->initialise();
     QObject::connect( picks, SIGNAL(key(ushort,ushort,ushort,bool,bool) ),
             this, SIGNAL(key(ushort,ushort,ushort,bool,bool)) );
@@ -408,29 +411,29 @@ typedef struct SpecialMap {
 static const SpecialMap specialM[] = {
     {	Qt::Key_Backspace,	8,	"<",     backspace_xpm },
     {	Qt::Key_Tab,		9,	"Tab",   NULL },
-    {	Qt::Key_CapsLock,	0,	"Caps",  NULL },
+    {	Qt::Key_CapsLock,	0xffff,	"Caps",  NULL },
     {	Qt::Key_Return,		13,	"Ret",   NULL },
-    {	Qt::Key_Shift,		0,	"Shift", NULL },
-    {	Qt::Key_Control,	0,	"Ctrl",  NULL },
-    {	Qt::Key_Alt,		0,	"Alt",   NULL },
+    {	Qt::Key_Shift,		0xffff,	"Shift", NULL },
+    {	Qt::Key_Control,	0xffff,	"Ctrl",  NULL },
+    {	Qt::Key_Alt,		0xffff,	"Alt",   NULL },
     {	Qt::Key_Space,		' ',	"",      NULL },
     {	BackSlash,		43,	"\\",    NULL },
 
     // Need images?
-    {	Qt::Key_Up,		0,	"^",     uparrow_xpm },
-    {	Qt::Key_Left,		0,	"<",     leftarrow_xpm },
-    {	Qt::Key_Down,		0,	"v",     downarrow_xpm },
-    {	Qt::Key_Right,		0,	">",     rightarrow_xpm },
-    {	Qt::Key_Insert,		0,	"I",     insert_xpm },
-    {	Qt::Key_Home,		0,	"H",     home_xpm },
-    {	Qt::Key_PageUp,		0,	"U",     pageup_xpm },
-    {	Qt::Key_End,		0,	"E",     end_xpm },
-    {	Qt::Key_Delete,		0,	"X",     delete_xpm },
-    {	Qt::Key_PageDown,	0,	"D",     pagedown_xpm },
+    {	Qt::Key_Up,		0xffff,	"^",     uparrow_xpm },
+    {	Qt::Key_Left,		0xffff,	"<",     leftarrow_xpm },
+    {	Qt::Key_Down,		0xffff,	"v",     downarrow_xpm },
+    {	Qt::Key_Right,		0xffff,	">",     rightarrow_xpm },
+    {	Qt::Key_Insert,		0xffff,	"I",     insert_xpm },
+    {	Qt::Key_Home,		0xffff,	"H",     home_xpm },
+    {	Qt::Key_PageUp,		0xffff,	"U",     pageup_xpm },
+    {	Qt::Key_End,		0xffff,	"E",     end_xpm },
+    {	Qt::Key_Delete,		0xffff,	"X",     delete_xpm },
+    {	Qt::Key_PageDown,	0xffff,	"D",     pagedown_xpm },
     {	Blank,			0,	" ",     NULL },
-    {	Expand,			0,	"->",    expand_xpm },
-    {	Opti,			0,	"#",     NULL },
-    {	ResetDict,		0,	"R",     NULL },
+    {	Expand,			0xffff,	"->",    expand_xpm },
+    {	Opti,			0xffff,	"#",     NULL },
+    {	ResetDict,		0xffff,	"R",     NULL },
    
     // number pad stuff
     {	Divide,			0,	"/",     NULL },

@@ -27,7 +27,7 @@
 
 struct WindowDecorationInterface;
 struct StyleInterface;
-class QLibrary;
+class PluginLoader;
 class SampleWindow;
 
 class AppearanceSettings : public AppearanceSettingsBase
@@ -43,7 +43,7 @@ protected:
     void done(int r);
 
 protected slots:
-    void colorSelected( const QString &name );
+    void colorSelected( int );
     void styleSelected( int );
     void decorationSelected( int );
     void fontSelected( const QString &name );
@@ -59,12 +59,14 @@ private:
 
 private:
     WindowDecorationInterface *wdiface;
-    QLibrary *wdlib;
+    PluginLoader *wdLoader;
+    bool wdIsPlugin;
     StyleInterface *styleiface;
-    QLibrary *stylelib;
+    PluginLoader *styleLoader;
     SampleWindow *sample;
     int prefFontSize;
     int maxFontSize;
+    QStringList colorListIDs;
 };
 
 

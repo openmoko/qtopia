@@ -1,8 +1,9 @@
-Files: bin/todolist apps/Applications/todo.desktop services/Tasks/todolist
+Files: bin/todolist apps/Applications/todo.desktop services/Tasks/todolist services/Receive/text/x-vCalendar-Tasks/todolist
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia qpe-pim qpe-service-Tasks
 Description: TODO-list manager

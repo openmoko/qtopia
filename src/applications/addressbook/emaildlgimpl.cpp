@@ -64,7 +64,10 @@ void EmailDialog::setEmails(const QString &def, const QStringList &em)
 	if (*it != def && !(*it).isEmpty()) 
 	    emailList->insertItem(*it);
     }
-    emailEdit->setText(emailList->currentText());
+    if ( emailList->count() )
+	emailEdit->setText(emailList->currentText());
+    else
+	addEmail();
 }
 
 QString EmailDialog::defaultEmail() const

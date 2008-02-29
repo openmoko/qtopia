@@ -20,6 +20,27 @@
 
 #include <qtopia/categoryselect.h>
 
+
+CategorySelect::CategorySelect( const QArray<int> &vlCats, const QString &appName,
+				 const QString &visibleName, bool add, QWidget *parent,
+				const char *name , int width) :
+    QHBox( parent, name ),
+    cmbCat( 0 ),
+    cmdCat( 0 ),
+    d( 0 )
+{
+    // d will get set in the init
+    init(width, add);
+    setCategories( vlCats, appName, visibleName );
+}
+
+CategorySelect::SelectorWidget CategorySelect::widgetType() const
+{
+    if ( cmbCat )
+	return ComboBox;
+    return ListView;
+}
+
 bool CategorySelect::containsCategory( const QArray<int>& cats )
 {
     if ( cmdCat && cmdCat->isEnabled() ) {

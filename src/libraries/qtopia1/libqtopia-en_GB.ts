@@ -144,257 +144,31 @@
     </message>
 </context>
 <context>
-    <name>LongWeekName</name>
+    <name>LocalTimeFormat</name>
     <message>
-        <source>Monday</source>
+        <source>%1am</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Tuesday</source>
+        <source>%1pm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Wednesday</source>
+        <source>0%1</source>
+        <comment>0..9 hour of day</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Thursday</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Friday</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Saturday</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sunday</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Ordinal</name>
-    <message>
-        <source>first</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>second</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>third</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fourth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fifth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>sixth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>seventh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>eighth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>ninth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>tenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>eleventh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twelfth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirteenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fourteenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fifteenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>sixteenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>seventeenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>eighteenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>nineteenth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twentieth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-first</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-second</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-third</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-fourth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-fifth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-sixth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-seventh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-eighth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>twenty-ninth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirtieth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-first</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-second</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-third</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-forth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-fifth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-sixth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-seventh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-eighth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>thirty-ninth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fortieth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-first</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-second</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-third</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-forth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-fifth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-sixth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-seventh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-eighth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>forty-ninth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fiftieth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fifty-first</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fifty-second</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fifty-third</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>fifty-forth</source>
+        <source>%1</source>
+        <comment>10..24 hour of day</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QPEDateButton</name>
+</context>
+<context>
+    <name>QPEDateEdit</name>
     <message>
         <source>None</source>
         <translation type="unfinished"></translation>

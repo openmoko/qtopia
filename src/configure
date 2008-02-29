@@ -6,6 +6,7 @@
 #
 
 PLATFORM=generic
+DEVICE_ARCH=generic
 SHARING=shared
 DEBUG=
 QDESKTOP=
@@ -15,8 +16,8 @@ ECONFIG="CONFIG+=embedded"
 QMAKE_LFLAGS="QMAKE_LFLAGS=-Wl,-rpath,$QPEDIR/lib"
 SINGLE="CONFIG+=multiprocess"
 SINGLESINGLE="CONFIG+=singleprocess DEFINES+=SINGLE_APP"
-STATIC=
-STATICSTATIC="CONFIG+=static DEFINES+=QT_NO_COMPONENT"
+STATIC="CONFIG+=dynamic"
+STATICSTATIC="CONFIG+=static DEFINES+=QTOPIA_FAKE_COMPONENT"
 
 touch .test.qtopia.
 if [ '!' -f ${QPEDIR}/src/.test.qtopia. ];
@@ -61,6 +62,7 @@ while [ -n "$1" ]; do
    -platform|-xplatform) # No difference since we don't need to build moc, etc.
         shift; PLATFORM=$1
 	A="$A $1"
+	DEVICE_ARCH=$PLATFORM
 	;;
    -release)
        DEBUG=
@@ -191,7 +193,7 @@ fi
 
 mkdir -p ../include/qtopia
 rm -rf ../include/qpe
-ln -s qtopia ../include/qpe
+ln -s ../include/qtopia ../include/qpe
 mkdir -p ../include/qtopia/private
 
 # Need to rm the .h files for include qtopia now as it is not safe in the loop 
@@ -280,43 +282,66 @@ for a in $TOMAKE server; do
     then
 	if [ -f $a/$f.pro ]
 	then
-	    if [ $f != "server" ] && [ "$SINGLE" = "$SINGLESINGLE" ]
+	    if [ $f != "server" ]
 	    then
-		if ! grep -e '^singleprocess:' $a/$f.pro >/dev/null 2>&1
+		if [ "$SINGLE" = "$SINGLESINGLE" ]
 		then
-		    echo 'all clean distclean:' > $N
-		    echo -e "\t@echo Not building $f\n" >> $N
-		    continue
-		fi
-
-		if [ `echo $a | grep -v plugins` ] || [ $SHARING = "static" ]
-		then
-		    lib=`grep '^LIBS' $a/$f.pro | cut -d'=' -f2`
-		    SERVERLIBS="$SERVERLIBS ${lib}"
-		    lib=`grep '^[.*:]*static:[.*:]*LIBS' $a/$f.pro | cut -d'=' -f2`
-		    SERVERLIBS="$SERVERLIBS ${lib}"
-		    targ=`grep '^TARGET' $a/$f.pro | cut -d'=' -f2 | sed -e 's/ //g'`
-		    if [ -z $targ ];
+		    if ! grep -e '^singleprocess:' $a/$f.pro >/dev/null 2>&1
 		    then
-			targ=$f
+			echo 'all clean distclean:' > $N
+			echo -e "\t@echo Not building $f\n" >> $N
+			continue
 		    fi
-		    SERVERLIBS="$SERVERLIBS -l${targ}"
-		fi
-		if [ $a = "libraries/qtopiacalc" ] || [ $a = "applications/mediaplayer" ] || [ $a = "3rdparty/plugins/codecs/libffmpeg" ]
-		then
-		    echo -e "\nHacking $a\n"
-		    HACK="CONFIG+=static DEFINES+=QT_NO_COMPONENT"
-		else
-		    unset HACK
+		    # Incorrect for non-single, static builds
+		    if [ "$STATIC" = "$STATICSTATIC" ]
+		    then
+			# target becomes a library for the server to link with
+			targ=`grep '^TARGET' $a/$f.pro | cut -d'=' -f2 | sed -e 's/ //g'`
+			if [ -z $targ ];
+			then
+			    targ=$f
+			fi
+
+			# server links against our deps as well
+			lib=`grep '^\(\(static\|unix\)\:\)*LIBS' $a/$f.pro | cut -d'=' -f2`
+			if [ ! -z "$lib" ]
+			then
+			    SERVERLIBS="$SERVERLIBS ${lib}"
+			fi
+
+			# plugin-specific
+			MAGICPATH=
+			# libraries/qtopia contains the definition of Q_CREATE_INSTANCE
+			if [ $f != "qtopia" ] && grep Q_CREATE_INSTANCE $a/*.cpp >/dev/null 2>&1
+			then
+			    # help the server find us
+			    dest=`grep '^DESTDIR' $a/$f.pro | cut -d'=' -f2 | sed -e 's/ //g'`
+			    if [ ! -z "$dest" ]
+			    then
+				SERVERLIBS="-L$dest $SERVERLIBS"
+			    fi
+
+			    # magic-path for fake plugin loading
+			    file="lib${targ}.so"
+			    surprisefile=`echo "$dest/$file" | sed "s,\\$(QPEDIR),$QPEDIR,"`
+			    echo 'Surprise!' > $surprisefile
+			    MAGICPATH="DEFINES+=MYMAGICALPATH='\"'$file'\"'"
+			    SERVERPLUGINS="-l${targ} $SERVERPLUGINS"
+			else
+			    SERVERLIBS="-l${targ} $SERVERLIBS"
+			    SERVERDEPS="lib${targ}.a $SERVERDEPS"
+			fi
+		    fi
 		fi
 	    fi
 
 	    (   cd $a;
 		if [ "$f" = server ]
 		then 
-		    EXTRALIBS="$SERVERLIBS $EXTRALIBS"
+		    # Qt dependancies, plugins, applications, libraries
+		    EXTRALIBS="-ljpeg -Wl,-Bstatic -Wl,-whole-archive $SERVERPLUGINS -Wl,-no-whole-archive -Wl,-Bdynamic $SERVERLIBS $EXTRALIBS"
 		fi
-		tmake $HACK $STATIC $SINGLE $VCONFIG $QCONFIGARG $ECONFIG LIBS+="$EXTRALIBS" \
+		tmake $MAGICPATH $STATIC $SINGLE $VCONFIG $QCONFIGARG $ECONFIG LIBS+="$EXTRALIBS" \
 		OBJECTS_DIR="\$(OBJECTS_DIR)" MOC_DIR="\$(MOC_DIR)" INCLUDEPATH+="\$(MOC_DIR)" \
 		    -t $H/qt/tmake/propagate.t $f.pro |
 		    sed -e "s|$QTDIR|\$(QTDIR)|g" -e "s|$QPEDIR|\$(QPEDIR)|g" >Makefile.in;
@@ -552,7 +577,8 @@ EOF
     cat >> $N <<EOF
 
 lupdate:
-	sed -e 's/\$\$\$\$QTOPIA1DIR[^ ]*//' \
+	sed -e '/\$\$\$\$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/\$\$(.*/ d' \
 	    -e 's/^static:.*//' \
 	    <$f.pro >t\$\$\$\$.pro ;\
 	lupdate $lupdateargs t\$\$\$\$.pro ;\
@@ -566,7 +592,7 @@ lrelease:
 	\$(QPEDIR)/bin/qtopia-linstall $f.pro
 
 ipkg: $IPKGDEP # among other things...
-	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks \$(QPEDIR)/src/\$\$ctrl; done
+	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks -platform $DEVICE_ARCH \$(QPEDIR)/src/\$\$ctrl ; done
 
 package: ipkg
 	cd \$(QPEDIR)/ipkg; \

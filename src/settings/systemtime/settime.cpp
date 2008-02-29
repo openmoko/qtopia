@@ -25,7 +25,7 @@
 #include <qtopia/config.h>
 #include <qtopia/private/event.h>
 #include <qtopia/datebookdb.h>
-#include <qtopia/datepicker.h>
+#include <qtopia/datetimeedit.h>
 #include <qtopia/global.h>
 #include <qtopia/resource.h>
 #include <qtopia/timeconversion.h>
@@ -57,7 +57,7 @@
 SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags f )
     : QDialog( parent, name, modal, f )
 {
-    setCaption( tr("Set System Time") );
+    setCaption( tr("Date/Time") );
 
     QVBoxLayout *vb = new QVBoxLayout( this, 5 );
 
@@ -77,7 +77,7 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
     QHBoxLayout *db = new QHBoxLayout( vb );
     QLabel *dateLabel = new QLabel( tr("Date"), this );
     db->addWidget( dateLabel, 1 );
-    date = new QPEDateButton( this, 0, TRUE );
+    date = new QPEDateEdit( this, 0, TRUE );
     db->addWidget( date, 2 );
 
 
@@ -145,8 +145,7 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
     if (df == date_formats[1])
 	currentdf = 1;
     dateFormatCombo->insertItem( tr( date_formats[1].toNumberString() ) );
-    date_formats[2] = DateFormat('-', DateFormat::YearMonthDay, 
-	    DateFormat::DayMonthYear);
+    date_formats[2] = DateFormat('-', DateFormat::YearMonthDay); //, DateFormat::DayMonthYear);
     if (df == date_formats[2])
 	currentdf = 2;
     dateFormatCombo->insertItem( tr( date_formats[2].toNumberString() ) ); //ISO8601

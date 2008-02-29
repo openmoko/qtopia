@@ -72,7 +72,7 @@ public:
     void setSource( const QString& source )
     {
 	QTextBrowser::setSource(source);
-	if ( magic(source,"applications") || magic(source,"games") || magic(source,"settings") )
+	if ( magic(source,"applications") || magic(source,"games") || magic(source,"settings") ) // No tr
 	    return;
 	// Just those are magic (for now). Could do CGI here,
 	// or in Qtopia's mime source factory.

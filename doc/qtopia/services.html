@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/services.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/doc/services.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -100,7 +100,8 @@ This file is a standard Qtopia Config file. The keys in this file are:
 <ul>
 <li> <tt>Version</tt>
 <p>
-An integer.
+An integer. "100" should be interpretted as Version 1.01.
+Later versions of a service may support additional actions.
 </ul>
 <li> <tt>[Extensions]</tt>
 <ul>
@@ -117,6 +118,13 @@ a group defining properties of the action.
 <li> <tt>Icon</tt>
 </ul>
 </ul>
+<p> Often, only one application can provide a given service. The user selects
+which application they wish to provide the service using the Application
+Services settings. If however, the service can be provided by multiple
+applications, the service file will contain:
+<p> <pre>
+Multiple = 1
+</pre><p> in the <tt>[Service]</tt> section.
 <p> <h3> Qtopia - Defined Services
 </h3>
 <a name="1-3"></a><p> The services below are defined by Trolltech as basic services
@@ -206,6 +214,12 @@ Notes, Groups.
 <li> Open/<i>mimetype</i>
 <ul>
 <li> setDocument(QString <i>document</i>)
+<li> openFile(QString <i>filepath</i>) <i>Version 1.01 only</i>
+</ul>
+<li> View/<i>mimetype</i>
+<ul>
+<li> setDocument(QString <i>document</i>)
+<li> viewFile(QString <i>filepath</i>) <i>Version 1.01 only</i>
 </ul>
 <li> Receive/<i>mimetype</i>
 <ul>

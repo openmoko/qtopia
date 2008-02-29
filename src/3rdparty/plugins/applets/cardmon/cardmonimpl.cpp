@@ -5,14 +5,13 @@
 
 
 CardMonitorImpl::CardMonitorImpl()
-    : cardMonitor(0), icn(0), ref(0)
+    : cardMonitor(0), ref(0)
 {
 }
 
 CardMonitorImpl::~CardMonitorImpl()
 {
     delete cardMonitor;
-    delete icn;
 }
 
 QWidget *CardMonitorImpl::applet( QWidget *parent )
@@ -27,28 +26,12 @@ int CardMonitorImpl::position() const
     return 0;
 }
 
-QString CardMonitorImpl::name() const
-{
-    return qApp->translate( "Taskbar Applet", "Card Monitor" );
-}
-
-QPixmap CardMonitorImpl::icon() const
-{
-    if ( !icn ) {
-	CardMonitorImpl *that = (CardMonitorImpl *)this;
-	that->icn = new QPixmap();
-    }
-    return *icn;
-}
-
 QRESULT CardMonitorImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
 {
     *iface = 0;
     if ( uuid == IID_QUnknown )
 	*iface = this;
     else if ( uuid == IID_TaskbarApplet )
-	*iface = this;
-    else if ( uuid == IID_TaskbarNamedApplet )
 	*iface = this;
 
     if ( *iface )

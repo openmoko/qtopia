@@ -29,6 +29,7 @@
 #if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
 #include <sys/vfs.h>
 #include <mntent.h>
+#include <errno.h>
 #endif
 
 StorageInfo::StorageInfo( QWidget *parent, const char *name )
@@ -83,7 +84,8 @@ void StorageInfo::updateMounts()
 	while ( (me = getmntent( mntfp )) != 0 ) {
 	    QString fs = me->mnt_fsname;
 	    if ( fs.left(7)=="/dev/hd" || fs.left(7)=="/dev/sd"
-		    || fs.left(8)=="/dev/mtd" || fs.left(9) == "/dev/mmcd" )
+		    || fs.left(8)=="/dev/mtd" || fs.left(9) == "/dev/mmcd"
+		    || fs.left(8) == "/dev/ram" )
 	    {
 		n++;
 		curdisks.append(fs);
@@ -128,6 +130,8 @@ void StorageInfo::updateMounts()
 		humanname = tr("Internal Storage") + " " + humanname.mid(14);
 	    else if ( humanname.left(13) == "/dev/mtdblock" )
 		humanname = tr("Internal Storage") + " " + humanname.mid(13);
+	    else if ( humanname.left(8) == "/dev/ram" )
+		humanname = tr("RAM disk") + " " + humanname.mid(8);
 	    // etc.
 	    MountInfo* mi = new MountInfo( *fsit, humanname, this );
 	    vb->addWidget(mi);

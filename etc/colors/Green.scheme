@@ -1,3 +1,6 @@
+[Global]
+Name = Greenish
+Name[ja] = ???
 [Colors]
 Background = #DCFBC1
 Button = #C0DBA8

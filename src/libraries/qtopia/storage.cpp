@@ -38,6 +38,8 @@
 #include <unistd.h>
 #include <sys/vfs.h>
 #include <mntent.h>
+#else
+#include <qdir.h>
 #endif
 
 #include <qstringlist.h>
@@ -234,6 +236,12 @@ void StorageInfo::update()
 	// just update them
 	for (QListIterator<FileSystem> i(mFileSystems); i.current(); ++i)
 	    i.current()->update();
+    }
+#elif defined (Q_OS_WIN32)
+    if (mFileSystems.count() == 0){
+	FileSystem *fs = new FileSystem( "/dev/hda1", QDir::homeDirPath(), "Hard Disk", FALSE, "");
+	mFileSystems.append( fs );    
+	emit disksChanged();
     }
 #endif
 }

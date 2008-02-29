@@ -131,11 +131,11 @@ QWizard::QWizard( QWidget *parent, const char *name, bool modal,
     d->title = 0;
 
     // create in nice tab order
-    d->nextButton = new QPushButton( this, "next" );
-    d->finishButton = new QPushButton( this, "finish" );
-    d->helpButton = new QPushButton( this, "help" );
-    d->backButton = new QPushButton( this, "back" );
-    d->cancelButton = new QPushButton( this, "cancel" );
+    d->nextButton = new QPushButton( this, "next" ); // No tr
+    d->finishButton = new QPushButton( this, "finish" ); // No tr
+    d->helpButton = new QPushButton( this, "help" ); // No tr
+    d->backButton = new QPushButton( this, "back" ); // No tr
+    d->cancelButton = new QPushButton( this, "cancel" ); // No tr
 
     d->ws->installEventFilter( this );
 
@@ -649,7 +649,7 @@ void QWizard::layOutTitleRow( QHBoxLayout * layout, const QString & title )
 void QWizard::layOut()
 {
     delete d->v;
-    d->v = new QVBoxLayout( this, 6, 0, "top-level layout" );
+    d->v = new QVBoxLayout( this, 6, 0, "top-level layout" ); // No tr
 
     QHBoxLayout * l;
     l = new QHBoxLayout( 6 );

@@ -48,7 +48,7 @@ static QStringList serviceList_p(const QString& d, const QString n)
 */
 QStringList Service::list()
 {
-    return serviceList_p(QPEApplication::qpeDir()+"services", "");
+    return serviceList_p(QPEApplication::qpeDir()+"services", ""); // No tr
 }
 
 /*!
@@ -60,7 +60,7 @@ QString Service::binding(const QString& service)
     QString svrc = service;
     for (int i=0; i<(int)svrc.length(); i++)
         if ( svrc[i]=='/' ) svrc[i] = '-';
-    return "Service-"+svrc;
+    return "Service-"+svrc; // No tr
 }
 
 
@@ -297,6 +297,9 @@ ServiceRequest::~ServiceRequest()
 
 bool ServiceRequest::send() const
 {
+    if ( isNull() )
+	return FALSE;
+
 #ifndef QT_NO_COP
     QCString ch = channel();
     if ( !ch.isNull() ) {

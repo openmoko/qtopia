@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/task.cpp:35 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopiapim/task.cpp:35 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -54,12 +54,11 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>bool <a href="#isCompleted"><b>isCompleted</b></a> () const</div></li>
 <li><div class=fn>void <a href="#setCompleted"><b>setCompleted</b></a> ( bool&nbsp;b )</div></li>
 <li><div class=fn>uint <a href="#percentCompleted"><b>percentCompleted</b></a> () const</div></li>
-<li><div class=fn>void <a href="#setPercentCompleted"><b>setPercentCompleted</b></a> ( uint&nbsp;u )</div></li>
+<li><div class=fn>void <a href="#setPercentCompleted"><b>setPercentCompleted</b></a> ( uint&nbsp;percent )</div></li>
 <li><div class=fn>QString <a href="#notes"><b>notes</b></a> () const</div></li>
 <li><div class=fn>void <a href="#setNotes"><b>setNotes</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;s )</div></li>
 <li><div class=fn>bool <a href="#match"><b>match</b></a> ( const&nbsp;QRegExp&nbsp;&amp;&nbsp;r ) const</div></li>
 <li><div class=fn>QString <a href="#toRichText"><b>toRichText</b></a> () const</div></li>
-<li><div class=fn>virtual QMap&lt;int, QString&gt; <b>fields</b> () const</div></li>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -190,7 +189,7 @@ uncompleted.
 <h3 class=fn>void <a name="setCompletedDate"></a>PimTask::setCompletedDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )
 </h3>
 
-<p> Sets the tasks completed date.
+<p> Sets the tasks completed date to <em>date</em>.
 <p> <p>See also <a href="#isCompleted">isCompleted</a>() and <a href="#completedDate">completedDate</a>().
 
 <h3 class=fn>void <a name="setDescription"></a>PimTask::setDescription ( const&nbsp;QString&nbsp;&amp;&nbsp;description )
@@ -211,10 +210,11 @@ uncompleted.
 <p> Sets the notes of the task to <em>s</em>.
 <p> <p>See also <a href="#notes">notes</a>().
 
-<h3 class=fn>void <a name="setPercentCompleted"></a>PimTask::setPercentCompleted ( uint&nbsp;u )
+<h3 class=fn>void <a name="setPercentCompleted"></a>PimTask::setPercentCompleted ( uint&nbsp;percent )
 </h3>
-Sets the tasks percent completed field.  Note that for values above 99 this
-function will set the status to <a href="#TaskStatus-enum">Completed</a>.
+Sets the tasks percent completed field to <em>percent</em>.
+if <em>percent</em> is greater than 99 this function will also
+set the status to Completed.
 <p> <p>See also <a href="#percentCompleted">percentCompleted</a>() and <a href="#status">status</a>().
 
 <h3 class=fn>void <a name="setPriority"></a>PimTask::setPriority ( <a href="pimtask.html#PriorityValue-enum">PriorityValue</a>&nbsp;priority )
@@ -226,12 +226,12 @@ function will set the status to <a href="#TaskStatus-enum">Completed</a>.
 <h3 class=fn>void <a name="setStartedDate"></a>PimTask::setStartedDate ( const&nbsp;QDate&nbsp;&amp;&nbsp;date )
 </h3>
 
-<p> Sets the tasks started date.
+<p> Sets the tasks to have started on <em>date</em>.
 <p> <p>See also <a href="#hasStartedDate">hasStartedDate</a>() and <a href="#startedDate">startedDate</a>().
 
 <h3 class=fn>void <a name="setStatus"></a>PimTask::setStatus ( <a href="pimtask.html#TaskStatus-enum">TaskStatus</a>&nbsp;s )
 </h3>
-Sets the <a href="#TaskStatus-enum">TaskStatus</a> of the task.
+Sets the <a href="#TaskStatus-enum">TaskStatus</a> of the task to <em>s</em>.
 <p> <p>See also <a href="#status">status</a>().
 
 <h3 class=fn>const QDate &amp; <a name="startedDate"></a>PimTask::startedDate () const

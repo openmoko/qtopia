@@ -6,10 +6,10 @@ win32:DEFINES   += QTOPIA_DLL
 DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		+= desktop.h \
-		  qprocess.h \
 		  appicons.h \
 		  taskbar.h \
                   runningappbar.h \
+		  applauncher.h \
 		  stabmon.h \
 		  inputmethods.h \
 		  systray.h \
@@ -23,6 +23,7 @@ HEADERS		+= desktop.h \
 		  qcopbridge.h \
 		  packageslave.h \
 		  irserver.h \
+		  firstuse.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/buf.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/command.h \
@@ -44,10 +45,10 @@ HEADERS		+= desktop.h \
 #		  quicklauncher.h \
 
 SOURCES		+= desktop.cpp \
-		  qprocess.cpp \
 		  appicons.cpp \
 		  taskbar.cpp \
                   runningappbar.cpp \
+		  applauncher.cpp \
 		  stabmon.cpp \
 		  inputmethods.cpp \
 		  systray.cpp \
@@ -62,6 +63,7 @@ SOURCES		+= desktop.cpp \
 		  qcopbridge.cpp \
 		  startmenu.cpp \
 		  main.cpp \
+		  firstuse.cpp \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/buf.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c \
@@ -88,9 +90,6 @@ SOURCES		+= desktop.cpp \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
-
-unix:SOURCES += qprocess_unix.cpp
-win32:SOURCES += qprocess_win.cpp
 
 INTERFACES	+= shutdown.ui \
 		syncdialog.ui

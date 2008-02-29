@@ -20,7 +20,10 @@
 #include "pimrecord.h"
 #include <qtopia/pim/private/xmlio_p.h>
 #include <qdatastream.h>
+#include <qtranslator.h>
+#include <qtopia/qpeapplication.h>
 #include <qobject.h>
+#include <stdlib.h>
 
 #if defined(Q_WS_WIN32)
 #define INITGUID
@@ -121,6 +124,19 @@ bool PimRecord::operator!=( const PimRecord &other ) const
 */
 
 /*!
+  \fn void PimRecord::reassignCategoryId( int, int )
+  \internal
+*/
+
+/*!
+  \fn bool PimRecord::pruneDeadCategories( const QArray<int> & )
+  \internal
+
+  Removes deleted categories from the record.  Returns
+  TRUE if any categories were removed, FALSE otherwise.
+*/
+
+/*!
   \fn QArray<int> PimRecord::categories() const
 
   Returns the set of categories the record belongs to.
@@ -146,6 +162,16 @@ bool PimRecord::operator!=( const PimRecord &other ) const
   \internal
 
   Sets the record to have unique ID \a uid.
+*/
+
+/*!
+  \enum PimRecord::PrivateFields
+  \internal
+*/
+
+/*!
+  \enum PimRecord::CommonFields
+  \internal
 */
 
 /*!
@@ -242,23 +268,36 @@ QMap<int,QString> PimRecord::fields() const
 
 static const QtopiaPimMapEntry recentries[] = {
     { "Uid", NULL, PimRecord::UID_ID, 0 },
-    { "Categories", QT_TRANSLATE_NOOP("PimRecord", "Categories"), PimRecord::Categories, 0 },
+    { "Categories", // No tr
+	    QT_TRANSLATE_NOOP("PimRecord", "Categories"), PimRecord::Categories, 0 },
 
     { 0, 0, 0, 0 }
 };
 
-
 /*!
   \internal
 */
-void PimRecord::initMaps(const QtopiaPimMapEntry *entries, QMap<int,int> &uniquenessMap, QMap<QCString,int> &identifierToKeyMap,
+void PimRecord::initMaps(const char* trclass, const QtopiaPimMapEntry *entries, QMap<int,int> &uniquenessMap, QMap<QCString,int> &identifierToKeyMap,
 			QMap<int,QCString> &keyToIdentifierMap, QMap<int,QString> &trFieldsMap)
 {
+    static int translation_installed = 0;
+    if ( !translation_installed ) {
+	++translation_installed;
+	QString lang = getenv("LANG");
+	QTranslator * trans = new QTranslator(qApp);
+	QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/libqpepim.qm";
+qDebug("Load %s",tfn.latin1());
+	if ( trans->load( tfn ))
+	    qApp->installTranslator( trans );
+	else
+	    delete trans;
+    }
+
     for ( const QtopiaPimMapEntry *entry = recentries; entry->identifier; ++entry ) {
    	keyToIdentifierMap.insert( entry->id, entry->identifier );
 	identifierToKeyMap.insert( entry->identifier, entry->id );
 	if ( entry->trName )
-	    trFieldsMap.insert( entry->id, entry->trName );
+	    trFieldsMap.insert( entry->id, qApp->translate("PimRecord", entry->trName) );
 	uniquenessMap.insert( entry->id, entry->uniqueness );
     }
 
@@ -266,7 +305,7 @@ void PimRecord::initMaps(const QtopiaPimMapEntry *entries, QMap<int,int> &unique
 	keyToIdentifierMap.insert( entry2->id, entry2->identifier );
 	identifierToKeyMap.insert( entry2->identifier, entry2->id );
 	if ( entry2->trName )
-	    trFieldsMap.insert( entry2->id, entry2->trName );
+	    trFieldsMap.insert( entry2->id, qApp->translate(trclass, entry2->trName) );
 	uniquenessMap.insert( entry2->id, entry2->uniqueness );
     }
 }

@@ -1,8 +1,9 @@
-Files: etc/defaultbuttons.conf etc/qimpen etc/colors bin/qpe-reorgfiles lib/libqpe.so.$LIBQPE_VERSION_MAJ.$LIBQPE_VERSION_MIN.$LIBQPE_VERSION_PAT lib/libqpe.so.$LIBQPE_VERSION_MAJ.$LIBQPE_VERSION_MIN lib/libqpe.so.$LIBQPE_VERSION_MAJ apps/*/.directory etc/mime.types apps/Settings/quit.desktop
+Files: etc/defaultbuttons.conf etc/qimpen etc/colors bin/qpe-reorgfiles lib/libqpe.so.$LIBQPE_VERSION_MAJ.$LIBQPE_VERSION_MIN.$LIBQPE_VERSION_PAT lib/libqpe.so.$LIBQPE_VERSION_MAJ.$LIBQPE_VERSION_MIN lib/libqpe.so.$LIBQPE_VERSION_MAJ apps/*/.directory etc/mime.types apps/Settings/quit.desktop plugins/*/.directory
 Priority: required
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-13
 Depends: qt-embedded (>=$QTE_VERSION), qpe-qcop, qpe-pics, qpe-sounds, atd, qpe-libqtopia
 Description: Base Qtopia environment

@@ -27,6 +27,8 @@
 #include <qvaluelist.h>
 #include <qwidget.h>
 
+#include <qtopia/qtopiawinexport.h> 
+
 typedef QGuardedPtr<QWidget> GuardedWidget;
 
 class QTOPIA_EXPORT QPEMenuToolFocusManager : public QObject

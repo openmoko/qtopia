@@ -2,6 +2,7 @@ Files: lib/libqtopia.so.$VERSION_MAJ.$VERSION_MIN.$VERSION_PAT lib/libqtopia.so.
 Priority: required
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-13
 Description: Qtopia librarys extestion.

@@ -19,6 +19,7 @@
 **********************************************************************/
 
 #include "docproperties.h"
+#include "locationcombo.h"
 
 #include <qtopia/ir.h>
 #include <qtopia/applnk.h>
@@ -55,72 +56,14 @@
 
 
 
-LocationCombo::LocationCombo( AppLnk * lnk, QWidget *parent )
-    : QComboBox( FALSE, parent )
-{
-    QFileInfo fi( lnk->file() );
-    int fileSize = fi.size();
-    StorageInfo storage;
-    const QList<FileSystem> &fs = storage.fileSystems();
-    QListIterator<FileSystem> it ( fs );
-    QString s;
-    QString homeDir = Global::homeDirPath();
-    QString hardDiskHome;
-    QString hardDiskPath;
-    int index = 0;
-    currentLocation = -1;
-    for ( ; it.current(); ++it ) {
-	// we add 10k to the file size so we are sure we can also save the desktop file
-	if ( (ulong)(*it)->availBlocks() * (ulong)(*it)->blockSize() > (ulong)fileSize + 10000 ) {
-	    if ( (*it)->isRemovable() ||
-		 (*it)->disk() == "/dev/mtdblock1" ||
-		 (*it)->disk() == "/dev/mtdblock/1" ) {
-		insertItem( (*it)->name(), index );
-		locations.append( ((*it)->isRemovable() ? (*it)->path() : homeDir) );
-		if ( lnk->file().contains( (*it)->path() ) ) {
-		     setCurrentItem( index );
-		     currentLocation = index;
-		}
-		index++;
-	    } else if ( (*it)->name().contains( "Hard Disk") &&
-			homeDir.contains( (*it)->path() ) &&
-			(*it)->path().length() > hardDiskPath.length() ) {
-		hardDiskHome = (*it)->name();
-		hardDiskPath = (*it)->path();
-	    }
-	}
-    }
-    if ( !hardDiskHome.isEmpty() ) {
-	insertItem( hardDiskHome );
-	QString hardDiskPath = homeDir + "/Documents";
-	locations.append( hardDiskPath );
-	if ( currentLocation == -1 ) { // assume it's the hard disk
-	    setCurrentItem( index );
-	    currentLocation = index;
-	}
-    }
-}
-
-
-bool LocationCombo::isChanged() const
-{
-    return currentItem() != currentLocation;
-}
-
-QString LocationCombo::pathName() const
-{
-    return locations[ currentItem() ];
-}
-
-#if 0
-void LocationCombo::apply()
-{
-}
-#endif
-
 class DocPropertiesWidgetPrivate 
 {
 public:
+    DocPropertiesWidgetPrivate()
+    {
+	categoryEdit = 0;
+    }
+    
     LocationCombo *locationCombo;
     CategorySelect *categoryEdit;
     QLineEdit *docname;
@@ -130,10 +73,10 @@ public:
 };
 
 
-DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent )
-    : QWidget( parent ), lnk( l )
+DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent, const char *name )
+    : QWidget( parent, name ), lnk( l )
 {
-    bool isDocument = lnk->type().contains('/'); // #### better predicate needed
+    bool isDocument = lnk->isDocLnk();
     d = new DocPropertiesWidgetPrivate;
 
     QVBoxLayout *tll = new QVBoxLayout( this, 0, 0 );
@@ -153,7 +96,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent )
     grid->addWidget( d->docname, row, 1 );
     d->docname->setText(lnk->name());
     if ( !isDocument )
-	d->docname->setReadOnly( TRUE );
+	d->docname->setEnabled( FALSE );
     row++;
     
     
@@ -171,7 +114,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent )
 	d->categoryEdit = new CategorySelect( main );
 	grid->addWidget( d->categoryEdit, row, 1 );
 	d->categoryEdit->setCategories( lnk->categories(),
-					"Document View",
+					"Document View", // No tr
 					tr("Document View") );
 	row++;
     }
@@ -188,7 +131,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent )
 	grid->addWidget( new QLabel( tr("Comment:"), main ), row, 0 );
 	d->comment = new QLabel( main );
 	grid->addWidget( d->comment, row, 1 );
-	d->comment->setText( lnk->comment() );
+	d->comment->setText( "<qt>" + lnk->comment() + "</qt>" );
 	row++;
     }
 
@@ -238,6 +181,7 @@ DocPropertiesWidget::DocPropertiesWidget( AppLnk* l, QWidget* parent )
 
 DocPropertiesWidget::~DocPropertiesWidget()
 {
+    delete d;
 }
 
 void DocPropertiesWidget::applyChanges()
@@ -247,14 +191,14 @@ void DocPropertiesWidget::applyChanges()
 	lnk->setName(d->docname->text());
 	changed=TRUE;
     }
-    if ( d->categoryEdit->isVisible() ) {
+    if ( d->categoryEdit ) {
 	QArray<int> tmp = d->categoryEdit->currentCategories();
 	if ( lnk->categories() != tmp ) {
 	    lnk->setCategories( tmp );
 	    changed = TRUE;
 	}
     }
-    if ( !d->fastLoad && d->locationCombo->isChanged() ) {
+    if ( !d->fastLoad && d->locationCombo && d->locationCombo->isChanged() ) {
 	moveLnk();
     } else if ( changed ) {
 	lnk->writeLink();
@@ -336,7 +280,7 @@ bool DocPropertiesWidget::copyFile( DocLnk &newdoc )
     QString safename = newdoc.name();
     safename.replace(QRegExp("/"),"_");
 
-    QString fn = d->locationCombo->pathName() + "/Documents/" + newdoc.type() + "/" + safename;
+    QString fn = d->locationCombo->path() + "/Documents/" + newdoc.type() + "/" + safename;
     if ( QFile::exists(fn + fileExtn) || QFile::exists(fn + linkExtn) ) {
 	int n=1;
 	QString nn = fn + "_" + QString::number(n);
@@ -373,8 +317,8 @@ void DocPropertiesWidget::unlinkLnk()
 
 
 
-DocPropertiesDialog::DocPropertiesDialog( AppLnk* l, QWidget* parent )
-    : QDialog( parent, 0, TRUE )
+DocPropertiesDialog::DocPropertiesDialog( AppLnk* l, QWidget* parent, const char *name )
+    : QDialog( parent, name, TRUE )
 {
     setCaption( tr("Properties") );
 

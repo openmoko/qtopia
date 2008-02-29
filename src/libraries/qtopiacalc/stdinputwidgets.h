@@ -24,7 +24,9 @@
 #include "engine.h"
 #include <qtoolbutton.h>
 #include "doubleinstruction.h"
+#ifdef ENABLE_FRACTION
 #include "fractioninstruction.h"
+#endif
 
 class QTOPIA_EXPORT Type1BaseInputWidget : public QWidget
 {
@@ -35,7 +37,7 @@ public:
     ~Type1BaseInputWidget(){};
 
     QGridLayout* Type1BaseInputWidgetLayout;
-private slots:
+public slots:
     void val0Clicked ();
     void val1Clicked ();
     void val2Clicked ();
@@ -65,7 +67,7 @@ public:
     Type1DecimalInputWidget( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
     ~Type1DecimalInputWidget(){};
 
-private slots:
+public slots:
     void decimalClicked ();
 
     void addClicked ();
@@ -86,7 +88,7 @@ public:
     Type1FractionInputWidget( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
     ~Type1FractionInputWidget(){};
 
-private slots:
+public slots:
     void fractionClicked ();
 
     void addClicked ();
@@ -107,7 +109,7 @@ public:
 protected:
     QGridLayout *Type2InputWidgetLayout;
 
-private slots:
+public slots:
     void val0Clicked ();
     void val1Clicked ();
     void val2Clicked ();

@@ -28,7 +28,7 @@
 #ifdef QWS
 #include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qtopia/qlibrary.h>
+#include "pluginloader_p.h"
 
 #include <qlistbox.h>
 #include <qdir.h>
@@ -104,7 +104,7 @@ void Network::connectChoiceChange(QObject* receiver, const char* slot)
 */
 QString Network::settingsDir()
 {
-    return Global::applicationFileName("Network", "modules");
+    return Global::applicationFileName("Network", "modules"); // No tr
 }
 
 #ifndef QT_NO_COP
@@ -425,32 +425,24 @@ int Network::addStateWidgets(QWidget* parent)
     return n;
 }
 
-static QDict<NetworkInterface> *ifaces;
+static QDict<NetworkInterface> *ifaces = 0;
+static PluginLoaderIntern *loader = 0;
 
 /*!
   \internal
 */
 NetworkInterface* Network::loadPlugin(const QString& type)
 {
+    if ( type.isEmpty() )
+	return 0;
 #ifndef QT_NO_COMPONENT
     if ( !ifaces ) ifaces = new QDict<NetworkInterface>;
+    if ( !loader ) loader = new PluginLoaderIntern( "network" );
     NetworkInterface *iface = ifaces->find(type);
     if ( !iface ) {
-	QString libfile = QPEApplication::qpeDir() + "plugins/network/lib" + type + ".so";
-	QLibrary lib(libfile);
-	if ( !lib.queryInterface( IID_Network, (QUnknownInterface**)&iface ) == QS_OK )
+	if ( loader->queryInterface( type, IID_Network, (QUnknownInterface**)&iface ) != QS_OK )
 	    return 0;
 	ifaces->insert(type,iface);
-	QStringList langs = Global::languageList();
-	for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
-	    QString lang = *it;
-	    QTranslator * trans = new QTranslator(qApp);
-	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/lib"+type+".qm";
-	    if ( trans->load( tfn ))
-		qApp->installTranslator( trans );
-	    else
-		delete trans;
-	}
     }
     return iface;
 #else

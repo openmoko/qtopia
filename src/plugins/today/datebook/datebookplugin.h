@@ -37,7 +37,7 @@ public:
     DatebookPlugin(QObject *parent, const char *name);
     ~DatebookPlugin();
 
-    virtual QString name() const { return "DateBook plugin"; }
+    virtual QString name() const;
     virtual QPixmap icon() const;
     
     virtual QString html(uint charWidth, uint lineHeight) const;

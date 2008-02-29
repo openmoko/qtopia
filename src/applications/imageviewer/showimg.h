@@ -104,7 +104,6 @@ public:
 
 protected:
     void resizeEvent( QResizeEvent * );
-    void closeEvent( QCloseEvent * );
     void keyPressEvent(QKeyEvent *e);
 
 private:
@@ -173,6 +172,7 @@ private:
     bool bFromDocView;	    // a flag to indicate whether or not we were
 			    // launched from the document view...
     QAction *openAction;
+    QAction *propAction;
     QAction *slideAction;
     QAction *prevImageAction;
     QAction *nextImageAction;
@@ -182,7 +182,8 @@ private:
     bool slideReverse;	    // show slideshow in reverse order
     bool rotateOnLoad;	    // rotate by 90 degrees on loading to fit
     bool rotateClockwise;   // rotate clockwise
-    bool fastLoad;
+    bool fastLoad;	    // (sacrifice quality for speed)
+    bool smallScale;	    // scale small images to desktop size
     QTimer *slideTimer;
 };
 

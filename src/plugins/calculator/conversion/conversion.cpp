@@ -154,7 +154,7 @@ qDebug("DATA value = %f",nextData->factor);
 }
 
 void FormConversion::showEvent ( QShowEvent *e ) {
-    sys.setAccType("DOUBLE");
+    sys.setAccType("Double"); // No tr
     QWidget::showEvent(e);
 }
 

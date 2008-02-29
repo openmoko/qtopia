@@ -145,8 +145,13 @@ public:
     void keyPressEvent(QKeyEvent* e)
     {
 	ike = TRUE;
-	if ( e->key() == Key_F33 /* OK button */ || e->key() == Key_Space )
-	    returnPressed(currentItem());
+	if ( e->key() == Key_F33 /* OK button */ || e->key() == Key_Space ) {
+	    if ( (e->state() & ShiftButton) )
+		emit mouseButtonPressed(ShiftButton, currentItem(), QPoint() ); 
+	    else
+		returnPressed(currentItem());
+	}
+	
 	QIconView::keyPressEvent(e);
 	ike = FALSE;
     }
@@ -239,7 +244,7 @@ public:
     {
 	switch (sortmeth) {
 	case Name:
-	    return a->name().compare(b->name());
+	    return a->name().lower().compare(b->name().lower());
 	case Date: {
 	    QFileInfo fa(a->linkFileKnown() ? a->linkFile() : a->file());
 	    QFileInfo fb(b->linkFileKnown() ? b->linkFile() : b->file());
@@ -486,7 +491,7 @@ static QString docLinkInfo(const Categories& cats, DocLnk* doc)
 	}
     }
 
-    contents += "[Desktop Entry]\n";
+    contents += "[Desktop Entry]\n"; // No tr
     contents += "Categories = " // No tr
 	+ cats.labels("Document View", doc->categories()).join(";") + "\n"; // No tr
     contents += "File = "+doc->file()+"\n"; // No tr
@@ -522,6 +527,7 @@ QString LauncherIconView::getAllDocLinkInfo() const
 LauncherView::LauncherView( QWidget* parent, const char* name, WFlags fl )
     : QVBox( parent, name, fl )
 {
+    catmb = 0;
     icons = new LauncherIconView( this );
     setFocusProxy(icons);
     QPEApplication::setStylusOperation( icons->viewport(), QPEApplication::RightOnHold );
@@ -567,8 +573,6 @@ void LauncherView::setToolsEnabled(bool y)
 	    typemb->setSizePolicy(p);
 
 	    // Category filter
-	    catmb = new CategorySelect(tools);
-
 	    updateTools();
 	    tools->show();
 	} else {
@@ -582,7 +586,7 @@ void LauncherView::updateTools()
 {
     disconnect( typemb, SIGNAL(activated(int)),
 	        this, SLOT(showType(int)) );
-    disconnect( catmb, SIGNAL(signalSelected(int)),
+    if ( catmb ) disconnect( catmb, SIGNAL(signalSelected(int)),
 	        this, SLOT(showCategory(int)) );
 
     icons->updateCategoriesAndMimeTypes();
@@ -619,6 +623,9 @@ void LauncherView::updateTools()
     if ( prev.isNull() )
 	typemb->setCurrentItem(typemb->count()-1);
 
+    int pcat = catmb ? catmb->currentCategory() : -2;
+    if ( !catmb )
+	catmb = new CategorySelect(tools);
     Categories cats( 0 );
     cats.load( categoryFileName() );
     QArray<int> vl( 0 );
@@ -626,6 +633,7 @@ void LauncherView::updateTools()
 	tr("Document View") );
     catmb->setRemoveCategoryEdit( TRUE );
     catmb->setAllCategories( TRUE );
+    catmb->setCurrentCategory(pcat);
 
     connect(typemb, SIGNAL(activated(int)), this, SLOT(showType(int)));
     connect(catmb, SIGNAL(signalSelected(int)), this, SLOT(showCategory(int)));
@@ -671,6 +679,49 @@ void LauncherView::setViewMode( ViewMode m )
 	icons->viewport()->setUpdatesEnabled( TRUE );
 	vmode = m;
     }
+}
+
+//
+// User images may require scaling.
+//
+QImage LauncherView::loadBackgroundImage(QString &bgName)
+{
+    QImageIO imgio;
+    QSize   ds = qApp->desktop()->size();   // should be launcher, not desktop
+    bool    further_scaling = TRUE;
+
+    imgio.setFileName( bgName );
+    imgio.setParameters("GetHeaderInformation");
+
+    if (imgio.read() == FALSE) {
+	return imgio.image();
+    }
+
+    if (imgio.image().width() < ds.width() &&
+	    imgio.image().height() < ds.height()) {
+	further_scaling = FALSE;
+    }
+
+    if (!imgio.image().bits()) {
+	//
+	// Scale and load.  Note we don't scale up.
+	//
+	QString param( "Scale( %1, %2, ScaleMin )" ); // No tr
+	imgio.setParameters(further_scaling ?
+	    param.arg(ds.width()).arg(ds.height()).latin1() :
+	    "");
+	imgio.read();
+    } else {
+	if (further_scaling) {
+	    //
+	    // Loader didn't scale for us.  Do it manually.
+	    //
+	    int min = QMIN(ds.width(), ds.height());
+	    return imgio.image().smoothScale(min, min);
+	}
+    }
+
+    return imgio.image();
 }
 
 void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
@@ -728,15 +779,9 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 		    bgName = Resource::findPixmap( "wallpaper/" + bgName );
 		    tile = TRUE;
 		}
-		QImageIO imgio;
-		imgio.setFileName( bgName );
-		if ( !tile ) {
-		    QSize ds = qApp->desktop()->size();
-		    QString param( "Scale( %1, %2, ScaleMin )" ); // No tr
-		    imgio.setParameters( param.arg(ds.width()).arg(ds.height()).latin1() );
-		}
-		imgio.read();
-		QImage img = imgio.image();
+		QImage img = loadBackgroundImage(bgName);
+
+
 		if ( img.depth() == 1 )
 		    img = img.convertDepth(8);
 		img.setAlphaBuffer(FALSE);
@@ -838,6 +883,8 @@ void LauncherView::itemPressed( int btn, QIconViewItem *item )
     if ( item ) {
 	AppLnk *appLnk = ((LauncherItem *)item)->appLnk();
 	if ( btn == RightButton )
+	    emit rightPressed( appLnk );
+	else if ( btn == ShiftButton )
 	    emit rightPressed( appLnk );
 /*
 	else if ( btn == LeftButton )

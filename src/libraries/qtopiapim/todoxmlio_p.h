@@ -93,8 +93,11 @@ class QTOPIAPIM_EXPORT TodoXmlIO : public TaskIO, public PimXmlIO {
    * Returns the full task list.  This is guaranteed
    * to be current against what is stored by other apps.
    */
-  QList<PrTask>& tasks();
-  const SortedTasks& sortedTasks();
+  const QList<PrTask>& tasks();
+
+  const SortedTasks &sortedTasks();
+
+  PrTask taskForId( const QUuid &, bool *ok ) const;
 
   /**
    * Loads the task data into the internal list
@@ -107,10 +110,12 @@ class QTOPIAPIM_EXPORT TodoXmlIO : public TaskIO, public PimXmlIO {
    */
   bool saveData();
 
+  void clear();
+
   // external methods.. use PimTask
   void updateTask(const PimTask& task);
   void removeTask(const PimTask& task);
-  void addTask(const PimTask& task, bool assignUid = TRUE);
+  QUuid addTask(const PimTask& task, bool assignUid = TRUE);
      
   int sortKey() const;
   bool sortAcending() const;

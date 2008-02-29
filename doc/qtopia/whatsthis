@@ -7,6 +7,7 @@ Allows plugin network services. | NetworkInterface
 Allows the user to select DocLnk objects. | FileSelector
 Assists with AppLnk input/output. | FileManager
 Database that groups categories and maps ids to names. | Categories
+Defines a Universally Unique Identifier (UUID). | QUuid
 Defines the interface for text codec plugins. | TextCodecInterface
 Describes a single mount point. | FileSystem
 Describes the disks mounted on the file system. | StorageInfo
@@ -25,7 +26,6 @@ Implements various system services that are available to all Qtopia applications
 Information about available fonts. | FontDatabase
 Interface for Qtopia input methods. | InputMethodInterface
 Interface for Qtopia taskbar applet plugins. | TaskbarAppletInterface
-Interface for Qtopia taskbar applet plugins, including a name and icon. | TaskbarNamedAppletInterface
 Interface for Qtopia widget styles. | StyleInterface
 Interface for Qtopia window decoration styles. | WindowDecorationInterface
 Interface for adding font renderers to Qtopia. | FontFactoryInterface
@@ -53,5 +53,6 @@ Single element in an XML structure defined by XmlHandler. | Node
 The base class for PIM data recorded in the Qtopia database. | PimRecord
 Used to access MediaPlayerDecoder objects. | MediaPlayerPluginInterface
 VNC client. | KVNC
+Wrapper for handling shared libraries. | QLibrary
 Wrapper for the libflash library. | LibFlashPlugin
 XML document structure holder. | XmlHandler

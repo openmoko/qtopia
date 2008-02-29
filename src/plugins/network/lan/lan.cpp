@@ -554,7 +554,7 @@ static QString findScheme(const QStringList& lans)
 	    c.setGroup("Lan");
 	    c.writeEntry("Scheme","default"); // No tr
 	}
-	SchemeChanger::changeScheme( "default" );
+	SchemeChanger::changeScheme( "default" ); // No tr
     }
     return scheme;
 }

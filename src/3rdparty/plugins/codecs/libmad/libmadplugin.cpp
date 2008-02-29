@@ -475,7 +475,7 @@ bool LibMadPlugin::decode( short *output, long samples, long& samplesMade ) {
 
 	while (mad_frame_decode(&d->frame, &d->stream) == -1) {
 	    if ( d->stream.error == MAD_ERROR_BUFLEN ) {
-		debugMsg( "feed me" );
+		debugMsg( "feed me" ); // No tr
 		qDebug( "feed me" );
 		return FALSE; // Feed me
 	    }

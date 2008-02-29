@@ -45,9 +45,12 @@
 */
 QString Config::configFilename(const QString& name, Domain d)
 {
+    QString actualName;
     switch (d) {
 	case File:
-	    return name;
+	    actualName = name;
+	    break;
+
 	case User: {
 	  QString homeDirPath = QDir::homeDirPath();
 #ifdef QTOPIA_DESKTOP
@@ -61,10 +64,11 @@ QString Config::configFilename(const QString& name, Domain d)
 #else
 	        dir.mkdir(dir.path());
 #endif
-	    return dir.path() + "/" + name + ".conf";
+	    actualName =  dir.path() + "/" + name + ".conf";
 	}
     }
-    return name;
+
+    return actualName;
 }
 
 /* This cannot be made public because of binary compat issues */
@@ -97,11 +101,6 @@ void Config::read( QTextStream &s )
   may be in the future.
 
   \ingroup qtopiaemb
-*/
-
-/*!
-  \enum Config::ConfigGroup
-  \internal
 */
 
 /*!

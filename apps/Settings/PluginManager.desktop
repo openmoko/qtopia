@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=pluginmanager
+Icon=AppServices
+Name=Plugin Manager
+Name[ja]=???
+CanFastload=0

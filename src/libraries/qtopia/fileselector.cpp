@@ -324,6 +324,7 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     QPEMenuToolFocusManager::manager()->addWidget( tb );
 
     view = new FileSelectorView( this, "fileview" );
+    view->setSorting(-1);
     view->setFrameStyle( QFrame::NoFrame );
     QPEApplication::setStylusOperation( view->viewport(), QPEApplication::RightOnHold );
     connect( view, SIGNAL( mouseButtonClicked( int, QListViewItem *, const QPoint &, int ) ),
@@ -332,6 +333,8 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
 	     this, SLOT( filePressed( int, QListViewItem *, const QPoint &, int ) ) );
     connect( view, SIGNAL( returnPressed( QListViewItem * ) ),
 	     this, SLOT( fileClicked( QListViewItem * ) ) );
+
+    setFocusProxy( view );
 
     QHBox *hb = new QHBox( this );
     d->typeCombo = new TypeCombo( hb );
@@ -546,6 +549,32 @@ void FileSelector::showEvent( QShowEvent *e )
     QVBox::showEvent( e );
 }
 
+class AppLnkPriv : public AppLnk {
+public:
+    inline bool linkFileKnown() const
+    {
+	return !mLinkFile.isNull();
+    }
+};
+
+static inline bool linkFileKnown(const AppLnk* l)
+{
+    return ((const AppLnkPriv*)l)->linkFileKnown();
+}
+
+static int compareDocLnk(const void* va, const void* vb)
+{
+    const DocLnk* b = *(const DocLnk**)va;
+    const DocLnk* a = *(const DocLnk**)vb;
+    int d = a->name().lower().compare(b->name().lower());
+    if ( !d ) {
+	QFileInfo fa(linkFileKnown(a) ? a->linkFile() : a->file());
+	QFileInfo fb(linkFileKnown(b) ? b->linkFile() : b->file());
+	d = fa.lastModified().secsTo(fb.lastModified());
+    }
+    return d;
+}
+
 void FileSelector::updateView()
 {
     FileSelectorItem *item = (FileSelectorItem *)view->selectedItem();
@@ -555,13 +584,20 @@ void FileSelector::updateView()
     if ( item )
 	oldFile = item->file().file();
     view->clear();
+    int ndocs = d->files.children().count();
     QListIterator<DocLnk> dit( d->files.children() );
+    DocLnk* *doc = new DocLnk*[ndocs];
+    int i=0;
     for ( ; dit.current(); ++dit ) {
+	doc[i++] = dit.current();
+    }
+    qsort(doc,ndocs,sizeof(doc[0]),compareDocLnk);
+    for ( i=0; i<ndocs; ++i ) {
 	bool mimeMatch = FALSE;
 	if ( d->mimeFilters.count() ) {
 	    QValueList<QRegExp>::Iterator it;
 	    for ( it = d->mimeFilters.begin(); it != d->mimeFilters.end(); ++it ) {
-		if ( (*it).match((*dit)->type()) >= 0 ) {
+		if ( (*it).match(doc[i]->type()) >= 0 ) {
 		    mimeMatch = TRUE;
 		    break;
 		}
@@ -570,9 +606,9 @@ void FileSelector::updateView()
 	    mimeMatch = TRUE;
 	}
 	if ( mimeMatch &&
-		(d->catId == -2 || (*dit)->categories().contains(d->catId) ||
-		 (d->catId == -1 && (*dit)->categories().isEmpty())) ) {
-	    item = new FileSelectorItem( view, **dit );
+		(d->catId == -2 || doc[i]->categories().contains(d->catId) ||
+		 (d->catId == -1 && doc[i]->categories().isEmpty())) ) {
+	    item = new FileSelectorItem( view, *doc[i] );
 	    if ( item->file().file() == oldFile )
 		view->setCurrentItem( item );
 	}

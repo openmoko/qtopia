@@ -19,7 +19,9 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_MIMEEXT
+#ifndef QTOPIA_INTERNAL_PRELOADACCESS
 #define QTOPIA_INTERNAL_PRELOADACCESS
+#endif
 
 #include "applnk.h"
 
@@ -59,23 +61,62 @@ static QString safeFileName(const QString& n)
     return safename;
 }
 
+
+/*
+    Takes an absolute path which needs to exist.
+    Creates all the intermediate paths up to that path as required.
+    UNIX path seperators assumed, but will work for absolute Windows
+    paths ie which start with "C:"
+    ### Probably needs optimizing
+ */
+bool mkdirRecursive( QString path )
+{
+    if ( path[int (path.length()) ] == '/' )
+      path = path.left( path.length() -1);
+
+    QString wholePath = path;
+
+    QFileInfo fi( path );
+
+    // find the path segment that does exist
+    while ( !fi.isDir() && path.contains( '/' ) ) {
+	path = path.left( path.findRev( '/' ) );
+	fi = QFileInfo( path );
+    }
+
+    // make the path segments that do not exist
+    QDir d;
+    while ( path != wholePath ) {
+	path = wholePath.left( wholePath.find( '/', path.length() + 1 ));
+	d.mkdir( path );
+	fi = QFileInfo( path );
+	if ( !fi.isDir() )
+	    return FALSE;
+    }
+
+    return TRUE;
+}
+
+
 static bool prepareDirectories(const QString& lf)
 {
-    QDir d(lf);
-    if ( !d.exists() ) {
-	// May need to create directories
-	QFileInfo fi(lf);
-	QString dirPath = QDir::convertSeparators( fi.dirPath(TRUE) );
+    QFileInfo fi(lf);
+    if (!fi.isDir()){
+      fi = QFileInfo(fi.dirPath(TRUE));
+    }
 
-	QString param("");
+    QString dirPath = fi.absFilePath();
+    if ( !fi.exists() ) {
 #ifndef Q_OS_WIN32
-	param = "-p ";
+	// May need to create directories
+	QString cmdLine(QString("mkdir -p ") + dirPath.latin1());
+	if ( system(cmdLine.latin1())){
+#else
+	if ( !mkdirRecursive( dirPath ) ) {
 #endif
-        QString cmdLine("mkdir " + param + dirPath.latin1());
-        if ( system(cmdLine.latin1()) ){
-            qDebug("System failed to execute command %s", cmdLine.latin1());
-            return FALSE;
-        }
+	     qDebug("AppLnk::prepareDirectories : System failed to create directory path %s", dirPath.latin1());
+	     return FALSE;
+	}
     }
     return TRUE;
 }
@@ -92,7 +133,7 @@ public:
 	Categories cat( 0 );
 	cat.load( categoryFileName() );
 	mCatList = cat.globalGroup().labels( mCat );
-	mCatList += cat.appGroupMap()["Document View"].labels( mCat );
+	mCatList += cat.appGroupMap()["Document View"].labels( mCat ); // No tr
     }
 
     void setCatArrayDirty()
@@ -116,9 +157,9 @@ public:
 	    bool number;
 	    int id = (*it).toInt( &number );
 	    if ( !number ) {
-		id = cat.id( "Document View", *it );
+		id = cat.id( "Document View", *it ); // No tr
 		if ( id == 0 )
-		    id = cat.addCategory( "Document View", *it );
+		    id = cat.addCategory( "Document View", *it ); // No tr
 	    }
 	    mCat[i] = id;
 	}
@@ -391,9 +432,9 @@ AppLnk::AppLnk( const QString &file )
 		    int id = (*it).toInt( &number );
 		    if ( !number ) {
 			// convert from text
-			id = cat.id( "Document View", *it );
+			id = cat.id( "Document View", *it ); // No tr
 			if ( id == 0 )
-			    id = cat.addCategory( "Document View", *it );
+			    id = cat.addCategory( "Document View", *it ); // No tr
 		    }
 		    d->mCat[i] = id;
 		}
@@ -630,9 +671,16 @@ void AppLnk::execute(const QStringList& args) const
 	int rot = QPEApplication::defaultRotation();
 	rot = (rot+mRotation.toInt())%360;
 	QCString old = getenv("QWS_DISPLAY");
+#ifndef Q_OS_WIN32
 	setenv("QWS_DISPLAY", QString("Transformed:Rot%1:0").arg(rot), 1);
 	invoke(args);
 	setenv("QWS_DISPLAY", old.data(), 1);
+#else
+	QString	rotationEvn("QWS_DISPLAY="); 
+	_putenv((rotationEvn + QString("Transformed:Rot%1:0").arg(rot)).latin1());
+	invoke(args);
+	_putenv((rotationEvn + old.data()).latin1());
+#endif
     } else
 	invoke(args);
 #endif
@@ -1057,7 +1105,7 @@ void AppLnkSet::findChildren(const QString &dr, const QString& typ, const QStrin
 		    QString d = typNameLocal.isNull() ? bn : typNameLocal+"/"+bn;
 		    findChildren(fi->filePath(), c, d, depth );
 		} else {
-		    if ( fi->extension(FALSE) == "desktop" ) {
+		    if ( fi->extension(FALSE) == "desktop" ) { // No tr
 			AppLnk* app = new AppLnk( fi->filePath() );
 #ifdef QT_NO_QWS_MULTIPROCESS
 			if ( !Global::isBuiltinCommand( app->exec() ) )
@@ -1295,7 +1343,7 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
 		    if ( bn != "CVS" && bn != "Qtopia" && bn != "QtPalmtop" )
 			findChildren(fi->filePath(), mimeFilters, reference, depth);
 		} else {
-		    if ( fi->extension(FALSE) == "desktop" ) {
+		    if ( fi->extension(FALSE) == "desktop" ) { // No tr
 			DocLnk* dl = new DocLnk( fi->filePath() );
 			QFileInfo fi2(dl->file());
 			bool match = FALSE;

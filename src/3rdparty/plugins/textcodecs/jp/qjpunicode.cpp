@@ -833,8 +833,8 @@ const QJpUnicodeConv *QJpUnicodeConv::newConverter(int rule)
 		rule = (rule & 0xff00) | JU_Unicode_ASCII;
 	    } else if (qstricmp(s, "jisx0221-1995") == 0) {
 		rule = (rule & 0xff00) | JU_JISX0221_JISX0201;
-	    } else if ((qstricmp(s, "open-0201") == 0) ||
-		       (qstricmp(s, "open-19970715-0201") == 0)) {
+	    } else if ((qstricmp(s, "open-0201") == 0) || // No tr
+		       (qstricmp(s, "open-19970715-0201") == 0)) { // No tr
 		rule = (rule & 0xff00) | JU_JISX0221_JISX0201;
 	    } else if ((qstricmp(s, "open-ascii") == 0) ||
 		       (qstricmp(s, "open-19970715-ascii") == 0)) {

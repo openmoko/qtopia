@@ -50,7 +50,7 @@ public:
 
     bool hasCurrentEntry();
     PimTask currentEntry();
-    void setCurrentEntry(QUuid &);
+    void setCurrentEntry(const QUuid &);
 
     QString categoryLabel( int id );
 
@@ -86,6 +86,7 @@ public:
 public slots:
     void slotDoFind( const QString &findString, int category );
     void reload(const SortedTasks &tasks);
+    void fitHeadersToWidth();
 
 signals:
     void updateTask(const PimTask &);
@@ -101,12 +102,15 @@ signals:
 
 protected:
     void setFields(QValueList<int> f, QStringList sizes);
+    void calcFieldSizes(int oldSize, int);
     int defaultFieldSize(PimTask::TaskFields f);
+    int minimumFieldSize(PimTask::TaskFields f);
     QValueList<int> defaultFields();
-
+    
     void keyPressEvent( QKeyEvent *e );
     void contentsMousePressEvent( QMouseEvent *e );
     void contentsMouseReleaseEvent( QMouseEvent *e );
+    void resizeEvent( QResizeEvent *e );
 
     int rowHeight( int ) const;
     int rowPos( int row ) const;

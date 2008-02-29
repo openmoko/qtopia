@@ -19,7 +19,7 @@
 **********************************************************************/
 
 #include "packageslave.h"
-#include "qprocess.h"
+#include <qtopia/qprocess.h>
 
 #ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>

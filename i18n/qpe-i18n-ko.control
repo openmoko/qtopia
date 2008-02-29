@@ -2,6 +2,8 @@ Files: i18n/ko/.directory i18n/ko/*.qm
 Priority: optional
 Section: qpe/i18n
 Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-9
 Depends: qpf-cyberbit-120-50-t10
 Description: i18n: Korean

@@ -151,6 +151,11 @@ TodoPlugin::~TodoPlugin()
     delete d;
 }
 
+QString TodoPlugin::name() const
+{
+    return tr("Todo List");
+}
+
 QPixmap TodoPlugin::icon() const
 {
     return Resource::loadPixmap("TodoList");
@@ -198,7 +203,7 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
 
 	    QString when;
 	    if ( t.hasDueDate ) {
-		when = TimeString::longDateString( t.dueDate ); 
+		when = TimeString::localYMD( t.dueDate ); 
 	    } else {
 		when = tr("Priority %1").arg(t.priority);
 	    }

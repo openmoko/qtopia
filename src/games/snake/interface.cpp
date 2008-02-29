@@ -43,9 +43,6 @@ SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
 
     cv = new QCanvasView(&canvas, this);
 
-    pauseTimer = new QTimer(this);
-    connect(pauseTimer, SIGNAL(timeout()), this, SLOT(wait()) );
-
     setToolBarsMovable( FALSE );
 
     QPEToolBar* toolbar = new QPEToolBar( this);
@@ -66,7 +63,6 @@ SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
 
     setCentralWidget(cv);
 
-    QTimer::singleShot( 16, this, SLOT(welcomescreen()) ); 
     gamestopped = true; 
     waitover = true;
 }
@@ -89,43 +85,14 @@ void SnakeGame::resizeEvent(QResizeEvent *)
     }
 }
 
-void SnakeGame::welcomescreen()
-{
-   QCanvasText* title = new QCanvasText(tr("SNAKE!"), &canvas);
+void SnakeGame::focusOutEvent(QFocusEvent *) {
+    if (snake)
+	snake->pause();
+}
 
-   int h = canvas.height() / 4;
-
-   title->setColor(yellow);
-   title->setFont( QFont("times", 18, QFont::Bold) );  
-   int w = title->boundingRect().width();
-   title->move(canvas.width()/2 - w/2, (h - title->boundingRect().height())/2);
-   title->show();
-
-   QCanvasPixmapArray* titlearray = new QCanvasPixmapArray(Resource::findPixmap("title"));
-   QCanvasSprite* titlepic = new QCanvasSprite(titlearray, &canvas);
-   titlepic->move(canvas.width()/2 - titlepic->boundingRect().width()/2,
-	h + (h - titlepic->boundingRect().height()) / 2);
-   titlepic->show(); 
-
-    QCanvasText	*instr = new QCanvasText(tr(
-	"Guide the snake with the arrow\n"
-	"keys to eat the mice. Don't let\n"
-	"the snake hit the walls or itself !"), &canvas);
-
-
-   w = instr->boundingRect().width();
-   instr->move(canvas.width()/2-w/2,
-	h*2 + (h - instr->boundingRect().height()) / 2);
-   instr->setColor(white);
-   instr->show();
-
-   QCanvasText* cont = new QCanvasText(tr("Press Any Key To Start"), &canvas);
-   w = cont->boundingRect().width();
-   cont->move(canvas.width()/2-w/2,
-	h*3 + (h - cont->boundingRect().height()) / 2);
-   cont->setColor(yellow);
-   cont->show(); 
-
+void SnakeGame::focusInEvent(QFocusEvent *) {
+    if (snake)
+	snake->pause();
 }
 
 void SnakeGame::newGame()
@@ -238,20 +205,6 @@ void SnakeGame::gameOver()
    gameover->show();
    gamestopped = true;
    waitover = false;
-   pauseTimer->start(1500);
-}
-
-void SnakeGame::wait()
-{
-   waitover = true;
-   pauseTimer->stop();
-   QCanvasText* cont = new QCanvasText(tr("Press Any Key to Begin a New Game."),
-                                       &canvas);         
-   cont->setZ(100);
-   cont->setColor(white);
-   int w = cont->boundingRect().width();
-   cont->move(canvas.width()/2 -w/2, canvas.height()/2);
-   cont->show();
 }
 
 void SnakeGame::keyPressEvent(QKeyEvent* event)

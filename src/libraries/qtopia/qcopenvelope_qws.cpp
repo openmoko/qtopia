@@ -96,7 +96,6 @@ QCopEnvelope::QCopEnvelope( const QCString& channel, const QCString& message ) :
 /*!
   Writes the message and then destroys the QCopEnvelope.
 */
-#ifndef Q_OS_WIN32
 QCopEnvelope::~QCopEnvelope()
 {
     QByteArray data = ((QBuffer*)device())->buffer();
@@ -107,11 +106,13 @@ QCopEnvelope::~QCopEnvelope()
 	QFile qcopfile(qcopfn);
 
 	if ( qcopfile.open(IO_WriteOnly | IO_Append) ) {
+#ifndef Q_OS_WIN32
 	    if(flock(qcopfile.handle(), LOCK_EX)) {
 		/* some error occurred */
 		qWarning(QString("Failed to obtain file lock on %1 (%2)")
 			.arg(qcopfn).arg( errno ));
 	    }
+#endif
 	    /* file locked, but might be stale (e.g. program for whatever
 	       reason did not start).  I modified more than 1 minute ago,
 	       truncate the file */
@@ -121,7 +122,10 @@ QCopEnvelope::~QCopEnvelope()
 		// success on fstat, lets compare times
 		if (buf.st_ctime + 60 < t) {
 		    qWarning("stale file " + qcopfn + " found.  Truncating");
+		    //		    ftruncate(qcopfile.handle(), 0);
+#ifdef Q_OS_WIN32
 		    Global::truncateFile(qcopfile, 0);
+#endif
 		    qcopfile.reset();
 		}
 	    }
@@ -131,7 +135,9 @@ QCopEnvelope::~QCopEnvelope()
 		{
 		    QDataStream ds(&qcopfile);
 		    ds << ch << msg << data;
+#ifndef Q_OS_WIN32
 		    flock(qcopfile.handle(), LOCK_UN);
+#endif
 		    qcopfile.close();
 		}
 
@@ -155,95 +161,7 @@ QCopEnvelope::~QCopEnvelope()
 		}
 		goto end;
 	    } // endif isRegisterd
-	    flock(qcopfile.handle(), LOCK_UN);
-	    qcopfile.close();
-	    qcopfile.remove();
-	} else {
-	    qWarning(QString("Failed to obtain file lock on %1")
-			.arg(qcopfn));
-	} // endif open
-    }
-    else if (qstrncmp(ch.data(), "QPE/SOAP/", 9) == 0) {
-      // If this is a message that should go along the SOAP channel, we move the
-      // endpoint URL to the data section.
-      QString endpoint = ch.mid(9);
-      
-      ch = "QPE/SOAP";
-      // Since byte arrays are explicitly shared, this is appended to the data variable..
-      *this << endpoint;
-    }
-    QCopChannel::send(ch,msg,data);
-end:
-    delete device();
-}
-
-#else
-
-/*
-##### revise make use of Global::lockFile
-*/
-
-QCopEnvelope::~QCopEnvelope()
-{
-    QByteArray data = ((QBuffer*)device())->buffer();
-    const int pref=16;
-    if ( qstrncmp(ch.data(),"QPE/Application/",pref)==0 ) {
-	QString qcopfn("/tmp/qcop-msg-");
-	qcopfn += ch.mid(pref);
-	QFile qcopfile(qcopfn);
-
-	if ( qcopfile.open(IO_WriteOnly | IO_Append) ) {
-#if 0	  
-	    if(flock(qcopfile.handle(), LOCK_EX)) {
-		/* some error occurred */
-		qWarning(QString("Failed to obtain file lock on %1 (%2)")
-			.arg(qcopfn).arg( errno ));
-	    }
-#endif
-	    /* file locked, but might be stale (e.g. program for whatever
-	       reason did not start).  I modified more than 1 minute ago,
-	       truncate the file */
-	    struct stat buf;
-	    time_t t;
-	    if (!fstat(qcopfile.handle(), &buf) &&  (time(&t) != (time_t)-1) ) {
-		// success on fstat, lets compare times
-		if (buf.st_ctime + 60 < t) {
-		    qWarning("stale file " + qcopfn + " found.  Truncating");
-		    //		    ftruncate(qcopfile.handle(), 0);
-		    qcopfile.reset();
-		}
-	    }
-
-	    if ( !QCopChannel::isRegistered(ch) ) {
-		int fsize = qcopfile.size();
-		{
-		    QDataStream ds(&qcopfile);
-		    ds << ch << msg << data;
-#if 0
-		    flock(qcopfile.handle(), LOCK_UN);
-#endif
-		    qcopfile.close();
-		}
-
-		if (fsize == 0) {
-		    QString cmd = ch.mid(pref);
-		    Global::execute(cmd);
-		}
-
-		char c;
-		for (int i=0; (c=msg[i]); i++) {
-		    if ( c == ' ' ) {
-			// Return-value required
-			// ###### wait for it
-			break;
-		    } else if ( c == '(' ) {
-			// No return value
-			break;
-		    }
-		}
-		goto end;
-	    } // endif isRegisterd
-#if 0
+#ifndef Q_OS_WIN32
 	    flock(qcopfile.handle(), LOCK_UN);
 #endif
 	    qcopfile.close();
@@ -266,6 +184,5 @@ QCopEnvelope::~QCopEnvelope()
 end:
     delete device();
 }
-#endif
 
 #endif

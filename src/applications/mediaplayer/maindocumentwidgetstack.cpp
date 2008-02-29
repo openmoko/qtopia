@@ -35,11 +35,12 @@ LoopControl *loopControl = 0;
 MainDocumentWidgetStack *mainDocumentWindow = 0;
 
 
-MainDocumentWidgetStack::MainDocumentWidgetStack( QWidget *parent, const char *name, WFlags fl )
+MainDocumentWidgetStack::MainDocumentWidgetStack( QWidget *parent, const char *name, WFlags /* fl */)
     : QWidgetStack( parent, name )
 {
     loading = TRUE;
     setCaption( tr("Media Player") );
+    setMinimumSize( 128, 128 );
     QObject::connect( qApp, SIGNAL( appMessage(const QCString &, const QByteArray &) ), this, SLOT( appMessage(const QCString &, const QByteArray &) ) );
     mainDocumentWindow = this;
 
@@ -76,7 +77,7 @@ void MainDocumentWidgetStack::setDocument( const QString& fileref )
 
 void MainDocumentWidgetStack::closeEvent( QCloseEvent *ce )
 {
-    if ( visibleWidget()->close() )
+    if ( !visibleWidget() || visibleWidget()->close() )
 	QWidgetStack::closeEvent( ce );
 }
 
@@ -93,10 +94,10 @@ void MainDocumentWidgetStack::appMessage( const QCString &msg, const QByteArray 
 
 MainDocumentWidgetStack::~MainDocumentWidgetStack()
 {
-    delete mediaPlayerState;
-    delete playList;
-    delete loopControl;
     delete mediaPlayer;
+    delete loopControl;
+    delete playList;
+    delete mediaPlayerState;
 }
 
 

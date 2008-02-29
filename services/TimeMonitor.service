@@ -1,2 +1,3 @@
 [Service]
 Actions = timeChanged(QString)
+Multiple = 1

@@ -36,6 +36,8 @@ typedef enum {
 
 #endif /* JMAKE_ENUM_LIST */
 
+// BEGIN No tr
+
 JMESSAGE(JMSG_NOMESSAGE, "Bogus message code %d") /* Must be first entry! */
 
 /* For maintenance convenience, list is alphabetical by message code name */
@@ -287,5 +289,7 @@ JMESSAGE(JWRN_TOO_MUCH_DATA, "Application transferred too many scanlines")
   ((cinfo)->err->msg_code = (code), \
    strncpy((cinfo)->err->msg_parm.s, (str), JMSG_STR_PARM_MAX), \
    (*(cinfo)->err->emit_message) ((j_common_ptr) (cinfo), (lvl)))
+
+// END No tr
 
 #endif /* JERROR_H */

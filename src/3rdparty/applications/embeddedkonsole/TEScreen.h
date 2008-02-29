@@ -19,7 +19,7 @@
 #ifndef TESCREEN_H
 #define TESCREEN_H
 
-/*! \file
+/* \file
 */
 
 #include "TECommon.h"
@@ -33,7 +33,7 @@
 #define MODE_NewLine   5
 #define MODES_SCREEN   6
 
-/*!
+/*
 */
 struct ScreenParm
 {
@@ -138,14 +138,14 @@ public: // these are all `Screen' operations
     //
     ca*  getCookedImage();
     
-    /*! return the number of lines. */
+    /* return the number of lines. */
     int  getLines()   { return lines; }
-    /*! return the number of columns. */
+    /* return the number of columns. */
     int  getColumns() { return columns; }
 
-    /*! set the position of the history cursor. */
+    /* set the position of the history cursor. */
     void setHistCursor(int cursor);
-    /*! return the position of the history cursor. */
+    /* return the position of the history cursor. */
     int  getHistCursor();
 
     int  getHistLines ();

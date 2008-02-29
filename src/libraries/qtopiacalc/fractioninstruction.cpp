@@ -30,19 +30,32 @@ Data *BaseFractionInstruction::eval(Data *d) {
 }
 BaseFractionInstructionDescription::BaseFractionInstructionDescription()
     : InstructionDescription() {
-	typeOne = typeTwo = "FRACTION";
+	type = typeOne = typeTwo = "Fraction"; // No tr
     }
 
-// Conversion functions
-Data * iConvertFractionFraction::eval(Data *d) {
+// Factory
+Data * iFractionFactory::eval(Data * /* d */) {
     FractionData *ret = new FractionData();
+    ret->clear();
+    return ret;
+}
+FractionFactory::FractionFactory():BaseFractionInstructionDescription() {
+    instructionName = "Factory"; // No tr
+};
+
+// Copy
+Data *iFractionCopy::eval(Data *d) {
+    FractionData *ret = new FractionData();
+    ret->clear();
     ret->set(((FractionData *)d)->getNumerator(),
 	    ((FractionData *)d)->getDenominator());
     return ret;
-}
-ConvertFractionFraction::ConvertFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "CONVERT";
-}
+};
+FractionCopy::FractionCopy():BaseFractionInstructionDescription() {
+    instructionName = "Copy"; // No tr
+};
+
+// Conversion functions
 Data * iConvertDoubleFraction::eval(Data *d) {
     FractionData *ret = new FractionData();
     double target,tmp,upper,lower;
@@ -66,9 +79,9 @@ Data * iConvertDoubleFraction::eval(Data *d) {
     return ret;
 }
 ConvertDoubleFraction::ConvertDoubleFraction():InstructionDescription() {
-    instructionName = "CONVERT";
-    typeOne = "DOUBLE";
-    typeTwo = "FRACTION";
+    instructionName = "Convert"; // No tr
+    typeOne = "Double"; // No tr
+    typeTwo = "Fraction"; // No tr
 }
 
 // Mathematical functions
@@ -107,19 +120,19 @@ Data * iDivideFractionFraction::doEval (FractionData *f) {
 }
 
 AddFractionFraction::AddFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "ADD";
+    instructionName = "Add"; // No tr
     precedence = 10;
 }
 SubtractFractionFraction::SubtractFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "SUBTRACT";
+    instructionName = "Subtract"; // No tr
     precedence = 10;
 }
 MultiplyFractionFraction::MultiplyFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "MULTIPLY";
+    instructionName = "Multiply"; // No tr
     precedence = 15;
 }
 DivideFractionFraction::DivideFractionFraction():BaseFractionInstructionDescription() {
-    instructionName = "DIVIDE";
+    instructionName = "Divide"; // No tr
     precedence = 15;
 }
 

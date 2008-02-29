@@ -8,7 +8,6 @@ COMMERCIALCOMPONENTS=\
 	plugins/applets/mountmon
 
 COMMERCIALAPPS=\
-	applications/firstuse \
 	applications/qtmail \
 	settings/backuprestore \
 	settings/buttoneditor
@@ -31,7 +30,7 @@ $(LIBS2): $(LIBS1)
 
 $(LIBS3): $(LIBS2)
 
-LIBS=$(LIBS3) $(LIBS2) $(LIBS1)
+LIBS=$(LIBS1) $(LIBS2) $(LIBS3)
 
 COMPONENTS=$(LOCALCOMPONENTS) \
 	3rdparty/plugins/codecs/libffmpeg \
@@ -103,7 +102,7 @@ APPS=$(LOCALAPPS) \
 	settings/network \
 	settings/qipkg \
 	settings/launcher \
-	settings/taskbar \
+	settings/pluginmgr \
 	tools/qcop \
 	tools/quickexec \
 	settings/worldtime
@@ -112,20 +111,21 @@ EXTRAPACKAGES=\
 		$(QPEDIR)/src/qt/qpe-babelfish-font.control \
 		$(QPEDIR)/src/qt/qt-embedded-jpeg.control \
 		$(QPEDIR)/src/qt/qpe-utopia-font.control \
-		$(QPEDIR)/src/qt/qt-embedded-rotation.control \
-		$(QPEDIR)/src/qt/qpf-cyberbit-120-50-t10.control \
+		$(QPEDIR)/src/qt/qt-embedded-fonts-t0.control \
+		$(QPEDIR)/src/qt/qt-embedded-fonts-t5.control \
+		$(QPEDIR)/src/qt/qt-embedded-fonts-t10.control \
+		$(QPEDIR)/src/qt/qt-embedded-fonts-t15.control \
 		$(QPEDIR)/src/qt/qt-embedded.control \
 		$(QPEDIR)/src/qt/qpf-unifont-160-50-t10.control \
 		$(QPEDIR)/pics/mediaplayer/skins/techno/qpe-mediaplayer-techno-skin.control \
 		$(QPEDIR)/pics/qpe-pics.control \
 		$(QPEDIR)/sounds/qpe-sounds.control \
-		$(QPEDIR)/help/en/qpe-help-en.control \
+		$(QPEDIR)/help/html/qpe-help-en.control \
 		$(QPEDIR)/services/qpe-service-Calendar.control \
 		$(QPEDIR)/services/qpe-service-Tasks.control \
 		$(QPEDIR)/services/qpe-service-Contacts.control \
 		$(QPEDIR)/services/qpe-service-Email.control \
 		$(QPEDIR)/services/qpe-service-TimeMonitor.control \
-		$(QPEDIR)/services/qpe-service-Receive.control \
 		$(QPEDIR)/i18n/qpe-i18n-de.control \
 		$(QPEDIR)/i18n/qpe-i18n-en.control \
 		$(QPEDIR)/i18n/qpe-i18n-hu.control \
@@ -162,10 +162,10 @@ desktop:
 	$(MAKE) -C libraries/qtopiapim
 
 showwin32components:
-	@echo libraries/qtopia
 	@echo $(LIBS)
 	@echo $(APPS)
 	@echo $(COMPONENTS)
+	@echo server
 
 showlibraries:
 	@echo $(LIBS)

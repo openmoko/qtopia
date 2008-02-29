@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Infrared Receiver
+Comment=Adds IR Receiver controls to the Q-Menu.
+X-QPE-Library=libirreceiverapplet.so

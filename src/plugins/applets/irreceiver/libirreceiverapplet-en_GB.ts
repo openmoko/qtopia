@@ -24,9 +24,5 @@
 </context>
 <context>
     <name>Taskbar Applet</name>
-    <message>
-        <source>IR Receiver</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 </TS>

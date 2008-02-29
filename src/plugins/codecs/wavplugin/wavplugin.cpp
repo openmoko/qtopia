@@ -87,6 +87,7 @@ public:
     int gsmnext;
 
     WavPluginData() {
+	input = 0;
 	max = out = sound_buffer_size;
 	wavedata_remaining = 0;
 	samples_due = 0;
@@ -184,8 +185,10 @@ public:
 		    samples = (wavedata_remaining / 65) * 320;
 		    samples = samples * 441 / (chunkdata.samplesPerSec/100);
 		} else {
-		    samples = wavedata_remaining / chunkdata.channels
-			* 441 / (chunkdata.samplesPerSec/100);
+		    samples = wavedata_remaining / chunkdata.channels;
+		    if ( chunkdata.wBitsPerSample == 16 )
+			samples /= 2;
+		    samples = samples * 441 / (chunkdata.samplesPerSec/100);
 		}
 	    } else if ( qstrncmp(chunk.id,"RIFF",4) == 0 ) {
 		char d[4];
@@ -380,7 +383,9 @@ bool WavPlugin::open( const QString& path ) {
 bool WavPlugin::close() {
     debugMsg( "WavPlugin::close" );
 
-    d->input->close();
+    if (d->input) {
+	d->input->close();
+    }
     delete d->input;
     d->input = 0;
     return TRUE;

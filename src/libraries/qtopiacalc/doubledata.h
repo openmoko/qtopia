@@ -29,7 +29,7 @@ class QTOPIA_EXPORT DoubleData:public Data {
 public:
     DoubleData();
     ~DoubleData(){};
-    QString getType(){return QString("DOUBLE");};
+    QString getType(){return QString("Double");}; // No tr
 
     void set(double);
     double get(){return dbl;};

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/qtopiadesktop.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/doc/qtopiadesktop.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -148,7 +148,7 @@ DataSetInterface::applyChanges().
 <a name="4"></a><p> Each plugin implementation needs to define some pure virtual methods defined
 in the plugin hierarchy. Each plugin must define the following methods:
 <pre>
-    QRESULT queryInterface( const QUuid&amp;, QUnknownInterface** );
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
     Q_REFCOUNT
 
     QString name() const;
@@ -174,7 +174,7 @@ Q_EXPORT_INTERFACE()
     Q_CREATE_INSTANCE( AddressBook )
 }
 
-  QRESULT AddressBook::queryInterface( const QUuid &amp;uuid,
+  QRESULT AddressBook::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid,
     QUnknownInterface** iface )
 {
     *iface = 0;

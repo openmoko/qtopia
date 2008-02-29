@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/devices.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/doc/devices.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,6 +51,19 @@ to display in different orientations.
 not be necessary in a production device.  It can be removed by deleting
 apps/Settings/quit.desktop
 </ul>
+<p> <h3> Required Plugins
+</h3>
+<a name="1-4"></a><p> If Qtopia crashes twice in quick succession "Safe Mode" will be entered and
+no plugins will be loaded in case the crash was caused by a misbehaving
+plugin.  In some cases there are plugins that are required for correct
+operation of the device.  These plugins can be specified in the .directory
+file in $QPEDIR/plugins/<type>/.directory.  For example, if the simple8
+text codec is always required:
+<p> [Desktop Entry]
+Name=Text Codecs
+Comment=Provides support for various international languages.
+Required=simple8
+Apply=QPE/System restart()
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>

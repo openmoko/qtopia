@@ -35,7 +35,8 @@ class QComboBox;
 class QHBox;
 class QTabWidget;
 class CategorySelect;
-class QPEDateButton;
+class QPEDateEdit;
+class QTextEdit;
 
 class FileAsCombo;
 class AbEditor : public QDialog
@@ -47,6 +48,7 @@ public:
     AbEditor( QWidget* parent = 0, const char* name = 0,  WFlags fl = 0 );
     ~AbEditor();
 
+    void setCategory(int);
     void setNameFocus();
     PimContact entry() const { return ent; }
 
@@ -72,7 +74,7 @@ private:
     QTabWidget *tabs;
     QWidget *personalTab;
     QWidget *summaryTab;
-    QLabel *summary;
+    QTextEdit *summary;
     QMap<int, QLineEdit *> lineEdits;
     QMap<int, QLabel *> labels;
     QComboBox *genderCombo;
@@ -80,8 +82,8 @@ private:
     QComboBox *suffixCombo;
     FileAsCombo *fileAsCombo;
     CategorySelect *cmbCat;
-    QPEDateButton *bdayButton;
-    QPEDateButton *anniversaryButton;
+    QPEDateEdit *bdayButton;
+    QPEDateEdit *anniversaryButton;
     QHBox *ehb;
     QLineEdit *emailLE;
     QPushButton *emailBtn;

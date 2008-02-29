@@ -41,9 +41,6 @@ public:
 	Deferred
     };
     
-    /*!
-      \internal
-    */
     enum TaskFields {
 	HasDate = CommonFieldsEnd,
 	Description,

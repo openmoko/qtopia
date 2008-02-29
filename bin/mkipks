@@ -26,6 +26,8 @@ fi
 QPE_VERSION=$VERSION_MAJ.$VERSION_MIN.$VERSION_PAT
 
 ARCH=arm
+CPU_ARCH=arm
+DEVICE_ARCH=SHARP
 STRIP=arm-linux-strip
 STRIP_FILES="*ARM*not stripped"
 
@@ -65,6 +67,10 @@ do
 	ARCH=$1
 	STRIP=
 	STRIP_FILES=
+    ;; -platform)
+	shift
+	DEVICE_ARCH=$1
+	CPU_ARCH=arm
     ;; -o)
 	shift
 	RDIR=$1
@@ -95,7 +101,8 @@ do
     version=$(eval echo '"'$(sed -n -e "s/^Version: *//p" $i)'"')
     depends=$(eval echo '"'$(sed -n -e "s/^Depends: *//p" $i)'"')
     files=$(eval echo $(sed -n -e "s/^Files://p" $i))
-    arch=$(eval echo $(sed -n -e "s/^Arch://p" $i))
+    arch=$(eval echo '"'$(sed -n -e "s/^Arch: *//p" $i)'"')
+    platform=$(eval echo '"'$(sed -n -e "s/^Architecture: *//p" $i)'"')
     section=$(sed -n -e "s/^Section: *//p" $i)
     license=$(sed -n -e "s/^License: *//p" $i)
     summary=$(sed -n -e "s/^Description: *//p" $i)
@@ -186,14 +193,26 @@ do
 	    # rm $SPEC
 	elif [ -z "$IMAGEDIR" ]
 	then
-	    #size=$(du -h -s $DATADIR | sed -e 's/[	 ].*//')
-	    size=$(mkfs.jffs2 -r $DATADIR | wc -c)
+	    if [ -z `which mkfs.jffs2` ]
+	    then
+		size=$(du -h -s $DATADIR | sed -e 's/[	 ].*//')
+	    else
+	        size=$(mkfs.jffs2 -r $DATADIR | wc -c)
+	    fi
 	    echo "Package: $packagename" >$CTRLDIR/control
 	    echo "Installed-Size: $size" >>$CTRLDIR/control
 	    echo "Filename: ./$package.ipk" >>$CTRLDIR/control
+	    if [ -n $platform ]
+            then
+		echo "Architecture: $platform" >> $CTRLDIR/control
+	    fi
+	    if [ -n $arch ]
+	    then
+		echo "Arch: $arch" >> $CTRLDIR/control
+	    fi
 	    echo "Version: $version" >>$CTRLDIR/control
 	    if [ -n "$depends" ]; then echo "Depends: $depends" >>$CTRLDIR/control; fi
-	    egrep -v "^(Files|Version|Depends):" >>$CTRLDIR/control $i
+	    egrep -v "^(Files|Version|Depends|Arch|Architecture):" >>$CTRLDIR/control $i
 	    echo "$DEB_VERSION" >$TDIR/debian-binary
 	    base=${i%.control}
 	    scripts="preinst postinst prerm postrm"

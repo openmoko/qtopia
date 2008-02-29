@@ -64,5 +64,9 @@
         <source>Priority %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Todo List</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

@@ -403,7 +403,7 @@ QValueList<Occurance> DateBookTable::getOccurances(
 
     static const QString sel(
 		"select * from events where start <= '%1' AND "
-		"(end >= '%2' || (repeatType != '0' AND (repeatTill >= '%3' || repeatForever != '0')));");
+		"(end >= '%2' || (repeatType != '0' AND (repeatTill >= '%3' || repeatForever != '0')));"); // No tr
     qDebug(sel
 		.arg(dateTimeString(QDateTime(to, QTime(23,59,59))))
 		.arg(dateTimeString(QDateTime(from, QTime(0,0,0))))

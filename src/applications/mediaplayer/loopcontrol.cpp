@@ -252,7 +252,7 @@ void LoopControl::startVideo()
 		}
 
 	    } else {
-		if ( hasAudioChannel && !isMuted ) {
+		if ( hasAudioChannel ) {
 		    if ( prev_frame != -1 && current_frame <= prev_frame )
 			return;
 		} else {
@@ -283,7 +283,7 @@ void LoopControl::startAudio()
 {
     if ( moreAudio ) {
 
-	if ( !isMuted && mediaPlayerState->decoder() ) {
+	if ( mediaPlayerState->decoder() ) {
 
 	    currentSample = audioSampleCounter + 1;
 	    long samplesRead = 0;
@@ -321,8 +321,7 @@ void LoopControl::startAudio()
 
 	} else {
 
-	    if ( !isMuted )
-		moreAudio = FALSE;
+	    moreAudio = FALSE;
 
 	}
 
@@ -403,7 +402,7 @@ void LoopControl::stop( bool willPlayAgainShortly )
     if ( !willPlayAgainShortly && disabledSuspendScreenSaver ) {
 	disabledSuspendScreenSaver = FALSE; 
 	// Re-enable the suspend mode
-	QCopEnvelope("QPE/System", "setScreenSaverMode(int)" ) << QPEApplication::Enable;
+	QPEApplication::setTempScreenSaverMode(QPEApplication::Enable);
     }
 #endif
 
@@ -467,14 +466,14 @@ bool LoopControl::init( const QString& filename, const QString& mimetype, bool i
     if ( hasAudioChannel ) {
 	astream = 0;
 	channels = mediaPlayerState->decoder()->audioChannels( astream );
-	DecodeLoopDebug(( "channels = %d\n", channels ));
+	DecodeLoopDebug(( "channels = %d\n", channels )); // No tr
 	total_audio_samples = mediaPlayerState->decoder()->audioSamples( astream );
 	if ( total_audio_samples )
 	    // give it one extra iteration through the
 	    // audio decoding loop after the expected EOF
 	    total_audio_samples += 1000;
 	freq = mediaPlayerState->decoder()->audioFrequency( astream );
-	DecodeLoopDebug(( "frequency = %d\n", freq ));
+	DecodeLoopDebug(( "frequency = %d\n", freq )); // No tr
 	audioSampleCounter = 0;
 
 	static const int bytes_per_sample = 2; //16 bit
@@ -494,9 +493,9 @@ bool LoopControl::init( const QString& filename, const QString& mimetype, bool i
 	vstream = 0;
 	total_video_frames = mediaPlayerState->decoder()->videoFrames( vstream );
         framerate = (float)mediaPlayerState->decoder()->videoFrameRate( vstream );
-        DecodeLoopDebug(( "Frame rate %g total %ld", framerate, total_video_frames ));
+        DecodeLoopDebug(( "Frame rate %g total %ld", framerate, total_video_frames )); // No tr
 	if ( framerate <= 1.0 ) {
-	    DecodeLoopDebug(( "Crazy frame rate, resetting to sensible" ));
+	    DecodeLoopDebug(( "Crazy frame rate, resetting to sensible" )); // No tr
 	    framerate = 25;
 	}
     }
@@ -522,7 +521,7 @@ bool LoopControl::init( const QString& filename, const QString& mimetype, bool i
     }
 
     if ( !mediaPlayerState->hasLength() )
-	DecodeLoopDebug(( "Decoder can not query length" ));
+	DecodeLoopDebug(( "Decoder can not query length" )); // No tr
 
     current_frame = 0;
     prev_frame = -1;
@@ -540,8 +539,7 @@ void LoopControl::play()
 	disabledSuspendScreenSaver = TRUE; 
 	previousSuspendMode = hasVideoChannel;
         // Stop the screen from blanking and power saving state
-	QCopEnvelope("QPE/System", "setScreenSaverMode(int)" ) 
-	    << ( hasVideoChannel ? QPEApplication::Disable : QPEApplication::DisableSuspend );
+	QPEApplication::setTempScreenSaverMode(hasVideoChannel ? QPEApplication::Disable : QPEApplication::DisableSuspend);
     }
 #endif
     if ( hasVideo() )
@@ -558,16 +556,7 @@ void LoopControl::play()
 
 void LoopControl::setMute( bool on )
 {
-    if ( on != isMuted ) {
-	isMuted = on;
-	if ( !on ) {
-	    // Force an update of the position
-	    mediaPlayerState->setPosition( mediaPlayerState->position() + 1 );
-	    mediaPlayerState->setPosition( mediaPlayerState->position() - 1 );
-	    // Resume playing audio
-	    moreAudio = TRUE;
-	}
-    }
+    isMuted = on;
 }
 
 

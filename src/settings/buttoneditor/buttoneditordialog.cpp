@@ -38,7 +38,7 @@
 ButtonEditorDialog::ButtonEditorDialog() 
   : QDialog(0L, "ButtonEditorDialog", TRUE)
 {
-  setCaption(tr("Configure Hardware Buttons"));
+  setCaption(tr("Buttons"));
   initAppList();
   buildGUI();
 }

@@ -23,9 +23,7 @@
 #include <qstringlist.h>
 
 QWidget * AdvancedInterface::create (QWidget *parent) {
-    if ( !input )
-	input = new FormAdvanced(parent,"Scientific",0);
-    return input;
+    return new FormAdvanced(parent,pluginName(),0);
 }
 
 #ifndef QT_NO_COMPONENT

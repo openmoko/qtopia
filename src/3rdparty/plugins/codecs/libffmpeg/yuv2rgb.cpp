@@ -379,9 +379,9 @@ static scale_line_func_t find_scale_line_func(int step)
     scale_line_func_t	func;
     char	       *desc;
   } scale_line[] = {
-    {  5,  8, scale_line_5_8,   "svcd 4:3(pal)" },
+    {  5,  8, scale_line_5_8,   "svcd 4:3(pal)" }, // No tr
     {  3,  4, scale_line_3_4,   "svcd 4:3(ntsc)" },
-    {  1,  2, scale_line_1_2,   "2*zoom" },
+    {  1,  2, scale_line_1_2,   "2*zoom" }, // No tr
     {  1,  1, scale_line_1_1,   "non-scaled" },
   };
   unsigned int i;
@@ -822,7 +822,7 @@ yuv2rgb_factory_t* yuv2rgb_factory_init (int mode, int swapped, int gamma)
 	    break;
 
 	default:
-	    fprintf (stderr, "mode %d not supported by yuv2rgb\n", mode);
+	    fprintf (stderr, "mode %d not supported by yuv2rgb\n", mode); // No tr
 	    abort();
     }
 

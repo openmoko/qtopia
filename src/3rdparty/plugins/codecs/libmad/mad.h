@@ -32,7 +32,7 @@
 # define MAD_VERSION_MAJOR	0
 # define MAD_VERSION_MINOR	13
 # define MAD_VERSION_PATCH	0
-# define MAD_VERSION_EXTRA	" (beta)"
+# define MAD_VERSION_EXTRA	" (beta)" // No tr
 
 # define MAD_VERSION_STRINGIZE(str)	#str
 # define MAD_VERSION_STRING(num)	MAD_VERSION_STRINGIZE(num)
@@ -43,7 +43,7 @@
 				MAD_VERSION_EXTRA
 
 # define MAD_PUBLISHYEAR	"2000-2001"
-# define MAD_AUTHOR		"Robert Leslie"
+# define MAD_AUTHOR		"Robert Leslie" // No tr
 # define MAD_EMAIL		"rob@mars.org"
 
 extern char const mad_version[];

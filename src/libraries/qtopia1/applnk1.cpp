@@ -29,6 +29,41 @@
 #include <qdir.h>
 #include <stdlib.h>
 
+/*
+    Takes an absolute path which needs to exist.
+    Creates all the intermediate paths up to that path as required.
+    UNIX path seperators assumed, but will work for absolute Windows
+    paths ie which start with "C:"
+    ### Probably needs optimizing
+ */
+static bool mkdirRecursive( QString path )
+{
+    if ( path[int( path.length()) ] == '/' )
+	path = path.left( path.length() - 1 );
+
+    QString wholePath = path;
+
+    QFileInfo fi( path );
+
+    // find the path segment that does exist
+    while ( !fi.isDir() && path.contains( '/' ) ) {
+	path = path.left( path.findRev( '/' ) );
+	fi = QFileInfo( path );
+    }
+
+    // make the path segments that do not exist
+    QDir d;
+    while ( path != wholePath ) {
+	path = wholePath.left( wholePath.find( '/', path.length() + 1 ) );
+	d.mkdir( path );
+	fi = QFileInfo( path );
+	if ( !fi.isDir() )
+	    return FALSE;
+    }
+
+    return TRUE;
+}
+
 class AppLnkPrivate
 {
 public:
@@ -54,17 +89,22 @@ QString AppLnk::icon() const
 
 static bool prepareDirectories(const QString& lf)
 {
-    if ( !QFile::exists(lf) ) {
-	// May need to create directories
-	QFileInfo fi(lf);
-	QString dirPath = QDir::convertSeparators( fi.dirPath(TRUE) );
+    QFileInfo fi(lf);
+    fi.setFile( fi.dirPath(TRUE) );
 
-	QString param;
+    QString dirPath = fi.absFilePath();
+    if ( !fi.exists() ) {
 #ifndef Q_OS_WIN32
-	param = "-p ";
+	// May need to create directories
+	QString cmdLine("mkdir -p ");
+	cmdLine += dirPath.latin1();
+	if ( system(cmdLine.latin1())){
+#else
+	if ( !mkdirRecursive( dirPath ) ) {
 #endif
-	if ( system(("mkdir "+ param + dirPath.latin1()) ) )
+	     qDebug("AppLnk1::prepareDirectories System failed to create directory %s", dirPath.latin1());
 	     return FALSE;
+	}
     }
     return TRUE;
 }
@@ -92,6 +132,12 @@ bool AppLnk::setLocation( const QString& docPath )
     // Search for a unique name.
     if ( QFile::exists( baseName + ext ) ||
 	 QFile::exists( baseName + ".desktop" ) ) {
+
+	// It's already in the right place.
+	if ( baseName + ext == fileName
+	    && baseName + ".desktop" == linkfileName )
+	    return TRUE;
+
 	int n = 1;
 	QString nn;
 	for(;;)
@@ -152,4 +198,9 @@ DocLnk & DocLnk::operator=(const DocLnk &other)
 {
     AppLnk::operator=(other);
     return *this;
+}
+
+bool AppLnk::isDocLnk() const
+{
+    return type().contains('/'); // ###### need better predicate
 }

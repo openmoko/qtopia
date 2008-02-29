@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/todoaccess.cpp:37 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopiapim/todoaccess.cpp:37 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -37,6 +37,7 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>void <a href="#updateTask"><b>updateTask</b></a> ( const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</div></li>
 <li><div class=fn>void <a href="#removeTask"><b>removeTask</b></a> ( const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</div></li>
 <li><div class=fn>void <a href="#addTask"><b>addTask</b></a> ( const&nbsp;PimTask&nbsp;&amp;&nbsp;task )</div></li>
+<li><div class=fn>PimTask <a href="#taskForId"><b>taskForId</b></a> ( const&nbsp;QUuid&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const</div></li>
 </ul>
 <h2>Signals</h2>
 <ul>
@@ -79,6 +80,13 @@ available
 </h3>
 If supported will remove <em>task</em> from the pim data;
 <p> Removing tasks requires the Tasks service to be available.
+
+<h3 class=fn><a href="pimtask.html">PimTask</a> <a name="taskForId"></a>TodoAccess::taskForId ( const&nbsp;<a href="quuid.html">QUuid</a>&nbsp;&amp;&nbsp;u, bool&nbsp;*&nbsp;ok = 0 ) const
+</h3>
+If there exists an task with the uid <em>u</em>, return 
+that task.  Returns a null task if otherwise.
+<p> If <em>ok</em> is non-null, *ok is set to TRUE if the task is
+found, and FALSE if the task is not found.
 
 <h3 class=fn>void <a name="todoListUpdated"></a>TodoAccess::todoListUpdated ()<tt> [signal]</tt>
 </h3>

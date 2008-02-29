@@ -253,14 +253,14 @@ $(MOC_DIR)/moc_lightsettingsbase.cpp: lightsettingsbase.h
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <light-and-power.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <light-and-power.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease light-and-power.pro
 	$(QPEDIR)/bin/qtopia-linstall light-and-power.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

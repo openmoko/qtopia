@@ -1,0 +1,11 @@
+Files: bin/fifteen apps/Games/fifteen.desktop
+Priority: optional
+Section: qpe/games
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-13
+Depends: qpe-libqtopia
+Description: Fifteen pieces game
+ A game for the Qtopia environment
+.

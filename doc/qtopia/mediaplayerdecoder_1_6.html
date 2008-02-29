@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:423 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:423 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -33,28 +33,124 @@ MediaPlayerDecoder class for Qtopia MediaPlayer decoder plugins.
 <p><a href="mediaplayerdecoder_1_6-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
-<li><div class=fn>virtual bool <b>supportsStreaming</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>canStreamURL</b> ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype ) = 0</div></li>
-<li><div class=fn>virtual bool <b>openURL</b> ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype ) = 0</div></li>
-<li><div class=fn>virtual bool <b>streamed</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>syncAvailable</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>sync</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>seekAvailable</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>seek</b> ( long&nbsp;pos ) = 0</div></li>
-<li><div class=fn>virtual bool <b>tellAvailable</b> () = 0</div></li>
-<li><div class=fn>virtual long <b>tell</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>lengthAvailable</b> () = 0</div></li>
-<li><div class=fn>virtual long <b>length</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>totalTimeAvailable</b> () = 0</div></li>
-<li><div class=fn>virtual long <b>totalTime</b> () = 0</div></li>
-<li><div class=fn>virtual bool <b>currentTimeAvailable</b> () = 0</div></li>
-<li><div class=fn>virtual long <b>currentTime</b> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#supportsStreaming"><b>supportsStreaming</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#canStreamURL"><b>canStreamURL</b></a> ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype ) = 0</div></li>
+<li><div class=fn>virtual bool <a href="#openURL"><b>openURL</b></a> ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype ) = 0</div></li>
+<li><div class=fn>virtual bool <a href="#streamed"><b>streamed</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#syncAvailable"><b>syncAvailable</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#sync"><b>sync</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#seekAvailable"><b>seekAvailable</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#seek"><b>seek</b></a> ( long&nbsp;pos ) = 0</div></li>
+<li><div class=fn>virtual bool <a href="#tellAvailable"><b>tellAvailable</b></a> () = 0</div></li>
+<li><div class=fn>virtual long <a href="#tell"><b>tell</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#lengthAvailable"><b>lengthAvailable</b></a> () = 0</div></li>
+<li><div class=fn>virtual long <a href="#length"><b>length</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#totalTimeAvailable"><b>totalTimeAvailable</b></a> () = 0</div></li>
+<li><div class=fn>virtual long <a href="#totalTime"><b>totalTime</b></a> () = 0</div></li>
+<li><div class=fn>virtual bool <a href="#currentTimeAvailable"><b>currentTimeAvailable</b></a> () = 0</div></li>
+<li><div class=fn>virtual long <a href="#currentTime"><b>currentTime</b></a> () = 0</div></li>
 </ul>
 <hr><a name="details"></a><h2>Detailed Description</h2>
 
 
 The MediaPlayerDecoder_1_6 class provides an extension to the
 <a href="mediaplayerdecoder.html">MediaPlayerDecoder</a> class for Qtopia MediaPlayer decoder plugins.
+
+<hr><h2>Member Function Documentation</h2>
+<h3 class=fn>bool <a name="canStreamURL"></a>MediaPlayerDecoder_1_6::canStreamURL ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder can support the given /a mimetype with the /a url provided.
+
+<h3 class=fn>long <a name="currentTime"></a>MediaPlayerDecoder_1_6::currentTime ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the current millisecond being played in the stream. The accuracy should only
+be considered good enough for the use in the display of the current play time and
+not used for the precise timing of syncing playback. Not all formats contain timestamps,
+therefore after seeking, not all formats and decoders will be able to support this function.
+
+<h3 class=fn>bool <a name="currentTimeAvailable"></a>MediaPlayerDecoder_1_6::currentTimeAvailable ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder can support the <a href="#currentTime">currentTime</a>() function for the given stream.
+
+<h3 class=fn>long <a name="length"></a>MediaPlayerDecoder_1_6::length ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the length in bytes of the stream. For streamed data, the protocol may
+not always return how long the stream will be, therefore it should be assumed
+that this may not always be available with all decoder plugins.
+
+<h3 class=fn>bool <a name="lengthAvailable"></a>MediaPlayerDecoder_1_6::lengthAvailable ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder can support the <a href="#length">length</a>() function for the given stream.
+
+<h3 class=fn>bool <a name="openURL"></a>MediaPlayerDecoder_1_6::openURL ( const&nbsp;QUrl&nbsp;&amp;&nbsp;url, const&nbsp;QString&nbsp;&amp;&nbsp;mimetype )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Opens the /a url of given /a mimetype. Typically this information is provided by a web
+server to a web browser which could pass this on directly to the plugin or indirectly to the
+Qtopia Media Player through a QCop signal for this.
+
+<h3 class=fn>bool <a name="seek"></a>MediaPlayerDecoder_1_6::seek ( long&nbsp;pos )<tt> [pure virtual]</tt>
+</h3>
+
+<p> Seeks to <em>pos</em> byte offset from the beginning of the stream.
+
+<h3 class=fn>bool <a name="seekAvailable"></a>MediaPlayerDecoder_1_6::seekAvailable ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the stream is seekable or not. For streamed media, it is possible
+that seeking may not be able to be implemented in the plugin therefore
+the plugin returns FALSE, otherwise if it can it returns TRUE.
+
+<h3 class=fn>bool <a name="streamed"></a>MediaPlayerDecoder_1_6::streamed ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder is playing a streamed file opened using <a href="#openURL">openURL</a>(), or if the file was
+opened using the <a href="mediaplayerdecoder.html#open">MediaPlayerDecoder::open</a>() function used for files.
+
+<h3 class=fn>bool <a name="supportsStreaming"></a>MediaPlayerDecoder_1_6::supportsStreaming ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder supports streaming.
+
+<h3 class=fn>bool <a name="sync"></a>MediaPlayerDecoder_1_6::sync ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Sync up the video to match the timestamp of where the audio currently is playing.
+If the video is behind, this will skip forward to the correctly matching frame.
+
+<h3 class=fn>bool <a name="syncAvailable"></a>MediaPlayerDecoder_1_6::syncAvailable ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder supports for the given stream syncing the audio and
+video together with the <a href="#sync">sync</a>() function.
+
+<h3 class=fn>long <a name="tell"></a>MediaPlayerDecoder_1_6::tell ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the current byte offset from the beginning of the stream.
+
+<h3 class=fn>bool <a name="tellAvailable"></a>MediaPlayerDecoder_1_6::tellAvailable ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder can support the <a href="#tell">tell</a>() function for the given stream.
+
+<h3 class=fn>long <a name="totalTime"></a>MediaPlayerDecoder_1_6::totalTime ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns the total time in milliseconds of the stream. For some file formats,
+the total play time may not be easily obtainable. Some formats use VBR (variable
+bit rate) encoding without timestamps making it uncertain as to exactly how long
+it takes to play the file without actually decoding or indexing it.
+
+<h3 class=fn>bool <a name="totalTimeAvailable"></a>MediaPlayerDecoder_1_6::totalTimeAvailable ()<tt> [pure virtual]</tt>
+</h3>
+
+<p> Returns if the decoder can support the <a href="#totalTime">totalTime</a>() function for the given stream.
 
 <!-- eof -->
 <hr><p>

@@ -34,6 +34,12 @@
 #	define Q_WS_WIN32    
 #   endif    
 #endif
+#if defined(_OS_UNIX_) && !defined(Q_OS_UNIX)
+#   define Q_OS_UNIX
+#   ifndef Q_WS_UNIX
+#	define Q_WS_UNIX    
+#   endif    
+#endif
 
 #if ( defined(Q_OS_WIN32) || defined(Q_OS_WIN64) ) 
 // #  if defined(QT_NODLL)

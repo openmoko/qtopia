@@ -26,6 +26,7 @@
 #include <qtextview.h>
 #include <qstring.h>
 #include <qapplication.h>
+#include <qpushbutton.h>
 #include <qfile.h>
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
@@ -55,8 +56,10 @@ public:
 signals:
     void passwordEntered( const QString& );
 
+public slots:
+    void key();
+
 protected:
-    bool eventFilter( QObject*, QEvent* );
     void keyPressEvent( QKeyEvent * );
 
 private:
@@ -76,7 +79,21 @@ extern "C" char *crypt(const char *key, const char *salt);
 
 static QString qcrypt(const QString& k, const char *salt)
 {
-    return QString::fromUtf8(crypt(k.utf8(),salt));
+    const QCString c_str = k.utf8();
+    int		len = k.length();
+    QString	result;
+    const char	*ptr;
+
+    for (; len > 8; len -= 8) {
+	result += QString::fromUtf8(crypt(ptr, salt));
+	ptr += 8;
+    }
+
+    if (*c_str) {
+	result += QString::fromUtf8(crypt(c_str, salt));
+    }
+
+    return result;
 }
 
 /*
@@ -96,17 +113,18 @@ PasswordDialog::PasswordDialog( QWidget* parent,  const char* name, WFlags fl )
 	prompt->setFont( f );
     }
     
-    button_0->installEventFilter( this );
-    button_1->installEventFilter( this );
-    button_2->installEventFilter( this );
-    button_3->installEventFilter( this );
-    button_4->installEventFilter( this );
-    button_5->installEventFilter( this );
-    button_6->installEventFilter( this );
-    button_7->installEventFilter( this );
-    button_8->installEventFilter( this );
-    button_9->installEventFilter( this );
-    button_OK->installEventFilter( this );
+    connect(button_0,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_1,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_2,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_3,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_4,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_5,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_6,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_7,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_8,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_9,SIGNAL(clicked()),this,SLOT(key()));
+    connect(button_OK,SIGNAL(clicked()),this,SLOT(key()));
+
     setFocus();
 }
 
@@ -124,17 +142,14 @@ PasswordDialog::~PasswordDialog()
   \reimp
 */
 
-bool PasswordDialog::eventFilter( QObject*o, QEvent*e )
+void PasswordDialog::key()
 {
-    if ( e->type() == QEvent::MouseButtonRelease ) {
-	if ( o == button_OK ) {
-	    emit passwordEntered( text );
-	} else {
-	    QLabel *l = (QLabel*)o;
-	    input(l->text());
-	}
+    QPushButton* s = (QPushButton*)sender();
+    if ( s == button_OK ) {
+	emit passwordEntered( text );
+    } else {
+	input(s->text());
     }
-    return FALSE;
 }
 
 
@@ -142,14 +157,15 @@ bool PasswordDialog::eventFilter( QObject*o, QEvent*e )
   \reimp
 */
 
-void PasswordDialog::keyPressEvent( QKeyEvent * )
+void PasswordDialog::keyPressEvent( QKeyEvent *e )
 {
-#if 0
     if ( e->key() == Key_Enter || e->key() == Key_Return )
 	emit passwordEntered( text );
-    else
-	input( e->text() );
-#endif
+    else {
+	QString t = e->text().left(1);
+	if ( t[0]>='0' && t[0]<='9' )
+	    input(t);
+    }
 }
 
 

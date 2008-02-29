@@ -21,14 +21,12 @@
 #ifndef __START_MENU_H__
 #define __START_MENU_H__
 
+#include <qtopia/applnk.h>
 #include <qstring.h>
 #include <qlist.h>
 #include <qlabel.h>
 #include <qpopupmenu.h>
 
-
-class AppLnkSet;
-class AppLnk;
 
 class StartPopupMenu : public QPopupMenu
 {
@@ -44,10 +42,11 @@ public:
     StartMenu( QWidget * );
     ~StartMenu();
 
-    const AppLnk* execToLink(const QString& appname);
-
 public:
     StartPopupMenu *launchMenu;
+
+signals:
+    void tabSelected(const QString&);
 
 public slots:
     void launch( );
@@ -62,7 +61,7 @@ protected:
     virtual void mousePressEvent( QMouseEvent * );
     
 private:
-    bool loadMenu( AppLnkSet *folder, QPopupMenu *menu );
+    bool loadMenu( QPopupMenu *menu );
 
 private:
     bool useWidePopupMenu;
@@ -71,7 +70,10 @@ private:
     bool startButtonIsFlat;
     QString startButtonPixmap;
 
-    AppLnkSet *apps;
+    QStringList tabs;
+    QList<AppLnk> other;
+    int ntabs;
+    int nother;
 };
 
 #endif // __START_MENU_H__

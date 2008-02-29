@@ -47,7 +47,20 @@ void AbLabel::sync()
 
 void AbLabel::keyPressEvent( QKeyEvent *e )
 {
-    if ( e->key() == Qt::Key_F33 ) {
+    switch( e->key() ) {
+    case Key_Space:
+    case Key_Return:
 	emit okPressed();
+	break;
+    case Key_Left:
+    case Key_Up:
+	emit previous();
+	break;
+    case Key_Right:
+    case Key_Down:
+	emit next();
+	break;
+    default:
+	QTextView::keyPressEvent( e );
     }
 }

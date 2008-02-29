@@ -26,7 +26,12 @@
     <name>CategoryCombo</name>
     <message>
         <source> (Multi.)</source>
-        <translation>(mehrere)</translation>
+        <translation type="obsolete">(mehrere)</translation>
+    </message>
+    <message>
+        <source> (multi.)</source>
+        <comment>short &apos;multiple&apos;</comment>
+        <translation type="unfinished">(mehrere)</translation>
     </message>
 </context>
 <context>
@@ -120,6 +125,10 @@
         <source>Sorry, another application is
 editing categories.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Categories</source>
+        <translation type="unfinished">Kategorien</translation>
     </message>
 </context>
 <context>
@@ -283,11 +292,11 @@ versuchen Sie es erneut.</translation>
     </message>
     <message>
         <source>PM</source>
-        <translation>PM</translation>
+        <translation type="obsolete">PM</translation>
     </message>
     <message>
         <source>AM</source>
-        <translation>AM</translation>
+        <translation type="obsolete">AM</translation>
     </message>
     <message>
         <source>First Name</source>
@@ -555,55 +564,55 @@ versuchen Sie es erneut.</translation>
     </message>
     <message>
         <source>Mon</source>
-        <translation>Mo</translation>
+        <translation type="obsolete">Mo</translation>
     </message>
     <message>
         <source>Tue</source>
-        <translation>Di</translation>
+        <translation type="obsolete">Di</translation>
     </message>
     <message>
         <source>Wed</source>
-        <translation>Mi</translation>
+        <translation type="obsolete">Mi</translation>
     </message>
     <message>
         <source>Thu</source>
-        <translation>Do</translation>
+        <translation type="obsolete">Do</translation>
     </message>
     <message>
         <source>Fri</source>
-        <translation>Fr</translation>
+        <translation type="obsolete">Fr</translation>
     </message>
     <message>
         <source>Sat</source>
-        <translation>Sa</translation>
+        <translation type="obsolete">Sa</translation>
     </message>
     <message>
         <source>Sun</source>
-        <translation>So</translation>
+        <translation type="obsolete">So</translation>
     </message>
     <message>
         <source>D</source>
-        <translation>T</translation>
+        <translation type="obsolete">T</translation>
     </message>
     <message>
         <source>M</source>
-        <translation>M</translation>
+        <translation type="obsolete">M</translation>
     </message>
     <message>
         <source>Y</source>
-        <translation>J</translation>
+        <translation type="obsolete">J</translation>
     </message>
     <message>
         <source>day</source>
-        <translation>Tag</translation>
+        <translation type="obsolete">Tag</translation>
     </message>
     <message>
         <source>month</source>
-        <translation>Monat</translation>
+        <translation type="obsolete">Monat</translation>
     </message>
     <message>
         <source>year</source>
-        <translation>Jahr</translation>
+        <translation type="obsolete">Jahr</translation>
     </message>
     <message>
         <source>New Document</source>
@@ -706,6 +715,87 @@ versuchen Sie es erneut.</translation>
     <name>TZCombo</name>
     <message>
         <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TimeStringFormat</name>
+    <comment>month-date separator</comment>
+    <message>
+        <source>D</source>
+        <translation type="obsolete">T</translation>
+    </message>
+    <message>
+        <source>M</source>
+        <translation type="unfinished">M</translation>
+    </message>
+    <message>
+        <source>Y</source>
+        <translation type="unfinished">J</translation>
+    </message>
+    <message>
+        <source>day</source>
+        <translation type="obsolete">Tag</translation>
+    </message>
+    <message>
+        <source>month</source>
+        <translation type="unfinished">Monat</translation>
+    </message>
+    <message>
+        <source>year</source>
+        <translation type="unfinished">Jahr</translation>
+    </message>
+    <message>
+        <source>, </source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>, </source>
+        <comment>year-date seperator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 %2</source>
+        <comment>1=Monday 2=January 12</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1, %2</source>
+        <comment>1=Monday 2=12 January</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PM</source>
+        <translation type="unfinished">PM</translation>
+    </message>
+    <message>
+        <source>AM</source>
+        <translation type="unfinished">AM</translation>
+    </message>
+    <message>
+        <source>%1 %2</source>
+        <comment>1=Monday 2=12:45</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>D</source>
+        <comment>day in month</comment>
+        <translation type="unfinished">T</translation>
+    </message>
+    <message>
+        <source>day</source>
+        <comment>in month</comment>
+        <translation type="unfinished">Tag</translation>
+    </message>
+    <message>
+        <source> </source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> </source>
+        <comment>month-date separator</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

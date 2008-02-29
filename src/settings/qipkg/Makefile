@@ -136,37 +136,25 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 ####### Files
 
-HEADERS =	packagemanager.h
-SOURCES =	packagemanager.cpp \
+HEADERS =	packagewizard.h
+SOURCES =	packagewizard.cpp \
 		main.cpp
-OBJECTS =	$(OBJECTS_DIR)/packagemanager.o \
+OBJECTS =	$(OBJECTS_DIR)/packagewizard.o \
 		$(OBJECTS_DIR)/main.o \
-		$(OBJECTS_DIR)/packagemanagerbase.o \
-		$(OBJECTS_DIR)/pkdesc.o \
-		$(OBJECTS_DIR)/pkfind.o \
-		$(OBJECTS_DIR)/pksettings.o
-INTERFACES =    packagemanagerbase.ui \
-		pkdesc.ui \
-		pkfind.ui \
-		pksettings.ui
-UICDECLS =      packagemanagerbase.h \
-		pkdesc.h \
-		pkfind.h \
-		pksettings.h
-UICIMPLS =      packagemanagerbase.cpp \
-		pkdesc.cpp \
-		pkfind.cpp \
-		pksettings.cpp
-SRCMOC	=	$(MOC_DIR)/moc_packagemanager.cpp \
-		$(MOC_DIR)/moc_packagemanagerbase.cpp \
-		$(MOC_DIR)/moc_pkdesc.cpp \
-		$(MOC_DIR)/moc_pkfind.cpp \
-		$(MOC_DIR)/moc_pksettings.cpp
-OBJMOC	=	$(OBJECTS_DIR)/moc_packagemanager.o \
-		$(OBJECTS_DIR)/moc_packagemanagerbase.o \
-		$(OBJECTS_DIR)/moc_pkdesc.o \
-		$(OBJECTS_DIR)/moc_pkfind.o \
-		$(OBJECTS_DIR)/moc_pksettings.o
+		$(OBJECTS_DIR)/pkwizard.o \
+		$(OBJECTS_DIR)/pkdesc.o
+INTERFACES =    pkwizard.ui \
+		pkdesc.ui
+UICDECLS =      pkwizard.h \
+		pkdesc.h
+UICIMPLS =      pkwizard.cpp \
+		pkdesc.cpp
+SRCMOC	=	$(MOC_DIR)/moc_packagewizard.cpp \
+		$(MOC_DIR)/moc_pkwizard.cpp \
+		$(MOC_DIR)/moc_pkdesc.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_packagewizard.o \
+		$(OBJECTS_DIR)/moc_pkwizard.o \
+		$(OBJECTS_DIR)/moc_pkdesc.o
 
 
 ####### Implicit rules
@@ -232,24 +220,22 @@ REQUIRES=
 
 ####### Compile
 
-$(OBJECTS_DIR)/packagemanager.o: packagemanager.cpp \
-		packagemanager.h \
-		packagemanagerbase.h \
-		pkdesc.h \
-		pkfind.h \
-		pksettings.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packagemanager.o packagemanager.cpp
+$(OBJECTS_DIR)/packagewizard.o: packagewizard.cpp \
+		packagewizard.h \
+		pkwizard.h \
+		pkdesc.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packagewizard.o packagewizard.cpp
 
 $(OBJECTS_DIR)/main.o: main.cpp \
-		packagemanager.h \
-		packagemanagerbase.h
+		packagewizard.h \
+		pkwizard.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-packagemanagerbase.h: packagemanagerbase.ui
-	$(UIC) packagemanagerbase.ui -o $(INTERFACE_DECL_PATH)/packagemanagerbase.h
+pkwizard.h: pkwizard.ui
+	$(UIC) pkwizard.ui -o $(INTERFACE_DECL_PATH)/pkwizard.h
 
-packagemanagerbase.cpp: packagemanagerbase.ui
-	$(UIC) packagemanagerbase.ui -i packagemanagerbase.h -o packagemanagerbase.cpp
+pkwizard.cpp: pkwizard.ui
+	$(UIC) pkwizard.ui -i pkwizard.h -o pkwizard.cpp
 
 pkdesc.h: pkdesc.ui
 	$(UIC) pkdesc.ui -o $(INTERFACE_DECL_PATH)/pkdesc.h
@@ -257,77 +243,45 @@ pkdesc.h: pkdesc.ui
 pkdesc.cpp: pkdesc.ui
 	$(UIC) pkdesc.ui -i pkdesc.h -o pkdesc.cpp
 
-pkfind.h: pkfind.ui
-	$(UIC) pkfind.ui -o $(INTERFACE_DECL_PATH)/pkfind.h
-
-pkfind.cpp: pkfind.ui
-	$(UIC) pkfind.ui -i pkfind.h -o pkfind.cpp
-
-pksettings.h: pksettings.ui
-	$(UIC) pksettings.ui -o $(INTERFACE_DECL_PATH)/pksettings.h
-
-pksettings.cpp: pksettings.ui
-	$(UIC) pksettings.ui -i pksettings.h -o pksettings.cpp
-
-$(OBJECTS_DIR)/packagemanagerbase.o: packagemanagerbase.cpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packagemanagerbase.o packagemanagerbase.cpp
+$(OBJECTS_DIR)/pkwizard.o: pkwizard.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pkwizard.o pkwizard.cpp
 
 $(OBJECTS_DIR)/pkdesc.o: pkdesc.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pkdesc.o pkdesc.cpp
 
-$(OBJECTS_DIR)/pkfind.o: pkfind.cpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pkfind.o pkfind.cpp
+$(OBJECTS_DIR)/moc_packagewizard.o: $(MOC_DIR)/moc_packagewizard.cpp \
+		packagewizard.h \
+		pkwizard.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_packagewizard.o $(MOC_DIR)/moc_packagewizard.cpp
 
-$(OBJECTS_DIR)/pksettings.o: pksettings.cpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pksettings.o pksettings.cpp
-
-$(OBJECTS_DIR)/moc_packagemanager.o: $(MOC_DIR)/moc_packagemanager.cpp \
-		packagemanager.h \
-		packagemanagerbase.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_packagemanager.o $(MOC_DIR)/moc_packagemanager.cpp
-
-$(OBJECTS_DIR)/moc_packagemanagerbase.o: $(MOC_DIR)/moc_packagemanagerbase.cpp \
-		packagemanagerbase.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_packagemanagerbase.o $(MOC_DIR)/moc_packagemanagerbase.cpp
+$(OBJECTS_DIR)/moc_pkwizard.o: $(MOC_DIR)/moc_pkwizard.cpp \
+		pkwizard.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pkwizard.o $(MOC_DIR)/moc_pkwizard.cpp
 
 $(OBJECTS_DIR)/moc_pkdesc.o: $(MOC_DIR)/moc_pkdesc.cpp \
 		pkdesc.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pkdesc.o $(MOC_DIR)/moc_pkdesc.cpp
 
-$(OBJECTS_DIR)/moc_pkfind.o: $(MOC_DIR)/moc_pkfind.cpp \
-		pkfind.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pkfind.o $(MOC_DIR)/moc_pkfind.cpp
+$(MOC_DIR)/moc_packagewizard.cpp: packagewizard.h
+	$(MOC) packagewizard.h -o $(MOC_DIR)/moc_packagewizard.cpp
 
-$(OBJECTS_DIR)/moc_pksettings.o: $(MOC_DIR)/moc_pksettings.cpp \
-		pksettings.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pksettings.o $(MOC_DIR)/moc_pksettings.cpp
-
-$(MOC_DIR)/moc_packagemanager.cpp: packagemanager.h
-	$(MOC) packagemanager.h -o $(MOC_DIR)/moc_packagemanager.cpp
-
-$(MOC_DIR)/moc_packagemanagerbase.cpp: packagemanagerbase.h
-	$(MOC) packagemanagerbase.h -o $(MOC_DIR)/moc_packagemanagerbase.cpp
+$(MOC_DIR)/moc_pkwizard.cpp: pkwizard.h
+	$(MOC) pkwizard.h -o $(MOC_DIR)/moc_pkwizard.cpp
 
 $(MOC_DIR)/moc_pkdesc.cpp: pkdesc.h
 	$(MOC) pkdesc.h -o $(MOC_DIR)/moc_pkdesc.cpp
 
-$(MOC_DIR)/moc_pkfind.cpp: pkfind.h
-	$(MOC) pkfind.h -o $(MOC_DIR)/moc_pkfind.cpp
-
-$(MOC_DIR)/moc_pksettings.cpp: pksettings.h
-	$(MOC) pksettings.h -o $(MOC_DIR)/moc_pksettings.cpp
-
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qipkg.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <qipkg.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qipkg.pro
 	$(QPEDIR)/bin/qtopia-linstall qipkg.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

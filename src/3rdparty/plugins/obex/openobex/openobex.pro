@@ -1,20 +1,20 @@
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on
 win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
-#DEFINES+=OBEX_DEBUG=2
-HEADERS = inobex.h    \	
-	irda.h 	      \	
-	irda_wrap.h   \	
-	irobex.h      \	
-	netbuf.h      \	
-	obex.h	      \	
-	obex_client.h \	
-	obex_connect.h \	
-	obex_const.h  \	
-	obex_header.h \	
-	obex_main.h   \	
-	obex_object.h \	
-	obex_server.h \	
+
+HEADERS = inobex.h    \
+	irda.h 	      \
+	irda_wrap.h   \
+	irobex.h      \
+	netbuf.h      \
+	obex.h	      \
+	obex_client.h \
+	obex_connect.h \
+	obex_const.h  \
+	obex_header.h \
+	obex_main.h   \
+	obex_object.h \
+	obex_server.h \
 	obex_transport.h
 
 

@@ -353,21 +353,21 @@
                         </property>
                     </widget>
                     <widget row="3"  column="2"  rowspan="1"  colspan="2" >
-                        <class>QPEDateButton</class>
+                        <class>QPEDateEdit</class>
                         <property stdset="1">
                             <name>name</name>
                             <cstring>buttonDue</cstring>
                         </property>
                     </widget>
                     <widget row="4"  column="2"  rowspan="1"  colspan="2" >
-                        <class>QPEDateButton</class>
+                        <class>NDateButton</class>
                         <property stdset="1">
                             <name>name</name>
                             <cstring>buttonStart</cstring>
                         </property>
                     </widget>
                     <widget row="5"  column="2"  rowspan="1"  colspan="2" >
-                        <class>QPEDateButton</class>
+                        <class>QPEDateEdit</class>
                         <property stdset="1">
                             <name>name</name>
                             <cstring>buttonEnd</cstring>
@@ -469,8 +469,22 @@
         <pixmap>image0</pixmap>
     </customwidget>
     <customwidget>
-        <class>QPEDateButton</class>
-        <header location="global">qtopia/datepicker.h</header>
+        <class>QPEDateEdit</class>
+        <header location="global">qtopia/datetimeedit.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+    </customwidget>
+    <customwidget>
+        <class>NDateButton</class>
+        <header location="local">nulldb.h</header>
         <sizehint>
             <width>-1</width>
             <height>-1</height>

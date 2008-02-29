@@ -4,3 +4,4 @@ Exec=mediarecorder
 Icon=SoundPlayer
 Type=Application
 Name=Voice Recorder
+Name[ja]=???

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/config.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/include/qtopia/config.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -59,21 +59,10 @@ body { background: #ffffff; color: black; }
 #include &lt;qcstring.h&gt;
 
 #include &lt;qstring.h&gt;
-#if defined(Q_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-Q_TEMPLATE_EXTERN template class Q_EXPORT QMap&lt;QString, QString&gt;;
-// MOC_SKIP_END
-#endif
+#include &lt;qtopia/qtopiawinexport.h&gt;
 
 typedef QMap&lt; QString, QString &gt; ConfigGroup;
 typedef QMap&lt; QString, ConfigGroup&gt; ConfigGroupMap;
-
-#if defined (QTOPIA_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-template class QTOPIA_EXPORT QMap&lt;QString, QMap&lt;QString, QString&gt; &gt;;
-template class QTOPIA_EXPORT QMapIterator&lt; QString, QMap&lt; QString,  QString&gt; &gt;;
-// MOC_SKIP_END
-#endif
 
 class ConfigPrivate;
 class QTextStream;

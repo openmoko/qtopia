@@ -17,6 +17,20 @@
 ** not clear to you.
 **
 **********************************************************************/
+
+#include "tabbedselector.h"
+#include "playlistselection.h"
+#include "mediaplayerstate.h"
+#include "audiowidget.h"
+#include "documentlist.h"
+
+#include <qtopia/fileselector.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/resource.h>
+#include <qtopia/categoryselect.h>
+#include <qtopia/qpeapplication.h>
+
 #include <qwidget.h>
 #include <qlabel.h>
 #include <qtabwidget.h>
@@ -24,16 +38,6 @@
 #include <qpushbutton.h>
 #include <qobjectlist.h>
 #include <qwidgetstack.h>
-#include <qtopia/fileselector.h>
-#include <qtopia/qpemenubar.h>
-#include <qtopia/qpetoolbar.h>
-#include <qtopia/resource.h>
-#include <qtopia/categoryselect.h>
-#include "tabbedselector.h"
-#include "playlistselection.h"
-#include "mediaplayerstate.h"
-#include "audiowidget.h"
-#include "documentlist.h"
 
 
 class TabItemData {
@@ -48,12 +52,13 @@ public:
 	    QHBox *hbox = new QHBox( tab );
 	    locMenu = new QComboBox( hbox );
 	    locMenu->insertStringList( si.fileSystemStrings() );
-	    locMenu->insertItem( parent->tr( "All Locations" ) );
+	    locMenu->insertItem( qApp->translate( "PlayListSelection", "All Locations" ) );
 	    locMenu->setCurrentItem( locMenu->count() - 1 );
 	    tabList->setLocationFilter( locMenu );
 	    catMenu = new CategorySelect( hbox, "MediaPlayer" );
 	    catMenu->setRemoveCategoryEdit( TRUE );
-	    catMenu->setCategories( vl, "Document View", parent->tr("Document View") );
+	    catMenu->setCategories( vl, "Document View", // No tr
+		qApp->translate("FileSelector", "Document View") );
 	    catMenu->setAllCategories( TRUE );
 	    tabList->setCategoryFilter( catMenu );
 	    parent->connect( catMenu, SIGNAL( signalSelected(int) ), parent, SLOT( categoryChanged() ) );
@@ -85,7 +90,7 @@ TabbedSelector::TabbedSelector( QWidget *parent, const char *name )
     d->videoTab.create( this );
     d->plistTab.create( this, FALSE );
 
-    d->list = new DocumentList( "video/*;audio/*", this, "list" );
+    d->list = new DocumentList( "video/*;audio/*", this, "list" ); // No tr
 
     connect( d->list, SIGNAL( added( const DocLnk & ) ), this, SLOT( addLink( const DocLnk & ) ) );
     connect( d->list, SIGNAL( allRemoved() ), this, SLOT( removeAll() ) );
@@ -98,14 +103,14 @@ TabbedSelector::TabbedSelector( QWidget *parent, const char *name )
     connect( mediaPlayerState, SIGNAL( prevTab() ), this, SLOT( showPrevTab() ) );
     connect( mediaPlayerState, SIGNAL( nextTab() ), this, SLOT( showNextTab() ) );
 
-    addTab( d->audioTab.tab, Resource::loadIconSet("mediaplayer/audio_tab"), "Audio" );
-    addTab( d->videoTab.tab, Resource::loadIconSet("mediaplayer/video_tab"), "Video" );
-    addTab( d->plistTab.tab, Resource::loadIconSet("mediaplayer/playlist_tab"), "Playlist" );
+    addTab( d->audioTab.tab, Resource::loadIconSet("mediaplayer/audio_tab"), tr("Audio") );
+    addTab( d->videoTab.tab, Resource::loadIconSet("mediaplayer/video_tab"), tr("Video") );
+    addTab( d->plistTab.tab, Resource::loadIconSet("mediaplayer/playlist_tab"), tr("Playlist") );
 
     setFocusPolicy( QWidget::NoFocus );
 
     // remove unnecessary border.
-    QObjectList *list = queryList ( "QWidgetStack", "tab pages", FALSE, FALSE );
+    QObjectList *list = queryList ( "QWidgetStack", "tab pages", FALSE, FALSE ); // No tr
     if ( list->first() )
 	((QWidgetStack*)list->first())->setFrameStyle( QFrame::NoFrame );
     delete list;

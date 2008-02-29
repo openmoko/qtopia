@@ -29,6 +29,39 @@
 
 #include <qtopia/qpeglobal.h>
 
+/*
+13rd January, 1934
+
+12:20pm
+
+12pm
+23
+09
+
+12h50m
+
+12h50
+
+2002y12m25d
+
+y%1m%2d%3
+
+y2002m12d25
+25/12/2002
+25 Dec 2002
+
+"%1 %2 %3"
+"%1/%2/%3"
+
+25 Dec 02
+
+25 Dec
+25/12
+
+*/
+
+class QObject;
+
 // return a string with the time based on whether or not you want
 // you want it in 12 hour form.   if ampm is true, then return
 // it in 12 hour (am/pm) form otherwise return it in 24 hour form
@@ -36,11 +69,11 @@
 class QTOPIA_EXPORT DateFormat 
 {
 public:
-    // date format type 001,010,100 = day month year
+    // date format type 1,2,4 = day,month,year
     enum Order {
-	DayMonthYear = 0x0111, // 0x001 + 0x010(0x2 << 3) + 0x100(0x4 << 3)
-	MonthDayYear = 0x010A,
-	YearMonthDay = 0x0054
+	DayMonthYear = 0421, // right-to-left
+	MonthDayYear = 0412,
+	YearMonthDay = 0124
     };
 
     DateFormat(QChar s = '/', Order so = MonthDayYear) : _shortOrder(so),
@@ -105,6 +138,7 @@ public:
 		      //YearMonthDay = ISO8601 };
 
 
+private:
     static QString shortDate( const QDate &d ) 
     { return shortDate( d, currentDateFormat() ); }
     static QString dateString( const QDate &d )
@@ -114,11 +148,30 @@ public:
     static QString dateString( const QDateTime &dt, bool ampm, bool seconds )
     { return dateString( dt, ampm, seconds, currentDateFormat() ); }
 
-    static QString dateString( const QDateTime &t, bool ampm = false );
+public:
+    enum Length { Short, Medium, Long };
+    static QString localH( int hour );
+    static QString localHM( const QTime & );
+    static QString localHMS( const QTime & );
+    static QString localMD( const QDate &, Length=Medium );
+    static QString localYMD( const QDate &, Length=Medium );
+    static QString localYMDHMS( const QDateTime &, Length=Medium );
+    static QString localDayOfWeek( const QDate&, Length=Medium );
+    static QString localDayOfWeek( int day1to7, Length=Medium );
+
+    static QString hourString( int hour, bool ampm );
+    static bool currentAMPM();
+    static DateFormat currentDateFormat();
+
+    static void connectChange(QObject*,const char* member);
+    static void disconnectChange(QObject*,const char* member);
+
+    // Not recommended to call these (they don't honor system ampm)
+    static QString dateString( const QDateTime &t, bool ampm );
     static QString timeString( const QTime &t, bool ampm, bool seconds );
-    static QString timeString( const QTime &t, bool ampm = false );
+    static QString timeString( const QTime &t, bool ampm );
     static QString shortTime( bool ampm, bool seconds );
-    static QString shortTime( bool ampm = false );
+    static QString shortTime( bool ampm );
 
     static QString numberDateString( const QDate &d, DateFormat );
     static QString numberDateString( const QDate &d )
@@ -130,8 +183,6 @@ public:
     static QString shortDate( const QDate &, DateFormat );
     static QString dateString( const QDate &, DateFormat  );
     static QString longDateString( const QDate &, DateFormat );
-
-    static DateFormat currentDateFormat();
 
 private:
     static QString dateString( const QDateTime &t, bool ampm, bool seconds, DateFormat );

@@ -3,11 +3,11 @@
     <name>SnakeGame</name>
     <message>
         <source>SNAKE!</source>
-        <translation>SCHLANGE!</translation>
+        <translation type="obsolete">SCHLANGE!</translation>
     </message>
     <message>
         <source>Press Any Key to Begin a New Game.</source>
-        <translation>Neues Spiel: Betätigen Sie eine beliebige Taste.</translation>
+        <translation type="obsolete">Neues Spiel: Betätigen Sie eine beliebige Taste.</translation>
     </message>
     <message>
         <source>     Score :    %1   </source>
@@ -25,17 +25,11 @@
     </message>
     <message>
         <source>Press Any Key To Start</source>
-        <translation>Spielbeginn: Betätigen Sie eine beliebige Taste.</translation>
+        <translation type="obsolete">Spielbeginn: Betätigen Sie eine beliebige Taste.</translation>
     </message>
     <message>
         <source>Snake</source>
         <translation>Schlange</translation>
-    </message>
-    <message>
-        <source>Guide the snake with the arrow
-keys to eat the mice. Don&apos;t let
-the snake hit the walls or itself !</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

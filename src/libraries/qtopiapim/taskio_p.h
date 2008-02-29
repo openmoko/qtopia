@@ -73,6 +73,8 @@ public:
 
     virtual TaskIteratorMachine *begin() const = 0;
 
+    virtual PrTask taskForId( const QUuid &, bool *ok ) const = 0;
+
 signals:
     void tasksUpdated();
 

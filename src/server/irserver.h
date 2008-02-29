@@ -25,7 +25,7 @@
 #include <qobject.h>
 
 class QCopChannel;
-class QLibrary;
+class PluginLoader;
 struct ObexInterface;
 
 class IrServer : public QObject
@@ -36,7 +36,7 @@ public:
     ~IrServer();
 
 private:
-    QLibrary *lib;
+    PluginLoader *loader;
     ObexInterface *obexIface;
 };
 

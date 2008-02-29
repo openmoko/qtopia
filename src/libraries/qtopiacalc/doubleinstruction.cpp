@@ -18,8 +18,12 @@
 **
 **********************************************************************/
 #include "doubleinstruction.h"
+#ifdef ENABLE_INTEGER
 #include "integerdata.h"
+#endif
+#ifdef ENABLE_FRACTION
 #include "fractiondata.h"
+#endif
 #include "engine.h"
 
 // Maths libraries
@@ -29,7 +33,7 @@
 // Base class automatic type casting
 BaseDoubleInstructionDescription::BaseDoubleInstructionDescription()
     :InstructionDescription() {
-    typeOne = typeTwo = type = "DOUBLE";
+    typeOne = typeTwo = type = "Double"; // No tr
 }
 Data *BaseDoubleInstruction::eval(Data *d) {
     doubleNum = (DoubleData *)num;
@@ -44,7 +48,7 @@ Data * iDoubleFactory::eval(Data * /* d */) {
     return ret;
 }
 DoubleFactory::DoubleFactory():BaseDoubleInstructionDescription() {
-    instructionName = "Factory";
+    instructionName = "Factory"; // No tr
 };
 
 // Copy
@@ -55,10 +59,10 @@ Data *iDoubleCopy::eval(Data *d) {
     return ret;
 };
 DoubleCopy::DoubleCopy():BaseDoubleInstructionDescription() {
-    instructionName = "Copy";
+    instructionName = "Copy"; // No tr
 };
 
-#ifdef TYPE_CONVERSION
+#ifdef ENABLE_INTEGER
 Data * iConvertIntDouble::eval(Data *d) {
     DoubleData *ret = new DoubleData();;
     IntegerData *i = (IntegerData *)d;
@@ -66,10 +70,12 @@ Data * iConvertIntDouble::eval(Data *d) {
     return ret;
 }
 ConvertIntDouble::ConvertIntDouble():InstructionDescription() {
-    instructionName = "Convert";
-    typeOne = "INT";
-    typeTwo = "DOUBLE";
+    instructionName = "Convert"; // No tr
+    typeOne = "Int";
+    typeTwo = "Double"; // No tr
 }
+#endif
+#ifdef ENABLE_FRACTION
 Data * iConvertFractionDouble::eval(Data *d) {
     DoubleData *ret = new DoubleData();
     FractionData *f = (FractionData *)d;
@@ -85,9 +91,9 @@ Data * iConvertFractionDouble::eval(Data *d) {
     return ret;
 }
 ConvertFractionDouble::ConvertFractionDouble():InstructionDescription() {
-    instructionName = "Convert";
-    typeOne = "FRACTION";
-    typeTwo = "DOUBLE";
+    instructionName = "Convert"; // No tr
+    typeOne = "Fraction"; // No tr
+    typeTwo = "Double"; // No tr
 }
 #endif
 // Mathematical functions
@@ -114,7 +120,7 @@ Data * iDoublePow::doEval(DoubleData *d) {
     return d;
 }
 DoubleXRootY::DoubleXRootY():BaseDoubleInstructionDescription() {
-    instructionName = "X root y";
+    instructionName = "X root y"; // No tr
     precedence = 20;
 }
 
@@ -205,19 +211,19 @@ Data * iDoubleNegate::doEval(DoubleData *d) {
 }
 
 AddDoubleDouble::AddDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Add";
+    instructionName = "Add"; // No tr
     precedence = 10;
 }
 SubtractDoubleDouble::SubtractDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Subtract";
+    instructionName = "Subtract"; // No tr
     precedence = 10;
 }
 MultiplyDoubleDouble::MultiplyDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Multiply";
+    instructionName = "Multiply"; // No tr
     precedence = 15;
 }
 DivideDoubleDouble::DivideDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "Divide";
+    instructionName = "Divide"; // No tr
     precedence = 15;
 }
 DoublePow::DoublePow():BaseDoubleInstructionDescription() {
@@ -237,7 +243,7 @@ DoubleCos::DoubleCos():BaseDoubleInstructionDescription() {
 DoubleTan::DoubleTan():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Tan";
+    instructionName = "Tan"; // No tr
 }
 DoubleASin::DoubleASin():BaseDoubleInstructionDescription() {
     precedence = 0;
@@ -272,30 +278,30 @@ DoubleExp::DoubleExp():BaseDoubleInstructionDescription() {
 DoubleOneOverX::DoubleOneOverX():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "One over x";
+    instructionName = "One over x"; // No tr
 }
 DoubleFactorial::DoubleFactorial():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Factorial";
+    instructionName = "Factorial"; // No tr
 }
 DoubleSquareRoot::DoubleSquareRoot():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Square root";
+    instructionName = "Square root"; // No tr
 }
 DoubleCubeRoot::DoubleCubeRoot():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Cube root";
+    instructionName = "Cube root"; // No tr
 }
 DoubleSquare::DoubleSquare():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Square";
+    instructionName = "Square"; // No tr
 }
 DoubleNegate::DoubleNegate():BaseDoubleInstructionDescription() {
     precedence = 0;
     argCount = 1;
-    instructionName = "Negate";
+    instructionName = "Negate"; // No tr
 }

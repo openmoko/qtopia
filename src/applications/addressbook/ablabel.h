@@ -37,6 +37,8 @@ public slots:
 
 signals:
     void okPressed();
+    void previous();
+    void next();
     
 protected:
     void keyPressEvent( QKeyEvent * );

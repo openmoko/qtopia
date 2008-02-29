@@ -188,8 +188,8 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     QPopupMenu *edit = new QPopupMenu( menubar );
     QPopupMenu *view = new QPopupMenu( menubar );
 
-    menubar->insertItem( "Image", edit );
-    menubar->insertItem( "View", view );
+    menubar->insertItem( tr("Image"), edit );
+    menubar->insertItem( tr("View"), view );
 
     toolBar = new QPEToolBar( this );
 
@@ -214,7 +214,10 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     a->addTo( edit );
 
     edit->insertSeparator();
-    edit->insertItem(tr("Properties..."), this, SLOT(properties()), 0);
+    propAction = new QAction(tr("Properties..."), QIconSet(), QString::null, 0, this, 0);
+    connect(propAction, SIGNAL( activated() ), this, SLOT(properties()));
+    propAction->addTo(edit);
+    //edit->insertItem(tr("Properties..."), this, SLOT(properties()), 0);
 
     a = new QAction( tr( "Fullscreen" ), Resource::loadIconSet( "fullscreen" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( fullScreen() ) );
@@ -262,6 +265,7 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     rotateOnLoad = config.readBoolEntry("Rotate", TRUE);
     rotateClockwise = config.readBoolEntry("Clockwise", TRUE);
     fastLoad = config.readBoolEntry("FastLoad", TRUE);
+    smallScale = config.readBoolEntry("SmallScale", FALSE);
 }
 
 ImageViewer::~ImageViewer()
@@ -288,12 +292,37 @@ ImageViewer::properties(void)
     }
 
     if (doc) {
-	DocPropertiesDialog *dp = new DocPropertiesDialog(doc);
-	dp->showMaximized();
-	dp->exec();
+	// pause slideshow if on
+	bool on = slideTimer->isActive();
+	int idx = imageIndex();
+	if (on)
+	    slideTimer->stop();
+
+	DocPropertiesDialog *dp = new DocPropertiesDialog(doc, this);
+	QPEApplication::execDialog( dp );
 	delete dp;
 
+	QString newname = doc->name();
+	filename = doc->file();
 	fileSelector->reread();
+	imageList = fileSelector->fileList();
+
+	if (imageIndex() == -1)
+	{
+	    if (imageList.count() > 0) {
+		if (idx >= int(imageList.count()))
+		    idx = imageList.count() - 1;
+		if (idx != -1)
+		    openFile(imageList[idx]);
+	    } else {
+		on = FALSE;
+		slideShow(FALSE);
+		open();
+	    }
+	}
+
+	if (on)
+	    slideTimer->start(slideDelay * 1000, FALSE);
     }
 }
 
@@ -318,6 +347,7 @@ void ImageViewer::settings()
     dlg.setRotate(rotateOnLoad);
     dlg.setClockwise(rotateClockwise);
     dlg.setFastLoad(fastLoad);
+    dlg.setSmallScale(smallScale);
 
     if ( QPEApplication::execDialog(&dlg) == QDialog::Accepted ) {
 	slideDelay = dlg.delay();
@@ -326,6 +356,7 @@ void ImageViewer::settings()
 	rotateOnLoad = dlg.rotate();
         rotateClockwise = dlg.clockwise();
 	fastLoad = dlg.fastLoad();
+	smallScale = dlg.smallScale();
 
 	Config config( "ImageViewer" );
 	config.setGroup( "SlideShow" );
@@ -337,6 +368,7 @@ void ImageViewer::settings()
 	config.writeEntry("Clockwise", rotateClockwise);
 	config.writeEntry("Rotate", rotateOnLoad);
 	config.writeEntry("FastLoad", fastLoad);
+	config.writeEntry("SmallScale", smallScale);
     }
 }
 
@@ -388,6 +420,7 @@ void ImageViewer::open()
 {
     slideAction->setOn( FALSE );
     stack->raiseWidget(fileSelector);
+    fileSelector->setFocus();
     openAction->setEnabled( FALSE );
     updateCaption();
 }
@@ -435,18 +468,28 @@ void ImageViewer::loadFilename( const QString &file ) {
 	imageheight = iio.image().height();
 	if ( !iio.image().bits() ) {
 	    // GetHeaderInformation is supported
-	    int maxsize = QMAX(qApp->desktop()->width(),
-		qApp->desktop()->height());
 
 	    //
-	    // Scale the image.  If we're loading fast, use the
-	    // shrink parameter to help out.
+	    // Don't scale if we don't have to.
 	    //
-	    param.sprintf("Scale( %i, %i, %s ), %s, Shrink( %i )",
-		maxsize, maxsize, "ScaleMin",
-		fastLoad ? ", Fast" : "",
-		fastLoad ? QMAX(imagewidth/maxsize, imageheight/maxsize) : 1);
+	    if (!smallScale &&
+		    imagewidth < qApp->desktop()->width() &&
+		    imageheight < qApp->desktop()->height()) {
+		param.sprintf("%s", fastLoad ? "Fast" : ""); // No tr
+	    } else {
+		int maxsize = QMAX(qApp->desktop()->width(),
+		    qApp->desktop()->height());
 
+		//
+		// Scale the image.  If we're loading fast, use the
+		// shrink parameter to help out.
+		//
+		param.sprintf("Scale( %i, %i, %s ), %s, Shrink( %i )", // No tr
+		    maxsize, maxsize, "ScaleMin",
+		    fastLoad ? ", Fast" : "", // No tr
+		    fastLoad ? QMAX(imagewidth/maxsize, imageheight/maxsize):1);
+
+	    }
 	    iio.setParameters(param);
 	    iio.read();
 	}
@@ -491,7 +534,6 @@ bool ImageViewer::loadSelected()
     }
     if ( !image.isNull() ) {
 	closeFileSelector();
-	updateCaption( filename );
 	return true;
     }
     return false;
@@ -516,18 +558,28 @@ const QPixmap &ImageViewer::scaledPixmap( bool newImage )
 
     if (!image.isNull()) {
 	//
-	// Setup scaling first.
+	// Leaves dimensions as they are if we're not scaling.
 	//
-	sw = rotated90 ? h() : imagePanel->width();
-	sh = rotated90 ? imagePanel->width() : h();
-
-	int t1 = image.width() * sh;
-	int t2 = image.height() * sw;
-
-	if (t1 > t2) {
-	    sh = t2 / image.width();
+	if (!smallScale &&
+		image.width() < imagePanel->width() &&
+		image.height() < h()) {
+	    sw = image.width();
+	    sh = image.height();
 	} else {
-	    sw = t1 / image.height();
+	    //
+	    // Setup scaling first.
+	    //
+	    sw = rotated90 ? h() : imagePanel->width();
+	    sh = rotated90 ? imagePanel->width() : h();
+
+	    int t1 = image.width() * sh;
+	    int t2 = image.height() * sw;
+
+	    if (t1 > t2) {
+		sh = t2 / image.width();
+	    } else {
+		sw = t1 / image.height();
+	    }
 	}
     }
 
@@ -725,18 +777,6 @@ void ImageViewer::updateStatus()
     }
 }
 
-void ImageViewer::closeEvent( QCloseEvent *e )
-{
-    if ( stack->visibleWidget() == imagePanel && !bFromDocView ) {
-	e->ignore();
-	open();
-	updateCaption();
-    } else {
-	bFromDocView = FALSE;
-	e->accept();
-    }
-}
-
 //
 // Return the index into the imageList of the currently viewed
 // image (ie. ImageViewer::filename in ImageViewer::imageList).
@@ -823,6 +863,9 @@ ImageViewer::keyPressEvent(QKeyEvent *e)
 void
 ImageViewer::handleKeypress(int keycode)
 {
+    if ( stack->visibleWidget() == fileSelector )
+	return;
+
     switch (keycode) {
     case Qt::Key_Right:
 	nextImage();
@@ -844,6 +887,10 @@ ImageViewer::handleKeypress(int keycode)
 	if (isFullScreen) {
 	    normalView();
 	}
+	break;
+
+    case Qt::Key_Space:
+	open();
 	break;
     }
 }

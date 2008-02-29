@@ -60,7 +60,7 @@ static int WAVsoundDuration(const QString& filename)
 	const int n = sizeof(chunk)-sizeof(chunk.data);
 	if ( input.readBlock((char*)&chunk,n) != n )
 	    break;
-	if ( qstrncmp(chunk.id,"data",4) == 0 ) {
+	if ( qstrncmp(chunk.id,"data",4) == 0 ) { // No tr
 	    total += chunkdata.avgBytesPerSec ?
 		chunk.size * 1000 / chunkdata.avgBytesPerSec : 0;
 //qDebug("%d bytes of PCM (%dms)", chunk.size,chunkdata.avgBytesPerSec ?  chunk.size * 1000 / chunkdata.avgBytesPerSec : 0);
@@ -176,7 +176,7 @@ void Sound::soundAlarm()
 # endif
 #else
 # ifndef QT_NO_SOUND
-    QSound::play(Resource::findSound("alarm"));
+    QSound::play(Resource::findSound("alarm")); // No tr
 # endif
 #endif
 }

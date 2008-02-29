@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/qpeapplication.cpp:625 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopia/qpeapplication.cpp:647 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -64,6 +64,7 @@ that are available to all Qtopia applications.
 <li><div class=fn>InputMethodHint <a href="#inputMethodHint"><b>inputMethodHint</b></a> ( QWidget&nbsp;*&nbsp;w )</div></li>
 <li><div class=fn>void <a href="#showDialog"><b>showDialog</b></a> ( QDialog&nbsp;*&nbsp;dialog, bool&nbsp;nomax = FALSE )</div></li>
 <li><div class=fn>int <a href="#execDialog"><b>execDialog</b></a> ( QDialog&nbsp;*&nbsp;dialog, bool&nbsp;nomax = FALSE )</div></li>
+<li><div class=fn>void <b>setTempScreenSaverMode</b> ( screenSaverHint )</div></li>
 <li><div class=fn>void <a href="#setKeepRunning"><b>setKeepRunning</b></a> ()</div></li>
 </ul>
 <h2>Protected Members</h2>
@@ -178,11 +179,17 @@ and emitted as signals, such as flush() and reload().
 <p> This signal is emitted when the user changes the clock's style. If
 <em>ampm</em> is TRUE, the user wants a 12-hour AM/PM clock, otherwise,
 they want a 24-hour clock.
+<p> <b>Warning:</b> if you use the TimeString functions, you should use
+TimeString::connectChange() instead.
+<p> <p>See also <a href="#dateFormatChanged">dateFormatChanged</a>().
 
 <h3 class=fn>void <a name="dateFormatChanged"></a>QPEApplication::dateFormatChanged ( DateFormat )<tt> [signal]</tt>
 </h3>
 
 <p> This signal is emitted whenever the date format is changed.
+<p> <b>Warning:</b> if you use the TimeString functions, you should use
+TimeString::connectChange() instead.
+<p> <p>See also <a href="#clockChanged">clockChanged</a>().
 
 <h3 class=fn>QString <a name="documentDir"></a>QPEApplication::documentDir ()<tt> [static]</tt>
 </h3>

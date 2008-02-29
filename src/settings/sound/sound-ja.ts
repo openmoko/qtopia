@@ -3,23 +3,23 @@
     <name>SoundSettingsBase</name>
     <message>
         <source>Sound Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>音響設定</translation>
     </message>
     <message>
         <source>Keyboard sound</source>
-        <translation type="unfinished"></translation>
+        <translation>キーボード音響</translation>
     </message>
     <message>
         <source>Screen sound</source>
-        <translation type="unfinished"></translation>
+        <translation>画面音響</translation>
     </message>
     <message>
         <source>Loud</source>
-        <translation type="unfinished"></translation>
+        <translation>大きい</translation>
     </message>
     <message>
         <source>Silent</source>
-        <translation type="unfinished"></translation>
+        <translation>サイレント</translation>
     </message>
 </context>
 </TS>

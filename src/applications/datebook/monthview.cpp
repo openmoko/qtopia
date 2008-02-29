@@ -199,8 +199,8 @@ void MonthView::getEventsForMonth(int y, int m)
 	    }
 	}
 
-	QDate f = (*it).startInTZ().date();
-	QDate t = (*it).endInTZ().date();
+	QDate f = (*it).startInCurrentTZ().date();
+	QDate t = (*it).endInCurrentTZ().date();
 
 
 	bool normalAllDay = FALSE;
@@ -214,8 +214,8 @@ void MonthView::getEventsForMonth(int y, int m)
 		repeatAllDay = TRUE;
 	    }
 	} else {
-	    startPos =  ev.startInTZ().time().hour();
-	    endPos = ev.endInTZ().time().hour();
+	    startPos =  ev.startInCurrentTZ().time().hour();
+	    endPos = ev.endInCurrentTZ().time().hour();
 	}
 
 	int startIndex = Calendar::indexForDate(y, m, f, sMon);

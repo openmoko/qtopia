@@ -35,9 +35,6 @@ class QTOPIAPIM_EXPORT PimContact : public PimRecord
     friend class AddressBookAccessPrivate;
 
 public:
-    /*!
-      \internal
-    */
     enum ContactFields {
 	NameTitle = CommonFieldsEnd,
 	FirstName,
@@ -288,6 +285,7 @@ protected:
     QMap<int, QString> mMap;
 
 private:
+    static QString fullName(const PimContact &);
     static void initMaps();
 
     PimContactPrivate *d;

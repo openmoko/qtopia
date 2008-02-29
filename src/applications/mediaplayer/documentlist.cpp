@@ -92,7 +92,9 @@ void DocumentListPrivate::initialize( const QString &mimefilter )
     QStringList subFilter = QStringList::split(";", mimefilter);
     for( QStringList::Iterator it = subFilter.begin(); it != subFilter.end(); ++ it )
 	mimeFilters.append( QRegExp(*it, FALSE, TRUE) );
-    docPaths += QPEApplication::documentDir();
+    QDir docDir( QPEApplication::documentDir() );
+    if ( docDir.exists() )
+	docPaths += QPEApplication::documentDir();
     int i = 1;
     const QList<FileSystem> &fs = storage->fileSystems();
     QListIterator<FileSystem> it( fs );
@@ -206,7 +208,7 @@ const DocLnk *DocumentListPrivate::iterate()
 	//qDebug("state Find");
 	QFileInfo *fi;
 	while ( (fi = nextFile()) ) {
-	    if ( fi->extension(FALSE) == "desktop" ) {
+	    if ( fi->extension(FALSE) == "desktop" ) { // No tr
 		DocLnk* dl = new DocLnk( fi->filePath() );
 		if ( store(dl) )
 		    return dl;

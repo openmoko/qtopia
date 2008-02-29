@@ -140,11 +140,15 @@ HEADERS =	accessory.h \
 		datepicker.h \
 		datetimeedit.h \
 		fieldmapimpl.h \
+		qprocess.h \
+		timezone.h \
 		services.h \
 		devicebuttonmanager.h \
 		devicebutton.h \
 		qwizard.h \
-		docproperties.h
+		locationcombo.h \
+		docproperties.h \
+		pluginloader.h
 SOURCES =	applnk1.cpp \
 		categories1.cpp \
 		categoryselect1.cpp \
@@ -155,14 +159,22 @@ SOURCES =	applnk1.cpp \
 		resource1.cpp \
 		datepicker.cpp \
 		datetimeedit.cpp \
+		timeconversion1.cpp \
+		timestring1.cpp \
 		global1.cpp \
 		fieldmapimpl.cpp \
+		qprocess.cpp \
+		timezone.cpp \
 		services.cpp \
 		devicebuttonmanager.cpp \
 		devicebutton.cpp \
 		fileselector1.cpp \
 		qwizard.cpp \
-		docproperties.cpp
+		locationcombo.cpp \
+		docproperties.cpp \
+		pluginloader.cpp \
+		pluginloaderlib.cpp \
+		qprocess_unix.cpp
 OBJECTS =	$(OBJECTS_DIR)/applnk1.o \
 		$(OBJECTS_DIR)/categories1.o \
 		$(OBJECTS_DIR)/categoryselect1.o \
@@ -173,14 +185,22 @@ OBJECTS =	$(OBJECTS_DIR)/applnk1.o \
 		$(OBJECTS_DIR)/resource1.o \
 		$(OBJECTS_DIR)/datepicker.o \
 		$(OBJECTS_DIR)/datetimeedit.o \
+		$(OBJECTS_DIR)/timeconversion1.o \
+		$(OBJECTS_DIR)/timestring1.o \
 		$(OBJECTS_DIR)/global1.o \
 		$(OBJECTS_DIR)/fieldmapimpl.o \
+		$(OBJECTS_DIR)/qprocess.o \
+		$(OBJECTS_DIR)/timezone.o \
 		$(OBJECTS_DIR)/services.o \
 		$(OBJECTS_DIR)/devicebuttonmanager.o \
 		$(OBJECTS_DIR)/devicebutton.o \
 		$(OBJECTS_DIR)/fileselector1.o \
 		$(OBJECTS_DIR)/qwizard.o \
-		$(OBJECTS_DIR)/docproperties.o
+		$(OBJECTS_DIR)/locationcombo.o \
+		$(OBJECTS_DIR)/docproperties.o \
+		$(OBJECTS_DIR)/pluginloader.o \
+		$(OBJECTS_DIR)/pluginloaderlib.o \
+		$(OBJECTS_DIR)/qprocess_unix.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
@@ -188,16 +208,23 @@ SRCMOC	=	$(MOC_DIR)/moc_accessory.cpp \
 		$(MOC_DIR)/moc_datepicker.cpp \
 		$(MOC_DIR)/moc_datetimeedit.cpp \
 		$(MOC_DIR)/moc_fieldmapimpl.cpp \
+		$(MOC_DIR)/moc_qprocess.cpp \
 		$(MOC_DIR)/moc_devicebuttonmanager.cpp \
 		$(MOC_DIR)/moc_qwizard.cpp \
+		$(MOC_DIR)/moc_locationcombo.cpp \
 		$(MOC_DIR)/moc_docproperties.cpp \
-		$(MOC_DIR)/datepicker.moc
+		$(MOC_DIR)/datepicker.moc \
+		$(MOC_DIR)/timestring1.moc \
+		$(MOC_DIR)/pluginloaderlib.moc \
+		$(MOC_DIR)/qprocess_unix.moc
 OBJMOC	=	$(OBJECTS_DIR)/moc_accessory.o \
 		$(OBJECTS_DIR)/moc_datepicker.o \
 		$(OBJECTS_DIR)/moc_datetimeedit.o \
 		$(OBJECTS_DIR)/moc_fieldmapimpl.o \
+		$(OBJECTS_DIR)/moc_qprocess.o \
 		$(OBJECTS_DIR)/moc_devicebuttonmanager.o \
 		$(OBJECTS_DIR)/moc_qwizard.o \
+		$(OBJECTS_DIR)/moc_locationcombo.o \
 		$(OBJECTS_DIR)/moc_docproperties.o
 
 
@@ -299,11 +326,26 @@ $(OBJECTS_DIR)/datetimeedit.o: datetimeedit.cpp \
 		datepicker.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datetimeedit.o datetimeedit.cpp
 
+$(OBJECTS_DIR)/timeconversion1.o: timeconversion1.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/timeconversion1.o timeconversion1.cpp
+
+$(OBJECTS_DIR)/timestring1.o: timestring1.cpp \
+		$(MOC_DIR)/timestring1.moc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/timestring1.o timestring1.cpp
+
 $(OBJECTS_DIR)/global1.o: global1.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/global1.o global1.cpp
 
 $(OBJECTS_DIR)/fieldmapimpl.o: fieldmapimpl.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fieldmapimpl.o fieldmapimpl.cpp
+
+$(OBJECTS_DIR)/qprocess.o: qprocess.cpp \
+		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess.o qprocess.cpp
+
+$(OBJECTS_DIR)/timezone.o: timezone.cpp \
+		timezone.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/timezone.o timezone.cpp
 
 $(OBJECTS_DIR)/services.o: services.cpp \
 		services.h
@@ -325,9 +367,29 @@ $(OBJECTS_DIR)/qwizard.o: qwizard.cpp \
 		qwizard.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qwizard.o qwizard.cpp
 
+$(OBJECTS_DIR)/locationcombo.o: locationcombo.cpp \
+		locationcombo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/locationcombo.o locationcombo.cpp
+
 $(OBJECTS_DIR)/docproperties.o: docproperties.cpp \
-		docproperties.h
+		docproperties.h \
+		locationcombo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/docproperties.o docproperties.cpp
+
+$(OBJECTS_DIR)/pluginloader.o: pluginloader.cpp \
+		pluginloader.h \
+		pluginloaderlib_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pluginloader.o pluginloader.cpp
+
+$(OBJECTS_DIR)/pluginloaderlib.o: pluginloaderlib.cpp \
+		$(MOC_DIR)/pluginloaderlib.moc \
+		pluginloaderlib_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pluginloaderlib.o pluginloaderlib.cpp
+
+$(OBJECTS_DIR)/qprocess_unix.o: qprocess_unix.cpp \
+		$(MOC_DIR)/qprocess_unix.moc \
+		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess_unix.o qprocess_unix.cpp
 
 $(OBJECTS_DIR)/moc_accessory.o: $(MOC_DIR)/moc_accessory.cpp \
 		accessory.h
@@ -346,6 +408,10 @@ $(OBJECTS_DIR)/moc_fieldmapimpl.o: $(MOC_DIR)/moc_fieldmapimpl.cpp \
 		fieldmapimpl.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_fieldmapimpl.o $(MOC_DIR)/moc_fieldmapimpl.cpp
 
+$(OBJECTS_DIR)/moc_qprocess.o: $(MOC_DIR)/moc_qprocess.cpp \
+		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qprocess.o $(MOC_DIR)/moc_qprocess.cpp
+
 $(OBJECTS_DIR)/moc_devicebuttonmanager.o: $(MOC_DIR)/moc_devicebuttonmanager.cpp \
 		devicebuttonmanager.h \
 		devicebutton.h
@@ -354,6 +420,10 @@ $(OBJECTS_DIR)/moc_devicebuttonmanager.o: $(MOC_DIR)/moc_devicebuttonmanager.cpp
 $(OBJECTS_DIR)/moc_qwizard.o: $(MOC_DIR)/moc_qwizard.cpp \
 		qwizard.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qwizard.o $(MOC_DIR)/moc_qwizard.cpp
+
+$(OBJECTS_DIR)/moc_locationcombo.o: $(MOC_DIR)/moc_locationcombo.cpp \
+		locationcombo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_locationcombo.o $(MOC_DIR)/moc_locationcombo.cpp
 
 $(OBJECTS_DIR)/moc_docproperties.o: $(MOC_DIR)/moc_docproperties.cpp \
 		docproperties.h
@@ -371,11 +441,17 @@ $(MOC_DIR)/moc_datetimeedit.cpp: datetimeedit.h
 $(MOC_DIR)/moc_fieldmapimpl.cpp: fieldmapimpl.h
 	$(MOC) fieldmapimpl.h -o $(MOC_DIR)/moc_fieldmapimpl.cpp
 
+$(MOC_DIR)/moc_qprocess.cpp: qprocess.h
+	$(MOC) qprocess.h -o $(MOC_DIR)/moc_qprocess.cpp
+
 $(MOC_DIR)/moc_devicebuttonmanager.cpp: devicebuttonmanager.h
 	$(MOC) devicebuttonmanager.h -o $(MOC_DIR)/moc_devicebuttonmanager.cpp
 
 $(MOC_DIR)/moc_qwizard.cpp: qwizard.h
 	$(MOC) qwizard.h -o $(MOC_DIR)/moc_qwizard.cpp
+
+$(MOC_DIR)/moc_locationcombo.cpp: locationcombo.h
+	$(MOC) locationcombo.h -o $(MOC_DIR)/moc_locationcombo.cpp
 
 $(MOC_DIR)/moc_docproperties.cpp: docproperties.h
 	$(MOC) docproperties.h -o $(MOC_DIR)/moc_docproperties.cpp
@@ -383,17 +459,26 @@ $(MOC_DIR)/moc_docproperties.cpp: docproperties.h
 $(MOC_DIR)/datepicker.moc: datepicker.cpp
 	$(MOC) datepicker.cpp -o $(MOC_DIR)/datepicker.moc
 
+$(MOC_DIR)/timestring1.moc: timestring1.cpp
+	$(MOC) timestring1.cpp -o $(MOC_DIR)/timestring1.moc
+
+$(MOC_DIR)/pluginloaderlib.moc: pluginloaderlib.cpp
+	$(MOC) pluginloaderlib.cpp -o $(MOC_DIR)/pluginloaderlib.moc
+
+$(MOC_DIR)/qprocess_unix.moc: qprocess_unix.cpp
+	$(MOC) qprocess_unix.cpp -o $(MOC_DIR)/qprocess_unix.moc
+
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qtopia1.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <qtopia1.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qtopia1.pro
 	$(QPEDIR)/bin/qtopia-linstall qtopia1.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

@@ -22,6 +22,7 @@
 #define ZONEMAP_H
 
 #include "stylusnormalizer.h"
+#include <qtopia/timezone.h>
 
 #include <qlist.h>
 #include <qscrollview.h>
@@ -35,26 +36,6 @@ class QLabel;
 class QTimer;
 class QToolButton;
 
-
-
-class ZoneField
-{
-public:
-    ZoneField( const QString & );
-    void showStructure( void ) const;
-    inline int x( void ) const { return _x; };
-    inline int y( void ) const { return _y; };
-
-    inline QString city( void ) const { return strCity; };
-    inline QString country( void ) const { return strCountry; };
-    inline QString code( void ) const { return strCountryCode; };
-private:
-    int _x;
-    int _y;
-    QString strCountryCode;
-    QString strCountry;
-    QString strCity;
-};
 
 class ZoneMap : public QScrollView
 {
@@ -74,10 +55,9 @@ public slots:
     void slotUpdate( void );
     void slotRedraw( void );
     void slotFindCity( const QPoint &pos );  // Find the closest city
-    void changeClock( bool );
 
 signals:
-    void signalTz( const QString &newCountry, const QString &newCity );
+    void signalTz( const QCString &timezoneID );
 
 protected:
     virtual void viewportMouseMoveEvent( QMouseEvent *event );
@@ -88,20 +68,18 @@ protected:
     virtual void drawContents( QPainter *p, int cx, int cy, int cw, int ch );
 
 private:
-    ZoneField *findCityNear( ZoneField *city, int key );
-    void showCity( ZoneField *city );
+    const TimeZone findCityNear( const TimeZone &city, int key );
+    void showCity( const TimeZone &city );
     void drawCities( QPainter *p );	// put all the cities on the map (ugly)
-    void drawCity( QPainter *p, const ZoneField *pCity ); // draw the given city on the map
-    void readZones( void ); // Read in the zone information from the file
+    void drawCity( QPainter *p, const TimeZone &pCity ); // draw the given city on the map
     void zoom( void );  // Zoom the map...
     void makeMap( int width, int height );
     QPixmap* pixCurr; // image to be drawn on the screen
     QLabel* lblCity;    // the "tool-tip" that shows up when you pick a city...
     QToolButton *cmdZoom;   // our zoom option...
     QTimer*	tHide;  // the timer to hide the "tool tip"
-    ZoneField *pLast;   // the last known good city that was found...
-    ZoneField *pRepaint; // save the location to maximize the repaint...
-    QList<ZoneField> zones; // a linked list to hold all this information
+    TimeZone m_last;   // the last known good city that was found...
+    TimeZone m_repaint; // save the location to maximize the repaint...
     StylusNormalizer norm;
 
     //the True width and height of the map...
@@ -117,9 +95,8 @@ private:
 
     bool bZoom; // a flag to indicate zoom is active
     bool bIllum;    // flag to indicat that illumination is active
-    bool ampm;
 
-    ZoneField *cursor;
+    TimeZone m_cursor;
 };
 
 inline bool ZoneMap::zoneToWin( int zoneX, int zoneY,

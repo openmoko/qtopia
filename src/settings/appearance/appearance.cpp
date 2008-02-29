@@ -24,7 +24,7 @@
 #include <qtopia/config.h>
 #include <qtopia/applnk.h>
 #include <qtopia/qpeapplication.h>
-#include <qtopia/qlibrary.h>
+#include <qtopia/pluginloader.h>
 #include <qtopia/qpestyle.h>
 #include <qtopia/styleinterface.h>
 #include <qtopia/windowdecorationinterface.h>
@@ -336,9 +336,11 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
     AppearanceSettingsBaseLayout->addWidget( sample );
 
     wdiface = 0;
-    wdlib = 0;
     styleiface = 0;
-    stylelib = 0;
+    wdLoader = new PluginLoader( "decorations" );
+    styleLoader = new PluginLoader( "styles" );
+    wdIsPlugin = FALSE;
+
     maxFontSize = qApp->desktop()->width() >= 640 ? 14 : 12;
 
     populateStyleList();
@@ -361,9 +363,9 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
 	this, SLOT(styleSelected(int)) );
 
     s = config.readEntry( "Scheme", "Desert" );
-    connect( colorList, SIGNAL(highlighted(const QString&)),
-	this, SLOT(colorSelected(const QString&)) );
-    colorList->setCurrentItem( colorList->findItem( s ) );
+    connect( colorList, SIGNAL(highlighted(int)),
+	this, SLOT(colorSelected(int)) );
+    colorList->setCurrentItem( colorListIDs.findIndex(s) );
 
     s = config.readEntry( "Decoration" );
     for ( i = 0; i < decorationList->count(); i++ ) {
@@ -388,6 +390,8 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
 
 AppearanceSettings::~AppearanceSettings()
 {
+    delete styleLoader;
+    delete wdLoader;
 }
 
 void AppearanceSettings::accept()
@@ -403,11 +407,13 @@ void AppearanceSettings::accept()
     s = item->filename().isEmpty() ? item->text() : item->filename();
     config.writeEntry( "Decoration", s );
 
-    s = colorList->currentText();
+    s = colorListIDs[colorList->currentItem()];
     config.writeEntry( "Scheme", s );
 
     Config scheme( QPEApplication::qpeDir() + "etc/colors/" + s + ".scheme",
         Config::File );
+
+    scheme.setGroup("Colors");
     QString color = scheme.readEntry( "Background", "#E5E1D5" );
     config.writeEntry( "Background", color );
     color = scheme.readEntry( "Button", "#D6CDBB" );
@@ -442,9 +448,9 @@ void AppearanceSettings::done(int r) {
   close();
 }
 
-void AppearanceSettings::colorSelected( const QString &name )
+void AppearanceSettings::colorSelected( int id )
 {
-    Config config( QPEApplication::qpeDir() + "etc/colors/" + name + ".scheme",
+    Config config( QPEApplication::qpeDir() + "etc/colors/" + colorListIDs[id] + ".scheme",
         Config::File );
 
     config.setGroup( "Colors" );
@@ -470,35 +476,24 @@ void AppearanceSettings::colorSelected( const QString &name )
 
 void AppearanceSettings::styleSelected( int idx )
 {
-#ifndef Q_OS_WIN32
-    QString dllExtension(".so");
-#else
-    QString dllExtension(".dll");
-#endif
+    QString style("Qtopia");
     PluginItem *item = (PluginItem *)styleList->item( idx );
-    QString style = item->filename().isEmpty() ? item->text() : item->filename();
+    if ( item )
+	style = item->filename().isEmpty() ? item->text() : item->filename();
 
     StyleInterface *oldIface = styleiface;
-    QLibrary *oldLib = stylelib;
     QStyle *newStyle = 0;
     styleiface = 0;
-    stylelib = 0;
 
-    if ( style == "Windows" ) {
+    if ( style == "Windows" ) { // No tr
 	newStyle = new QWindowsStyle;
     } else if ( style == "QPE" || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
-    } else if ( style.findRev(dllExtension) == int(style.length() - dllExtension.length()) ) {
-	QString path = QPEApplication::qpeDir() + "plugins/styles";
+    } else {
 	StyleInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + style );
-	if ( lib->queryInterface( IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	if ( styleLoader->queryInterface( style, IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 	    newStyle = iface->style();
 	    styleiface = iface;
-	    stylelib = lib;
-	} else {
-	    lib->unload();
-	    delete lib;
 	}
     }
 
@@ -510,36 +505,28 @@ void AppearanceSettings::styleSelected( int idx )
     setStyle( sample, newStyle );
     QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
 
-    if ( oldLib ) {
-	oldIface->release();
-	oldLib->unload();
-	delete oldLib;
-    }
+    if ( oldIface )
+	styleLoader->releaseInterface( oldIface );
 }
 
 void AppearanceSettings::decorationSelected( int idx )
 {
-    PluginItem *item = (PluginItem *)decorationList->item( idx );
-    QString dec = item->filename().isEmpty() ? item->text() : item->filename();
-
-    if ( wdlib ) {
-	wdiface->release();
-	wdlib->unload();
-	delete wdlib;
-	wdlib = 0;
+    if ( wdIsPlugin ) {
+	wdLoader->releaseInterface( wdiface );
     } else {
 	delete wdiface;
     }
     wdiface = 0;
+    wdIsPlugin = FALSE;
 
-    QString path = QPEApplication::qpeDir() + "plugins/decorations";
-    QLibrary *lib = new QLibrary( path + "/" + dec );
-    if ( lib->queryInterface( IID_WindowDecoration, (QUnknownInterface**)&wdiface ) == QS_OK && wdiface ) {
-	wdlib = lib;
-    } else {
-	lib->unload();
-	delete lib;
-	wdlib = 0;
+    QString dec("Qtopia");
+    PluginItem *item = (PluginItem *)decorationList->item( idx );
+    if ( item )
+	dec = item->filename().isEmpty() ? item->text() : item->filename();
+
+    if ( dec != "Qtopia" ) {
+	if ( wdLoader->queryInterface( dec, IID_WindowDecoration, (QUnknownInterface**)&wdiface ) == QS_OK && wdiface )
+	    wdIsPlugin = TRUE;
     }
 
     if ( !wdiface )
@@ -602,25 +589,16 @@ void AppearanceSettings::populateStyleList()
 #if QT_VERSION >= 300
 //    styleList->insertStringList(QStyleFactory::styles());
 #else
-    (void)new PluginItem( styleList, "Windows");
-    QString path = QPEApplication::qpeDir() + "plugins/styles";
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir (path, "*.dll");
-#endif
-    QStringList list = dir.entryList();
+    (void)new PluginItem( styleList, "Windows"); // No tr
+    QStringList list = styleLoader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	StyleInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-	if ( lib->queryInterface( IID_Style, (QUnknownInterface**)&iface ) == QS_OK ) {
+	if (  styleLoader->queryInterface( *it, IID_Style, (QUnknownInterface**)&iface ) == QS_OK ) {
 	    PluginItem *item = new PluginItem( styleList, iface->name() );
 	    item->setFilename( *it );
-	    iface->release();
-	    lib->unload();
+	    styleLoader->releaseInterface( iface );
 	}
-	delete lib;
     }
 #endif
 }
@@ -629,33 +607,28 @@ void AppearanceSettings::populateColorList()
 {
     QDir dir( QPEApplication::qpeDir() + "etc/colors" );
     QStringList list = dir.entryList( "*.scheme" ); // No tr
+    colorListIDs.clear();
     for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
+	Config scheme( QPEApplication::qpeDir() + "etc/colors/" + *it, Config::File );
         QString name = (*it).left( (*it).find( ".scheme" ) );
-        colorList->insertItem( name );
+	colorListIDs.append(name);
+	scheme.setGroup("Global");
+        colorList->insertItem( scheme.readEntry("Name",name+"-DEF") );
     }
 }
 
 void AppearanceSettings::populateDecorationList()
 {
     (void)new PluginItem( decorationList, "Qtopia" );
-    QString path = QPEApplication::qpeDir() + "plugins/decorations";
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir (path, "*.dll");
-#endif   
-    QStringList list = dir.entryList();
+    QStringList list = wdLoader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	WindowDecorationInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-	if ( lib->queryInterface( IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	if ( wdLoader->queryInterface( *it, IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 	    PluginItem *item = new PluginItem( decorationList, iface->name() );
 	    item->setFilename( *it );
-	    iface->release();
-	    lib->unload();
+	    wdLoader->releaseInterface( iface );
 	}
-	delete lib;
     }
 }
 

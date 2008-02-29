@@ -23,6 +23,7 @@
 #include "mediarecorder.h"
 #include "mediarecorderbase.h"
 #include "audioinput.h"
+#include "audiodevice.h"
 #include "samplebuffer.h"
 #include "pluginlist.h"
 #include "timeprogressbar.h"
@@ -35,6 +36,7 @@
 #include <qtopia/resource.h>
 #include <qtopia/config.h>
 #include <qtopia/storage.h>
+#include <qtopia/locationcombo.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/qpemenubar.h>
 #include <qtopia/qpetoolbar.h>
@@ -57,13 +59,6 @@ MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
     // Load the media plugins.
     recorderPlugins = new MediaRecorderPluginList();
     playerPlugins = new MediaPlayerPluginList();
-
-    // Create a storage handler.
-    storage = new StorageInfo( this );
-
-    // Find the primary document location.
-    homeDocuments = QString(getenv("HOME")) + "/Documents";
-    currentDocPath = homeDocuments;
 
     setToolBarsMovable( FALSE );
     setBackgroundMode( PaletteButton );
@@ -93,18 +88,15 @@ MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
     contents = new MediaRecorderBase( stack );
     stack->addWidget( contents, 0 );
 
-    config = new ConfigureRecorder( qualities, recorderPlugins, stack );
-    stack->addWidget( config, 1 );
-
     initializeContents();
     stack->raiseWidget( contents );
 
-    audio = 0;
+    audioInput = 0;
+    audioOutput = 0;
 #ifdef RECORD_THEN_SAVE
     samples = 0;
-#else
-    sampleBuffer = 0;
 #endif
+    sampleBuffer = 0;
     recordTime = 0;
     recording = FALSE;
     playing = FALSE;
@@ -117,10 +109,19 @@ MediaRecorder::MediaRecorder( QWidget *parent, const char *name, WFlags f )
 	     this, SLOT( recordClicked() ) );
     connect( contents->replayButton, SIGNAL( clicked() ),
 	     this, SLOT( replayClicked() ) );
-    connect( config->done, SIGNAL( clicked() ),
-	     this, SLOT( configureDone() ) );
     connect( lightTimer, SIGNAL( timeout() ),
 	     this, SLOT( recordLightBlink() ) );
+
+    // Listen on the system tray for clicks on the record light so that
+    // we can raise the application when the user clicks on it.
+    trayChannel = new QCopChannel( "Qt/Tray", this );
+    connect( trayChannel, SIGNAL(received(const QCString&, const QByteArray&)),
+	     this, SLOT(traySocket(const QCString&, const QByteArray&)) );
+
+    // Force the MIME type handling system to preload the list
+    // of extensions.  If we don't do this, then "startRecording"
+    // ends up being _very_ slow.
+    MimeType type("audio/x-wav");
 }
 
 
@@ -128,15 +129,16 @@ MediaRecorder::~MediaRecorder()
 {
     delete recorderPlugins;
     delete playerPlugins;
-    if ( audio )
-	delete audio;
+    if ( audioInput )
+	delete audioInput;
+    if ( audioOutput )
+	delete audioOutput;
 #ifdef RECORD_THEN_SAVE
     if ( samples )
 	delete samples;
-#else
+#endif
     if ( sampleBuffer )
 	delete[] sampleBuffer;
-#endif
     if ( io )
 	delete io;
     if ( lightTimer )
@@ -160,16 +162,14 @@ void MediaRecorder::initializeContents()
     contents->replayButton->hide();
 
     // Load the initial quality settings.
+    config = new ConfigureRecorder( qualities, recorderPlugins, this );
     contents->qualityGroup->setButton( config->currentQuality() );
     setQualityDisplay( qualities[config->currentQuality()] );
     connect( contents->qualityGroup, SIGNAL( clicked(int) ),
 	     this, SLOT( qualityChanged(int) ) );
 
-    // Populate the combo box with the list of storage locations.
-    loadDocPaths();
-    connect( storage, SIGNAL( disksChanged() ), this, SLOT( disksChanged() ) );
-    connect( contents->storage, SIGNAL( activated(int) ),
-	     this, SLOT( storageChanged(int) ) );
+    connect( contents->storageLocation, SIGNAL(newPath()), 
+	     this, SLOT(newLocation()) );
     recomputeMaxTime();
 }
 
@@ -205,8 +205,10 @@ void MediaRecorder::setQualityDisplay( const QualitySetting& quality )
 
 void MediaRecorder::recomputeMaxTime()
 {
+
     // Determine the maximum available space on the device.
-    const FileSystem *fs = storage->fileSystemOf(currentDocPath);
+    const FileSystem *fs = contents->storageLocation->fileSystem();
+
     long availBlocks;
     long blockSize;
     if ( fs ) {
@@ -291,33 +293,6 @@ void MediaRecorder::recomputeMaxTime()
     maxRecordTime = maxSecs;
 }
 
-
-void MediaRecorder::loadDocPaths()
-{
-    // Clear the list of document paths.
-    docPaths.clear();
-    contents->storage->clear();
-
-    // Add the primary home document store.
-    const FileSystem *filesys = storage->fileSystemOf( homeDocuments );
-    if ( filesys )
-	contents->storage->insertItem( filesys->name() );
-    else
-	contents->storage->insertItem( tr("Documents") );
-    docPaths += homeDocuments;
-
-    // Add all removeable filesystems.
-    const QList<FileSystem> &fs = storage->fileSystems();
-    QListIterator<FileSystem> it( fs );
-    for ( ; it.current(); ++it ) {
-	if ( (*it)->isRemovable() ) {
-	    contents->storage->insertItem( (*it)->name() );
-	    docPaths += (*it)->path() + "/Documents";
-	}
-    }
-}
-
-
 void MediaRecorder::qualityChanged( int id )
 {
     config->setQuality( id );
@@ -326,20 +301,8 @@ void MediaRecorder::qualityChanged( int id )
     recomputeMaxTime();
 }
 
-
-void MediaRecorder::disksChanged()
+void MediaRecorder::newLocation()
 {
-    storage->update();
-    currentDocPath = homeDocuments;
-    loadDocPaths();
-    recomputeMaxTime();
-}
-
-
-void MediaRecorder::storageChanged( int index )
-{
-    storage->update();
-    currentDocPath = docPaths[index];
     recomputeMaxTime();
 }
 
@@ -354,19 +317,18 @@ void MediaRecorder::startSave()
     // Open the document.
     DocLnk doc;
     FileManager fm;
-    QString name = tr("Recorded Sound");
-    name = name + " " + TimeString::timeString( QTime::currentTime() );
-    name = name + " " + TimeString::numberDateString( QDate::currentDate() );
+    QString name =
+	tr("Recorded Sound %1","date").arg(TimeString::localYMDHMS(QDateTime::currentDateTime()));
     doc.setName( name );
     doc.setType( encoder->pluginMimeType() );
-    doc.setLocation( currentDocPath );
+    doc.setLocation( contents->storageLocation->documentPath() );
 
     io = fm.saveFile( doc );
 
     // Write the sample data using the encoder.
     encoder->begin( io, qualities[config->currentQuality()].formatTag );
-    encoder->setAudioChannels( audio->channels() );
-    encoder->setAudioFrequency( audio->frequency() );
+    encoder->setAudioChannels( audioInput->channels() );
+    encoder->setAudioFrequency( audioInput->frequency() );
 
     // Record the location of the file that we are saving.
     lastSaved = doc.file();
@@ -411,40 +373,41 @@ void MediaRecorder::startRecording()
     // Disable power save while recording so that the device
     // doesn't suspend while a long-term recording session
     // is in progress.
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    QCopEnvelope( "QPE/System", "setScreenSaverMode(int)" ) 
-	    << QPEApplication::DisableSuspend;
+#ifdef Q_WS_QWS
+	QPEApplication::setTempScreenSaverMode( QPEApplication::DisableSuspend );
 #endif
 
     // Open the audio input device and normalize the parameters.
-    if ( audio )
-	delete audio;
-    audio = new AudioInput( qual->frequency, qual->channels );
-    qDebug( "channels: %d", audio->channels() );
-    qDebug( "frequency: %d", audio->frequency() );
-    qDebug( "bufferSize: %d", audio->bufferSize() );
-    connect( audio, SIGNAL( dataAvailable() ), this, SLOT( processAudioData() ) );
+    if ( audioInput )
+	delete audioInput;
+    audioInput = new AudioInput( qual->frequency, qual->channels );
+    qDebug( "channels: %d", audioInput->channels() );
+    qDebug( "frequency: %d", audioInput->frequency() );
+    qDebug( "bufferSize: %d", audioInput->bufferSize() );
+    connect( audioInput, SIGNAL( dataAvailable() ),
+	     this, SLOT( processAudioData() ) );
 
     // Create the sample buffer, for recording the data temporarily.
 #ifdef RECORD_THEN_SAVE
     if ( samples )
 	delete samples;
-    samples = new SampleBuffer( audio->bufferSize() );
+    samples = new SampleBuffer( audioInput->bufferSize() );
 #else
     if ( sampleBuffer )
 	delete[] sampleBuffer;
-    sampleBuffer = new short [ audio->bufferSize() ];
+    sampleBuffer = new short [ audioInput->bufferSize() ];
 #endif
 
     // Start the save process.
     startSave();
 
     // Create the waveform display.
-    contents->waveform->changeSettings( audio->frequency(), audio->channels() );
+    contents->waveform->changeSettings( audioInput->frequency(),
+					audioInput->channels() );
 
     configureAction->setEnabled( FALSE );
     contents->qualityGroup->setEnabled( FALSE );
-    contents->storage->setEnabled( FALSE );
+    contents->storageLocation->setEnabled( FALSE );
     recordTime = 0;
     contents->progress->setTotalSteps( 120 );
     contents->progress->setProgress( 0 );
@@ -459,18 +422,18 @@ void MediaRecorder::startRecording()
     // Some audio devices may start sending us data immediately, but
     // others may need an initial "read" to start the ball rolling.
     // Processing at least one data block will prime the device.
-    audio->start();
+    audioInput->start();
     processAudioData();
 }
 
 
 void MediaRecorder::stopRecording()
 {
-    audio->stop();
+    audioInput->stop();
     contents->waveform->reset();
     configureAction->setEnabled( TRUE );
     contents->qualityGroup->setEnabled( TRUE );
-    contents->storage->setEnabled( TRUE );
+    contents->storageLocation->setEnabled( TRUE );
     contents->recordButton->setEnabled( FALSE );
     recording = FALSE;
     contents->recordButton->setText( tr("Record") );
@@ -483,9 +446,8 @@ void MediaRecorder::stopRecording()
     endSave();
 
     // Re-enable power save.
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    QCopEnvelope( "QPE/System", "setScreenSaverMode(int)" )
-    	<< QPEApplication::Enable;
+#ifdef Q_WS_QWS
+    QPEApplication::setTempScreenSaverMode( QPEApplication::Enable );
 #endif
 }
 
@@ -502,11 +464,9 @@ void MediaRecorder::recordClicked()
 
 void MediaRecorder::startPlaying()
 {
-    MediaPlayerDecoder *decoder;
-
     // Do we have a decoder for this type of file?
     decoder = playerPlugins->fromFile( lastSaved );
-    if ( decoder == 0 ) {
+    if ( decoder == 0 || !( decoder->open( lastSaved ) ) ) {
         QMessageBox::critical( this, tr( "No playback plugin found" ),
 			       tr( "Voice Recorder was unable to\n"
 			           "locate a suitable plugin to\n"
@@ -517,7 +477,7 @@ void MediaRecorder::startPlaying()
     // Reconfigure the UI to reflect the current mode.
     configureAction->setEnabled( FALSE );
     contents->qualityGroup->setEnabled( FALSE );
-    contents->storage->setEnabled( FALSE );
+    contents->storageLocation->setEnabled( FALSE );
     recordTime = 0;
     contents->progress->setTotalSteps( 120 );
     contents->progress->setProgress( 0 );
@@ -526,18 +486,43 @@ void MediaRecorder::startPlaying()
     contents->replayButton->setText( tr("Stop") );
     contents->replayButton->setEnabled( TRUE );
 
-    // TODO: start playing back the recorded sound in "lastSave".
+    // Create the waveform display.
+    contents->waveform->changeSettings( decoder->audioFrequency( 0 ),
+					decoder->audioChannels( 0 ) );
+
+    // Open the audio output device.
+    audioOutput = new AudioDevice( decoder->audioFrequency( 0 ),
+				   decoder->audioChannels( 0 ), 2 );
+    sampleBuffer = new short [ audioOutput->bufferSize() ];
+    QObject::connect( audioOutput, SIGNAL(completedIO()),
+		      this, SLOT(audioOutputDone()) );
+
+    // Force the first block to be played, to prime the device.
+    audioOutputDone();
 }
 
 
 void MediaRecorder::stopPlaying()
 {
-    // TODO: stop playing back the recorded sound
+    // Stop playing back the recorded sound
+    if ( audioOutput ) {
+	delete audioOutput;
+	audioOutput = 0;
+    }
+    if ( decoder ) {
+	decoder->close();
+	decoder = 0;
+    }
+    if ( sampleBuffer ) {
+	delete[] sampleBuffer;
+	sampleBuffer = 0;
+    }
 
+    // Return the UI to the default state.
     contents->waveform->reset();
     configureAction->setEnabled( TRUE );
     contents->qualityGroup->setEnabled( TRUE );
-    contents->storage->setEnabled( TRUE );
+    contents->storageLocation->setEnabled( TRUE );
     contents->recordButton->setEnabled( TRUE );
     playing = FALSE;
     contents->replayButton->setEnabled( TRUE );
@@ -581,7 +566,7 @@ void MediaRecorder::processAudioData()
 
     if ( samples->nextWriteBuffer( buf, length ) ) {
 	// Read the next block of samples into the write buffer.
-	result = audio->read( buf, length );
+	result = audioInput->read( buf, length );
 	samples->commitWriteBuffer( (unsigned int)result );
 
 	// Update the waveform display.
@@ -592,16 +577,16 @@ void MediaRecorder::processAudioData()
 	stopped = TRUE;
     }
 #else
-    result = audio->read( sampleBuffer, audio->bufferSize() );
+    result = audioInput->read( sampleBuffer, audioInput->bufferSize() );
     while ( result > 0 ) {
 	contents->waveform->newSamples( sampleBuffer, result );
 	encoder->writeAudioSamples( sampleBuffer, (long)result );
-	result = audio->read( sampleBuffer, audio->bufferSize() );
+	result = audioInput->read( sampleBuffer, audioInput->bufferSize() );
     }
 #endif
 
     // Update the record time if another second has elapsed.
-    newTime = audio->position() / (long)(audio->frequency());
+    newTime = audioInput->position() / (long)(audioInput->frequency());
     if ( newTime != recordTime ) {
 	recordTime = newTime;
 	if ( recordTime >= contents->progress->totalSteps() ) {
@@ -622,18 +607,9 @@ void MediaRecorder::processAudioData()
 
 void MediaRecorder::configure()
 {
-    config->setQuality( config->currentQuality() );
-    stack->raiseWidget( config );
-    configureAction->setEnabled( FALSE );
-}
-
-
-void MediaRecorder::configureDone()
-{
-    setQualityDisplay( qualities[config->currentQuality()] );
-    recomputeMaxTime();
-    stack->raiseWidget( contents );
-    configureAction->setEnabled( TRUE );
+    config->processPopup();
+    contents->qualityGroup->setButton( config->currentQuality() );
+    qualityChanged( config->currentQuality() );
 }
 
 
@@ -673,8 +649,9 @@ void MediaRecorder::recordLightBlink()
 		<< RECORD_LIGHT_ID
 		<< Resource::loadPixmap( "record-light" );
     } else {
-        QCopEnvelope( "Qt/Tray", "remove(int)" )
-		<< RECORD_LIGHT_ID;
+        QCopEnvelope( "Qt/Tray", "setIcon(int,QPixmap)" )
+		<< RECORD_LIGHT_ID
+		<< Resource::loadPixmap( "record-blank" );
     }
 }
 
@@ -688,11 +665,49 @@ void MediaRecorder::closeEvent( QCloseEvent *e )
 	stopPlaying();
     }
 
-    // Should we exit the app, or just the configuration pane.
-    if ( configureAction->isEnabled() ) {
-	QMainWindow::closeEvent(e);
-    } else {
-	configureDone();
+    e->accept();
+}
+
+
+void MediaRecorder::audioOutputDone()
+{
+    // Read the next block of samples.
+    long samplesRead = 0;
+    qDebug("%d", audioOutput->bufferSize());
+    if ( !decoder->audioReadSamples( sampleBuffer, 2, 1024, samplesRead, 0 ) ) {
+	stopPlaying();
+	return;
+    }
+    if ( samplesRead <= 0 ) {
+	stopPlaying();
+	return;
+    }
+
+    // Write the samples to the audio output device.
+    audioOutput->write( (char *)sampleBuffer, (int)( samplesRead * 4 ) );
+
+    // Update the waveform display.
+    contents->waveform->newSamples( sampleBuffer, samplesRead );
+}
+
+
+void MediaRecorder::traySocket( const QCString& msg, const QByteArray &data )
+{
+    QDataStream stream( data, IO_ReadOnly );
+    int id = 0;
+    QPoint p;
+    
+    if ( msg == "popup(int,QPoint)" ) {
+	stream >> id >> p;
+    } else if ( msg == "clicked(int,QPoint)" || msg == "doubleClicked(int,QPoint)" ) {
+	stream >> id >> p;
+    }
+
+    if ( id == RECORD_LIGHT_ID ) {
+	if ( this->isVisible() )
+	    this->raise();
+	else
+	    this->showMaximized();
     }
 }
 

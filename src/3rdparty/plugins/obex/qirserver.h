@@ -26,10 +26,12 @@ class QIrServer : public QObject
 {
   Q_OBJECT
 public:
-  QIrServer( QObject *parent = 0, const char *name = 0 );
+    QIrServer( QObject *parent = 0, const char *name = 0 );
+    ~QIrServer();
 
     enum State { Ready, Beaming, Receiving, Error };
 
+    State state() const { return _state; }
 
 public slots:
 
@@ -37,19 +39,27 @@ public slots:
     void cancel();
 
     void setReceivingEnabled( bool );
-
+    void receiving(bool);
 
 signals:
-    void done();
-    void receiving( int size, const QString& filename, const QString& mime );
-    void progress( int size );
-    void received( const QString& filename, const QString& mime );
+    void beamDone();
+    void beamError();
 
+    void receiveInit();
+    void receiving( int size, const QString& filename, const QString& mime );
+    void received( const QString& filename, const QString& mime );
+    void receiveError();
+    
+    void progress( int size );
+    void statusMsg(const QString &);
+    
     void abort(); //private
 
 private slots:
+    void mDone();
+    void mError();
 
 private:
-  QIrPrivate *data;
-
+    QIrPrivate *data;
+    State _state;
 };

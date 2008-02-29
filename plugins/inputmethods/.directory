@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Input Methods
+Comment=Text input methods.
+Apply=QPE/TaskBar reloadInputMethods()

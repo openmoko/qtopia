@@ -24,14 +24,13 @@
 
 
 IRReceiverAppletImpl::IRReceiverAppletImpl()
-    : irreceiver(0), icn(0), ref(0)
+    : irreceiver(0), ref(0)
 {
 }
 
 IRReceiverAppletImpl::~IRReceiverAppletImpl()
 {
     delete irreceiver;
-    delete icn;
 }
 
 QWidget *IRReceiverAppletImpl::applet( QWidget *parent )
@@ -46,28 +45,12 @@ int IRReceiverAppletImpl::position() const
     return 0;
 }
 
-QString IRReceiverAppletImpl::name() const
-{
-    return qApp->translate( "Taskbar Applet", "IR Receiver" );
-}
-
-QPixmap IRReceiverAppletImpl::icon() const
-{
-    if ( !icn ) {
-	IRReceiverAppletImpl *that = (IRReceiverAppletImpl*)this;
-	that->icn = new QPixmap();
-    }
-    return *icn;
-}
-
 QRESULT IRReceiverAppletImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
 {
     *iface = 0;
     if ( uuid == IID_QUnknown )
 	*iface = this;
     else if ( uuid == IID_TaskbarApplet )
-	*iface = this;
-    else if ( uuid == IID_TaskbarNamedApplet )
 	*iface = this;
     else
 	return QS_FALSE;

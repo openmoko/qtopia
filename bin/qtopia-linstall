@@ -5,7 +5,7 @@ while (<>) {
 	for $ts ( split " ", $1 ) {
 	    ($target,$locale) = $ts =~ /^(.*)-(.*)\.ts$/;
 	    $dir = "$ENV{QPEDIR}/i18n/$locale";
-	    mkdir $dir if ! -d $dir;
+	    mkdir $dir,0700 if ! -d $dir;
 	    system("cp $target-$locale.qm $dir/$target.qm") && exit 1;
 	}
     }

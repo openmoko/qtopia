@@ -27,7 +27,7 @@
 class FractionInterface : public CalculatorInterface
 {
 public:
-    FractionInterface():CalculatorInterface(){input = 0;};
+    FractionInterface():CalculatorInterface(){};
     virtual ~FractionInterface(){};
 
 #ifndef QT_NO_COMPONENT
@@ -39,7 +39,6 @@ public:
     const char * pluginName() { return "Fraction"; };
 
 private:
-    FormFraction *input;
     ulong ref;
 };
 

@@ -43,7 +43,7 @@ DateBookTable::~DateBookTable()
 QValueList<Occurrence> DateBookTable::getOccurrences( 
 	const QDate &from, const QDate &to ) const
 {
-    return dba->getOccurrences(from, to);
+    return dba->getOccurrencesInCurrentTZ(from, to);
 }
 
 Occurrence DateBookTable::getNextAlarm( const QDateTime &from, bool *ok) const
@@ -54,7 +54,7 @@ Occurrence DateBookTable::getNextAlarm( const QDateTime &from, bool *ok) const
     QValueListIterator<Occurrence> it;
 
     for (it = list.begin(); it != list.end(); ++it ) {
-	if ((*it).startInTZ() == from && (*it).event().hasAlarm()) {
+	if ((*it).startInCurrentTZ() == from && (*it).event().hasAlarm()) {
 	    // the right event.
 	    if (ok)
 		*ok = TRUE;
@@ -95,7 +95,7 @@ Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
 	QDate next = it.current()->nextOccurrence(dt.addDays(-1), &ok);
 	while (ok) {
 	    Occurrence o(next, *(it.current()));
-	    if (o.startInTZ().date() >= dt) {
+	    if (o.startInCurrentTZ().date() >= dt) {
 		if (resultFound)
 		    *resultFound = TRUE;
 		return o;
@@ -162,9 +162,9 @@ Occurrence DateBookTable::find(const QUuid &u, const QDate &date, bool *ok) cons
     return Occurrence();
 
 }
-void DateBookTable::addEvent(const PimEvent &ev)
+QUuid DateBookTable::addEvent(const PimEvent &ev)
 {
-    dba->addEvent(ev);
+    return dba->addEvent(ev);
 }
 
 void DateBookTable::addException(const QDate &d, const PimEvent &parent)
@@ -172,9 +172,9 @@ void DateBookTable::addException(const QDate &d, const PimEvent &parent)
     dba->addException(d, parent);
 }
 
-void DateBookTable::addException(const QDate &d, const PimEvent &parent, const PimEvent &ev)
+QUuid DateBookTable::addException(const QDate &d, const PimEvent &parent, const PimEvent &ev)
 {
-    dba->addException(d, parent, ev);
+    return dba->addException(d, parent, ev);
 }
 
 void DateBookTable::removeExceptions(const PimEvent &e)
@@ -183,7 +183,7 @@ void DateBookTable::removeExceptions(const PimEvent &e)
     const QValueList<QUuid> &list = ((PrEvent &)e).childUids();
     QValueList<QUuid>::ConstIterator it = list.begin();
     for (;it != list.end(); ++it) {
-	qDebug("remi %d", (*it).data1);
+	qDebug("remi %ld", (*it).data1);
 	//PimEvent p = find(((PrEvent &)e).parentUid());
 	PimEvent p = find(*it);
 	dba->removeEvent(p);

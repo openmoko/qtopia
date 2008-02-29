@@ -64,7 +64,7 @@ private slots:
     void fileNew();
     void showSettings();
     void slotToday();	// view today
-    void changeClock( bool newClock );
+    void changeClock();
     void changeWeek( bool newDay );
     void appMessage(const QCString& msg, const QByteArray& data);
     // handle key events in the day view...

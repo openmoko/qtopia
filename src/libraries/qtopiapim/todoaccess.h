@@ -76,6 +76,8 @@ class QTOPIAPIM_EXPORT TodoAccess : public QObject {
   
   void addTask(const PimTask& task);
 
+  PimTask taskForId(const QUuid &, bool *ok = 0) const;
+
  signals:
   void todoListUpdated();
 

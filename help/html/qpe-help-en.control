@@ -1,0 +1,8 @@
+Files: help/html/*.html help/html/*.png
+Priority: optional
+Section: qpe
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-7
+Description: The English help documentation for Qtopia.

@@ -66,6 +66,19 @@ TodoAccess::~TodoAccess()
 }
 
 /*!
+  If there exists an task with the uid \a u, return 
+  that task.  Returns a null task if otherwise.
+
+  If \a ok is non-null, *ok is set to TRUE if the task is
+  found, and FALSE if the task is not found.
+*/
+PimTask TodoAccess::taskForId(const QUuid &u, bool *ok) const
+{
+    return taskio->taskForId(u, ok);
+}
+
+
+/*!
   If supported will update \a task in the pim data.
 
   Updating tasks requires the Tasks service to be available.
@@ -119,7 +132,7 @@ void TodoAccess::addTask(const PimTask& task)
 bool TodoAccess::editSupported() const
 {
 #ifdef Q_WS_QWS
-    return Service::list().contains("Tasks");
+    return Service::list().contains("Tasks"); // No tr
 #else
     return FALSE;
 #endif

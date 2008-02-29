@@ -4,6 +4,7 @@
     <keyword ref="addressbookaccess.html">AddressBookAccess</keyword>
     <keyword ref="addressbookaccess.html#addContact">addContact</keyword>
     <keyword ref="addressbookaccess.html#addressBookUpdated">addressBookUpdated</keyword>
+    <keyword ref="addressbookaccess.html#contactForId">contactForId</keyword>
     <keyword ref="addressbookaccess.html#editSupported">editSupported</keyword>
     <keyword ref="addressbookaccess.html#personalDetails">personalDetails</keyword>
     <keyword ref="addressbookaccess.html#removeContact">removeContact</keyword>
@@ -178,6 +179,7 @@
     <keyword ref="datebookaccess.html#addEvent">addEvent</keyword>
     <keyword ref="datebookaccess.html#dateBookUpdated">dateBookUpdated</keyword>
     <keyword ref="datebookaccess.html#editSupported">editSupported</keyword>
+    <keyword ref="datebookaccess.html#eventForId">eventForId</keyword>
     <keyword ref="datebookaccess.html#removeEvent">removeEvent</keyword>
     <keyword ref="datebookaccess.html#updateEvent">updateEvent</keyword>
     <keyword ref="datebookaccess.html#~DateBookAccess">~DateBookAccess</keyword>
@@ -346,6 +348,22 @@
 </section>
 <section ref="mediaplayerdecoder_1_6.html" title="MediaPlayerDecoder_1_6 Class Reference">
     <keyword ref="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#canStreamURL">canStreamURL</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#currentTime">currentTime</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#currentTimeAvailable">currentTimeAvailable</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#length">length</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#lengthAvailable">lengthAvailable</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#openURL">openURL</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#seek">seek</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#seekAvailable">seekAvailable</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#streamed">streamed</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#supportsStreaming">supportsStreaming</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#sync">sync</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#syncAvailable">syncAvailable</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#tell">tell</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#tellAvailable">tellAvailable</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#totalTime">totalTime</keyword>
+    <keyword ref="mediaplayerdecoder_1_6.html#totalTimeAvailable">totalTimeAvailable</keyword>
     <section ref="mediaplayerdecoder_1_6-members.html" title="List of All Member Functions"/>
     <section ref="mediaplayerplugininterface-h.html" title="Header File"/>
 </section>
@@ -549,7 +567,7 @@
     <keyword ref="pimevent.html#color">color</keyword>
     <keyword ref="pimevent.html#description">description</keyword>
     <keyword ref="pimevent.html#end">end</keyword>
-    <keyword ref="pimevent.html#endInTZ">endInTZ</keyword>
+    <keyword ref="pimevent.html#endInCurrentTZ">endInCurrentTZ</keyword>
     <keyword ref="pimevent.html#frequency">frequency</keyword>
     <keyword ref="pimevent.html#hasAlarm">hasAlarm</keyword>
     <keyword ref="pimevent.html#hasExceptions">hasExceptions</keyword>
@@ -563,7 +581,7 @@
     <keyword ref="pimevent.html#repeatForever">repeatForever</keyword>
     <keyword ref="pimevent.html#repeatOnWeekDay">repeatOnWeekDay</keyword>
     <keyword ref="pimevent.html#repeatTill">repeatTill</keyword>
-    <keyword ref="pimevent.html#repeatTillInTZ">repeatTillInTZ</keyword>
+    <keyword ref="pimevent.html#repeatTillInCurrentTZ">repeatTillInCurrentTZ</keyword>
     <keyword ref="pimevent.html#repeatType">repeatType</keyword>
     <keyword ref="pimevent.html#seriesUid">seriesUid</keyword>
     <keyword ref="pimevent.html#setAlarm">setAlarm</keyword>
@@ -582,7 +600,7 @@
     <keyword ref="pimevent.html#setTimeZone">setTimeZone</keyword>
     <keyword ref="pimevent.html#showOnNearest">showOnNearest</keyword>
     <keyword ref="pimevent.html#start">start</keyword>
-    <keyword ref="pimevent.html#startInTZ">startInTZ</keyword>
+    <keyword ref="pimevent.html#startInCurrentTZ">startInCurrentTZ</keyword>
     <keyword ref="pimevent.html#timeZone">timeZone</keyword>
     <keyword ref="pimevent.html#weekOffset">weekOffset</keyword>
     <keyword ref="pimevent.html#writeVCalendar">writeVCalendar</keyword>
@@ -592,6 +610,8 @@
 </section>
 <section ref="pimrecord.html" title="PimRecord Class Reference">
     <keyword ref="pimrecord.html">PimRecord</keyword>
+    <keyword ref="pimrecord.html#categories">categories</keyword>
+    <keyword ref="pimrecord.html#customField">customField</keyword>
     <keyword ref="pimrecord.html#operator!-eq">operator!=</keyword>
     <keyword ref="pimrecord.html#operator-eq">operator=</keyword>
     <keyword ref="pimrecord.html#operator-eq-eq">operator==</keyword>
@@ -673,6 +693,21 @@
     <section ref="qjpunicodeconv-members.html" title="List of All Member Functions"/>
     <section ref="qjpunicode-h.html" title="Header File"/>
 </section>
+<section ref="qlibrary.html" title="QLibrary Class Reference">
+    <keyword ref="qlibrary.html">QLibrary</keyword>
+    <keyword ref="qlibrary.html#Policy">Policy</keyword>
+    <keyword ref="qlibrary.html#isLoaded">isLoaded</keyword>
+    <keyword ref="qlibrary.html#library">library</keyword>
+    <keyword ref="qlibrary.html#load">load</keyword>
+    <keyword ref="qlibrary.html#policy">policy</keyword>
+    <keyword ref="qlibrary.html#queryInterface">queryInterface</keyword>
+    <keyword ref="qlibrary.html#resolve">resolve</keyword>
+    <keyword ref="qlibrary.html#setPolicy">setPolicy</keyword>
+    <keyword ref="qlibrary.html#unload">unload</keyword>
+    <keyword ref="qlibrary.html#~QLibrary">~QLibrary</keyword>
+    <section ref="qlibrary-members.html" title="List of All Member Functions"/>
+    <section ref="qlibrary-h.html" title="Header File"/>
+</section>
 <section ref="qobex.html" title="QObex Class Reference">
     <keyword ref="qobex.html">QObex</keyword>
     <section ref="qobex-members.html" title="List of All Member Functions"/>
@@ -720,6 +755,18 @@
     <section ref="qsjiscodec-members.html" title="List of All Member Functions"/>
     <section ref="qsjiscodec-h.html" title="Header File"/>
 </section>
+<section ref="quuid.html" title="QUuid Class Reference">
+    <keyword ref="quuid.html">QUuid</keyword>
+    <keyword ref="quuid.html#isNull">isNull</keyword>
+    <keyword ref="quuid.html#operator!-eq">operator!=</keyword>
+    <keyword ref="quuid.html#operator-lt">operator&lt;</keyword>
+    <keyword ref="quuid.html#operator-eq">operator=</keyword>
+    <keyword ref="quuid.html#operator-eq-eq">operator==</keyword>
+    <keyword ref="quuid.html#operator-gt">operator&gt;</keyword>
+    <keyword ref="quuid.html#toString">toString</keyword>
+    <section ref="quuid-members.html" title="List of All Member Functions"/>
+    <section ref="quuid-h.html" title="Header File"/>
+</section>
 <section ref="resource.html" title="Resource Class Reference">
     <keyword ref="resource.html">Resource</keyword>
     <keyword ref="resource.html#allSounds">allSounds</keyword>
@@ -765,13 +812,6 @@
     <section ref="taskbarappletinterface-members.html" title="List of All Member Functions"/>
     <section ref="taskbarappletinterface-h.html" title="Header File"/>
 </section>
-<section ref="taskbarnamedappletinterface.html" title="TaskbarNamedAppletInterface Class Reference">
-    <keyword ref="taskbarnamedappletinterface.html">TaskbarNamedAppletInterface</keyword>
-    <keyword ref="taskbarnamedappletinterface.html#icon">icon</keyword>
-    <keyword ref="taskbarnamedappletinterface.html#name">name</keyword>
-    <section ref="taskbarnamedappletinterface-members.html" title="List of All Member Functions"/>
-    <section ref="taskbarappletinterface-h.html" title="Header File"/>
-</section>
 <section ref="textcodecinterface.html" title="TextCodecInterface Class Reference">
     <keyword ref="textcodecinterface.html">TextCodecInterface</keyword>
     <keyword ref="textcodecinterface.html#createForMib">createForMib</keyword>
@@ -798,6 +838,7 @@
     <keyword ref="todoaccess.html#addTask">addTask</keyword>
     <keyword ref="todoaccess.html#editSupported">editSupported</keyword>
     <keyword ref="todoaccess.html#removeTask">removeTask</keyword>
+    <keyword ref="todoaccess.html#taskForId">taskForId</keyword>
     <keyword ref="todoaccess.html#todoListUpdated">todoListUpdated</keyword>
     <keyword ref="todoaccess.html#updateTask">updateTask</keyword>
     <keyword ref="todoaccess.html#~TodoAccess">~TodoAccess</keyword>
@@ -906,6 +947,12 @@
 </section>
 <section ref="release-1.6beta2.html" title="">
     <keyword ref="release-1.6beta2.html"></keyword>
+</section>
+<section ref="release-1.6beta3.html" title="">
+    <keyword ref="release-1.6beta3.html"></keyword>
+</section>
+<section ref="release-1.6beta4.html" title="">
+    <keyword ref="release-1.6beta4.html"></keyword>
 </section>
 <section ref="services.html" title="">
     <keyword ref="services.html"></keyword>

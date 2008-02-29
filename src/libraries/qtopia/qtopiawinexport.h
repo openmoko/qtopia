@@ -18,6 +18,9 @@
 ** not clear to you.
 **
 **********************************************************************/
+
+#include <qtopia/qpeglobal.h>
+
 #ifdef QTOPIA_TEMPLATEDLL
 //MOC_SKIP_BEGIN
 
@@ -28,13 +31,13 @@ QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QList<AppLnk>;
 
 #if defined(QTOPIA_DEFINED_CATEGORYGROUP) && defined(Q_DEFINED_QMAP) && !defined(QTOPIA_EXPORTED_QTPALMTOP_CATEGORY_TEMPLATES)
 #define QTOPIA_EXPORTED_QTPALMTOP_CATEGORY_TEMPLATES
-QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QMap<QString, CategoryGroup >;
+QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QMap<QString, CategoryGroup>;
 #endif
 
 #if  defined(Q_DEFINED_QMAP) && defined(Q_DEFINED_QSTRING) && !defined(QTOPIA_EXPORTED_CONFIG_TEMPLATES)
 #define QTOPIA_EXPORTED_CONFIG_TEMPLATES 
+QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QMapIterator<QString, QMap<QString, QString> >;
 QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QMap<QString, QMap<QString, QString> >;
-QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QMapIterator< QString, QMap< QString,  QString> >;
 #endif
 
 #if ( defined(Q_DEFINED_QLIST) || defined(Q_DEFINED_QPTRLIST) ) && defined(QTOPIA_DEFINED_FILESYSTEM) && !defined(QTOPIA_EXPORTED_STORAGE_TEMPLATES)
@@ -47,7 +50,8 @@ QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QList<FileSystem>;
 QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QValueList<Event>;
 #endif
 
-#if defined(Q_DEFINED_QDICT) && defined(Q_DEFINED_QLIBRARY) && (QT_VERSION < 300) && !defined(QTOPIA_EXPORTED_QLIBRAY_TEMPLATES) && (QT_VERSION < 300)
+// Special case QLibrary is will be defined in Qtopia under Qt2.3
+#if defined(Q_DEFINED_QDICT) && defined(Q_DEFINED_QLIBRARY) && (QT_VERSION < 300) && !defined(QTOPIA_EXPORTED_QLIBRAY_TEMPLATES) 
 #define QTOPIA_EXPORTED_QLIBRAY_TEMPLATES
 QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QDict<QLibrary>;
 #endif
@@ -59,7 +63,7 @@ QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QValueList<DeviceButton>;
 
 #if defined(Q_DEFINED_QGUARDEDPTR) && defined(Q_DEFINED_QVALUELIST) && defined(Q_DEFINED_QWIDGET) && !defined(QTOPIA_EXPORTED_QMENUBAR_TEMPLATES)
 #define QTOPIA_EXPORTED_QMENUBAR_TEMPLATES
-QTOPIA_TEMPLATE_EXTERN template class QValueList<QGuardedPtr< QWidget> >;
+QTOPIA_TEMPLATE_EXTERN template class QTOPIA_EXPORT QValueList<QGuardedPtr< QWidget> >;
 #endif
 
 //MOC_SKIP_END

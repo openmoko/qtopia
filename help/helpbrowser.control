@@ -1,0 +1,9 @@
+Files: bin/helpbrowser apps/Applications/helpbrowser.desktop 
+Priority: optional
+Section: qpe
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-7
+Description: Browse HTML help documents
+ The HTML help browser for the Qtopia.

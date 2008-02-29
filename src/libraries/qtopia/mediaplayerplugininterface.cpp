@@ -427,12 +427,117 @@
 */
 
 /*!
-    \fn virtual bool MediaPlayerDecoder_1_6::seekable() = 0
+    \fn virtual bool MediaPlayerDecoder_1_6::supportsStreaming() = 0
+
+    Returns if the decoder supports streaming.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::canStreamURL( const QUrl& url, const QString& mimetype ) = 0
+
+    Returns if the decoder can support the given /a mimetype with the /a url provided.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::openURL( const QUrl& url, const QString& mimetype ) = 0
+
+    Opens the /a url of given /a mimetype. Typically this information is provided by a web
+    server to a web browser which could pass this on directly to the plugin or indirectly to the
+    Qtopia Media Player through a QCop signal for this.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::streamed() = 0
+
+    Returns if the decoder is playing a streamed file opened using openURL(), or if the file was
+    opened using the MediaPlayerDecoder::open() function used for files.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::syncAvailable() = 0
+
+    Returns if the decoder supports for the given stream syncing the audio and
+    video together with the sync() function.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::sync() = 0
+
+    Sync up the video to match the timestamp of where the audio currently is playing.
+    If the video is behind, this will skip forward to the correctly matching frame.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::seekAvailable() = 0
 
     Returns if the stream is seekable or not. For streamed media, it is possible
     that seeking may not be able to be implemented in the plugin therefore
     the plugin returns FALSE, otherwise if it can it returns TRUE.
 */
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::seek( long pos ) = 0
+
+    Seeks to \a pos byte offset from the beginning of the stream.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::tellAvailable() = 0
+
+    Returns if the decoder can support the tell() function for the given stream.
+*/
+
+/*!
+    \fn virtual long MediaPlayerDecoder_1_6::tell() = 0
+
+    Returns the current byte offset from the beginning of the stream.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::lengthAvailable() = 0
+
+    Returns if the decoder can support the length() function for the given stream.
+*/
+
+/*!
+    \fn virtual long MediaPlayerDecoder_1_6::length() = 0
+
+    Returns the length in bytes of the stream. For streamed data, the protocol may
+    not always return how long the stream will be, therefore it should be assumed
+    that this may not always be available with all decoder plugins.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::totalTimeAvailable() = 0
+
+    Returns if the decoder can support the totalTime() function for the given stream.
+*/
+
+/*!
+    \fn virtual long MediaPlayerDecoder_1_6::totalTime() = 0
+
+    Returns the total time in milliseconds of the stream. For some file formats,
+    the total play time may not be easily obtainable. Some formats use VBR (variable
+    bit rate) encoding without timestamps making it uncertain as to exactly how long
+    it takes to play the file without actually decoding or indexing it.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::currentTimeAvailable() = 0
+
+    Returns if the decoder can support the currentTime() function for the given stream.
+*/
+
+/*!
+    \fn virtual long MediaPlayerDecoder_1_6::currentTime() = 0
+
+    Returns the current millisecond being played in the stream. The accuracy should only
+    be considered good enough for the use in the display of the current play time and
+    not used for the precise timing of syncing playback. Not all formats contain timestamps,
+    therefore after seeking, not all formats and decoders will be able to support this function.
+*/
+
+
 
 /*!
     \class MediaPlayerPluginInterface <qtopia/mediaplayerplugininterface.h>

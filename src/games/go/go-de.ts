@@ -3,7 +3,7 @@
     <name>GoMainWidget</name>
     <message>
         <source>New Game</source>
-        <translation>Neues Spiel</translation>
+        <translation type="obsolete">Neues Spiel</translation>
     </message>
     <message>
         <source>Pass</source>
@@ -15,11 +15,19 @@
     </message>
     <message>
         <source>Two player option</source>
-        <translation>Zwei Spieler</translation>
+        <translation type="obsolete">Zwei Spieler</translation>
     </message>
     <message>
         <source>Game</source>
         <translation>Spiel</translation>
+    </message>
+    <message>
+        <source>Single player game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Two player game</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

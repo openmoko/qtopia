@@ -36,6 +36,7 @@
 #include "global.h"
 #include "qlibrary.h"
 #include "windowdecorationinterface.h"
+#include "pluginloader_p.h"
 #include <qfile.h>
 #include <qsignal.h>
 
@@ -482,18 +483,16 @@ private:
 };
 
 static WindowDecorationInterface *wdiface = 0;
-static QLibrary *wdlib = 0;
+static PluginLoaderIntern *wdLoader = 0;
 
 //===========================================================================
 
 QPEDecoration::QPEDecoration()
     : QWSDefaultDecoration()
 {
-    if ( wdlib ) {
-	wdiface->release();
-	wdlib->unload();
-	delete wdlib;
-	wdlib = 0;
+    if ( wdLoader ) {
+	delete wdLoader;
+	wdLoader = 0;
     } else {
 	delete wdiface;
     }
@@ -510,22 +509,20 @@ QPEDecoration::QPEDecoration()
 QPEDecoration::QPEDecoration( const QString &plugin )
     : QWSDefaultDecoration()
 {
-    if ( wdlib ) {
-	wdiface->release();
-	wdlib->unload();
-	delete wdlib;
-	wdlib = 0;
+    if ( wdLoader ) {
+	delete wdLoader;
+	wdLoader = 0;
     } else {
 	delete wdiface;
     }
+    wdLoader = new PluginLoaderIntern( "decorations" ); // No tr
     WindowDecorationInterface *iface = 0;
-    QString path = QPEApplication::qpeDir() + "plugins/decorations";
-    QLibrary *lib = new QLibrary( path + "/" + plugin );
-    if ( lib->queryInterface( IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+    if ( !wdLoader->inSafeMode() && wdLoader->isEnabled(plugin) &&
+	wdLoader->queryInterface( plugin, IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 	wdiface = iface;
-	wdlib = lib;
     } else {
-	delete lib;
+	delete wdLoader;
+	wdLoader = 0;
 	wdiface = new DefaultWindowDecoration;
     }
 
@@ -883,7 +880,16 @@ void QPEDecoration::minimize( QWidget *widget )
 void QPEDecoration::help( QWidget *w )
 {
     if ( helpExists ) {
-	Global::execute( "helpbrowser", helpFile );
+	QString hf = helpFile;
+	QString localHelpFile = QString(qApp->argv()[0]) + "-" + w->name() + ".html";
+	QStringList helpPath = Global::helpPath();
+	for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end(); ++it) {
+	    if ( QFile::exists( *it + "/" + localHelpFile ) ) {
+		hf = localHelpFile;
+		break;
+	    }
+	}
+	Global::execute( "helpbrowser", hf );
     } else if ( w && w->testWFlags(Qt::WStyle_ContextHelp) ) {
 	QWhatsThis::enterWhatsThisMode();
 	QWhatsThis::leaveWhatsThisMode( qApp->translate("QPEDecoration",

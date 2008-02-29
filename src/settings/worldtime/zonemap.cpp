@@ -23,6 +23,7 @@
 
 #include <qtopia/resource.h>
 #include <qtopia/timestring.h>
+#include <qtopia/timezone.h>
 #include <qtopia/qpeapplication.h>
 
 #include <qdatetime.h>
@@ -42,7 +43,11 @@
 #include <limits.h>
 
 // the map file...
+#ifndef Q_OS_WIN32
 static const char strZONEINFO[] = "/usr/share/zoneinfo/zone.tab";
+#else
+static const char strZONEINFO[] = "./etc/zoneinfo/zone.tab";
+#endif
 static const char strMAP[] = "simple_grid_400";
 
 // the maximum distance we'll allow the pointer to be away from a city
@@ -60,100 +65,17 @@ const int iCITYOFFSET = 2;
 static inline void darken( QImage *pImage, int start, int stop, int row );
 static void dayNight( QImage *pImage );
 
-ZoneField::ZoneField( const QString& strLine )
-{
-    // make a bunch of RegExp's to match the data from the line
-    QRegExp regCoord( "[-+][0-9]+" );	// the latitude
-    QRegExp regCountry( "[A-Za-z]+/" ); // the country (not good enough)
-    QRegExp regCity( "[A-Za-z_-]*" ); // the city
-
-    int iStart,
-	iStop,
-        iLen,
-        tmp;
-    QString strTmp;
-    // we should be able to assume that the country code is always the first
-    // two chars, so just grap them and let it go...
-    strCountryCode = strLine.left( 2 );
-    iStart = regCoord.match( strLine, 0, &iLen );
-    if ( iStart >= 0 ) {
-	strTmp = strLine.mid( iStart, iLen );
-	tmp = strTmp.toInt();
-	// okay, there are two versions of the format, make a decision based on
-	// the size...
-	// Oh BTW, we are storing everything in seconds!
-	if ( iLen < 7 ) {
-	    _y = tmp / 100;
-	    _y *= 60;
-	    _y += tmp % 100;
-	    _y *= 60;
-	} else {
-	    _y = tmp / 10000;
-	    _y *= 60;
-	    tmp %= 10000;
-	    _y += tmp / 100;
-	    _y *= 60;
-	    tmp %= 100;
-	    _y += tmp;
-	}
-    }
-    iStart = regCoord.match( strLine, iStart + iLen, &iLen );
-    if ( iStart >= 0 ) {
-	strTmp = strLine.mid( iStart, iLen );
-	tmp = strTmp.toInt();
-	if ( iLen < 8 ) {
-	    _x = tmp / 100;
-	    _x *= 60;
-	    _x += tmp % 100;
-	    _x *= 60;
-	} else {
-	    _x = tmp / 10000;
-	    _x *= 60;
-	    tmp %= 10000;
-	    _x += tmp / 100;
-	    _x *= 60;
-	    tmp %= 100;
-	    _x += tmp;
-	}
-    }
-    iStart = regCountry.match( strLine, 0, &iLen );
-    // help with the shortcoming in 2.x regexp...
-    iStop = strLine.findRev( '/' );
-    if ( iStart >= 0 ) {
-	iLen = (iStop - iStart) + 1;
-	strCountry = strLine.mid( iStart, iLen );
-    }
-    // now match the city...
-    iStart = regCity.match( strLine, iStart + iLen, &iLen );
-    if ( iStart >= 0 ) {
-	strCity = strLine.mid( iStart, iLen );
-    }
-}
-
-void ZoneField::showStructure( void ) const
-{
-    qDebug( "Country: %s", strCountry.latin1() );
-    qDebug( "City: %s", strCity.latin1() );
-    qDebug( "x: %d", _x );
-    qDebug( "y: %d\n", _y );
-}
-
 ZoneMap::ZoneMap( QWidget *parent, const char* name )
     : QScrollView( parent, name ),
-      pLast( 0 ),
-      pRepaint( 0 ),
       ox( 0 ),
       oy( 0 ),
       drawableW( -1 ),
       drawableH( -1 ),
       bZoom( FALSE ),
-      bIllum( TRUE ),
-      cursor( 0 )
+      bIllum( TRUE )
 {
     viewport()->setFocusPolicy( StrongFocus );
 
-    // set mouse tracking so we can use the mouse move event
-    zones.setAutoDelete( true );
     // get the map loaded
     // just set the current image to point
     pixCurr = new QPixmap();
@@ -194,38 +116,13 @@ ZoneMap::ZoneMap( QWidget *parent, const char* name )
                       this, SLOT( slotZoom( bool ) ) );
     QObject::connect( &norm, SIGNAL( signalNewPoint( const QPoint& ) ),
                       this, SLOT( slotFindCity( const QPoint& ) ) );
-    QObject::connect( qApp, SIGNAL( clockChanged( bool ) ),
-                      this, SLOT( changeClock( bool ) ) );
     // update the sun's movement every 5 minutes
     tUpdate->start( 5 * 60 * 1000 );
     // May as well read in the timezone information too...
-    readZones();
 }
 
 ZoneMap::~ZoneMap()
 {
-}
-
-void ZoneMap::readZones( void )
-{
-    QFile fZone( strZONEINFO );
-    if ( !fZone.open( IO_ReadOnly ) ) {
-	QMessageBox::warning (this,
-		tr( "Unable to Find Timezone Info" ),
-		tr( "<p>Unable to find any timezone information in %1" )
-		.arg( strZONEINFO ));
-	exit(-1);
-    } else {
-	QTextStream tZone( &fZone );
-	while ( !tZone.atEnd() ) {
-	    QString strLine = tZone.readLine();
-	    // only pass on lines that aren't comments
-	    if ( strLine[0] != '#' ) {
-		zones.append( new ZoneField( strLine ) );
-	    }
-	}
-	fZone.close();
-    }
 }
 
 void ZoneMap::viewportMousePressEvent( QMouseEvent* event )
@@ -247,9 +144,9 @@ void ZoneMap::viewportMouseReleaseEvent( QMouseEvent* )
     // get the averaged points in case a timeout hasn't occurred,
     // more for "mouse clicks"
     norm.stop();
-    if ( pLast != NULL ) {
-	emit signalTz( pLast->country(), pLast->city() );
-	pLast = NULL;
+    if (m_last.isValid()) {
+	emit signalTz( m_last.id() );
+	m_last = TimeZone();
     }
     tHide->start( 2000, true );
 }
@@ -262,15 +159,15 @@ void ZoneMap::keyPressEvent( QKeyEvent *ke )
 	case Key_Up:
 	case Key_Down: {
 		tHide->stop();
-		if ( !cursor )
+		if ( !m_cursor.isValid() )
 		    slotFindCity( QPoint( contentsWidth(), contentsHeight() ) / 2 );
-		ZoneField *city = findCityNear( cursor, ke->key() );
-		if ( city ) {
-		    cursor = city;
+		TimeZone city = findCityNear( m_cursor, ke->key() );
+		if ( city.isValid() ) {
+		    m_cursor = city;
 		    int tmpx, tmpy;
-		    zoneToWin( cursor->x(), cursor->y(), tmpx, tmpy );
+		    zoneToWin( m_cursor.lon(), m_cursor.lat(), tmpx, tmpy );
 		    ensureVisible( tmpx, tmpy );
-		    showCity( cursor );
+		    showCity( m_cursor );
 		    tHide->start( 3000, true );
 		}
 	    }
@@ -279,25 +176,30 @@ void ZoneMap::keyPressEvent( QKeyEvent *ke )
 	case Key_Space:
 	case Key_Enter:
 	case Key_Return:
-	    if ( cursor ) {
-		emit signalTz( cursor->country(), cursor->city() );
+	    if ( m_cursor.isValid() ) {
+		emit signalTz( m_cursor.id());
 		tHide->start( 0, true );
 	    }
 	    break;
     }
 }
 
-ZoneField *ZoneMap::findCityNear( ZoneField *city, int key )
+const TimeZone ZoneMap::findCityNear( const TimeZone &city, int key )
 {
-    ZoneField *pZone;
-    ZoneField *pClosest = 0;
+    TimeZone curZone, closestZone;
     long ddist = LONG_MAX;
-
-    QListIterator<ZoneField> it( zones );
+    const char *zoneID;
+    QStrList list = TimeZone::ids() ;
+    QStrListIterator it( list );
     for (; it.current(); ++it) {
-	pZone = it.current();
-	long dx = (pZone->x() - city->x())/100;
-	long dy = (pZone->y() - city->y())/100;
+	zoneID = it.current();
+	curZone = TimeZone( zoneID );
+	if ( !curZone.isValid() ){
+	    qDebug("ZoneMap::findCityNear  Invalid zoneID %s", zoneID);
+	    break;
+	}
+	long dy = (curZone.lat() - city.lat())/100;
+	long dx = (curZone.lon() - city.lon())/100;
 	switch ( key ) {
 	    case Key_Right:
 	    case Key_Left:
@@ -307,7 +209,7 @@ ZoneField *ZoneMap::findCityNear( ZoneField *city, int key )
 		    long dist = QABS(dy)*4 + dx;
 		    if ( dist < ddist ) {
 			ddist = dist;
-			pClosest = pZone;
+			closestZone = curZone;
 		    }
 		}
 		break;
@@ -319,14 +221,15 @@ ZoneField *ZoneMap::findCityNear( ZoneField *city, int key )
 		    long dist = QABS(dx)*4 + dy;
 		    if ( dist < ddist ) {
 			ddist = dist;
-			pClosest = pZone;
+			closestZone = curZone;
 		    }
 		}
 		break;
 	}
     }
-
-    return pClosest;
+    
+    closestZone.dump();
+    return closestZone;
 }
 
 void ZoneMap::slotFindCity( const QPoint &pos )
@@ -336,8 +239,8 @@ void ZoneMap::slotFindCity( const QPoint &pos )
     int tmpx, tmpy, x, y;
     long lDistance,
          lClosest;
-    ZoneField *pZone,
-              *pClosest;
+    TimeZone curZone, closestZone;
+    const char *zoneID;
 
     if ( tHide->isActive() ) {
         tHide->stop();
@@ -349,57 +252,48 @@ void ZoneMap::slotFindCity( const QPoint &pos )
     // the only problem is that this is all done with doubles, but I don't know
     // another way to do it at the moment.  Another problem is a linked list is
     // used obviously something indexed would help
-    QListIterator<ZoneField> it( zones );
-    pClosest = 0;
     lClosest = LONG_MAX;
+    QStrList list = TimeZone::ids() ;
+    QStrListIterator it( list );
     for (; it.current(); ++it) {
-	pZone = it.current();
+	zoneID = it.current();
+	curZone = TimeZone( zoneID );
+	if ( !curZone.isValid() ){
+	    qDebug("ZoneMap::slotFindCity  Invalid zoneID %s", zoneID);
+	    break;
+	}
+
 	// use the manhattenLength, a good enough of an appoximation here
-	lDistance = QABS( x - pZone->x() ) + QABS( y - pZone->y() );
+	lDistance = QABS( y - curZone.lat() ) + QABS( x - curZone.lon());
 	// first to zero wins!
 	if ( lDistance < lClosest ) {
-	    lClosest = lDistance;
-	    pClosest = pZone;
+	    lClosest = lDistance;	    
+	    closestZone = curZone;
 	}
     }
 
     // Okay, we found the closest city, but it might still be too far away.
     if ( lClosest <= iTHRESHOLD ) {
-	showCity( pClosest );
-	cursor = pClosest;
+	showCity( closestZone );
+	m_cursor = closestZone;
     }
 }
 
-void ZoneMap::showCity( ZoneField *city )
+void ZoneMap::showCity( const TimeZone &city )
 {
-    if ( pLast == city )
+    if ( m_last == city )
 	return;
-    pLast = city;
-    // we'll use city and country a couple of times, get them to save some
-    // time
-    QString strCity = pLast->city();
-    QString strCountry = pLast->country();
-    // Display the time at this location by setting the environment timezone
-    // getting the current time [there] and then swapping back the variable
-    // so no one notices...
-    QString strSave;
-    char *p = getenv( "TZ" );
-    if ( p ) {
-	strSave = p;
-    }
-    // set the timezone :)
-    setenv( "TZ", strCountry + strCity, true );
-    lblCity->setText( strCity.replace( QRegExp("_"), " ") + "\n" +
-		      TimeString::shortTime( ampm ) );
+    m_last = city;
+    QDateTime cityTime = city.fromUtc(TimeZone::utcDateTime());
+
+    lblCity->setText( city.city().replace( QRegExp("_"), " ") + "\n" +
+		      TimeString::localHM( cityTime.time()));
     lblCity->setMinimumSize( lblCity->sizeHint() );
     lblCity->resize( QMAX(lblCity->sizeHint().width(),80), QMAX(lblCity->sizeHint().height(),40) );
-    // undue our damage...
-    unsetenv( "TZ" );
-    if ( p )
-	setenv( "TZ", strSave, true );
+
     // Now decide where to move the label, x & y can be reused
     int tmpx, tmpy, x, y;
-    zoneToWin( pLast->x(), pLast->y(), tmpx, tmpy );
+    zoneToWin( m_last.lon(), m_last.lat(), tmpx, tmpy );
     contentsToViewport(tmpx, tmpy, x, y);
 
     //
@@ -417,16 +311,16 @@ void ZoneMap::showCity( ZoneField *city )
     }
 
     // draw in the city and the label
-    if ( pRepaint ) {
+    if ( m_repaint.isValid()) {
 	int repx,
 	    repy;
-	zoneToWin( pRepaint->x(), pRepaint->y(), repx, repy );
+	zoneToWin( m_repaint.lon(), m_repaint.lat(), repx, repy );
 	updateContents( repx - iCITYOFFSET, repy - iCITYOFFSET,
 			iCITYSIZE, iCITYSIZE );
     }
     updateContents( tmpx - iCITYOFFSET, tmpy - iCITYOFFSET, iCITYSIZE,
 		    iCITYSIZE );
-    pRepaint = pLast;
+    m_repaint = m_last;
 
     lblCity->move( x, y );
     lblCity->show();
@@ -434,6 +328,14 @@ void ZoneMap::showCity( ZoneField *city )
 
 void ZoneMap::resizeEvent( QResizeEvent *e )
 {
+    //
+    // Disable zooming when resizing.
+    //
+    if (bZoom) {
+	bZoom = FALSE;
+	cmdZoom->setOn(FALSE);
+    }
+
     // keep the zoom button down in the corner
     QSize _size = e->size();
     cmdZoom->move( _size.width() - cmdZoom->width(),
@@ -448,29 +350,20 @@ void ZoneMap::resizeEvent( QResizeEvent *e )
     }
 }
 
-void ZoneMap::showZones( void ) const
-{
-    // go through the zones in the list and just display the values...
-    QListIterator<ZoneField> itZone( zones );
-    for ( itZone.toFirst(); itZone.current(); ++itZone ) {
-	ZoneField *pZone = itZone.current();
-	pZone->showStructure();
-    }
-}
-
 void ZoneMap::drawCities( QPainter *p )
 {
-    int x,
-        y,
-        j;
+    int x,y;
     // draw in the cities
     // for testing only as when you put it
     // on the small screen it looks awful and not to mention useless
     p->setPen( red );
-    QListIterator<ZoneField> itZone( zones );
-    for ( itZone.toFirst(), j = 0; itZone.current(); ++itZone, j++ ) {
-	ZoneField *pZone = itZone.current();
-	zoneToWin( pZone->x(), pZone->y(), x, y );
+    TimeZone curZone;
+    const char *zoneID;
+    QStrListIterator it( TimeZone::ids() );
+    for (; it.current(); ++it) {
+	zoneID = it.current();   
+	curZone = TimeZone( zoneID );
+	zoneToWin( curZone.lat(), curZone.lon(), x, y );
 	if ( x > wImg )
 	    x = x - wImg;
 	p->drawRect( x - iCITYOFFSET, y - iCITYOFFSET, iCITYSIZE, iCITYSIZE);
@@ -566,13 +459,13 @@ void ZoneMap::makeMap( int w, int h )
                                QPixmap::ThresholdDither );
 }
 
-void ZoneMap::drawCity( QPainter *p, const ZoneField *pCity )
+void ZoneMap::drawCity( QPainter *p, const TimeZone &city )
 {
     int x,
         y;
 
     p->setPen( red );
-    zoneToWin( pCity->x(), pCity->y(), x, y );
+    zoneToWin( city.lon(), city.lat(), x, y );
     p->drawRect( x - iCITYOFFSET, y - iCITYOFFSET, iCITYSIZE, iCITYSIZE );
 }
 
@@ -606,8 +499,8 @@ void ZoneMap::drawContents( QPainter *p, int cx, int cy, int cw, int ch )
     }
 
     // Draw that city!
-    if ( pLast )
-	drawCity( p, pLast );
+    if ( m_last.isValid() )
+	drawCity( p, m_last );
 }
 
 void ZoneMap::slotZoom( bool setZoom )
@@ -641,17 +534,11 @@ void ZoneMap::slotUpdate( void )
 void ZoneMap::slotRedraw( void )
 {
     // paint over that pesky city...
-    int x,
-        y;
-    if ( pRepaint ) {
-	pLast = 0;
-	zoneToWin(pRepaint->x(), pRepaint->y(), x, y);
+    int x, y;
+    if ( m_repaint.isValid() ) {
+	m_last = TimeZone();
+	zoneToWin(m_repaint.lon(), m_repaint.lat(), x, y);
 	updateContents( x - iCITYOFFSET, y - iCITYOFFSET, iCITYSIZE, iCITYSIZE);
-        pRepaint = 0;
+        m_repaint = TimeZone();
     }
-}
-
-void ZoneMap::changeClock( bool whichClock )
-{
-    ampm = whichClock;
 }

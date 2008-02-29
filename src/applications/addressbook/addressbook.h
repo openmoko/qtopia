@@ -40,6 +40,7 @@ class Ir;
 class QAction;
 class CategorySelect;
 class QVBox;
+class QPopupMenu;
 
 class AbSettings : public QDialog
 {
@@ -84,6 +85,8 @@ private slots:
     void slotViewDuplicate();
     void slotPersonalView();
     void editPersonal();
+    void viewNext();
+    void viewPrevious();
     void markCurrentAsPersonal();
     void writeMail();
     void slotBeam();
@@ -94,6 +97,7 @@ private slots:
     void findNotFound();
     void findFound();
     void slotSetCategory( int );
+    void catChanged();
     void updateIcons();
     void contactFilterSelected( int idx );
     void selectAll();
@@ -107,6 +111,7 @@ private:
     AbLabel *abView();
     void showView();
     void deleteContacts(QValueList<QUuid> &);
+    void setViewOptions(bool enabled);
 
     ContactXmlIO contacts;
     Categories cats;
@@ -121,8 +126,9 @@ private:
 
     QPEToolBar *searchBar;
     QLineEdit *searchEdit;
+    QPopupMenu *viewmenu;
 
-    QAction *actionNew, *actionEdit, *actionTrash, *actionFind,
+    QAction *actionNew, *actionList, *actionEdit, *actionTrash, *actionFind,
 	*actionBeam, *actionPersonal, *actionMail, *actionDuplicate,
 	*actionSetPersonal;
 

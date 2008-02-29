@@ -231,7 +231,7 @@ AudioDevice::AudioDevice( unsigned int f, unsigned int chs, unsigned int bps ) {
 #ifdef KEEP_DEVICE_OPEN
     if ( AudioDevicePrivate::dspFd == 0 ) {
 #endif
-    if ( ( d->handle = ::open( "/dev/dsp", O_WRONLY ) ) < 0 ) {
+    if ( ( d->handle = ::open( "/dev/dsp", O_WRONLY | O_NONBLOCK ) ) < 0 ) {
 	qDebug( "error opening audio device /dev/dsp, sending data to /dev/null instead" );
 	d->handle = ::open( "/dev/null", O_WRONLY );
     }
@@ -280,7 +280,9 @@ AudioDevice::~AudioDevice() {
 # endif
     delete [] d->unwrittenBuffer;
     delete d;
-    delete d->notifier;
+    // TODO - the following line causes a SIGSEGV for
+    // a currently unknown reason - Rhys.
+    //delete d->notifier;
 #endif
 }
 

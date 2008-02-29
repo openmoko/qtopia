@@ -263,20 +263,24 @@ void Type1FractionInputWidget::fractionClicked () {
     systemEngine->pushChar('/');
 }
 void Type1FractionInputWidget::addClicked () {
-qDebug("not implemented, see stdinputwidgets.cpp");
-//        systemEngine->pushInstruction(new AddFractionFraction());
+#ifdef ENABLE_FRACTION
+        systemEngine->pushInstruction(new AddFractionFraction());
+#endif
 }
 void Type1FractionInputWidget::subClicked () {
-qDebug("not implemented, see stdinputwidgets.cpp");
-//        systemEngine->pushInstruction(new SubtractFractionFraction());
+#ifdef ENABLE_FRACTION
+        systemEngine->pushInstruction(new SubtractFractionFraction());
+#endif
 }
 void Type1FractionInputWidget::mulClicked () {
-qDebug("not implemented, see stdinputwidgets.cpp");
-//        systemEngine->pushInstruction(new MultiplyFractionFraction());
+#ifdef ENABLE_FRACTION
+        systemEngine->pushInstruction(new MultiplyFractionFraction());
+#endif
 }
 void Type1FractionInputWidget::divClicked () {
-qDebug("not implemented, see stdinputwidgets.cpp");
-//        systemEngine->pushInstruction(new DivideFractionFraction());
+#ifdef ENABLE_FRACTION
+        systemEngine->pushInstruction(new DivideFractionFraction());
+#endif
 }
 
 // TYPE 2

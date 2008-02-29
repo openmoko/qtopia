@@ -70,19 +70,30 @@ public:
     CategorySelect( QWidget *parent = 0, const char *name = 0, int width = 0 );
 
     CategorySelect( const QArray<int> &vlCats, const QString &appName,
-		    QWidget *parent = 0, const char *name = 0, 
+		    QWidget *parent = 0, const char *name = 0,
 		    int width = 0);
     CategorySelect( const QArray<int> &vlCats, const QString &appName,
 		    const QString &visibleName, QWidget *parent = 0,
 		    const char *name = 0 , int width = 0);
+    CategorySelect( const QArray<int> &vlCats, const QString &appName,
+		    const QString &visibleName, bool allCategories, QWidget *parent = 0,
+		    const char *name = 0 , int width = 0); // libqtopia
 
     ~CategorySelect();
 
+    enum SelectorWidget { ComboBox, ListView };
+    SelectorWidget widgetType() const; // libqtopia
+
     bool containsCategory( const QArray<int>& categories ); // libqtopia
 
-    const QArray<int> &currentCategories() const;
-    int currentCategory() const;
+    // these were added for find dialog.
+    void setRemoveCategoryEdit( bool remove );
+    void setAllCategories( bool add );
     void setCurrentCategory( int newCatUid );
+    int currentCategory() const;
+
+    const QArray<int> &currentCategories() const;
+
     // pretty much if you don't set it the constructor, you need to
     // call it here ASAP!
     // however this call is depreciated...
@@ -90,13 +101,11 @@ public:
     QString setCategories( const QArray<int> &vlCats, const QString &appName );
     QString setCategories( const QArray<int> &vlCats, const QString &appName,
 			const QString &visibleName );
-    // these were added for find dialog.
-    void setRemoveCategoryEdit( bool remove );
-    void setAllCategories( bool add );
 
     void setFixedWidth(int width);
 signals:
     void signalSelected( int );
+    void editCategoriesClicked();
 
 private slots:
     void slotDialog();
@@ -106,7 +115,7 @@ public slots:
     void slotNewCat( int id );
 
 private:
-    void init(int width=0);
+    void init(int width=0, bool usingAll=FALSE );
     QString mStrAppName;
     CategoryCombo *cmbCat;
     QToolButton *cmdCat;

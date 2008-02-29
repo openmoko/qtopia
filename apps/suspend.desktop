@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=suspend
+Icon=Shutdown
+Name=Suspend
+Name[ja]=???
+CanFastload=0

@@ -800,7 +800,7 @@ static void synth_filter(MPADecodeContext *s1,
 #if FRAC_BITS <= 15
     int sum;
 #else
-    INT64 sum;
+    volatile INT64 sum;
 #endif
 
     dct32(tmp, sb_samples);

@@ -2,7 +2,8 @@ Files: bin/clock apps/Applications/clock.desktop services/TimeMonitor/clock
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Clock and stop-watch

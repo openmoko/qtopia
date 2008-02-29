@@ -40,19 +40,34 @@ public:
     ~BaseFractionInstructionDescription(){};
 };
 
-// Conversions
-class QTOPIA_EXPORT iConvertFractionFraction:public BaseFractionInstruction {
+// Factory
+class QTOPIA_EXPORT iFractionFactory:public BaseFractionInstruction {
 public:
-    iConvertFractionFraction():BaseFractionInstruction(){};
-    ~iConvertFractionFraction(){};
+    iFractionFactory():BaseFractionInstruction(){};
+    ~iFractionFactory(){};
     Data *eval(Data *);
 };
-class QTOPIA_EXPORT ConvertFractionFraction:public BaseFractionInstructionDescription {
-public:
-    ConvertFractionFraction();
-    ~ConvertFractionFraction(){};
-    Instruction *getInstruction(){return new iConvertFractionFraction();};
+class QTOPIA_EXPORT FractionFactory:public BaseFractionInstructionDescription {
+public:FractionFactory();
+    ~FractionFactory(){};
+    Instruction *getInstruction(){return new iFractionFactory();};
 };
+
+// Copy
+class QTOPIA_EXPORT iFractionCopy:public BaseFractionInstruction {
+public:
+    iFractionCopy():BaseFractionInstruction(){};
+    ~iFractionCopy(){};
+    Data *eval(Data *);
+};
+class QTOPIA_EXPORT FractionCopy:public BaseFractionInstructionDescription {
+public:
+    FractionCopy();
+    ~FractionCopy(){};
+    Instruction *getInstruction(){return new iFractionCopy();};
+};
+
+// Conversions
 class QTOPIA_EXPORT iConvertDoubleFraction:public BaseFractionInstruction {
 public:
     iConvertDoubleFraction():BaseFractionInstruction(){};

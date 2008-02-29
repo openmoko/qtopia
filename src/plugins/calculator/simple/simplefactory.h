@@ -27,7 +27,7 @@
 class QTOPIA_PLUGIN_EXPORT SimpleInterface : public CalculatorInterface
 {
 public:
-    SimpleInterface():CalculatorInterface(){input = 0;};
+    SimpleInterface():CalculatorInterface(){};
     virtual ~SimpleInterface(){};
 
 #ifndef QT_NO_COMPONENT
@@ -39,7 +39,6 @@ public:
     const char * pluginName() { return "Simple"; };
 
 private:
-    FormSimple *input;
     ulong ref;
 };
 

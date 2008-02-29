@@ -918,23 +918,32 @@ void TEWidget::pasteClipboard( )
   emitSelection();
 }
 
+static bool weSetSelection = FALSE;
+
 void TEWidget::setSelection(const QString& t)
 {
 #ifndef QT_NO_CLIPBOARD
+  // this disconnection doesn't work at we receive the event after we reconnect
+  
   // Disconnect signal while WE set the clipboard
-  QObject *cb = QApplication::clipboard();
-  QObject::disconnect( cb, SIGNAL(dataChanged()),
-                     this, SLOT(onClearSelection()) );
+//  QObject *cb = QApplication::clipboard();
+//  QObject::disconnect( cb, SIGNAL(dataChanged()),
+//                     this, SLOT(onClearSelection()) );
 
+  weSetSelection = TRUE;
   QApplication::clipboard()->setText(t);
 
-  QObject::connect( cb, SIGNAL(dataChanged()),
-                     this, SLOT(onClearSelection()) );
+//  QObject::connect( cb, SIGNAL(dataChanged()),
+//                     this, SLOT(onClearSelection()) );
 #endif
 }
 
 void TEWidget::onClearSelection()
 {
+  if ( weSetSelection ) {
+    weSetSelection = FALSE;
+    return;
+  }
   emit clearSelectionSignal();
 }
 

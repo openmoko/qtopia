@@ -11,13 +11,16 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>230</width>
+            <width>222</width>
             <height>264</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Rotation Settings</string>
+        <string>Rotation</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
     </property>
     <grid>
         <property stdset="1">
@@ -208,7 +211,7 @@
             </property>
             <property stdset="1">
                 <name>text</name>
-                <string>&lt;p&gt;The chosen rotation will only affect new applications.</string>
+                <string>&lt;p&gt;The chosen rotation will take affect immediately.</string>
             </property>
             <property stdset="1">
                 <name>alignment</name>

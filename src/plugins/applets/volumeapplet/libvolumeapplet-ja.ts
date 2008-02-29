@@ -3,7 +3,7 @@
     <name>VolumeControl</name>
     <message>
         <source>Mute</source>
-        <translation type="unfinished"></translation>
+        <translation>ミュート</translation>
     </message>
 </context>
 </TS>

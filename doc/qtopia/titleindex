@@ -81,6 +81,8 @@ QJisCodec Class | qjiscodec.html
 QJisCodec Member List | qjiscodec-members.html
 QJpUnicodeConv Class | qjpunicodeconv.html
 QJpUnicodeConv Member List | qjpunicodeconv-members.html
+QLibrary Class | qlibrary.html
+QLibrary Member List | qlibrary-members.html
 QObex Class | qobex.html
 QObex Member List | qobex-members.html
 QPEApplication Class | qpeapplication.html
@@ -93,6 +95,8 @@ QPEToolBar Class | qpetoolbar.html
 QPEToolBar Member List | qpetoolbar-members.html
 QSjisCodec Class | qsjiscodec.html
 QSjisCodec Member List | qsjiscodec-members.html
+QUuid Class | quuid.html
+QUuid Member List | quuid-members.html
 Qtopia | index.html
 Qtopia - All Functions | functions.html
 Qtopia - Header Files | headers.html
@@ -111,8 +115,6 @@ StyleInterface Class | styleinterface.html
 StyleInterface Member List | styleinterface-members.html
 TaskbarAppletInterface Class | taskbarappletinterface.html
 TaskbarAppletInterface Member List | taskbarappletinterface-members.html
-TaskbarNamedAppletInterface Class | taskbarnamedappletinterface.html
-TaskbarNamedAppletInterface Member List | taskbarnamedappletinterface-members.html
 TextCodecInterface Class | textcodecinterface.html
 TextCodecInterface Member List | textcodecinterface-members.html
 TodayPluginInterface Class | todayplugininterface.html
@@ -125,6 +127,7 @@ WindowDecorationInterface Class | windowdecorationinterface.html
 WindowDecorationInterface Member List | windowdecorationinterface-members.html
 XmlHandler Class | xmlhandler.html
 XmlHandler Member List | xmlhandler-members.html
+addressbookaccess.h Include File | addressbookaccess-h.html
 alarmserver.h Include File | alarmserver-h.html
 applnk.h Include File | applnk-h.html
 atd Class | atd.html
@@ -132,6 +135,9 @@ atd Member List | atd-members.html
 categories.h Include File | categories-h.html
 categorymenu.h Include File | categorymenu-h.html
 config.h Include File | config-h.html
+contact.h Include File | contact-h.html
+datebookaccess.h Include File | datebookaccess-h.html
+event.h Include File | event-h.html
 filemanager.h Include File | filemanager-h.html
 fileselector.h Include File | fileselector-h.html
 fontdatabase.h Include File | fontdatabase-h.html
@@ -144,18 +150,23 @@ mediarecorderplugininterface.h Include File | mediarecorderplugininterface-h.htm
 menubutton.h Include File | menubutton-h.html
 mimetype.h Include File | mimetype-h.html
 networkinterface.h Include File | networkinterface-h.html
+pimrecord.h Include File | pimrecord-h.html
 qcopenvelope_qws.h Include File | qcopenvelope_qws-h.html
 qdawg.h Include File | qdawg-h.html
+qlibrary.h Include File | qlibrary-h.html
 qpeapplication.h Include File | qpeapplication-h.html
 qpemenubar.h Include File | qpemenubar-h.html
 qpetoolbar.h Include File | qpetoolbar-h.html
+quuid.h Include File | quuid-h.html
 resource.h Include File | resource-h.html
 sound.h Include File | sound-h.html
 storage.h Include File | storage-h.html
 styleinterface.h Include File | styleinterface-h.html
+task.h Include File | task-h.html
 taskbarappletinterface.h Include File | taskbarappletinterface-h.html
 textcodecinterface.h Include File | textcodecinterface-h.html
 todayplugininterface.h Include File | todayplugininterface-h.html
+todoaccess.h Include File | todoaccess-h.html
 windowdecorationinterface.h Include File | windowdecorationinterface-h.html
 xmlreader.h Include File | xmlreader-h.html
  | devices.html
@@ -170,5 +181,7 @@ xmlreader.h Include File | xmlreader-h.html
  | porting.html
  | qcop.html
  | release-1.6beta2.html
+ | release-1.6beta3.html
+ | release-1.6beta4.html
  | services.html
  | start.html

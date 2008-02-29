@@ -4,5 +4,7 @@ Exec=qipkg
 MimeType=application/ipkg
 Icon=Ipkg
 Name=Software Packages
+Name[ja]=???
 Name[hu]=Csomag- kezelõ
 Name[de]=Software
+CanFastload=0

@@ -47,9 +47,9 @@ public:
     Occurrence find(const QUuid &u, const QDate &, bool *ok = 0) const;
     PimEvent find(const QUuid &u, bool *ok = 0) const;
 
-    void addEvent( const PimEvent &ev );
+    QUuid addEvent( const PimEvent &ev );
     void addException(const QDate &date, const PimEvent & );
-    void addException(const QDate &date, const PimEvent &, const PimEvent &);
+    QUuid addException(const QDate &date, const PimEvent &, const PimEvent &);
     void removeExceptions(const PimEvent &ev);
     void removeEvent( const PimEvent &uid );
 

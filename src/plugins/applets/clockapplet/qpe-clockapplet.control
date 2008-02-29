@@ -1,8 +1,9 @@
-Files: plugins/applets/libclockapplet.so*
+Files: plugins/applets/libclockapplet.so* plugins/applets/clockapplet.desktop
 Priority: optional
 Section: qpe/taskbar
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Clock applet

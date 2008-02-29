@@ -21,9 +21,9 @@
 
 #include "datebookdb.h"
 
-PeriodView::PeriodView( DateBookTable *datedb, bool ct, bool stm, 
+PeriodView::PeriodView( DateBookTable *datedb, bool stm, 
 	    QWidget *parent, const char *name)
-: QWidget(parent, name), db(datedb), cType(ct), bOnMonday(stm)
+: QWidget(parent, name), db(datedb), bOnMonday(stm)
 {
     sHour = 8;
     cDate = QDate::currentDate();
@@ -42,11 +42,6 @@ PimEvent PeriodView::currentEvent() const
 void PeriodView::selectDate(const QDate &d)
 {
     cDate = d;
-}
-
-void PeriodView::setTwelveHour( bool ct )
-{
-    cType = ct;
 }
 
 void PeriodView::setStartOnMonday( bool b )

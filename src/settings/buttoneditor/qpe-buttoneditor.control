@@ -2,7 +2,8 @@ Files: bin/buttoneditor apps/Settings/Buttons.desktop pics/ButtonEditor.png
 Priority: optional
 Section: qpe/settings
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Hardware buttons editor

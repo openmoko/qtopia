@@ -2,10 +2,6 @@
 <context>
     <name>ButtonEditorDialog</name>
     <message>
-        <source>Configure Hardware Buttons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
@@ -15,6 +11,10 @@
     </message>
     <message>
         <source>No buttons!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Buttons</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

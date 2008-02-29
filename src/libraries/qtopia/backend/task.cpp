@@ -193,7 +193,7 @@ QMap<int, QString> Task::toMap() const
 */
 void Task::save( QString& buf ) const
 {
-    buf += " Completed=\"";
+    buf += " Completed=\""; // No tr
     //    qDebug( "writing %d", complete );
     buf += QString::number( (int)mCompleted );
     buf += "\"";
@@ -201,14 +201,14 @@ void Task::save( QString& buf ) const
     //    qDebug( "writing %d",  );
     buf += QString::number( (int)mDue );
     buf += "\"";
-    buf += " Priority=\"";
+    buf += " Priority=\""; // No tr
     //    qDebug ("writing %d", prior );
     buf += QString::number( mPriority );
     buf += "\"";
-    buf += " Categories=\"";
+    buf += " Categories=\""; // No tr
     buf += Qtopia::Record::idsToString( categories() );
     buf += "\"";
-    buf += " Description=\"";
+    buf += " Description=\""; // No tr
     //    qDebug( "writing note %s", note.latin1() );
     buf += Qtopia::escapeString( mDesc );
     buf += "\"";

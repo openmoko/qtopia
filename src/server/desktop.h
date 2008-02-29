@@ -73,6 +73,9 @@ public:
     DesktopApplication( int& argc, char **argv, Type t );
     ~DesktopApplication();
 
+    static bool doRestart;
+    static bool allowRestart;
+
 signals:
     void home();
     void launch();
@@ -94,6 +97,8 @@ protected:
 protected slots:
     void shutdown(ShutdownImpl::Type);
     void psTimeout();
+    void showSafeMode();
+    void clearSafeMode();
 
 private:
     DesktopPowerAlerter *pa;

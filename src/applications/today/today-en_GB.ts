@@ -9,6 +9,27 @@
         <source>Displays todays&apos; activities.  Configure the view by tapping the Today icon.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Edit Today View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No plugins found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No plugins selected for display.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Click &lt;a href=&quot;TodayPluginEdit&quot;&gt;here&lt;/a&gt; to configure display.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 settings</source>
+        <comment>eg. Calendar settings</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TodayOptions</name>

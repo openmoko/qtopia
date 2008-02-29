@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>221</width>
+            <width>217</width>
             <height>291</height>
         </rect>
     </property>
@@ -40,6 +40,10 @@
                 <name>name</name>
                 <cstring>description</cstring>
             </property>
+            <property stdset="1">
+                <name>textFormat</name>
+                <enum>RichText</enum>
+            </property>
         </widget>
         <widget>
             <class>QLayoutWidget</class>
@@ -60,22 +64,11 @@
                     <class>QToolButton</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>install</cstring>
+                        <cstring>choose</cstring>
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string>Install</string>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QToolButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>remove</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Remove</string>
+                        <string>Select</string>
                     </property>
                 </widget>
                 <widget>
@@ -93,4 +86,18 @@
         </widget>
     </vbox>
 </widget>
+<connections>
+    <connection>
+        <sender>choose</sender>
+        <signal>clicked()</signal>
+        <receiver>Form7</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>ignore</sender>
+        <signal>clicked()</signal>
+        <receiver>Form7</receiver>
+        <slot>reject()</slot>
+    </connection>
+</connections>
 </UI>

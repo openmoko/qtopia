@@ -101,7 +101,7 @@ void drawText( QWidget *w, TestItem *ti )
 {
     QPainter p( w );
     p.setPen( Qt::white );
-    QString text( "The quick red fox jumps over the lazy brown dog." );
+    QString text( "The quick red fox jumps over the lazy brown dog." ); // No tr
     ti->begin();
     for ( int i = 0; i < ti->iterations(); i++ ) {
 	p.drawText( rand() % 100, rand() % 300, text );
@@ -118,10 +118,10 @@ struct {
 }
 perfTests[] =
 {
-    { 0, "Fill Rect", 1000, &fillRect },
-    { 1, "Bit Blt", 1000, &bitBlt },
-    { 2, "Alpha Blt", 100, &alphaBlt },
-    { 3, "Draw Text", 5000, &drawText },
+    { 0, "Fill Rect", 1000, &fillRect }, // No tr
+    { 1, "Bit Blt", 1000, &bitBlt }, // No tr
+    { 2, "Alpha Blt", 100, &alphaBlt }, // No tr
+    { 3, "Draw Text", 5000, &drawText }, // No tr
     {-1, "", 0, 0 }
 };
 
@@ -170,7 +170,7 @@ void PerformanceTest::doTest()
 	}
 	i++;
     }
-    resultsEdit->append( QString("-> Total time: %1ms\n").arg(totalTime) );
-    testButton->setText( "Test" );
+    resultsEdit->append( QString("-> Total time: %1ms\n").arg(totalTime) ); // No tr
+    testButton->setText( "Test" ); // No tr
     testButton->setEnabled( TRUE );
 }

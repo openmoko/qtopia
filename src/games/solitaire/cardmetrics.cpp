@@ -96,7 +96,7 @@ QPixmap *CardMetrics::cardsSuitsUpsideDown = NULL;
 QPixmap *CardMetrics::cardsSuitsSmallUpsideDown = NULL;
 
 
-static const char *cardSizePaths[] = { "micro", "small", "normal", "large" };
+static const char *cardSizePaths[] = { "micro", "small", "normal", "large" }; // No tr
 
 /*
 void CardMetrics::drawSuitShape( QPainter &p, int x, int y, int suit, bool inverted ) {
@@ -148,7 +148,7 @@ void CardMetrics::loadMetrics( int width, int ) {
 	cardsSpade->setMask( *tCardsSpade );
 	delete tCardsSpade;
 
-	QBitmap *tCardsChars = new QBitmap( Resource::loadBitmap( cardImagePath + "ranks" ) );
+	QBitmap *tCardsChars = new QBitmap( Resource::loadBitmap( cardImagePath + "ranks" ) ); // No tr
 	QBitmap *tCardsCharsUpsideDown = Create180RotatedBitmap( tCardsChars );
 	cardsChars = new QPixmap( *tCardsChars );
 	cardsChars->setMask( *tCardsChars );
@@ -157,7 +157,7 @@ void CardMetrics::loadMetrics( int width, int ) {
 	delete tCardsChars;
 	delete tCardsCharsUpsideDown;
 
-	QBitmap *tCardsSuitsSmall = new QBitmap( Resource::loadBitmap( cardImagePath + "suits01" ) );
+	QBitmap *tCardsSuitsSmall = new QBitmap( Resource::loadBitmap( cardImagePath + "suits01" ) ); // No tr
 	QBitmap *tCardsSuitsSmallUpsideDown = Create180RotatedBitmap( tCardsSuitsSmall );
 	cardsSuitsSmall = new QPixmap( *tCardsSuitsSmall );
 	cardsSuitsSmall->setMask( *tCardsSuitsSmall );
@@ -166,7 +166,7 @@ void CardMetrics::loadMetrics( int width, int ) {
 	delete tCardsSuitsSmall;
 	delete tCardsSuitsSmallUpsideDown;
 
-	QBitmap *tCardsSuits = new QBitmap( Resource::loadBitmap( cardImagePath + "suits02" ) );
+	QBitmap *tCardsSuits = new QBitmap( Resource::loadBitmap( cardImagePath + "suits02" ) ); // No tr
 	QBitmap *tCardsSuitsUpsideDown = Create180RotatedBitmap( tCardsSuits );
 	cardsSuits = new QPixmap( *tCardsSuits );
 	cardsSuits->setMask( *tCardsSuits );
@@ -187,6 +187,21 @@ void CardMetrics::loadMetrics( int width, int ) {
 	spw = cardsSpade->width(); 
 	sph = cardsSpade->height();
 
+	cardsFaces->setOptimization( QPixmap::BestOptim );
+	cardsBacks->setOptimization( QPixmap::BestOptim );
+	cardsJoker->setOptimization( QPixmap::BestOptim );
+
+	cardsPictures->setOptimization( QPixmap::BestOptim );
+	cardsPicturesUpsideDown->setOptimization( QPixmap::BestOptim );
+
+	cardsChars->setOptimization( QPixmap::BestOptim );
+	cardsCharsUpsideDown->setOptimization( QPixmap::BestOptim );
+
+	cardsSuitsSmall->setOptimization( QPixmap::BestOptim );
+	cardsSuitsSmallUpsideDown->setOptimization( QPixmap::BestOptim );
+
+	cardsSuits->setOptimization( QPixmap::BestOptim );
+	cardsSuitsUpsideDown->setOptimization( QPixmap::BestOptim );
     }
  
     int totalWidth = 7 * w + 6 * g;

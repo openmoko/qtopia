@@ -24,11 +24,20 @@
 #include <qcheckbox.h>
 #include <qradiobutton.h>
 #include <qbuttongroup.h>
+#include <qcombobox.h>
+
+#define ROTATION_CLOCKWISE	    0
+#define ROTATION_COUNTERCLOCKWISE   1
 
 SettingsDialog::SettingsDialog( QWidget *parent, const char *name, bool modal, WFlags f )
     : SettingsDialogBase( parent, name, modal, f )
 {
     connect( delaySlider, SIGNAL(valueChanged(int)), this, SLOT(delayChanged(int)) );
+
+    rotateComboBox->clear();
+    rotateComboBox->insertItem("Clockwise", ROTATION_CLOCKWISE);
+    rotateComboBox->insertItem("Counter-clockwise",
+	ROTATION_COUNTERCLOCKWISE);
 }
 
 void SettingsDialog::setDelay( int d )
@@ -70,7 +79,7 @@ bool SettingsDialog::reverse() const
 void SettingsDialog::setRotate(bool r)
 {
     rotateCheck->setChecked(r);
-    clockwiseCheck->setEnabled( r );
+    rotateComboBox->setEnabled( r );
 }
 
 bool SettingsDialog::rotate() const
@@ -80,12 +89,13 @@ bool SettingsDialog::rotate() const
 
 void SettingsDialog::setClockwise(bool r)
 {
-    clockwiseCheck->setChecked(r);
+    rotateComboBox->setCurrentItem(
+	r == TRUE ? ROTATION_CLOCKWISE : ROTATION_COUNTERCLOCKWISE);
 }
 
 bool SettingsDialog::clockwise() const
 {
-    return clockwiseCheck->isChecked();
+    return rotateComboBox->currentItem() == ROTATION_CLOCKWISE;
 }
 
 
@@ -97,4 +107,14 @@ void SettingsDialog::setFastLoad(bool f)
 bool SettingsDialog::fastLoad() const
 {
     return fastLoadCheck->isChecked();
+}
+
+void SettingsDialog::setSmallScale(bool s)
+{
+    smallScaleCheck->setChecked(s);
+}
+
+bool SettingsDialog::smallScale() const
+{
+    return smallScaleCheck->isChecked();
 }

@@ -18,8 +18,8 @@
 **
 **********************************************************************/
 
-#ifndef LNKPROPERTIES_H
-#define LNKPROPERTIES_H
+#ifndef DOCPROPERTIES_H
+#define DOCPROPERTIES_H
 
 #include <qtopia/qpeglobal.h>
 
@@ -32,35 +32,16 @@
 class AppLnk;
 class QListViewItem;
 class DocLnk;
+class FileSystem;
+class StorageInfo;
 
 class DocPropertiesWidgetPrivate;
-
-class QTOPIA_EXPORT LocationCombo : public QComboBox
-{
-    Q_OBJECT
-public:
-    LocationCombo( AppLnk * lnk, QWidget *parent );
-
-    QString pathName() const;
-    
-    bool isChanged() const;
-signals:
-    void newPath( const QString& );
-    //public slots:    
-    //    void apply();
-private:
-    QStringList locations;
-    int currentLocation;
-    
-    
-};
-
 
 class QTOPIA_EXPORT DocPropertiesWidget : public QWidget
 {
     Q_OBJECT
 public:
-    DocPropertiesWidget( AppLnk* lnk, QWidget* parent = 0 );
+    DocPropertiesWidget( AppLnk* lnk, QWidget* parent = 0, const char *name=0 );
     ~DocPropertiesWidget();
 
 public slots:
@@ -92,7 +73,7 @@ class QTOPIA_EXPORT DocPropertiesDialog : public QDialog
     Q_OBJECT
 
 public:
-    DocPropertiesDialog( AppLnk* lnk, QWidget* parent = 0 );
+    DocPropertiesDialog( AppLnk* lnk, QWidget* parent = 0, const char *name=0 );
     ~DocPropertiesDialog();
 
     void done(int);
@@ -103,4 +84,4 @@ private:
 };
 
 #endif // QWS
-#endif // LNKPROPERTIES_H
+#endif // DOCPROPERTIES_H

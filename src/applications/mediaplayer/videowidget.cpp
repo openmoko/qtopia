@@ -40,12 +40,12 @@
 
 // Layout information for the videoButtons (and if it is a toggle button or not)
 MediaButton videoButtons[] = {
-    { FALSE, FALSE, FALSE, FALSE, "previous",   PreviousButton   },
-    { FALSE, FALSE, FALSE, FALSE, "backward",   BackwardButton   },
-    {  TRUE, FALSE, FALSE, FALSE, "play",       PlayButton       },
-    { FALSE, FALSE, FALSE, FALSE, "forward",    ForwardButton    },
-    { FALSE, FALSE, FALSE, FALSE, "next",       NextButton       },
-    {  TRUE, FALSE, FALSE, FALSE, "loop",       LoopButton       },
+    { FALSE, FALSE, FALSE, FALSE, "previous",   PreviousButton   }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "backward",   BackwardButton   }, // No tr
+    {  TRUE, FALSE, FALSE, FALSE, "play",       PlayButton       }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "forward",    ForwardButton    }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "next",       NextButton       }, // No tr
+    {  TRUE, FALSE, FALSE, FALSE, "loop",       LoopButton       }, // No tr
     // {  TRUE, FALSE, FALSE, FALSE, "fullscreen", FullscreenButton },
 };
 
@@ -127,7 +127,7 @@ void VideoWidget::setNextMode()
 
 
 VideoWidget::VideoWidget(QWidget* parent, const QString& skin, const char* name ) :
-    ControlWidgetBase( parent, skin, "video", name ), 
+    ControlWidgetBase( parent, skin, "video", name ),  // No tr
     cornerButton( this ), cornerMenu( 0 ), screenMode( InvalidMode ), videoOutput( this )
 {
     setButtonData( videoButtons, sizeof(videoButtons)/sizeof(MediaButton) );
@@ -229,6 +229,8 @@ void VideoWidget::setView( View view )
     if ( view == VideoView ) {
 	if ( mediaPlayerState->fullscreen() )
 	    screenMode = Fullscreen;
+	else if ( screenMode == Fullscreen )
+	    screenMode = Normal;
 	makeVisible();
     } else {
 	videoOutput.hide();
@@ -244,12 +246,14 @@ void VideoWidget::makeVisible()
     if ( screenMode == Fullscreen ) {
 	videoOutput.reparent( 0, QPoint( 0, 0 ) );
 	videoOutput.resize( qApp->desktop()->size() );
+	videoOutput.setCursor( QCursor( blankCursor ) );
 	videoOutput.showFullScreen();
     } else {
 	mainDocumentWindow->raiseWidget( this );
 	updateVideoOutputGeometry();
 	videoOutput.reparent( this, innerMovieArea.topLeft() );
 	videoOutput.resize( innerMovieArea.size() );
+	videoOutput.unsetCursor();
 	videoOutput.show();
     }
     qApp->processEvents();
@@ -533,6 +537,9 @@ bool VideoOutput::playVideo()
 
     result = mediaPlayerState->decoder()->videoReadScaledFrame( fb->jumpTable(),
 		    decodeX, decodeY, decodeWidth, decodeHeight, scaleWidth, scaleHeight, format, 0) == 0;
+
+    // ### I think I found a case which is broken, screenRotated=FALSE and rotateMovie90=TRUE and rotateFullscreen90=FALSE and useDirectFrameBuffer=FALSE, image is rotated 180
+    // and when screenRotated=TRUE for this case, it can crash
 
     if ( result ) {
 	if ( !useDirectFrameBuffer ) {

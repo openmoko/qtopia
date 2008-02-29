@@ -26,7 +26,7 @@
 #include <qtopia/categoryselect.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/qpedialog.h>
-#include <qtopia/datepicker.h>
+#include <qtopia/datetimeedit.h>
 
 #include <qcombobox.h>
 #include <qlabel.h>
@@ -41,6 +41,11 @@
 #include <qvbox.h>
 #include <qtabwidget.h>
 #include <qregexp.h>
+#include <qwhatsthis.h>
+
+#ifdef QTOPIA_DESKTOP
+#include <qtextedit.h>
+#endif
 
 // Make QScrollView in AutoOneFit mode use the minimum horizontal size
 // instead of the sizeHint() so that the widgets fit horizontally.
@@ -334,8 +339,9 @@ void FileAsCombo::reload()
     curNumGroupChoices = -1;
     setEditText( "" );
     autoUpdate();
-    userChanged( e->ent.fileAs() );
     reloading = FALSE;
+    userChanged( e->ent.fileAs() );
+    autoUpdate();
 }
 
 
@@ -344,11 +350,17 @@ AbEditor::AbEditor( QWidget *parent, const char *name, WFlags fl)
 {
     fileAsCombo = 0;
     init();
-    resize( 400, 425 );
+    resize( 400, 500 );
+    setCaption( tr("Edit Contact Details") );
 }
 
 AbEditor::~AbEditor()
 {
+}
+
+void AbEditor::setCategory(int id)
+{
+    cmbCat->setCurrentCategory( id );
 }
 
 void AbEditor::init()
@@ -364,14 +376,11 @@ void AbEditor::init()
     personalTabKeys.append( PimContact::LastName );
     personalTabKeys.append( PimContact::Suffix );
     personalTabKeys.append( PimContact::Pronunciation );
+    personalTabKeys.append( PimContact::Nickname );
+    personalTabKeys.append( PimContact::FileAs );
     personalTabKeys.append( PimContact::Categories );
     personalTabKeys.append( PimContact::Emails );
-    personalTabKeys.append( PimContact::FileAs );
     personalTabKeys.append( PimContact::Birthday );
-    personalTabKeys.append( PimContact::Anniversary );
-    personalTabKeys.append( PimContact::Nickname );
-    personalTabKeys.append( PimContact::Spouse );
-    personalTabKeys.append( PimContact::Children );
     personalTabKeys.append( PimContact::Gender );
 
     // business tab keys
@@ -398,6 +407,9 @@ void AbEditor::init()
 
     // home tab keys
     QValueList<int> homeTabKeys;
+    homeTabKeys.append( PimContact::Spouse );
+    homeTabKeys.append( PimContact::Anniversary );
+    homeTabKeys.append( PimContact::Children );
     homeTabKeys.append( PimContact::HomePhone );
     homeTabKeys.append( PimContact::HomeFax );
     homeTabKeys.append( PimContact::HomeMobile );
@@ -432,11 +444,9 @@ void AbEditor::init()
     connect( tabs, SIGNAL( currentChanged( QWidget *) ), SLOT( tabClicked(QWidget *) ) );
 
     QVBoxLayout *vbSummary = new QVBoxLayout( summaryTab, 5, 5 );
-    summary = new QLabel( summaryTab );
-    summary->setAlignment( Qt::AlignTop );
+    summary = new QTextEdit( summaryTab );
+    summary->setReadOnly( TRUE );
     vbSummary->addWidget( summary );
-    vbSummary->addStretch();
-
 #else
     summaryTab = 0;
     summary = 0;
@@ -471,16 +481,29 @@ void AbEditor::init()
     bottomBox->addWidget( cancelButton );
 #endif
 
+    QWhatsThis::add(lineEdits[PimContact::Pronunciation],
+	tr("Describes the spoken name phonetically."));
+    QWhatsThis::add(lineEdits[PimContact::Spouse],
+	tr("e.g. Husband or Wife."));
+    QWhatsThis::add(fileAsCombo,
+	tr("Preferred format for the contact name."));
+    QWhatsThis::add(lineEdits[PimContact::Profession],
+	tr("Occupation or job description."));
+
     new QPEDialogListener(this);
 }
 
 void AbEditor::tabClicked( QWidget *tab )
 {
+#ifdef QTOPIA_DESKTOP
     if ( summaryTab && tab == summaryTab ) {
 	PimContact c;
 	contactFromFields(c);
-	summary->setText( c.toRichText() );
+	summary->setText(c.toRichText());
     }
+#else
+    Q_UNUSED(tab);
+#endif
 }
 
 void AbEditor::editEmails()
@@ -541,17 +564,16 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
     QGridLayout *gl = new QGridLayout( container, keys.count()+1, 2, 4, 2 );
     gl->setSpacing(1);
 
+    QWidget *lastEditor = 0, *editor;
     int fieldInTabNum=0;
     for ( QValueList<int>::ConstIterator fieldKey = keys.begin();
 	  fieldKey != keys.end(); ++fieldKey ) {
 
 	QLabel *label = new QLabel( displayNames[ *fieldKey ], container );
-	gl->addWidget( label, fieldInTabNum, 0 );
-	labels.insert( *fieldKey, label );
 
 	// do a switch on the field type; most are line edits, the exceptions get a case, the default
 	// is a linedit
-	QWidget *editor = 0;
+	editor = 0;
 	switch ( *fieldKey ) {
 	case PimContact::Suffix:
 	    suffixCombo = new QComboBox( container );
@@ -598,7 +620,7 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 	    editor = fileAsCombo;
 	    break;
 	case PimContact::Birthday:
-	    bdayButton = new QPEDateButton( container, "", FALSE, TRUE );
+	    bdayButton = new QPEDateEdit( container, "", FALSE, TRUE );
 	    editor = bdayButton;
 	    break;
 	case PimContact::DefaultEmail:
@@ -610,12 +632,20 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 	    editor = ehb;
 	    break;
 	case PimContact::Anniversary:
-	    anniversaryButton = new QPEDateButton( container, "", FALSE, TRUE );
+	    anniversaryButton = new QPEDateEdit( container, "", FALSE, TRUE );
 	    editor = anniversaryButton;
 	    break;
 	case PimContact::Categories:
-	    cmbCat = new CategorySelect( container );
-	    editor = cmbCat;
+	    {
+		QArray<int> emptyCat;
+		cmbCat = new CategorySelect( emptyCat, "Address Book", // No tr()
+			tr("Contacts"), container );
+		editor = cmbCat;
+		if ( cmbCat->widgetType() == CategorySelect::ListView ) {
+		    delete label;
+		    label = 0;
+		}
+	    }
 	    break;
 	case PimContact::Notes:
 	    // this is taken care of later; don't want to create a line edit for it
@@ -635,15 +665,25 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 	if ( editor ) {
 
 	    // add the editor to the layout
-	    gl->addWidget( editor, fieldInTabNum, 1 );
+	    if ( label ) {
+		gl->addWidget( label, fieldInTabNum, 0 );
+		labels.insert( *fieldKey, label );
+		gl->addWidget( editor, fieldInTabNum, 1 );
+	    }
+	    else
+		gl->addMultiCellWidget( editor, fieldInTabNum, fieldInTabNum, 0, 1 );
+	    if ( lastEditor ) {
+		setTabOrder( lastEditor, editor );
+	    }
+	    lastEditor = editor;
 
 	    // increment the field number for this tab
 	    fieldInTabNum++;
-	}
+	} else delete label;
     }
     QSpacerItem *verticleSpacer = new QSpacerItem( 1, 1, QSizePolicy::Minimum,
 						   QSizePolicy::Expanding );
-    gl->addItem( verticleSpacer, fieldInTabNum, 0 );
+    gl->addItem( verticleSpacer, fieldInTabNum, 1 );
 
 }
 
@@ -655,11 +695,11 @@ void AbEditor::setEntry( const PimContact &entry )
     fileAsCombo->reload();
 
     fileAsCombo->programaticUpdate = TRUE;
-	
+
     // categories not part of map
     cmbCat->setCategories( ent.categories(), "Address Book", // No tr()
 	tr("Contacts") );
-    
+
     // iterate through all display fields for contact
     QMap<int, QCString> i2keyMap = PimContact::keyToIdentifierMap();
     QMap<int, QCString>::Iterator it;

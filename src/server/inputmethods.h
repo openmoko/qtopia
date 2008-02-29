@@ -29,14 +29,12 @@
 
 class QToolButton;
 class QWidgetStack;
-class QLibrary;
+class PluginLoader;
 
 struct InputMethod
 {
-#ifndef QT_NO_COMPONENT
-    QLibrary *library;
-#endif
     QWidget *widget;
+    QString libName;
     bool newIM;
     union { 
 	InputMethodInterface *interface;
@@ -45,7 +43,7 @@ struct InputMethod
 
     inline QString name() { return newIM ? extInterface->name() : interface->name(); } 
     inline QPixmap *icon() { return newIM ? extInterface->icon() : interface->icon(); } 
-    inline void release() { if ( newIM ) extInterface->release(); else interface->release(); }
+    inline QUnknownInterface *iface() { return newIM ? extInterface : interface; }
     inline void resetState() { if ( !newIM ) interface->resetState(); }
 };
 
@@ -90,6 +88,7 @@ private:
     InputMethod *imethod;
     QValueList<InputMethod> inputMethodList;
     QValueList<InputMethod> inputModifierList;
+    PluginLoader *loader;
 };
 
 

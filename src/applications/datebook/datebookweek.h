@@ -44,7 +44,7 @@ class WeekView : public PeriodView
     Q_OBJECT
 
 public:
-    WeekView( DateBookTable *, bool ampm, bool weekOnMonday,
+    WeekView( DateBookTable *, bool weekOnMonday,
 		  QWidget *parent = 0, const char *name = 0 );
 
     bool hasSelection() const { return FALSE; }
@@ -56,7 +56,6 @@ public:
 public slots:
     void selectDate( const QDate & );
 
-    void setTwelveHour( bool );
     void setStartsOnMonday( bool );
     void setDayStarts( int h );
 

@@ -204,9 +204,9 @@ bool DialupImpl::doProperties( QWidget *parent, Config& cfg )
 	    //opt << "debug\n";
 	    opt << "connect '/usr/sbin/chat " // No tr
 		    "-s -v "
-		    "ABORT \"NO CARRIER\" "
-		    "ABORT \"NO DIALTONE\" "
-		    "ABORT \"BUSY\" "
+		    "ABORT \"NO CARRIER\" " // No tr
+		    "ABORT \"NO DIALTONE\" " // No tr
+		    "ABORT \"BUSY\" " // No tr
 		<< "\"\" ATZ OK " + dial + " CONNECT'\n";
 	    if ( dialog.crtscts->isChecked() )
 		opt << "crtscts\n";
@@ -348,7 +348,7 @@ protected:
 		break;
 	      case Connect:
 		if ( log.find(QRegExp("\nCONNECT[^\n]*\n -- got it"))>=start ) { // No tr
-		    progress(tr("Authenticating"),1);
+		    progress(tr("Authenticating"),1); // No tr
 		    state = Authenticate;
 		} else if ( log.find(QRegExp("\nNO DIALTONE"))>=start ) {
 		    progress(tr("No dialtone"),0);
@@ -383,7 +383,7 @@ protected:
 		}
 		break;
 	      case Timing:
-		if ( log.find(QRegExp("\nConnection terminated"))>=start ) {
+		if ( log.find(QRegExp("\nConnection terminated"))>=start ) { // No tr
 		    progress(tr("Waiting for activity"),1);
 		    state = Initialize;
 		}

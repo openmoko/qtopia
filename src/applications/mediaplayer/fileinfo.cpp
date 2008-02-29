@@ -66,12 +66,12 @@ ID3TagEditWidget::ID3TagEditWidget( QWidget *parent, const DocLnk& lnk ) : QWidg
     QGridLayout *gl = new QGridLayout( this, 4, 4 );
     gl->setSpacing( 3 );
     
-    gl->addWidget( new QLabel( "Title", this ),   0, 0 );
-    gl->addWidget( new QLabel( "Artist", this ),  1, 0 );
-    gl->addWidget( new QLabel( "Album", this ),   2, 0 );
-    gl->addWidget( new QLabel( "Comment", this ), 3, 0 );
-    gl->addWidget( new QLabel( "Year", this ),    1, 2 ); 
-    gl->addWidget( new QLabel( "Track", this ),   2, 2 );
+    gl->addWidget( new QLabel( tr("Title"), this ),   0, 0 );
+    gl->addWidget( new QLabel( tr("Artist"), this ),  1, 0 );
+    gl->addWidget( new QLabel( tr("Album"), this ),   2, 0 );
+    gl->addWidget( new QLabel( tr("Comment"), this ), 3, 0 );
+    gl->addWidget( new QLabel( tr("Year"), this ),    1, 2 ); 
+    gl->addWidget( new QLabel( tr("Track"), this ),   2, 2 );
 
     int fd = ::open( fileInfo.file().latin1(), O_RDONLY );
     inputTag.read( fd );
@@ -136,8 +136,8 @@ class InfoListView : public QListView {
 public:
 	InfoListView( QWidget *parent ) : QListView( parent ) {
 	    setSorting( -1 );
-	    addColumn( "Column1" );
-	    addColumn( "Column2" );
+	    addColumn( "C1" ); // No tr
+	    addColumn( "C2" ); // No tr
 	    header()->hide();
 	}
 	void setDocLnk( const DocLnk& fileInfo ) {

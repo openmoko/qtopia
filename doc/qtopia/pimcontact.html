@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/contact.cpp:41 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopiapim/contact.cpp:49 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -129,7 +129,6 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>QStringList <a href="#childrenList"><b>childrenList</b></a> () const</div></li>
 <li><div class=fn>QString <a href="#notes"><b>notes</b></a> () const</div></li>
 <li><div class=fn>QString <a href="#toRichText"><b>toRichText</b></a> () const</div></li>
-<li><div class=fn>virtual QMap&lt;int, QString&gt; <b>fields</b> () const</div></li>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -371,8 +370,7 @@ be set to the first one in the list.
 
 <h3 class=fn>void <a name="setAnniversary"></a>PimContact::setAnniversary ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )
 </h3>
-Sets the persons anniversary. Note that this does not create
-an <a href="pimevent.html">PimEvent</a> for it in the Calendar (yet).
+Sets the person's anniversary to <em>d</em>.
 
 <h3 class=fn>void <a name="setAssistant"></a>PimContact::setAssistant ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
@@ -380,8 +378,7 @@ Sets the assistant of the contact to <em>str</em>.
 
 <h3 class=fn>void <a name="setBirthday"></a>PimContact::setBirthday ( const&nbsp;QDate&nbsp;&amp;&nbsp;d )
 </h3>
-Sets the persons birthday. Note that this does not create
-an <a href="pimevent.html">PimEvent</a> for it in the Calendar (yet).
+Sets the person's birthday to <em>d</em>.
 
 <h3 class=fn>void <a name="setBusinessCity"></a>PimContact::setBusinessCity ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 
@@ -433,7 +430,7 @@ Sets the company for contact to <em>str</em>.
 
 <h3 class=fn>void <a name="setDefaultEmail"></a>PimContact::setDefaultEmail ( const&nbsp;QString&nbsp;&amp;&nbsp;v )
 </h3>
-Sets the default email and adds it to the list.
+Sets the default email to <em>v</em> and adds it to the list.
 
 <h3 class=fn>void <a name="setDepartment"></a>PimContact::setDepartment ( const&nbsp;QString&nbsp;&amp;&nbsp;str )
 </h3> 

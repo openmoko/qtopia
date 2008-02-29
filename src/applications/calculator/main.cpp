@@ -25,16 +25,9 @@ int main (int argc, char **argv)
 {
   QPEApplication a (argc, argv);
 
-  /*
-  Calculator *mw = new Calculator(
-#ifdef QTEST
-	  argc, argv
-#endif
-	  );
-	  */
   Calculator mw;
   QPEApplication::setInputMethodHint (&mw, QPEApplication::AlwaysOff);
-  mw.setCaption("Calculator");
+  mw.setCaption(mw.tr("Calculator"));
   a.showMainWidget (&mw);
 
   return a.exec ();

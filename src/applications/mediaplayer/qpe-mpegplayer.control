@@ -2,7 +2,8 @@ Files: bin/mpegplayer pics/mediaplayer/*.* pics/mediaplayer/skins/default apps/A
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Audio/Video Media Player

@@ -35,21 +35,21 @@
 
 // Layout information for the audioButtons (and if it is a toggle button or not)
 MediaButton audioButtons[] = {
-    { TRUE,  FALSE, FALSE, FALSE, "play",     PlayButton       },
-    { FALSE, FALSE, FALSE, FALSE, "stop",     StopButton       },
-    { FALSE, FALSE, FALSE, FALSE, "next",     NextButton       },
-    { FALSE, FALSE, FALSE, FALSE, "previous", PreviousButton   },
-    { FALSE, FALSE, FALSE, FALSE, "up",       VolumeUpButton   },
-    { FALSE, FALSE, FALSE, FALSE, "down",     VolumeDownButton },
-    { TRUE,  FALSE, FALSE, FALSE, "loop",     LoopButton       },
+    { TRUE,  FALSE, FALSE, FALSE, "play",     PlayButton       }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "stop",     StopButton       }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "next",     NextButton       }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "previous", PreviousButton   }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "up",       VolumeUpButton   }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "down",     VolumeDownButton }, // No tr
+    { TRUE,  FALSE, FALSE, FALSE, "loop",     LoopButton       }, // No tr
     { FALSE, FALSE, FALSE, FALSE, "playlist", PlayListButton   },
-    { FALSE, FALSE, FALSE, FALSE, "forward",  ForwardButton    },
-    { FALSE, FALSE, FALSE, FALSE, "backward", BackwardButton   },
+    { FALSE, FALSE, FALSE, FALSE, "forward",  ForwardButton    }, // No tr
+    { FALSE, FALSE, FALSE, FALSE, "backward", BackwardButton   }, // No tr
 };
 
 
 AudioWidget::AudioWidget( QWidget* parent, const QString &skin, const char* name ) :
-    ControlWidgetBase( parent, skin, "audio", name ), songInfo( this )
+    ControlWidgetBase( parent, skin, "audio", name ), songInfo( this ) // No tr
 {
     setButtonData( audioButtons, sizeof(audioButtons)/sizeof(MediaButton) );
     connect( mediaPlayerState, SIGNAL( viewChanged(View) ), this, SLOT( setView(View) ) );

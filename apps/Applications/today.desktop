@@ -3,4 +3,5 @@ Exec=today
 Icon=TodayApp
 Type=Application
 Name=Today
+Name[ja]=???
 

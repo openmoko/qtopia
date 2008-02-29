@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>443</width>
-            <height>347</height>
+            <width>350</width>
+            <height>490</height>
         </rect>
     </property>
     <property stdset="1">
@@ -181,13 +181,6 @@
                 <name>wordwrap</name>
             </property>
         </widget>
-        <widget row="1"  column="1" >
-            <class>QComboBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>storage</cstring>
-            </property>
-        </widget>
         <widget row="2"  column="1" >
             <class>QLayoutWidget</class>
             <property stdset="1">
@@ -336,6 +329,13 @@
                 </spacer>
             </hbox>
         </widget>
+        <widget row="1"  column="1" >
+            <class>LocationCombo</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>storageLocation</cstring>
+            </property>
+        </widget>
     </grid>
 </widget>
 <customwidgets>
@@ -366,6 +366,21 @@
             <verdata>5</verdata>
         </sizepolicy>
         <pixmap>image0</pixmap>
+    </customwidget>
+    <customwidget>
+        <class>LocationCombo</class>
+        <header location="global">qtopia/locationcombo.h</header>
+        <sizehint>
+            <width>50</width>
+            <height>15</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>0</verdata>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+        <signal>newPath(const QString&amp;)</signal>
     </customwidget>
 </customwidgets>
 <images>

@@ -88,7 +88,7 @@ QWSDatabaseIndex::QWSDatabaseIndex(const QString& indname, QWSDatabase* d) :
     db(d)
 {
     dirty = FALSE;
-    idxfile = new QFile(Global::applicationFileName("Database", db->databaseName() + "." + indname + ".idx"));
+    idxfile = new QFile(Global::applicationFileName("Database", db->databaseName() + "." + indname + ".idx")); // No tr
     if (idxfile->open(IO_ReadWrite)) {
 	if ( idxfile->size() == 0 ) {
 	    setDirty( TRUE ); 
@@ -491,7 +491,7 @@ QWSDatabase::QWSDatabase(const QString& nm, QObject* parent, const char* name) :
     QObject(parent, name)
 {
     dbname = nm;
-    QString base = Global::applicationFileName("Database", nm);
+    QString base = Global::applicationFileName("Database", nm); // No tr
     dbfile = new QFile(base + ".dat");
     hdrfile = new QFile(base + ".hdr");
 

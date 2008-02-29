@@ -5,7 +5,7 @@
 class CardMonitor;
 class QPixmap;
 
-class CardMonitorImpl : public TaskbarNamedAppletInterface
+class CardMonitorImpl : public TaskbarAppletInterface
 {
 public:
     CardMonitorImpl();
@@ -16,11 +16,8 @@ public:
 
     virtual QWidget *applet( QWidget *parent );
     virtual int position() const;
-    virtual QString name() const;
-    virtual QPixmap icon() const;
 
 private:
     CardMonitor *cardMonitor;
-    QPixmap *icn;
     ulong ref;
 };

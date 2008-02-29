@@ -1,7 +1,9 @@
 TEMPLATE	= lib
 CONFIG	       += warn_on release
-CONFIG         -= qtopia
-CONFIG	       -= qt
+unix:CONFIG    -= qtopia
+unix:CONFIG    -= qt
+# We must get the right Win32 runtime ie -MD or -MDd
+win32:CONFIG += qtopia
 HEADERS		= 
 unix:SOURCES	= $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c
 win32:SOURCES	= $(QTDIR)/src/3rdparty/freetype/src/base/ftsystem.c 

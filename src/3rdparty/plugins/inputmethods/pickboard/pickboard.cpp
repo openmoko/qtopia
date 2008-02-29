@@ -76,7 +76,10 @@ Pickboard::Pickboard(QWidget* parent, const char* name, WFlags f) :
 {
     (new QHBoxLayout(this))->setAutoAdd(TRUE);
     d = new PickboardPrivate(this);
+// under Win32 we may not have smallsmooth font 
+#ifndef Q_OS_WIN32
     setFont( QFont( "smallsmooth", 9 ) );
+#endif
 }
 
 Pickboard::~Pickboard()

@@ -29,21 +29,10 @@
 #include <qcstring.h>
 
 #include <qstring.h>
-#if defined(Q_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<QString, QString>;
-// MOC_SKIP_END
-#endif
+#include <qtopia/qtopiawinexport.h>
 
 typedef QMap< QString, QString > ConfigGroup;
 typedef QMap< QString, ConfigGroup> ConfigGroupMap;
-
-#if defined (QTOPIA_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-template class QTOPIA_EXPORT QMap<QString, QMap<QString, QString> >;
-template class QTOPIA_EXPORT QMapIterator< QString, QMap< QString,  QString> >;
-// MOC_SKIP_END
-#endif
 
 class ConfigPrivate;
 class QTextStream;

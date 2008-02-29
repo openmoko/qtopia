@@ -139,10 +139,6 @@ Quit anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Single</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Edit Event Exception</source>
         <translation type="unfinished"></translation>
     </message>
@@ -156,6 +152,11 @@ Quit anyway?</source>
     </message>
     <message>
         <source>(in %1 minutes)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Single</source>
+        <comment>1 event, not all</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -314,7 +315,7 @@ Quit anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>00. Jan-00. Jan</source>
+        <source>...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -471,7 +472,15 @@ Quit anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>:00p</source>
+        <source>Time zone:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>End</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -538,10 +547,6 @@ Quit anyway?</source>
 <context>
     <name>RepeatEntry</name>
     <message>
-        <source>Day</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Week</source>
         <translation type="unfinished"></translation>
     </message>
@@ -551,10 +556,6 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Year</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Every:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -570,43 +571,7 @@ Quit anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>day(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>week(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>month(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Repeat every %1 years.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>year(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the %1 of the month.</source>
-        <comment>eg. %1 = 3rd</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the %1 %2 of the month.</source>
-        <comment>eg. %1 %2 = 2nd Friday</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the last %1 of the month.</source>
-        <comment>eg. %1 = Friday</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>the %1 last %2 of the month.</source>
-        <comment>eg. %1 last %2 = 2nd last Friday</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -683,11 +648,6 @@ Quit anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Repeat every month on the %1 of the month.</source>
-        <comment>eg. %1 = 3rd</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Repeat every %1 months on the %2 of the month.</source>
         <comment>eg. %1 = 4, %2 = 3rd</comment>
         <translation type="unfinished"></translation>
@@ -730,6 +690,77 @@ Quit anyway?</source>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Repeating Event</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <comment>Day, not date</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every %1 day(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every %1 week(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every %1 month(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Every %1 year(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the last %1.</source>
+        <comment>eg. %1 = Friday</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the %1 last %2.</source>
+        <comment>eg. %1 last %2 = 2nd last Friday</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>day %1 of the month.</source>
+        <comment>eg. %1 = 3</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the %1 %2.</source>
+        <comment>eg. %1 %2 = 2nd Friday</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Repeat every month on day %1 of the month.</source>
+        <comment>eg. %1 = 3</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>first</source>
+        <comment>eg. first Friday of month</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>second</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>third</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>fourth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>fifth</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>WeekViewContents</name>
@@ -769,7 +800,15 @@ Quit anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>p</source>
+        <source>%1am</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WeekViewHeader</name>
+    <message>
+        <source>%1-%2</source>
+        <comment>2 dates</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

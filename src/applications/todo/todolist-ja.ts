@@ -3,110 +3,118 @@
     <name>NewTaskDialog</name>
     <message>
         <source>Todo List</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックリスト</translation>
     </message>
     <message>
         <source>Qtopia Desktop ToDo List</source>
-        <translation type="unfinished"></translation>
+        <translation>Qtopia Desktopのチェックリスト</translation>
     </message>
     <message>
         <source>The start date must occur before the tasks due date.
 Please change the due date first.</source>
-        <translation type="unfinished"></translation>
+        <translation>仕事の開始日は終了期限より前にしてください。
+終了期限を先に変更してください。</translation>
     </message>
 </context>
 <context>
     <name>NewTaskDialogBase</name>
     <message>
         <source>New Task</source>
-        <translation type="unfinished"></translation>
+        <translation>新規の仕事</translation>
     </message>
     <message>
         <source>1 - Very High</source>
-        <translation type="unfinished"></translation>
+        <translation>1 - 緊急</translation>
     </message>
     <message>
         <source>2 - High</source>
-        <translation type="unfinished"></translation>
+        <translation>2 - 高</translation>
     </message>
     <message>
         <source>3 - Normal</source>
-        <translation type="unfinished"></translation>
+        <translation>3 - 標準</translation>
     </message>
     <message>
         <source>4 - Low</source>
-        <translation type="unfinished"></translation>
+        <translation>4 - 低</translation>
     </message>
     <message>
         <source>5 - Very Low</source>
-        <translation type="unfinished"></translation>
+        <translation>5 - 非常に低い</translation>
     </message>
     <message>
         <source>Task</source>
-        <translation type="unfinished"></translation>
+        <translation>仕事</translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished"></translation>
+        <translation>詳細</translation>
     </message>
     <message>
         <source>Priority</source>
-        <translation type="unfinished"></translation>
+        <translation>優先度</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>状態</translation>
     </message>
     <message>
         <source>Not Started</source>
-        <translation type="unfinished"></translation>
+        <translation>未開始</translation>
     </message>
     <message>
         <source>In Progress</source>
-        <translation type="unfinished"></translation>
+        <translation>作業中</translation>
     </message>
     <message>
         <source>Completed</source>
-        <translation type="unfinished"></translation>
+        <translation>終了</translation>
     </message>
     <message>
         <source>Waiting</source>
-        <translation type="unfinished"></translation>
+        <translation>待機中</translation>
     </message>
     <message>
         <source>Deferred</source>
-        <translation type="unfinished"></translation>
+        <translation>延期</translation>
     </message>
     <message>
         <source> %</source>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Completed Date</source>
-        <translation type="unfinished"></translation>
+        <translation>終了した日</translation>
     </message>
     <message>
         <source>Category</source>
-        <translation type="unfinished"></translation>
+        <translation>カテゴリ</translation>
     </message>
     <message>
         <source>Started Date</source>
-        <translation type="unfinished"></translation>
+        <translation>開始した日</translation>
     </message>
     <message>
         <source>Due</source>
-        <translation type="unfinished"></translation>
+        <translation>期限</translation>
     </message>
     <message>
         <source>Notes</source>
-        <translation type="unfinished"></translation>
+        <translation>メモ</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取り消し</translation>
     </message>
     <message>
         <source>OK</source>
+        <translation>OK</translation>
+    </message>
+</context>
+<context>
+    <name>TodoSettings</name>
+    <message>
+        <source>Configure columns to display</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -114,165 +122,194 @@ Please change the due date first.</source>
     <name>TodoTable</name>
     <message>
         <source>Unfiled</source>
-        <translation type="unfinished"></translation>
+        <translation>ファイルになし</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>すべて</translation>
     </message>
     <message>
         <source>Not started</source>
-        <translation type="unfinished"></translation>
+        <translation>未開始</translation>
     </message>
     <message>
         <source>Unfinished</source>
-        <translation type="unfinished"></translation>
+        <translation>未完了</translation>
     </message>
     <message>
         <source>Not Started</source>
-        <translation type="unfinished"></translation>
+        <translation>未開始</translation>
     </message>
     <message>
         <source>In Progress</source>
-        <translation type="unfinished"></translation>
+        <translation>作業中</translation>
     </message>
     <message>
         <source>Completed</source>
-        <translation type="unfinished"></translation>
+        <translation>完了</translation>
     </message>
     <message>
         <source>Waiting</source>
-        <translation type="unfinished"></translation>
+        <translation>待機中</translation>
     </message>
     <message>
         <source>Deferred</source>
-        <translation type="unfinished"></translation>
+        <translation>延期</translation>
     </message>
 </context>
 <context>
     <name>TodoWindow</name>
     <message>
         <source>Todo</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックリスト</translation>
     </message>
     <message>
         <source>List of tasks matching the completion and category filters.</source>
-        <translation type="unfinished"></translation>
+        <translation>進行状態とカテゴリのフィルタで合致する仕事の一覧です。</translation>
     </message>
     <message>
         <source>New Task</source>
-        <translation type="unfinished"></translation>
+        <translation>新規の仕事</translation>
     </message>
     <message>
         <source>Create a new task.</source>
-        <translation type="unfinished"></translation>
+        <translation>新規の仕事を作成します。</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>編集</translation>
     </message>
     <message>
         <source>Edit the highlighted task.</source>
-        <translation type="unfinished"></translation>
+        <translation>ハイライトした仕事を編集します。</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>削除</translation>
     </message>
     <message>
         <source>Delete the highlighted task.</source>
-        <translation type="unfinished"></translation>
+        <translation>ハイライトした仕事を削除します。</translation>
     </message>
     <message>
         <source>Beam</source>
-        <translation type="unfinished"></translation>
+        <translation>ビーム</translation>
     </message>
     <message>
         <source>Beam the highlighted task to another device.</source>
-        <translation type="unfinished"></translation>
+        <translation>ハイライトした仕事を別のデバイスへビームします。</translation>
     </message>
     <message>
         <source>Find</source>
-        <translation type="unfinished"></translation>
+        <translation>検索</translation>
     </message>
     <message>
         <source>Search for a task.</source>
-        <translation type="unfinished"></translation>
+        <translation>仕事を検索します。</translation>
     </message>
     <message>
         <source>Task</source>
-        <translation type="unfinished"></translation>
+        <translation>仕事</translation>
     </message>
     <message>
         <source>Find Next</source>
-        <translation type="unfinished"></translation>
+        <translation>次を検索</translation>
     </message>
     <message>
         <source>Find the next matching task.</source>
-        <translation type="unfinished"></translation>
+        <translation>次に合致する仕事を検索します。</translation>
     </message>
     <message>
         <source>Pending Tasks</source>
-        <translation type="unfinished"></translation>
+        <translation>保留中の仕事</translation>
     </message>
     <message>
         <source>All Tasks</source>
-        <translation type="unfinished"></translation>
+        <translation>すべての仕事</translation>
     </message>
     <message>
         <source>Show tasks with this completion status.</source>
-        <translation type="unfinished"></translation>
+        <translation>この進行状態の仕事を表示します。</translation>
     </message>
     <message>
         <source>Todo List</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックリスト</translation>
     </message>
     <message>
         <source>Show tasks in this category.</source>
-        <translation type="unfinished"></translation>
+        <translation>このカテゴリ内の仕事を表示します。</translation>
     </message>
     <message>
         <source>Edit Task</source>
-        <translation type="unfinished"></translation>
+        <translation>仕事の編集</translation>
     </message>
     <message>
         <source>Find: not found</source>
-        <translation type="unfinished"></translation>
+        <translation>検索：見つかりません</translation>
     </message>
     <message>
         <source>Find: reached end</source>
-        <translation type="unfinished"></translation>
+        <translation>検索：末尾です</translation>
     </message>
     <message>
         <source>&lt;P&gt;%1 new tasks.&lt;p&gt;Do you want to add them to your Todo List?</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;P&gt;%1 新規の仕事です。&lt;p&gt;これらを自分のチェックリストに追加しますか?</translation>
     </message>
     <message>
         <source>New Tasks</source>
-        <translation type="unfinished"></translation>
+        <translation>新規の仕事</translation>
     </message>
     <message>
         <source>Task Details</source>
-        <translation type="unfinished"></translation>
+        <translation>仕事の詳細</translation>
     </message>
     <message>
         <source>Select All</source>
-        <translation type="unfinished"></translation>
+        <translation>すべて選択</translation>
     </message>
     <message>
         <source>Configure headers</source>
-        <translation type="unfinished"></translation>
+        <translation>ヘッダーの設定</translation>
     </message>
     <message>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>表示</translation>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>はい</translation>
     </message>
     <message>
         <source>No</source>
+        <translation>いいえ</translation>
+    </message>
+    <message>
+        <source>Task List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View the list of Tasks.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit to width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete the %1 selected tasks?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete:
+%1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the %1 selected tasks</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

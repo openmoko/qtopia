@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 
-#define HERE fprintf(stderr,"%s(%d): here\n",__FILE__,__LINE__)
+#define HERE fprintf(stderr,"%s(%d): here\n",__FILE__,__LINE__) // No tr
 
 /* \class TESession
     \brief The TESession class is a combination of TEPTy and Emulations.

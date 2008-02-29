@@ -184,7 +184,7 @@ bool PatienceCardGame::mousePressCard( Card *card, QPoint p )
 		    faceUpDealingPile->addCardToTop(item);
 		    item->setCardPile( faceUpDealingPile );
 
-		    item->flipTo( faceUpDealingPile->getX(), faceUpDealingPile->getY(), 5 * flipped );
+		    item->flipTo( faceUpDealingPile->getX(), faceUpDealingPile->getY(), 300 * flipped );
 		}
 	    }
 	}

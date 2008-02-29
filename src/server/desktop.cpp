@@ -38,6 +38,7 @@
 #include <qtopia/services.h>
 #include <qtopia/qpeapplication.h>  // needed for qpe_setBackLight
 #include <qtopia/devicebuttonmanager.h>
+#include <qtopia/pluginloader.h>
 
 #ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
@@ -50,6 +51,7 @@
 #endif
 #ifdef Q_OS_WIN32
 #include <io.h>
+#include <process.h>
 #endif
 #include <qmainwindow.h>
 #include <qmessagebox.h>
@@ -132,6 +134,7 @@ bool Desktop::screenLocked()
  */
 class DesktopPowerAlerter : public QMessageBox
 {
+    Q_OBJECT
 public:
     DesktopPowerAlerter( QWidget *parent, const char *name = 0 )
 	: QMessageBox( tr("Battery Status"), tr("Low Battery"),
@@ -190,46 +193,58 @@ void KeyFilter::timerEvent(QTimerEvent* e)
 bool KeyFilter::filter(int /*unicode*/, int keycode, int modifiers, bool press,
 		  bool autoRepeat)
 {
-    if ( !loggedin && keycode != Key_F34 )
+    if ( !loggedin
+	    // Permitted keys
+	    && keycode != Key_F34 // power
+	    && keycode != Key_F30 // select
+	    && keycode != Key_Enter
+	    && keycode != Key_Return
+	    && keycode != Key_Space
+	    && keycode != Key_Left
+	    && keycode != Key_Right
+	    && keycode != Key_Up
+	    && keycode != Key_Down )
 	return TRUE;
-    if ( !((DesktopApplication*)qApp)->keyboardGrabbed() ) {
-	// First check to see if DeviceButtonManager knows something about this button:
-	const DeviceButton* button = DeviceButtonManager::instance().buttonForKeycode(keycode);
-	if (button) {
-	    if ( held_tid )
-		killTimer(held_tid);
-	    if ( button->heldAction().isNull() ) {
-		if ( press )
+    if ( !modifiers ) {
+	if ( !((DesktopApplication*)qApp)->keyboardGrabbed() ) {
+	    // First check to see if DeviceButtonManager knows something about this button:
+	    const DeviceButton* button = DeviceButtonManager::instance().buttonForKeycode(keycode);
+	    if (button) {
+		if ( held_tid )
+		    killTimer(held_tid);
+		if ( button->heldAction().isNull() ) {
+		    if ( press )
+			emit activate(button, FALSE);
+		} else if ( press ) {
+		    heldButton = button;
+		    held_tid = startTimer(1000);
+		} else if ( heldButton ) {
+		    heldButton = 0;
 		    emit activate(button, FALSE);
-	    } else if ( press ) {
-	        heldButton = button;
-	        held_tid = startTimer(1000);
-	    } else if ( heldButton ) {
-		heldButton = 0;
-		emit activate(button, FALSE);
+		}
+		QWSServer::screenSaverActivate(FALSE);
+		return TRUE;
 	    }
+	}
+	if ( keycode == Key_F34 ) {
+	    if ( press ) emit power();
+	    return TRUE;
+	}
+	if ( keycode == Key_F35 ) {
+	    if ( press ) emit backlight();
+	    return TRUE;
+	}
+	if ( keycode == Key_F32 ) {
+#ifndef QT_NO_COP
+	    if ( press ) QCopEnvelope e( "QPE/Desktop", "startSync()" );
+#endif
+	    return TRUE;
+	}
+	if ( keycode == Key_F31 ) {
+	    if ( press ) emit symbol();
 	    QWSServer::screenSaverActivate(FALSE);
 	    return TRUE;
 	}
-    }
-    if ( keycode == Key_F34 ) {
-	if ( press ) emit power();
-	return TRUE;
-    }
-    if ( keycode == Key_F35 ) {
-	if ( press ) emit backlight();
-	return TRUE;
-    }
-    if ( keycode == Key_F32 ) {
-#ifndef QT_NO_COP
-	if ( press ) QCopEnvelope e( "QPE/Desktop", "startSync()" );
-#endif
-	return TRUE;
-    }
-    if ( keycode == Key_F31 && !modifiers ) {
-	if ( press ) emit symbol();
-	QWSServer::screenSaverActivate(FALSE);
-	return TRUE;
     }
     if ( keycode == Key_NumLock ) {
 	if ( press ) emit numLockStateToggle();
@@ -237,31 +252,29 @@ bool KeyFilter::filter(int /*unicode*/, int keycode, int modifiers, bool press,
     if ( keycode == Key_CapsLock ) {
 	if ( press ) emit capsLockStateToggle();
     }
-    qpedesktop->keyClick(keycode,press,autoRepeat);
+    if ( qpedesktop )
+	qpedesktop->keyClick(keycode,press,autoRepeat);
     return FALSE;
 }
 
 
+bool DesktopApplication::doRestart = FALSE;
+bool DesktopApplication::allowRestart = TRUE;
+
 DesktopApplication::DesktopApplication( int& argc, char **argv, Type t )
     : QPEApplication( argc, argv, t )
 {
-
     QTimer *timer = new QTimer( this );
     connect( timer, SIGNAL(timeout()), this, SLOT(psTimeout()) );
     timer->start( 10000 );
     ps = new PowerStatus;
     pa = new DesktopPowerAlerter( 0 );
-    KeyFilter* kf = new KeyFilter(this);
-    qwsServer->setKeyboardFilter(kf);
-    connect(kf,SIGNAL(launch()),this,SIGNAL(launch()));
-    connect(kf,SIGNAL(power()),this,SIGNAL(power()));
-    connect(kf,SIGNAL(backlight()),this,SIGNAL(backlight()));
-    connect(kf,SIGNAL(symbol()),this,SIGNAL(symbol()));
-    connect(kf,SIGNAL(numLockStateToggle()),this,SIGNAL(numLockStateToggle()));
-    connect(kf,SIGNAL(capsLockStateToggle()),this,SIGNAL(capsLockStateToggle()));
-    connect(kf,SIGNAL(activate(const DeviceButton*,bool)),this,SIGNAL(activate(const DeviceButton*,bool)));
 
     applyLightSettings(ps);
+
+    if ( PluginLoader::inSafeMode() )
+	QTimer::singleShot(0, this, SLOT(showSafeMode()) );
+    QTimer::singleShot(20*1000, this, SLOT(clearSafeMode()) );
 }
 
 
@@ -277,9 +290,10 @@ enum MemState { Unknown, VeryLow, Low, Normal } memstate=Unknown;
 #ifdef Q_WS_QWS
 bool DesktopApplication::qwsEventFilter( QWSEvent *e )
 {
-    qpedesktop->checkMemory();
+    if ( qpedesktop )
+	qpedesktop->checkMemory();
 
-    if ( e->type == QWSEvent::Mouse ) {
+    if ( e->type == QWSEvent::Mouse && qpedesktop ) {
 	QWSMouseEvent *me = (QWSMouseEvent *)e;
 	static bool up = TRUE;
 	if ( me->simpleData.state&LeftButton ) {
@@ -299,7 +313,8 @@ bool DesktopApplication::qwsEventFilter( QWSEvent *e )
 
 void DesktopApplication::psTimeout()
 {
-    qpedesktop->checkMemory(); // in case no events are being generated
+    if ( qpedesktop )
+	qpedesktop->checkMemory(); // in case no events are being generated
 
     PowerStatus prev = *ps;
 
@@ -325,6 +340,29 @@ void DesktopApplication::psTimeout()
     }
 }
 
+void DesktopApplication::showSafeMode()
+{
+    if ( QMessageBox::warning(0, tr("Safe Mode"), tr("<P>A system startup error occurred, "
+		"and the system is now in Safe Mode. "
+		"Plugins are not loaded in Safe Mode. "
+		"You can use the Plugin Manager to "
+		"disable plugins that cause system error."), tr("OK"), tr("Plugin Manager..."), 0) == 1 ) {
+	Global::execute( "pluginmanager" );
+    }
+}
+
+void DesktopApplication::clearSafeMode()
+{
+    // If we've been running OK for a while then we won't bother going into
+    // safe mode immediately on the next crash.
+    Config cfg( "PluginLoader" );
+    cfg.setGroup( "Global" );
+    QString mode = cfg.readEntry( "Mode", "Normal" );
+    if ( mode == "MaybeSafe" ) {
+	cfg.writeEntry( "Mode", "Normal" );
+    }
+}
+
 #if defined(QPE_HAVE_MEMALERTER)
 QPE_MEMALERTER_IMPL
 #endif
@@ -347,10 +385,22 @@ Desktop::Desktop() :
 
     qpedesktop = this;
 
+    KeyFilter* kf = new KeyFilter(this);
+    qwsServer->setKeyboardFilter(kf);
+    connect(kf,SIGNAL(launch()),qApp,SIGNAL(launch()));
+    connect(kf,SIGNAL(power()),qApp,SIGNAL(power()));
+    connect(kf,SIGNAL(backlight()),qApp,SIGNAL(backlight()));
+    connect(kf,SIGNAL(symbol()),qApp,SIGNAL(symbol()));
+    connect(kf,SIGNAL(numLockStateToggle()),qApp,SIGNAL(numLockStateToggle()));
+    connect(kf,SIGNAL(capsLockStateToggle()),qApp,SIGNAL(capsLockStateToggle()));
+    connect(kf,SIGNAL(activate(const DeviceButton*,bool)),qApp,SIGNAL(activate(const DeviceButton*,bool)));
+
 //    bg = new Info( this );
     tb = new TaskBar;
+    connect(tb, SIGNAL(forceSuspend()), this, SLOT(togglePower()) );
 
     launcher = new Launcher( 0, 0, WStyle_Customize | QWidget::WGroupLeader );
+    connect(tb, SIGNAL(tabSelected(const QString&)), launcher, SLOT(showTab(const QString&)) );
 
     connect(launcher, SIGNAL(busy()), tb, SLOT(startWait()));
     connect(launcher, SIGNAL(notBusy(const QString&)), tb, SLOT(stopWait(const QString&)));
@@ -477,6 +527,10 @@ void Desktop::activate(const DeviceButton* button, bool held)
 	sr = button->heldAction();
     } else {
 	sr = button->pressedAction();
+    }
+    // A button with no action defined, will return a null ServiceRequest.  Don't attempt
+    // to send/do anything with this as it will crash
+    if ( !sr.isNull() ) {
 	QString app = sr.app();
 	bool vis = app=="qpe" ? isVisibleWindow(launcher->winId()) : hasVisibleWindow(app);
 	if ( sr.message() == "raise()" && vis ) {
@@ -485,8 +539,9 @@ void Desktop::activate(const DeviceButton* button, bool held)
 	    // "back door"
 	    sr << (int)vis;
 	}
+	
+	sr.send();
     }
-    sr.send();
 }
 
 void Desktop::appMessage(const QCString& message, const QByteArray&)
@@ -614,7 +669,9 @@ void DesktopApplication::shutdown( ShutdownImpl::Type t )
 #ifndef Q_OS_WIN32
 	    execlp("shutdown", "shutdown", "-h", "now", (void*)0); // No tr
 #else
-	    qDebug("DesktopApplication::shutdown fixme, can't shutdown");      
+	    qDebug("DesktopApplication::ShutdownSystem");      
+	    prepareForTermination(FALSE);
+	    quit();
 #endif
 	    break;
 
@@ -622,13 +679,15 @@ void DesktopApplication::shutdown( ShutdownImpl::Type t )
 #ifndef Q_OS_WIN32
 	    execlp("shutdown", "shutdown", "-r", "now", (void*)0); // No tr
 #else
-	    qDebug("DesktopApplication::shutdown fixme, can't reboot");      
+	    qDebug("DesktopApplication::RebootSystem");      
+	    restart();
 #endif
 	    break;
 
 	case ShutdownImpl::RestartDesktop:
 	    restart();
 	    break;
+
 	case ShutdownImpl::TerminateDesktop:
 	    prepareForTermination(FALSE);
 	    quit();
@@ -638,24 +697,11 @@ void DesktopApplication::shutdown( ShutdownImpl::Type t )
 
 void DesktopApplication::restart()
 {
-    prepareForTermination(TRUE);
-
-#ifdef Q_WS_QWS
-    for ( int fd = 3; fd < 100; fd++ )
-	close( fd );
-#ifndef Q_OS_WIN32
-#if defined(QT_DEMO_SINGLE_FLOPPY)
-    execl( "/sbin/init", "qpe", 0 );
-#elif defined(QT_QWS_CASSIOPEIA)
-    execl( "/bin/sh", "sh", 0 );
-#else
-    execl( (qpeDir()+"bin/qpe").latin1(), "qpe", 0 );
-#endif
-#else
-    qDebug("DesktopApplication::restart fixme, can't restart");      
-#endif
-    exit(1);
-#endif
+    if ( allowRestart ) {
+	prepareForTermination(TRUE);
+	doRestart = TRUE;
+	quit();
+    }
 }
 
 void Desktop::startTransferServer()
@@ -771,3 +817,5 @@ bool Desktop::eventFilter( QObject *o, QEvent *ev )
     }
     return FALSE;
 }
+
+#include "desktop.moc"

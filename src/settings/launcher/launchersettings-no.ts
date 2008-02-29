@@ -20,10 +20,6 @@
 <context>
     <name>LauncherSettingsBase</name>
     <message>
-        <source>Launcher Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Category:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -93,6 +89,10 @@
     </message>
     <message>
         <source>Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Launcher</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

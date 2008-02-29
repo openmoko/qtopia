@@ -24,7 +24,6 @@
 #if defined Q_OS_WIN32 && defined Q_WS_QWS
 #include <unistd.h>
 #endif
-#include "qlibrary.h"
 #include <qfile.h>
 
 #ifdef QTOPIA_DESKTOP
@@ -88,6 +87,7 @@
 #  include "qpestyle.h"
 #endif
 #include "alarmserver.h"
+#include "pluginloader_p.h"
 
 #include <stdlib.h>
 #ifndef Q_OS_WIN32
@@ -119,6 +119,10 @@ public:
     { return topData()->normalGeometry; };
 };
 
+#ifdef Q_WS_QWS
+extern QRect qt_maxWindowRect;
+#endif
+
 class QPEApplicationData {
 public:
     QPEApplicationData() : presstimer(0), presswidget(0), rightpressed(FALSE),
@@ -126,7 +130,8 @@ public:
 	forceshow(FALSE), nomaximize(FALSE), qpe_main_widget(0),
 	keep_running(TRUE), skiptimechanged(FALSE)
 #ifdef Q_WS_QWS
-	, styleLib(0), styleIface(0)
+	,styleLoader("styles"), styleIface(0), textPluginLoader("textcodecs"), // No tr
+	imagePluginLoader("imagecodecs")
 #endif
     {
 	qcopq.setAutoDelete(TRUE);
@@ -183,13 +188,16 @@ public:
 	if ( mw->isVisible() ) {
 	    mw->raise();
 	} else {
+	    QPoint p;
+	    QSize s;
+
 	    if ( mw->layout() && mw->inherits("QDialog") ) {
 		bool max;
-		QRect r = read_widget_rect(strName, max);
-		if ( !r.isNull() ) {
-		    mw->setGeometry( r );
+		if ( read_widget_rect(strName, max, p, s) && validate_widget_size(mw, p, s) ) {
+		    mw->resize(s);
+		    mw->move(p);
 
-		    if ( max )
+		    if ( max && !nomaximize )
 			mw->showMaximized();
 		    else
 			mw->show();
@@ -198,9 +206,9 @@ public:
 		}
 	    } else {
 		bool max;
-		QRect r = read_widget_rect(strName, max);
-		if ( !r.isNull() ) {
-		    mw->setGeometry( r );
+		if ( read_widget_rect(strName, max, p, s) && validate_widget_size(mw, p, s) ) {
+		    mw->resize(s);
+		    mw->move(p);
 		} else {    //no stored rectangle, make an estimation
 		    int x = (qApp->desktop()->width()-mw->frameGeometry().width())/2;
 		    int y = (qApp->desktop()->height()-mw->frameGeometry().height())/2;
@@ -210,7 +218,7 @@ public:
 			mw->showMaximized();
 #endif
 		}
-		if ( max )
+		if ( max && !nomaximize )
 		    mw->showMaximized();
 		else
 		    mw->show();
@@ -218,37 +226,73 @@ public:
 	}
     }
 
-    static QRect read_widget_rect(QString &app, bool &maximized)
+    static bool read_widget_rect(const QString &app, bool &maximized, QPoint &p, QSize &s)
     {
-	QRect r;
 	maximized = TRUE;
 
 	// 350 is the trigger in qwsdefaultdecoration for providing a resize button
 	if ( qApp->desktop()->width() <= 350 )
-	    return r;
+	    return FALSE;
 
 	Config cfg( "qpe" );
 	cfg.setGroup("ApplicationPositions");
-	QString s = cfg.readEntry( app, QString::null );
-	QStringList l = QStringList::split(",", s);
+	QString str = cfg.readEntry( app, QString::null );
+	QStringList l = QStringList::split(",", str);
 
-	if ( s != QString::null && l.count() == 5) {
-	    r.setRect( QMAX(0, l[0].toInt()),
-		       QMAX(0, l[1].toInt()),
-		       l[2].toInt(),
-		       l[3].toInt() );
+	if ( l.count() == 5) {
+	    p.setX( l[0].toInt() );
+	    p.setY( l[1].toInt() );
 
-	    r.setRight( QMIN(r.right(), qApp->desktop()->width() ) );
-	    r.setBottom( QMIN(r.bottom(), qApp->desktop()->height() ) );
+	    s.setWidth( l[2].toInt() );
+	    s.setHeight( l[3].toInt() );
+
 	    maximized = l[4].toInt();
 
-	    // Resizing and moving the window out of bounds could result in a 1 line window.
-	    // If we're very tiny, ignore the stored rectangle
-	    if ( r.height() < 40 || r.width() < 40 )
-		return QRect();
+	    return TRUE;
 	}
 
-	return r;
+	return FALSE;
+    }
+
+    static bool validate_widget_size(const QWidget *w, QPoint &p, QSize &s)
+    {
+#ifndef Q_WS_QWS
+	QRect qt_maxWindowRect = qApp->desktop()->geometry();
+#endif
+	int maxX = qt_maxWindowRect.width();
+	int maxY = qt_maxWindowRect.height();
+	int wWidth = s.width() + ( w->frameGeometry().width() - w->geometry().width() );
+	int wHeight = s.height() + ( w->frameGeometry().height() - w->geometry().height() );
+
+	// total window size is not allowed to be larger than desktop window size
+	if ( ( wWidth >= maxX ) && ( wHeight >= maxY ) )
+	    return FALSE;
+
+	if ( wWidth > maxX ) {
+	    s.setWidth( maxX - (w->frameGeometry().width() - w->geometry().width() ) );
+	    wWidth = maxX;
+	}
+
+	if ( wHeight > maxY ) {
+	    s.setHeight( maxY - (w->frameGeometry().height() - w->geometry().height() ) );
+	    wHeight = maxY;
+	}
+
+	// any smaller than this and the maximize/close/help buttons will be overlapping
+	if ( wWidth < 80 || wHeight < 60 )
+	    return FALSE;
+
+	if ( p.x() < 0 )
+	    p.setX(0);
+	if ( p.y() < 0 )
+	    p.setY(0);
+
+	if ( p.x() + wWidth > maxX )
+	    p.setX( maxX - wWidth );
+	if ( p.y() + wHeight > maxY )
+	    p.setY( maxY - wHeight );
+
+	return TRUE;
     }
 
     static void store_widget_rect(QWidget *w, QString &app)
@@ -257,18 +301,23 @@ public:
 	if ( qApp->desktop()->width() <= 350 )
 	    return;
 
+	// we use these to map the offset of geometry and pos.  ( we can only use normalGeometry to
+	// get the non-maximized version, so we have to do it the hard way )
+	int offsetX = w->x() - w->geometry().left();
+	int offsetY = w->y() - w->geometry().top();
+
 	QRect r;
 	if ( w->isMaximized() )
 	    r = ( (HackWidget *) w)->normalGeometry();
 	else
 	    r = w->geometry();
-	{
-	    Config cfg( "qpe" );
-	    cfg.setGroup("ApplicationPositions");
-	    QString s;
-	    s.sprintf("%d,%d,%d,%d,%d", r.left(), r.top(), r.width(), r.height(), w->isMaximized() );
-	    cfg.writeEntry( app, s );
-	}
+
+	// Stores the window placement as pos(), size()  (due to the offset mapping)
+	Config cfg( "qpe" );
+	cfg.setGroup("ApplicationPositions");
+	QString s;
+	s.sprintf("%d,%d,%d,%d,%d", r.left() + offsetX, r.top() + offsetY, r.width(), r.height(), w->isMaximized() );
+	cfg.writeEntry( app, s );
     }
 
     static bool setWidgetCaptionFromAppName( QWidget* /*mw*/, const QString& /*appName*/, const QString& /*appsPath*/ )
@@ -314,70 +363,43 @@ public:
 #ifdef Q_WS_QWS
     void loadTextCodecs()
     {
-	QString path = QPEApplication::qpeDir() + "plugins/textcodecs";
-#ifndef Q_OS_WIN32
-	QDir dir( path, "lib*.so" );
-#else
-	QDir dir (path, "*.dll");
-#endif
-
-	QStringList list = dir.entryList();
+	QStringList list = textPluginLoader.list();
 	QStringList::Iterator it;
 	for ( it = list.begin(); it != list.end(); ++it ) {
 	    TextCodecInterface *iface = 0;
-#if (QT_VERSION-0 >= 0x030000)
-	    QComLibrary *lib = new QComLibrary( path + "/" + *it );
-#else
-	    QLibrary *lib = new QLibrary( path + "/" + *it );
-#endif
-	    if ( lib->queryInterface( IID_QtopiaTextCodec, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	    if ( textPluginLoader.queryInterface( *it, IID_QtopiaTextCodec, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 		QValueList<int> mibs = iface->mibEnums();
 		for (QValueList<int>::ConstIterator i=mibs.begin(); i!=mibs.end(); ++i) {
 		    (void)iface->createForMib(*i);
 		    // ### it exists now; need to remember if we can delete it
 		}
-	    } else {
-		lib->unload();
-		delete lib;
 	    }
 	}
     }
 
     void loadImageCodecs()
     {
-	QString path = QPEApplication::qpeDir() + "plugins/imagecodecs";
-#ifndef Q_OS_WIN32
-	QDir dir( path, "lib*.so" );
-#else
-	QDir dir (path, "*.dll");
-#endif
-	QStringList list = dir.entryList();
+	QStringList list = imagePluginLoader.list();
 	QStringList::Iterator it;
 	for ( it = list.begin(); it != list.end(); ++it ) {
 	    ImageCodecInterface *iface = 0;
-#if (QT_VERSION-0 >= 0x030000)
-	    QComLibrary *lib = new QComLibrary( path + "/" + *it );
-#else
-	    QLibrary *lib = new QLibrary( path + "/" + *it );
-#endif
-	    if ( lib->queryInterface( IID_QtopiaImageCodec, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+	    if ( imagePluginLoader.queryInterface( *it, IID_QtopiaImageCodec, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 		QStringList formats = iface->keys();
 		for (QStringList::ConstIterator i=formats.begin(); i!=formats.end(); ++i) {
 		    (void)iface->installIOHandler(*i);
 		    // ### it exists now; need to remember if we can delete it
 		}
-	    } else {
-		lib->unload();
-		delete lib;
 	    }
 	}
     }
 #endif
 
 #ifdef Q_WS_QWS
-    QLibrary *styleLib;
+    PluginLoaderIntern styleLoader;
     StyleInterface *styleIface;
     QString styleName;
+    PluginLoaderIntern textPluginLoader;
+    PluginLoaderIntern imagePluginLoader;
 #endif
     QString decorationName;
 };
@@ -594,9 +616,9 @@ static void setScreenSaverIntervals(int i1, int i2, int i3)
     config.setGroup( "Screensaver" );
 
     int v[4];
-    i1 = ssi(i1, config, "Dim","Interval_Dim", 30);
+    i1 = ssi(i1, config, "Dim","Interval_Dim", 30); // No tr
     i2 = ssi(i2, config, "LightOff","Interval_LightOff", 20);
-    i3 = ssi(i3, config, "","Interval", 60);
+    i3 = ssi(i3, config, "","Interval", 60); // No tr
 
     //qDebug("screen saver intervals: %d %d %d", i1, i2, i3);
 
@@ -701,6 +723,11 @@ static void setScreenSaverInterval(int interval)
   This signal is emitted when the user changes the clock's style. If
   \a ampm is TRUE, the user wants a 12-hour AM/PM clock, otherwise,
   they want a 24-hour clock.
+
+  \warning if you use the TimeString functions, you should use
+  TimeString::connectChange() instead.
+
+  \sa dateFormatChanged()
 */
 
 /*!
@@ -723,6 +750,11 @@ static void setScreenSaverInterval(int interval)
     \fn void QPEApplication::dateFormatChanged( DateFormat )
 
     This signal is emitted whenever the date format is changed.
+
+    \warning if you use the TimeString functions, you should use
+    TimeString::connectChange() instead.
+
+    \sa clockChanged()
 */
 
 /*!
@@ -777,6 +809,7 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 {
     d = new QPEApplicationData;
 #ifdef Q_WS_QWS
+    PluginLoaderIntern::init();
     d->loadTextCodecs();
     d->loadImageCodecs();
 #endif
@@ -1176,7 +1209,7 @@ QString QPEApplication::qpeDir()
 */
 QString QPEApplication::documentDir()
 {
-    QString r = QDir::homeDirPath(); 
+    QString r = QDir::homeDirPath();
 #ifdef QTOPIA_DESKTOP
     r += "/.palmtopcenter/";
 #endif
@@ -1198,11 +1231,14 @@ int QPEApplication::defaultRotation()
 {
     if ( deforient < 0 ) {
 	QString d = getenv("QWS_DISPLAY");
-	if ( d.contains("Rot90") ) {
+	Config config("qpe");
+        config.setGroup( "Rotation" );
+	d = config.readEntry("Screen", d);
+	if ( d.contains("Rot90") ) { // No tr
 	    deforient = 90;
-	} else if ( d.contains("Rot180") ) {
+	} else if ( d.contains("Rot180") ) { // No tr
 	    deforient = 180;
-	} else if ( d.contains("Rot270") ) {
+	} else if ( d.contains("Rot270") ) { // No tr
 	    deforient = 270;
 	} else {
 	    deforient=0;
@@ -1385,18 +1421,6 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	emit timeChanged();
     } else if ( msg =="categoriesChanged()" ) {
 	emit categoriesChanged();
-    } else if ( msg == "execute(QString)" ) {
-	if ( type() == GuiServer ) {
-	    QString t;
-	    stream >> t;
-	    Global::execute( t );
-	}
-    } else if ( msg == "execute(QString,QString)" ) {
-	if ( type() == GuiServer ) {
-	    QString t,d;
-	    stream >> t >> d;
-	    Global::execute( t, d );
-	}
     } else if ( msg == "addAlarm(QDateTime,QCString,QCString,int)" ) {
 	if ( type() == GuiServer ) {
 	    QDateTime when;
@@ -1442,6 +1466,13 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	e << d->appName;
 #endif
     } else if ( msg == "reload()" ) {
+	// Reload anything stored in files...
+	applyStyle();
+	if ( type() == GuiServer ) {
+	    setVolume();
+	    setBacklight(-1);
+	}
+	// App-specifics...
 	emit reload();
     } else if ( msg == "setScreenSaverMode(int)" ) {
 	if ( type() == GuiServer ) {
@@ -1652,11 +1683,6 @@ bool QPEApplication::keepRunning() const
 void QPEApplication::internalSetStyle( const QString &style )
 {
 #ifdef Q_WS_QWS
-#ifndef Q_OS_WIN32
-    QString dllExtension(".so");
-#else
-    QString dllExtension(".dll");
-#endif
     if ( style == d->styleName )
 	return;
 
@@ -1670,25 +1696,19 @@ void QPEApplication::internalSetStyle( const QString &style )
     }
 #else
     StyleInterface *oldIface = d->styleIface;
-    QLibrary *oldLib = d->styleLib;
     d->styleIface = 0;
-    d->styleLib = 0;
 
-    if ( style == "Windows" ) {
+    if ( style == "Windows" ) { // No tr
 	newStyle = new QWindowsStyle;
     } else if ( style == "QPE" || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
-    } else if ( style.findRev( dllExtension ) == (int)style.length() - (int)dllExtension.length() ) {
-	QString path = QPEApplication::qpeDir() + "plugins/styles";
-	StyleInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + style );
-	if ( lib->queryInterface( IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
-	    newStyle = iface->style();
-	    d->styleIface = iface;
-	    d->styleLib = lib;
-	} else {
-	    lib->unload();
-	    delete lib;
+    } else {
+	if ( !d->styleLoader.inSafeMode() && d->styleLoader.isEnabled( style ) ) {
+	    StyleInterface *iface = 0;
+	    if ( d->styleLoader.queryInterface( style, IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
+		newStyle = iface->style();
+		d->styleIface = iface;
+	    }
 	}
     }
 #endif
@@ -1702,12 +1722,9 @@ void QPEApplication::internalSetStyle( const QString &style )
     setStyle( newStyle );
 
 #if QT_VERSION < 300
-    if ( oldIface ) {
-	// cleanup old plugin.
-	oldIface->release();
-	oldLib->unload();
-	delete oldLib;
-    }
+    // cleanup old plugin.
+    if ( oldIface )
+	d->styleLoader.releaseInterface( oldIface );
 #endif
 #endif
 }
@@ -1729,12 +1746,12 @@ void QPEApplication::prepareForTermination(bool willrestart)
 	//### revise add a different pix map
 	qDebug("Missing pixmap : QPEApplication::prepareForTermination()");
 #endif
-	QLabel *lblWait = new QLabel(0, "wait hack!", QWidget::WStyle_Customize |
-				  QWidget::WStyle_NoBorder | QWidget::WStyle_Tool );
+	QLabel *lblWait = new QLabel(0, "wait hack!", QWidget::WStyle_Customize | // no tr
+		QWidget::WStyle_NoBorder | QWidget::WStyle_Tool | QWidget::WStyle_StaysOnTop );
 	lblWait->setPixmap( pix );
 	lblWait->setAlignment( QWidget::AlignCenter );
+	lblWait->setGeometry( desktop()->geometry() );
 	lblWait->show();
-	lblWait->showMaximized();
     }
 #ifndef SINGLE_APP
 #ifndef QT_NO_COP
@@ -1993,7 +2010,8 @@ void QPEApplication::tryQuit()
 	e << d->appName;
     }
 #endif
-    d->store_widget_rect(d->qpe_main_widget, d->appName);
+    if ( d->keep_running )
+	d->store_widget_rect(d->qpe_main_widget, d->appName);
 
     processEvents();
 
@@ -2008,7 +2026,8 @@ void QPEApplication::tryQuit()
 */
 void QPEApplication::hideOrQuit()
 {
-    d->store_widget_rect(d->qpe_main_widget, d->appName);
+    if ( d->keep_running )
+	d->store_widget_rect(d->qpe_main_widget, d->appName);
 
     processEvents();
 
@@ -2023,6 +2042,20 @@ void QPEApplication::hideOrQuit()
     } else
 	quit();
 }
+
+#ifdef Q_WS_QWS
+extern PluginLibraryManager *pluginLibraryManagerInstanceIntern();
+#endif
+
+void QPEApplication::pluginLibraryManager( PluginLibraryManager **m )
+{
+#ifdef Q_WS_QWS
+    *m = pluginLibraryManagerInstanceIntern();
+#else
+    *m = 0;
+#endif
+}
+
 
 /*!
     \fn void QPEApplication::showDialog( QDialog* dialog, bool nomax )
@@ -2047,7 +2080,7 @@ extern "C" void __cxa_pure_virtual();
 
 void __cxa_pure_virtual()
 {
-    fprintf( stderr, "Pure virtual called\n");
+    fprintf( stderr, "Pure virtual called\n"); // No tr
     abort();
 
 }

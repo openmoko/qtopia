@@ -20,8 +20,8 @@
 #ifndef _FLASH_H_
 #define _FLASH_H_
 
-#define PLUGIN_NAME "Shockwave Flash"
-#define FLASH_VERSION_STRING "Version 0.4.10"
+#define PLUGIN_NAME "Shockwave Flash" // No tr
+#define FLASH_VERSION_STRING "Version 0.4.10" // No tr
 
 /* Flags to pass to FlashExec */
 #define FLASH_WAKEUP 0x01

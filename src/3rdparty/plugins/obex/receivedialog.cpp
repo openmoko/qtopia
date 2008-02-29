@@ -38,39 +38,75 @@
 #include <qprogressbar.h>
 
 ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent, const char *name )
-    : ReceiveDialogBase( parent, name, FALSE )//, WStyle_StaysOnTop )
+    : QMainWindow( parent, name, FALSE )//, WStyle_StaysOnTop )
 {
-    server = irserver;
-    connect( cancelButton1, SIGNAL( clicked() ), this, SLOT( cancelPressed() ) );
-    connect( cancelButton2, SIGNAL( clicked() ), this, SLOT( cancelPressed() ) );
-    connect( saveButton, SIGNAL( clicked() ), this, SLOT( savePressed() ) );
-    connect( openButton, SIGNAL( clicked() ), this, SLOT( openPressed() ) );
+    setCaption( tr("Infrared receive") );
+
+    w = new ReceiveDialogBase(this);
+    setCentralWidget(w);
     
-    applyFrame->hide();
+    server = irserver;
+    connect( server, SIGNAL(received(const QString&, const QString&) ), 
+	     this, SLOT( received() ) );
+    connect( server, SIGNAL(receiving(int, const QString&, const QString&) ), 
+	     this, SLOT( receiving(int, const QString&, const QString&) ) );
+
+    
+    connect( w->cancelButton, SIGNAL( clicked() ), this, SLOT( cancelPressed() ) );
+    connect( w->discardButton, SIGNAL( clicked() ), this, SLOT( discardPressed() ) );
+    connect( w->saveButton, SIGNAL( clicked() ), this, SLOT( savePressed() ) );
+    connect( w->openButton, SIGNAL( clicked() ), this, SLOT( openPressed() ) );
+    
+    w->applyFrame->hide();
 }
 
 ReceiveDialog::~ReceiveDialog()
 {
 }
-    
+
+void ReceiveDialog::statusMsg(const QString &str)
+{
+//    setStatus( str );
+    if ( !isVisible() )
+	Global::statusMessage( str );
+}
+
+void ReceiveDialog::receiving( int size, const QString &filename, const QString &mimetype )
+{
+    connect( server, SIGNAL( statusMsg(const QString &) ), this, SLOT( statusMsg(const QString &) ) );
+    connect( server, SIGNAL( progress(int) ), this, SLOT( progress(int) ) );
+
+    // reset widget states
+    w->cancelButton->setEnabled(TRUE);
+    w->openButton->setEnabled(TRUE);
+    w->progressFrame->show();
+    w->applyFrame->hide();
+    w->detailsLabel->setText("");
+
+    setInfo(size, filename, mimetype);
+}
+
+void ReceiveDialog::finished()
+{
+    disconnect( server, SIGNAL( statusMsg(const QString &) ), this, SLOT( statusMsg(const QString &) ) );
+    disconnect( server, SIGNAL( progress(int) ), this, SLOT( progress(int) ) );
+}
+
 void ReceiveDialog::setInfo( int s, const QString &fn, const QString &t )
 {
-    filename->setText( fn );
+    w->filename->setText( fn );
     QString sizeStr = (s != 0 ? QString::number( s ) : tr( "unknown" ) );
-    size->setText( sizeStr );
+    w->size->setText( sizeStr );
     QString typeStr = (t.isNull() ? tr( "unknown" ) : t );
-    type->setText( typeStr );
+    w->type->setText( typeStr );
     
     if ( s )  {
-	progressBar->setTotalSteps(s);
+	w->progressBar->reset();
+	w->progressBar->setTotalSteps(s);
     } else {
-	progressBar->hide();
+	w->progressBar->hide();
     }
     totalSize = s;
-
-    connect( server, SIGNAL( progress(int) ), this, SLOT( progress(int) ) );
-    connect( server, SIGNAL(received(const QString&, const QString&) ), 
-	     this, SLOT( received() ) );
 
 }
 
@@ -78,12 +114,28 @@ void ReceiveDialog::progress( int s )
 {
     QString progressStr;
     if ( totalSize && s != totalSize ) {
-	progressBar->setProgress( s );
+	w->progressBar->setProgress( s );
 	progressStr = QString("%1/%1").arg(s).arg(totalSize);
     } else {
 	progressStr = QString::number(s);
     }
-    size->setText(progressStr);
+    w->size->setText(progressStr);
+
+    if ( !isVisible() ) {
+	int percent;
+	if ( totalSize )
+	    percent = ( s  * 100 / totalSize );
+	else
+	    percent = 100;
+	
+	QString str = w->filename->text();
+	if ( str.length() > 20 ) {
+	    str.truncate(17);
+	    str + "...";
+	}
+	str += QString(" (%1\%)").arg(percent);
+	Global::statusMessage(str);
+    }
 }
 
 static QString vcalInfo( const QString &filename, bool *todo, bool *cal )
@@ -128,9 +180,9 @@ static QString vcalInfo( const QString &filename, bool *todo, bool *cal )
 
 void ReceiveDialog::received()
 {
-    QCopEnvelope env("QPE/Obex","received()");
+    progress( totalSize );
 
-    MimeType mt( filename->text() );
+    MimeType mt( w->filename->text() );
     QString service = "Receive/"+mt.id();
     QCString receiveChannel = Service::channel(service);
     if ( receiveChannel.isEmpty() ) {
@@ -138,59 +190,76 @@ void ReceiveDialog::received()
 	// ##### should split file, or some other full fix
 	if ( mt.id() == "text/x-vCalendar" ) {
 	    bool calendar, todo;
-	    QString desc = vcalInfo( "/tmp/obex/" + filename->text(), &todo, &calendar );
+	    QString desc = vcalInfo( "/tmp/obex/" + w->filename->text(), &todo, &calendar );
 	    if ( calendar ) {
 		receiveChannel = Service::channel(service+"-Events");
 		application = "datebook";
-		detailsLabel->setText( desc );
+		w->detailsLabel->setText( desc );
 	    } else if ( todo ) {
 		receiveChannel = Service::channel(service+"-Tasks");
 		application = "todolist";
-		detailsLabel->setText( desc );
+		w->detailsLabel->setText( desc );
 	    }
 	}
 	if ( receiveChannel.isEmpty() ) {
 	    QCString openchannel = Service::channel("Open/"+mt.id());
 	    if ( openchannel.isEmpty() )
-		openButton->setEnabled(FALSE);
-	    progressFrame->hide();
-	    applyFrame->show();
+		w->openButton->setEnabled(FALSE);
 	}
+    } else {
+	AppLnk app = Service::appLnk(service);
+	if ( app.isValid() )
+	    w->detailsLabel->setText( app.name() );
     }
+    
+    w->progressFrame->hide();
+    w->applyFrame->show();
 
     if ( !receiveChannel.isEmpty() ) {
 	// Send immediately
 	AppLnk lnk(Service::appLnk(service));
 	QCopEnvelope e( receiveChannel, "receiveData(QString,QString)");
-	e << QString( "/tmp/obex/" + filename->text() ) << mt.id();
-	accept();
+	e << QString( "/tmp/obex/" + w->filename->text() ) << mt.id();
+	close();
     }
+    
+    finished();
+}
+
+void ReceiveDialog::failed()
+{
+    w->cancelButton->setEnabled( FALSE );
+    w->detailsLabel->setText( tr("Failed") );
+    finished();
 }
 
 void ReceiveDialog::cancelPressed()
 {
     server->cancel();
-    reject();
-    delete this;
+    failed();
+    close();
+}
+
+void ReceiveDialog::discardPressed()
+{
+    close();
 }
 
 void ReceiveDialog::savePressed()
 {
     save(FALSE);
-    accept();
-    delete this;
+    close();
 }
 
 void ReceiveDialog::openPressed()
 {
     save(TRUE);
-    accept();
-    delete this;
+    close();
 }
 
 void ReceiveDialog::save(bool open)
 {
-    QString fn = filename->text();
+    QString fn = w->filename->text();
     
     // let's check the type. If it's a known one we pass it to the app, otherwise
     // add it to documents

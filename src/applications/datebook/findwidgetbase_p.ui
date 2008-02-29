@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>371</width>
-            <height>388</height>
+            <width>260</width>
+            <height>171</height>
         </rect>
     </property>
     <property stdset="1">
@@ -32,7 +32,7 @@
     <property>
         <name>layoutSpacing</name>
     </property>
-    <grid>
+    <vbox>
         <property stdset="1">
             <name>margin</name>
             <number>6</number>
@@ -41,7 +41,7 @@
             <name>spacing</name>
             <number>6</number>
         </property>
-        <widget row="0"  column="0" >
+        <widget>
             <class>QLayoutWidget</class>
             <property stdset="1">
                 <name>name</name>
@@ -99,13 +99,13 @@
                 </widget>
             </hbox>
         </widget>
-        <widget row="1"  column="0" >
+        <widget>
             <class>QLayoutWidget</class>
             <property stdset="1">
                 <name>name</name>
-                <cstring>Layout2</cstring>
+                <cstring>Layout5</cstring>
             </property>
-            <hbox>
+            <grid>
                 <property stdset="1">
                     <name>margin</name>
                     <number>0</number>
@@ -114,7 +114,69 @@
                     <name>spacing</name>
                     <number>6</number>
                 </property>
-                <widget>
+                <widget row="0"  column="1"  rowspan="1"  colspan="2" >
+                    <class>CategorySelect</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>cmbCat</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>7</hsizetype>
+                            <vsizetype>5</vsizetype>
+                        </sizepolicy>
+                    </property>
+                </widget>
+                <widget row="1"  column="2" >
+                    <class>QPEDateEdit</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>cmdDate</cstring>
+                    </property>
+                </widget>
+                <widget row="4"  column="0"  rowspan="1"  colspan="3" >
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>lblStatus</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>frameShape</name>
+                        <enum>Panel</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>frameShadow</name>
+                        <enum>Sunken</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                </widget>
+                <widget row="1"  column="0"  rowspan="1"  colspan="2" >
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>lblStartDate</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Start Search at:</string>
+                    </property>
+                </widget>
+                <widget row="3"  column="0"  rowspan="1"  colspan="3" >
+                    <class>QCheckBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>chkBackwards</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Search Backwards</string>
+                    </property>
+                </widget>
+                <widget row="0"  column="0" >
                     <class>QLabel</class>
                     <property stdset="1">
                         <name>name</name>
@@ -125,126 +187,25 @@
                         <string>Category:</string>
                     </property>
                 </widget>
-                <widget>
-                    <class>CategorySelect</class>
+                <widget row="2"  column="0"  rowspan="1"  colspan="3" >
+                    <class>QCheckBox</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>cmbCat</cstring>
+                        <cstring>chkCase</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>Case Sensitive</string>
                     </property>
                 </widget>
-            </hbox>
+            </grid>
         </widget>
-        <widget row="2"  column="0" >
-            <class>QFrame</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>Frame3</cstring>
-            </property>
-            <property stdset="1">
-                <name>sizePolicy</name>
-                <sizepolicy>
-                    <hsizetype>5</hsizetype>
-                    <vsizetype>1</vsizetype>
-                </sizepolicy>
-            </property>
-            <property stdset="1">
-                <name>frameShape</name>
-                <enum>NoFrame</enum>
-            </property>
-            <property stdset="1">
-                <name>frameShadow</name>
-                <enum>Raised</enum>
-            </property>
-            <property>
-                <name>layoutMargin</name>
-            </property>
-            <property>
-                <name>layoutSpacing</name>
-            </property>
-            <widget>
-                <class>QLabel</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>lblStartDate</cstring>
-                </property>
-                <property stdset="1">
-                    <name>geometry</name>
-                    <rect>
-                        <x>1</x>
-                        <y>1</y>
-                        <width>181</width>
-                        <height>80</height>
-                    </rect>
-                </property>
-                <property stdset="1">
-                    <name>text</name>
-                    <string>Start Search at:</string>
-                </property>
-            </widget>
-            <widget>
-                <class>QPEDateButton</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>cmdDate</cstring>
-                </property>
-                <property stdset="1">
-                    <name>geometry</name>
-                    <rect>
-                        <x>154</x>
-                        <y>29</y>
-                        <width>201</width>
-                        <height>31</height>
-                    </rect>
-                </property>
-            </widget>
-        </widget>
-        <widget row="3"  column="0" >
-            <class>QCheckBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>chkCase</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Case Sensitive</string>
-            </property>
-        </widget>
-        <widget row="4"  column="0" >
-            <class>QCheckBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>chkBackwards</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Search Backwards</string>
-            </property>
-        </widget>
-        <widget row="5"  column="0" >
-            <class>QLabel</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>lblStatus</cstring>
-            </property>
-            <property stdset="1">
-                <name>frameShape</name>
-                <enum>Panel</enum>
-            </property>
-            <property stdset="1">
-                <name>frameShadow</name>
-                <enum>Sunken</enum>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string></string>
-            </property>
-        </widget>
-    </grid>
+    </vbox>
 </widget>
 <customwidgets>
     <customwidget>
         <class>CategorySelect</class>
-        <header location="global">qtopia/categoryselect.h</header>
+        <header location="global">qpe/categoryselect.h</header>
         <sizehint>
             <width>-1</width>
             <height>-1</height>
@@ -257,8 +218,8 @@
         <pixmap>image0</pixmap>
     </customwidget>
     <customwidget>
-        <class>QPEDateButton</class>
-        <header location="global">qtopia/datepicker.h</header>
+        <class>QPEDateEdit</class>
+        <header location="global">qtopia/datetimeedit.h</header>
         <sizehint>
             <width>20</width>
             <height>10</height>
@@ -269,7 +230,7 @@
             <verdata>5</verdata>
         </sizepolicy>
         <pixmap>image0</pixmap>
-        <signal>dateSelected(const QDate &amp;)</signal>
+        <signal>valueChanged(const QDate &amp;)</signal>
         <slot access="public">setDate(const QDate &amp;)</slot>
     </customwidget>
 </customwidgets>

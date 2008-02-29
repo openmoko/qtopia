@@ -20,7 +20,7 @@
 
 #include "taskbarsettings.h"
 #include <qtopia/config.h>
-#include <qtopia/qlibrary.h>
+#include <qtopia/pluginloader.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/taskbarappletinterface.h>
 #include <qtopia/qcopenvelope_qws.h>
@@ -45,57 +45,33 @@ void TaskbarSettings::init()
     cfg.setGroup( "Applets" );
     QStringList exclude = cfg.readListEntry( "ExcludeApplets", ',' );
 
-    QString path = QPEApplication::qpeDir() + "plugins/applets";
-#ifndef Q_OS_WIN32
-    QDir dir( path, "lib*.so" );
-#else
-    QDir dir( path, "*.dll" );
-#endif
-    QStringList list = dir.entryList();
+    PluginLoader loader( "applets" );
+    QStringList list = loader.list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	QString name;
 	QPixmap icon;
-	TaskbarNamedAppletInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
-	lib->queryInterface( IID_TaskbarNamedApplet, (QUnknownInterface**)&iface );
-	if ( iface ) {
-	    QString lang = getenv( "LANG" );
-	    QTranslator * trans = new QTranslator(qApp);
-	    QString type = (*it).left( (*it).find(".") );
-	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
-	    if ( trans->load( tfn ))
-		qApp->installTranslator( trans );
-	    else
-		delete trans;
-	    name = iface->name();
-	    icon = iface->icon();
-	    iface->release();
-	    lib->unload();
-	} else {
-	    delete lib;
 #ifndef Q_OS_WIN32
-	    name = (*it).mid(3);
-	    int sep = name.find( ".so" );
+	name = (*it).mid(3);
+	int sep = name.find( ".so" );
 #else
-	    name = (*it);
-            int sep = name.find( ".dll" );
+	name = (*it);
+	int sep = name.find( ".dll" );
 #endif
-	    if ( sep > 0 )
-		name.truncate( sep );
-	    sep = name.find( "applet" );
+	if ( sep > 0 )
+	    name.truncate( sep );
+	sep = name.find( "applet" );
 #ifndef Q_OS_WIN32
-	    if ( sep == (int)name.length() - 6 )
-		name.truncate( sep );
+	if ( sep == (int)name.length() - 6 )
+	    name.truncate( sep );
 #else
-	    if (sep >= 0){
-                name.truncate( sep );
-	    }else{
-		qDebug("No applet in %s", (char*)name.latin1());
-	    }
-#endif
-	    name[0] = name[0].upper();
+	if (sep >= 0){
+	    name.truncate( sep );
+	}else{
+	    qDebug("No applet in %s", (char*)name.latin1());
 	}
+#endif
+	name[0] = name[0].upper();
 	QCheckListItem *item;
 	item = new QCheckListItem( appletListView, name,
 		QCheckListItem::CheckBox );
@@ -114,7 +90,7 @@ void TaskbarSettings::itemClicked( QListViewItem *i, const QPoint &p, int )
 {
     if ( i ) {
 	appletsChanged = TRUE;
-	if ( p.x() > 25 ) {
+	if ( appletListView->mapFromGlobal(p).x() > 20 ) {
 	    QCheckListItem *ci = (QCheckListItem *)i;
 	    ci->setOn( !ci->isOn() );
 	}

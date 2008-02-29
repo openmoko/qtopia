@@ -1,7 +1,7 @@
 multiprocess:TEMPLATE	= app
 multiprocess:DESTDIR	= $(QPEDIR)/bin
-#singleprocess:TEMPLATE	= lib
-#singleprocess:DESTDIR   = $(QPEDIR)/lib
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
 
 CONFIG		+= qtopia warn_on release
 

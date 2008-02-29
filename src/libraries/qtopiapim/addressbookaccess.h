@@ -74,6 +74,8 @@ class QTOPIAPIM_EXPORT AddressBookAccess : public QObject {
 
   PimContact personalDetails() const;
 
+  PimContact contactForId(const QUuid &, bool *ok = 0) const;
+
  signals:
   void addressBookUpdated();
 

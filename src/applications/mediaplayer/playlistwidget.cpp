@@ -74,8 +74,10 @@ public:
     int playlistMenuId;
     QPopupMenu *optionsMenu;
     int optionsMenuId;
+    bool playlistInMenu; 
     QPopupMenu *skinMenu;
     int skinMenuId;
+    bool skinInMenu; 
     QStringList skinID;
     unsigned int skinCount;
 
@@ -126,6 +128,7 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
 
     d->playlistMenu = new QPopupMenu( this );
     d->playlistMenuId = d->menu->insertItem( tr( "Playlist" ), d->playlistMenu );
+    d->playlistInMenu = TRUE;
     Action *a = new Action( this, tr( "Clear" ),               "mediaplayer/remove_from_playlist", d->ts,	       SLOT( clearList() ) );
     a->addTo( d->playlistMenu );
     a = new Action( this, tr( "Add all Music" ),       "mediaplayer/add_to_playlist", d->ts,            SLOT( addAllAudio() ) );
@@ -154,6 +157,7 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
     
     d->skinMenu = new QPopupMenu( this );
     d->skinMenuId = d->menu->insertItem( tr( "Skin" ), d->skinMenu );
+    d->skinInMenu = TRUE;
     QString skinPath = QPEApplication::qpeDir() + "pics/mediaplayer/skins/"; 
     QDir skinDir( skinPath );
     d->skinCount = 0;
@@ -197,33 +201,39 @@ PlayListWidget::~PlayListWidget()
 
 void PlayListWidget::resizeEvent( QResizeEvent * )
 {
-    // Remove it from any menu
-    if ( d->menu->findItem( d->skinMenuId ) )
-	d->menu->removeItem( d->skinMenuId );
-    else if ( d->optionsMenu->findItem( d->skinMenuId ) )
-	d->optionsMenu->removeItem( d->skinMenuId );
-
-    if ( d->menu->findItem( d->playlistMenuId ) )
-        d->menu->removeItem( d->playlistMenuId );
-    else if ( d->optionsMenu->findItem( d->playlistMenuId ) )
-        d->optionsMenu->removeItem( d->playlistMenuId );
-
     QFontMetrics fm( qApp->font() );
     int w = width() - fm.width( tr( "Options" ) + tr( "Playlist" ) + tr( "Skin" ) );
 
     // Add it back in based on the width
     if ( w < 5*30 ) {
-	d->skinMenuId = d->optionsMenu->insertItem( tr( "Skin" ), d->skinMenu );
+	if ( d->skinInMenu ) {
+	    d->menu->removeItem( d->skinMenuId );
+	    d->skinMenuId = d->optionsMenu->insertItem( tr( "Skin" ), d->skinMenu );
+	    d->skinInMenu = FALSE;
+	}
 	w += fm.width( tr( "Playlist" ) );
-    } else
-        d->skinMenuId = d->menu->insertItem( tr( "Skin" ), d->skinMenu );
+    } else {
+	if ( !d->skinInMenu ) {
+	    d->optionsMenu->removeItem( d->skinMenuId );
+	    d->skinMenuId = d->menu->insertItem( tr( "Skin" ), d->skinMenu );
+	    d->skinInMenu = TRUE;
+	}
+    }
 
     // Do the same for the playlist menu
-    if ( w < 5*30 ) // If this is a small screen, put the playlist options in 'options'
-	d->playlistMenuId = d->optionsMenu->insertItem( tr( "Playlist" ), d->playlistMenu );
-    else // Otherwise if there is space put it in the menubar
-        d->playlistMenuId = d->menu->insertItem( tr( "Playlist" ), d->playlistMenu );
-
+    if ( w < 5*30 ) { // If this is a small screen, put the playlist options in 'options'
+	if ( d->playlistInMenu ) {
+	    d->menu->removeItem( d->playlistMenuId );
+	    d->playlistMenuId = d->optionsMenu->insertItem( tr( "Playlist" ), d->playlistMenu );
+	    d->playlistInMenu = FALSE;
+	}
+    } else { // Otherwise if there is space put it in the menubar
+	if ( !d->playlistInMenu ) {
+	    d->optionsMenu->removeItem( d->playlistMenuId );
+	    d->playlistMenuId = d->menu->insertItem( tr( "Playlist" ), d->playlistMenu );
+	    d->playlistInMenu = TRUE;
+	}
+    }
 }
 
 

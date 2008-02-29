@@ -2,7 +2,8 @@ Files: bin/example apps/Applications/example.desktop pics/Example.png help/html/
 Priority: optional
 Section: qpe/applications
 Maintainer: Your Name <you@your.domain.com>
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: 1.0.0
 License: Public Domain
 Description: Example program

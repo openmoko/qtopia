@@ -62,6 +62,8 @@
 #    define QTOPIA_PLUGIN_TEMPLATE_EXTERN /*extern*/
 #    define QTOPIA_PLUGIN_TEMPLATEDLL
 #    undef  QTOPIA_PLUGIN_DISABLE_COPY /* avoid unresolved externals */
+#  else
+#    define QTOPIA_PLUGIN_EXPORT	
 #  endif
 #else
 #    define QTOPIA_PLUGIN_EXPORT
@@ -73,6 +75,11 @@ struct QTOPIA_PLUGIN_EXPORT QUnknownInterface
     virtual ulong   addRef() = 0;
     virtual ulong   release() = 0;
 };
+
+#ifdef QTOPIA_FAKE_COMPONENT
+#include <qdict.h>
+extern QDict<QUnknownInterface> *fakeFiles;
+#endif
 
 // {D16111D4-E1E7-4C47-8599-24483DAE2E07}
 #ifndef IID_QLibrary
@@ -86,18 +93,34 @@ struct QTOPIA_PLUGIN_EXPORT QLibraryInterface : public QUnknownInterface
     virtual bool    canUnload() const = 0;
 };
 
+#ifndef QTOPIA_FAKE_COMPONENT
 #define Q_CREATE_INSTANCE( IMPLEMENTATION )         \
 	IMPLEMENTATION *i = new IMPLEMENTATION; \
 	QUnknownInterface* iface = 0;                   \
 	i->queryInterface( IID_QUnknown, &iface );      \
 	return iface;
+#else
+#define Q_CREATE_INSTANCE( IMPLEMENTATION ) \
+	if (!fakeFiles) \
+	    fakeFiles = new QDict<QUnknownInterface> (); \
+	fakeFiles->insert(MYMAGICALPATH,new IMPLEMENTATION); \
+	return 1;
+#endif
 
+#ifndef QTOPIA_FAKE_COMPONENT
 #ifndef Q_OS_WIN32 
 #define Q_EXPORT_INTERFACE() \
 	extern "C" QUnknownInterface* ucm_instantiate()
 #else
 #define Q_EXPORT_INTERFACE() \
 	extern "C" QTOPIA_PLUGIN_EXPORT QUnknownInterface* ucm_instantiate()
+#endif
+#else
+#define Q_EXPORT_INTERFACE() \
+    extern QDict<QUnknownInterface> *fakeFiles; \
+    static int exportInterface(); \
+    static int foo = exportInterface(); \
+    int exportInterface()
 #endif
 
 

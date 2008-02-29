@@ -42,6 +42,7 @@
 #include <qlayout.h>
 #include <qregexp.h>
 #include <qstyle.h>
+#include <qtimer.h>
 
 static const int short_time_height = 20;
 static int day_height = 18;
@@ -55,7 +56,7 @@ inline QRect expandRect(QRect r)
 class DayItem : public LayoutItem
 {
 public:
-    DayItem(const QDate &referenceDate, const Occurrence &ev, bool ampm = FALSE) 
+    DayItem(const QDate &referenceDate, const Occurrence &ev)
 	: LayoutItem(ev) , hasFocus(FALSE)
     {
 
@@ -88,34 +89,20 @@ public:
 	}
 
 	headingText = "<b>" + strDesc + "</b><br>";
-	if (!ev.event().timeZone().isEmpty()) {
-	    QString tzText = ev.event().timeZone();
-	    int i = tzText.find('/');
-	    tzText = tzText.mid( i + 1 );
-	    tzText = tzText.replace(QRegExp("_"), " ");
-	    
-	    noteText = "<b>Time zone:</b> " + tzText + "<br>";
-	}
-	noteText += "<b>" + QObject::tr("Start") + "</b>: ";
 
-
-	if ( referenceDate != ev.date() ) {
-	    // multi-day event.  Show start date
-	    noteText += TimeString::longDateString( ev.event().start().date() );
-	} else {
-	    // Show start time.
-	    noteText += TimeString::timeString( ev.event().start().time(), ampm, FALSE );
+	if (ev.event().timeZone().isValid()) {
+	    noteTZ=ev.event().timeZone().id();
+	    // ########### translate with new TZ class, not this mess
+	    int i = noteTZ.find('/');
+	    noteTZ = noteTZ.mid( i + 1 );
+	    noteTZ = noteTZ.replace(QRegExp("_"), " ");
 	}
+	noteStart = ev.event().start();
+	noteEnd = ev.event().end();
+	noteShowStartDate = referenceDate != ev.date();
+	noteShowEndDate = referenceDate != ev.endDate();
+	noteStr = strNote;
 
-	noteText += "<br><b>" + QObject::tr("End") + "</b>: ";
-	if ( referenceDate != ev.endDate() ) {
-	    // multi-day event.  Show end date
-	    noteText += TimeString::longDateString( ev.event().end().date() );
-	} else {
-	    // Show end time.
-	    noteText += TimeString::timeString( ev.event().end().time(), ampm, FALSE );
-	}
-	noteText += "<br><br>" + strNote;
 	//setBackgroundMode( PaletteBase );
 
     }
@@ -165,6 +152,30 @@ public:
 	}
 
 	QSimpleRichText rt( headingText, p->font() );
+
+	QString noteText;
+	if (!noteTZ.isEmpty())
+	    noteText = "<b>"+DayViewContents::tr("Time zone:")+"</b> " + noteTZ + "<br>";
+	noteText += "<b>" + DayViewContents::tr("Start") + "</b>: ";
+
+	if ( noteShowStartDate ) {
+	    // multi-day event.  Show start date
+	    noteText += TimeString::localYMD( noteStart.date(), TimeString::Long );
+	} else {
+	    // Show start time.
+	    noteText += TimeString::localHM( noteStart.time() );
+	}
+
+	noteText += "<br><b>" + DayViewContents::tr("End") + "</b>: ";
+	if ( noteShowEndDate ) {
+	    // multi-day event.  Show end date
+	    noteText += TimeString::localYMD( noteEnd.date(), TimeString::Long );
+	} else {
+	    // Show end time.
+	    noteText += TimeString::localHM( noteEnd.time() );
+	}
+	noteText += "<br><br>" + noteStr;
+
 	QSimpleRichText rtNotes( noteText, p->font() );
 
 
@@ -193,7 +204,14 @@ private:
     }
     QPixmap pm_repeat, pm_alarmbell, pm_repeatE;
     QString headingText;
-    QString noteText;
+
+    QString noteTZ;
+    QDateTime noteStart;
+    QDateTime noteEnd;
+    bool noteShowStartDate;
+    bool noteShowEndDate;
+    QString noteStr;
+
     bool hasFocus;
 };
 
@@ -282,9 +300,9 @@ public:
 	return fItem;
     }
 
-    void addOccurrence(Occurrence &e, bool ampm, const QDate &cDate ) 
+    void addOccurrence(Occurrence &e, const QDate &cDate ) 
     {
-	DayItem *di = new DayItem(cDate, e, ampm);
+	DayItem *di = new DayItem(cDate, e);
 	initializeGeometry(di);
 	addItem(di);
     }
@@ -356,22 +374,21 @@ static int place( const DayViewWidget *item, bool *used, int maxn )
 }
 */
 
-DayViewContents::DayViewContents( Type t, bool whichClock,
+DayViewContents::DayViewContents( Type t,
 	QWidget *parent, const char *name )
     : QScrollView( parent, name, WRepaintNoErase ),
-      ampm( whichClock ), typ(t), start_of_day(8), 
+      typ(t), start_of_day(8), 
 	time_height(short_time_height)
 {
     setResizePolicy(Manual);
     startSel = endSel = -1;
     dragging = FALSE;
     QFontMetrics fm( font() );
-    time_width = fm.width( "p00:00p" );
+    time_width = fm.width( TimeString::hourString(12,TRUE)+" " );
     time_height = fm.height();
     day_height = fm.height() + 2;
 
     setHScrollBarMode(AlwaysOff);
-    enableClipper(TRUE); // makes scrolling with child widgets faster.
 
     if (typ == AllDay) {
 	setMargins(0, 3, 0, 0);
@@ -381,6 +398,11 @@ DayViewContents::DayViewContents( Type t, bool whichClock,
 	itemList = new DayViewLayout(contentsWidth() - time_width - 1, contentsHeight());
     }
 
+    viewport()->setBackgroundColor( white );
+    visibleTimer = new QTimer( this );
+    connect( visibleTimer, SIGNAL(timeout()), this, SLOT(makeVisible()) );
+
+    TimeString::connectChange(this,SLOT(timeStringChanged()));
 }
 
 DayViewContents::~DayViewContents()
@@ -389,19 +411,9 @@ DayViewContents::~DayViewContents()
     delete itemList;
 }
 
-void DayViewContents::set24HourClock( bool newClock )
-{
-    ampm = newClock;
-}
-
-bool DayViewContents::whichClock() const
-{
-    return ampm;
-}
-
 void DayViewContents::addOccurrence(Occurrence &ev, const QDate &cDate)
 {
-    itemList->addOccurrence(ev, ampm, cDate);
+    itemList->addOccurrence(ev, cDate);
 
     if (typ == AllDay) {
 	resizeContents(
@@ -426,6 +438,21 @@ void DayViewContents::layoutItems()
     updateContents(0, 0, contentsWidth(), contentsHeight());
 }
 
+void DayViewContents::timeStringChanged()
+{
+    updateContents(0, 0, contentsWidth(), contentsHeight());
+}
+
+void DayViewContents::clearSelectedTimes()
+{
+    int oldSelMin = QMIN(startSel, endSel);
+    int oldSelMax = QMAX(startSel, endSel);
+    startSel = endSel = -1;
+
+    repaintContents(0, posOfHour(oldSelMin - 1), 
+	    time_width, posOfHour(oldSelMax + 1), FALSE);
+}
+
 void DayViewContents::startAtTime(int t)
 {
     start_of_day = t;
@@ -445,100 +472,40 @@ void DayViewContents::showStartTime()
 }
 
 
-DayItem *DayViewContents::firstItem() 
+DayItem *DayViewContents::firstItem( bool show )
 {
     DayItem *orig = itemList->focusedItem();
     DayItem *dim = itemList->firstItem();
-    if (orig == dim)
-	return dim;
-    QRect r;
-    if (dim) {
-	r = expandRect(dim->geometry());
-	if (typ != AllDay)
-	    r.moveBy(time_width, 0);
-	updateContents(r.x(),r.y(), r.width(), r.height());
-    }
-    if (orig) {
-	QRect ogr = expandRect(orig->geometry());
-	if (typ != AllDay)
-	    ogr.moveBy(time_width, 0);
-	updateContents(ogr.x(),ogr.y(), ogr.width(), ogr.height());
-    }
-    if (dim)
-	ensureVisible(r.x(), r.y(), r.width(), r.height());
+    if (orig != dim && show)
+	moveSelection( orig, dim );
     return dim;
 }
 
 
-DayItem *DayViewContents::lastItem() 
+DayItem *DayViewContents::lastItem( bool show ) 
 {
     DayItem *orig = itemList->focusedItem();
     DayItem *dim = itemList->lastItem();
-    if (orig == dim)
-	return dim;
-    QRect r;
-    if (dim) {
-	r = expandRect(dim->geometry());
-	if (typ != AllDay)
-	    r.moveBy(time_width, 0);
-	updateContents(r.x(),r.y(), r.width(), r.height());
-    }
-    if (orig) {
-	QRect ogr = expandRect(orig->geometry());
-	if (typ != AllDay)
-	    ogr.moveBy(time_width, 0);
-	updateContents(ogr.x(),ogr.y(), ogr.width(), ogr.height());
-    }
-    if (dim)
-	ensureVisible(r.x(), r.y(), r.width(), r.height());
+    if (orig != dim && show )
+	moveSelection( orig, dim );
     return dim;
 }
 
-DayItem *DayViewContents::nextItem() 
-{ 
+DayItem *DayViewContents::nextItem( bool show ) 
+{
     DayItem *orig = itemList->focusedItem();
     DayItem *dim = itemList->nextItem();
-    if (orig == dim)
-	return dim;
-    QRect r;
-    if (dim) {
-	r = expandRect(dim->geometry());
-	if (typ != AllDay)
-	    r.moveBy(time_width, 0);
-	updateContents(r.x(),r.y(), r.width(), r.height());
-    }
-    if (orig) {
-	QRect ogr = expandRect(orig->geometry());
-	if (typ != AllDay)
-	    ogr.moveBy(time_width, 0);
-	updateContents(ogr.x(),ogr.y(), ogr.width(), ogr.height());
-    }
-    if (dim)
-	ensureVisible(r.x(), r.y(), r.width(), r.height());
+    if (orig != dim && show )
+	moveSelection( orig, dim );
     return dim;
 }
 
-DayItem *DayViewContents::previousItem() 
-{ 
+DayItem *DayViewContents::previousItem( bool show ) 
+{
     DayItem *orig = itemList->focusedItem();
     DayItem *dim = itemList->previousItem();
-    if (orig == dim)
-	return dim;
-    QRect r;
-    if (dim) {
-	r = expandRect(dim->geometry());
-	if (typ != AllDay)
-	    r.moveBy(time_width, 0);
-	updateContents(r.x(),r.y(), r.width(), r.height());
-    }
-    if (orig) {
-	QRect ogr = expandRect(orig->geometry());
-	if (typ != AllDay)
-	    ogr.moveBy(time_width, 0);
-	updateContents(ogr.x(),ogr.y(), ogr.width(), ogr.height());
-    }
-    if (dim)
-	ensureVisible(r.x(), r.y(), r.width(), r.height());
+    if (orig != dim && show )
+	moveSelection( orig, dim );
     return dim;
 }
 
@@ -547,27 +514,40 @@ DayItem *DayViewContents::currentItem() const
     return itemList->focusedItem();
 }
 
-void DayViewContents::setCurrentItem(DayItem *dim) 
+void DayViewContents::setCurrentItem(DayItem *dim, bool show)
 {
     DayItem *orig = itemList->focusedItem();
-    if (dim == orig)
-	return;
-    QRect r;
-    if (dim) {
+    if (dim && dim != orig)
 	itemList->setFocusedItem(dim);
-	r = expandRect(dim->geometry());
+    if (show)
+	moveSelection( orig, dim );
+}
+
+void DayViewContents::moveSelection( DayItem *from, DayItem *to )
+{
+    if (to) {
+	QRect r = expandRect(to->geometry());
 	if (typ != AllDay)
 	    r.moveBy(time_width, 0);
+	visRect = r;
+	visibleTimer->start(5, TRUE);
 	updateContents(r.x(),r.y(), r.width(), r.height());
     }
-    if (orig) {
-	QRect ogr = expandRect(orig->geometry());
+    if (from && from != to) {
+	QRect ogr = expandRect(from->geometry());
 	if (typ != AllDay)
 	    ogr.moveBy(time_width, 0);
 	updateContents(ogr.x(),ogr.y(), ogr.width(), ogr.height());
     }
-    if (dim)
-	ensureVisible(r.x(), r.y(), r.width(), r.height());
+}
+
+void DayViewContents::makeVisible()
+{
+    if ( visRect.x() < 0 || visRect.y() < 0 || visRect.width() < 0 || visRect.height() < 0 )
+	return;
+    int cx = visRect.x() + visRect.width()/2;
+    int cy = visRect.y() + visRect.height()/2;
+    ensureVisible( cx, cy, visRect.width()/2+5, visRect.height()/2+5 );
 }
 
 void DayViewContents::moveUp()
@@ -710,6 +690,30 @@ void DayViewContents::keyPressEvent( QKeyEvent *e )
 
 void DayViewContents::drawContents( QPainter *p, int, int y, int, int h)
 {
+    bool isClipped = p->hasClipping();
+    QRegion oldClip = p->clipRegion();
+    QRegion bgr = isClipped ? oldClip : QRect(0, 0, contentsWidth(), contentsHeight() );
+
+    QRect clipRect( 0, y, contentsWidth(), h );
+    bgr &= clipRect;
+
+    // draw items first and clip away their geometries to reduce flicker.
+    for (int k = 0; k < itemList->count(); k++) {
+	DayItem *di = (DayItem*)itemList->items().at(k);
+
+	QRect r = di->geometry();
+	r = expandRect( r );
+	r.moveBy( typ == AllDay ? 0 : time_width, 0 );
+
+	if ( r.intersects( clipRect ) ) {
+	    di->drawItem(p, typ == AllDay ? 0 : time_width, 0, palette().active());
+	    bgr -= r;
+	}
+    }
+
+    bgr.translate( -contentsX(), -contentsY() );
+    p->setClipRegion( bgr );
+
     //p->fillRect(time_width, x+w-time_width, y, h, palette().active().color(QColorGroup::Base));
     p->fillRect(time_width, 0, 
 	    contentsWidth() - time_width, contentsHeight(), white);
@@ -739,28 +743,13 @@ void DayViewContents::drawContents( QPainter *p, int, int y, int, int h)
 		int rx = 0;
 		int ry = 0;
 		int rh = 0;
-		int i = 0;
-		while (i < 24) {
-		    QString strTmp;
-		    if ( ampm ) {
-			if ( i == 0 )
-			    strTmp = QString::number(12) + ":00";
-			else if ( i == 12 )
-			    strTmp = QString::number(12) + tr(":00p");
-			else if ( i > 12 )
-			    strTmp = QString::number( i - 12 ) + tr(":00p");
-			else
-			    strTmp = QString::number(i) + ":00";
-		    } else {
-			if ( i < 10 )
-			    strTmp = "0" + QString::number(i) + ":00";
-			else
-			    strTmp = QString::number(i) + ":00";
-		    }
-		    strTmp += " ";
-		    ry = posOfHour(i);
-		    i++;
-		    rh = posOfHour(i) - ry;
+		int t = 0;
+		while (t < 24) {
+		    QString s = TimeString::localH(t);
+		    s += " ";
+		    ry = posOfHour(t);
+		    t++;
+		    rh = posOfHour(t) - ry;
 
 		    if (ry > y + h)
 			break;
@@ -771,12 +760,9 @@ void DayViewContents::drawContents( QPainter *p, int, int y, int, int h)
 		    QPen pn = p->pen();
 		    //p->setPen(black);
 		    p->drawLine( time_width, ry - 1, width(), ry - 1);
-		    int offset = fm.width(strTmp);
-		    if (ampm &&  i <= 12)
-			offset += fm.width("p");
 	    
 		    bool isDown;
-		    if ( i > firstSel && i <= lastSel + 1 ){
+		    if ( t > firstSel && t <= lastSel + 1 ){
 			p->setFont(selectFont);
 			isDown = TRUE;
 		    } else {
@@ -791,14 +777,14 @@ void DayViewContents::drawContents( QPainter *p, int, int y, int, int h)
 			    cgUp, isDown ? QStyle::Style_Enabled | QStyle::Style_Down : QStyle::Style_Raised);//QStyle::Style_Enabled | QStyle::Style_Up);
 
 		    //style().drawToolButton(p, rx, ry, time_width, time_height, 
-			    //cgUp, i > firstSel && i <= lastSel + 1 );
+			    //cgUp, t > firstSel && t <= lastSel + 1 );
 		    style().drawItem(p, QRect(rx, ry, time_width, time_height), 
-			    AlignRight | AlignTop, cgUp, TRUE, 0, strTmp);
+			    AlignRight | AlignTop, cgUp, TRUE, 0, s);
 #else 
 		    style().drawToolButton(p, rx, ry, time_width, time_height, 
-			    cgUp, i > firstSel && i <= lastSel + 1 );
+			    cgUp, t > firstSel && t <= lastSel + 1 );
 		    style().drawItem(p, rx, ry, time_width, time_height, 
-			    AlignRight | AlignTop, cgUp, TRUE, 0, strTmp);
+			    AlignRight | AlignTop, cgUp, TRUE, 0, s);
 #endif
 		    p->setFont(f);
 		    p->setPen(pn);
@@ -810,13 +796,9 @@ void DayViewContents::drawContents( QPainter *p, int, int y, int, int h)
 	case AllDay:
 	    break;
     }
-    // and now the items.
-
-    for (int k = 0; k < itemList->count(); k++) {
-	DayItem *di = (DayItem*)itemList->items().at(k);
-
-	di->drawItem(p, typ == AllDay ? 0 : time_width, 0, palette().active());
-    }
+    if ( isClipped )
+	p->setClipRegion( oldClip );
+    p->setClipping( isClipped );
 }
 
 int DayViewContents::posOfHour(int h) const {
@@ -848,23 +830,23 @@ int DayViewContents::hourAtPos(int h) const {
 
 //===========================================================================
 
-DayView::DayView( DateBookTable *newDb, bool ampm, bool startOnMonday,
+DayView::DayView( DateBookTable *newDb, bool startOnMonday,
 			  QWidget *parent, const char *name )
-    : PeriodView( newDb, ampm, startOnMonday, parent, name )
+    : PeriodView( newDb, startOnMonday, parent, name )
 {
     QFontMetrics fm( font() );
     day_height = fm.height() + 2;
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    header = new DayViewHeader( startOnMonday, this, "day header" );
+    header = new DayViewHeader( startOnMonday, this, "day header" ); // No tr
     header->setDate( cDate.year(), cDate.month(), cDate.day() );
     layout->addWidget(header);
-    allView = new DayViewContents( DayViewContents::AllDay, ampm, 
-	    this, "all day view" );
+    allView = new DayViewContents( DayViewContents::AllDay,
+	    this, "all day view" ); // No tr
     allView->setFocusPolicy(NoFocus);
     layout->addWidget(allView);
-    view = new DayViewContents( DayViewContents::ScrollingDay, ampm, 
-	    this, "day view" );
+    view = new DayViewContents( DayViewContents::ScrollingDay,
+	    this, "day view" ); // No tr
     view->setSizePolicy(
 	    QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     view->setFrameStyle( QFrame::NoFrame );
@@ -911,6 +893,11 @@ void DayView::selectedDates( QDateTime &start, QDateTime &end )
 	start.setTime( QTime( sh, 0, 0 ) );
 	end.setTime( QTime( eh, 0, 0 ) );
     }
+}
+
+void DayView::clearSelectedDates()
+{
+    view->clearSelectedTimes();
 }
 
 void DayView::selectDate( const QDate &d)
@@ -961,22 +948,28 @@ void DayView::setCurrentItem( const Occurrence &o )
 void DayView::setCurrentEvent( const PimEvent &e ) 
 {
     viewWithFocus = 0;
-    if (allView->firstItem()) {
+    DayItem *dim = allView->firstItem(FALSE);
+    if (dim) {
 	// check all view;
 	do {
-	    if (allView->currentItem()->event() == e)
+	    if (dim->event() == e) {
+		allView->setCurrentItem( dim );
 		return;
-	} while (allView->nextItem());
+	    }
+	} while ((dim = allView->nextItem(FALSE)) != 0);
 
     }
     // if found in all view, would have returned.
     viewWithFocus = 1;
-    if (view->firstItem()) {
+    dim = view->firstItem(FALSE);
+    if (dim) {
 	// check all view;
 	do {
-	    if (view->currentItem()->event() == e)
+	    if (dim->event() == e) {
+		view->setCurrentItem( dim );
 		return;
-	} while (view->nextItem());
+	    }
+	} while ((dim = view->nextItem(FALSE)) != 0);
 
     }
 }
@@ -1051,11 +1044,6 @@ void DayView::setStartOnMonday( bool bStartOnMonday )
 {
     header->setStartOfWeek( bStartOnMonday );
     //    redraw();
-}
-
-void DayView::set24HourClock( bool nc )
-{
-    view->set24HourClock( nc );
 }
 
 void DayView::keyPressEvent(QKeyEvent *e)

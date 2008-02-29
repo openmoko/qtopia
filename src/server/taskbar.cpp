@@ -36,6 +36,7 @@
 #endif
 #include <qtopia/global.h>
 #include <qtopia/custom.h>
+#include <qtopia/pluginloader.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
@@ -53,7 +54,7 @@
 
 #define FACTORY(T) \
     static QWidget *new##T( bool maximized ) { \
-	QWidget *w = new T( 0, "test", QWidget::WDestructiveClose | QWidget::WGroupLeader ); \
+	QWidget *w = new T( 0, 0, QWidget::WDestructiveClose | QWidget::WGroupLeader ); \
 	if ( maximized ) { \
 	    if ( qApp->desktop()->width() <= 350 ) { \
 		w->showMaximized(); \
@@ -99,6 +100,76 @@ static bool initNumLock()
     return FALSE;
 }
 
+//---------------------------------------------------------------------------
+
+class SafeMode : public QWidget
+{
+    Q_OBJECT
+public:
+    SafeMode( QWidget *parent ) : QWidget( parent ), menu(0)
+    {
+	message = tr("Safe Mode");
+	QFont f( font() );
+	f.setWeight( QFont::Bold );
+	setFont( f );
+    }
+
+    void mousePressEvent( QMouseEvent *);
+    QSize sizeHint() const;
+    void paintEvent( QPaintEvent* );
+
+private slots:
+    void action(int i);
+
+private:
+    QString message;
+    QPopupMenu *menu;
+};
+
+void SafeMode::mousePressEvent( QMouseEvent *)
+{
+    if ( !menu ) {
+	menu = new QPopupMenu(this);
+	menu->insertItem( tr("Plugin Manager..."), 0 );
+	menu->insertItem( tr("Restart Qtopia"), 1 );
+	menu->insertItem( tr("Help..."), 2 );
+	connect(menu, SIGNAL(activated(int)), this, SLOT(action(int)));
+    }
+    QPoint curPos = mapToGlobal( QPoint(0,0) );
+    QSize sh = menu->sizeHint();
+    menu->popup( curPos-QPoint((sh.width()-width())/2,sh.height()) );
+}
+
+void SafeMode::action(int i)
+{
+    switch (i) {
+	case 0:
+	    Global::execute( "pluginmanager" );
+	    break;
+	case 1:
+	    Global::restart();
+	    break;
+	case 2:
+	    Global::execute( "helpbrowser", "safemode.html" );
+	    break;
+    }
+}
+
+QSize SafeMode::sizeHint() const
+{
+    QFontMetrics fm = fontMetrics();
+
+    return QSize( fm.width(message), fm.height() );
+}
+
+void SafeMode::paintEvent( QPaintEvent* )
+{
+    QPainter p(this);
+    p.drawText( rect(), AlignCenter, message );
+}
+
+//---------------------------------------------------------------------------
+
 class LockKeyState : public QWidget
 {
 public:
@@ -135,6 +206,8 @@ private:
     bool nl, cl;
 };
 
+//---------------------------------------------------------------------------
+
 TaskBar::~TaskBar()
 {
 }
@@ -145,6 +218,8 @@ TaskBar::TaskBar() : QHBox(0, 0, WStyle_Customize | WStyle_Tool | WStyle_StaysOn
     Global::setBuiltinCommands(builtins);
 
     sm = new StartMenu( this );
+    connect( sm, SIGNAL(tabSelected(const QString&)), this,
+	    SIGNAL(tabSelected(const QString&)) );
 
     inputMethods = new InputMethods( this );
     connect( inputMethods, SIGNAL(inputToggled(bool)),
@@ -158,12 +233,16 @@ TaskBar::TaskBar() : QHBox(0, 0, WStyle_Customize | WStyle_Tool | WStyle_StaysOn
 //     mru = new MRUList( stack );
 //     stack->raiseWidget( mru );
     runningAppBar = new RunningAppBar(stack);
+    connect(runningAppBar, SIGNAL(forceSuspend()), this, SIGNAL(forceSuspend()) );
     stack->raiseWidget(runningAppBar);
 
     waitIcon = new Wait( this );
     (void) new AppIcons( this );
 
     sysTray = new SysTray( this );
+
+    if (PluginLoader::inSafeMode())
+	(void)new SafeMode( this );
 
     // ## make customizable in some way?
 #ifdef QT_QWS_CUSTOM
@@ -216,7 +295,6 @@ void TaskBar::startWait()
 void TaskBar::stopWait(const QString&)
 {
     waitTimer->stop();
-//     mru->addTask(sm->execToLink(app));
     waitIcon->setWaiting( false );
 }
 
@@ -283,6 +361,7 @@ void TaskBar::receive( const QCString &msg, const QByteArray &data )
     } else if ( msg == "reloadInputMethods()" ) {
 	inputMethods->loadInputMethods();
     } else if ( msg == "reloadApps()" ) {
+	runningAppBar->reloadApps();
 	sm->reloadApps();
     } else if ( msg == "reloadApplets()" ) {
 	sysTray->clearApplets();
@@ -337,3 +416,4 @@ bool TaskBar::recoverMemory()
   return true;
 }
 
+#include "taskbar.moc"

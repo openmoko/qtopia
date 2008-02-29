@@ -257,7 +257,6 @@ $(OBJECTS_DIR)/TEWidget.o: TEWidget.cpp \
 		TECommon.h \
 		session.h \
 		MyPty.h \
-		../../../server/qprocess.h \
 		TEmuVt102.h \
 		TEScreen.h \
 		TEHistory.h \
@@ -292,7 +291,6 @@ $(OBJECTS_DIR)/TEmuVt102.o: TEmuVt102.cpp \
 $(OBJECTS_DIR)/session.o: session.cpp \
 		session.h \
 		MyPty.h \
-		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -310,7 +308,6 @@ $(OBJECTS_DIR)/keytrans.o: keytrans.cpp \
 $(OBJECTS_DIR)/konsole.o: konsole.cpp \
 		konsole.h \
 		MyPty.h \
-		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -324,7 +321,6 @@ $(OBJECTS_DIR)/konsole.o: konsole.cpp \
 $(OBJECTS_DIR)/main.o: main.cpp \
 		konsole.h \
 		MyPty.h \
-		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -336,8 +332,7 @@ $(OBJECTS_DIR)/main.o: main.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 $(OBJECTS_DIR)/MyPty.o: MyPty.cpp \
-		MyPty.h \
-		../../../server/qprocess.h
+		MyPty.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/MyPty.o MyPty.cpp
 
 $(OBJECTS_DIR)/moc_TEWidget.o: $(MOC_DIR)/moc_TEWidget.cpp \
@@ -367,7 +362,6 @@ $(OBJECTS_DIR)/moc_TEmuVt102.o: $(MOC_DIR)/moc_TEmuVt102.cpp \
 $(OBJECTS_DIR)/moc_session.o: $(MOC_DIR)/moc_session.cpp \
 		session.h \
 		MyPty.h \
-		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -380,7 +374,6 @@ $(OBJECTS_DIR)/moc_session.o: $(MOC_DIR)/moc_session.cpp \
 $(OBJECTS_DIR)/moc_konsole.o: $(MOC_DIR)/moc_konsole.cpp \
 		konsole.h \
 		MyPty.h \
-		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -392,8 +385,7 @@ $(OBJECTS_DIR)/moc_konsole.o: $(MOC_DIR)/moc_konsole.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_konsole.o $(MOC_DIR)/moc_konsole.cpp
 
 $(OBJECTS_DIR)/moc_MyPty.o: $(MOC_DIR)/moc_MyPty.cpp \
-		MyPty.h \
-		../../../server/qprocess.h
+		MyPty.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_MyPty.o $(MOC_DIR)/moc_MyPty.cpp
 
 $(MOC_DIR)/moc_TEWidget.cpp: TEWidget.h
@@ -417,14 +409,14 @@ $(MOC_DIR)/moc_MyPty.cpp: MyPty.h
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <embeddedkonsole.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <embeddedkonsole.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease embeddedkonsole.pro
 	$(QPEDIR)/bin/qtopia-linstall embeddedkonsole.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

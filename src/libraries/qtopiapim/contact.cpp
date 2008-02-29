@@ -26,6 +26,8 @@
 
 #include <qtopia/stringutil.h>
 #include <qtopia/timeconversion.h>
+#include <qtopia/timestring.h>
+#include <qtopia/config.h>
 #include <qtopia/pim/private/xmlio_p.h>
 
 #include <qobject.h>
@@ -38,6 +40,12 @@
 
 QString emailSeparator() { return " "; }
 
+static QMap<int, int> *uniquenessMapPtr = 0;
+static QMap<QCString, int> *identifierToKeyMapPtr = 0;
+static QMap<int, QCString> *keyToIdentifierMapPtr = 0;
+static QMap<int, QString> * trFieldsMapPtr = 0;
+
+
 /*!
   \class PimContact
   \module qpepim
@@ -47,6 +55,16 @@ QString emailSeparator() { return " "; }
   This data includes information the name of the person, contact
   information, and business information such as deparment and job title.
 
+*/
+
+/*!
+  \enum PimContact::ContactFields
+  \internal
+*/
+
+/*!
+  \fn QMap<int,QString> PimContact::fields() const
+  \internal
 */
 
 /*!
@@ -77,6 +95,9 @@ PimContact::~PimContact()
 */
 QString PimContact::toRichText() const
 {
+    if (!keyToIdentifierMapPtr)
+	initMaps();
+
     QString text;
     QString value, comp, state;
 
@@ -218,14 +239,18 @@ QString PimContact::toRichText() const
     if ( !str.isEmpty() )
 	text += "<b>" + QObject::tr("Spouse: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
-    str = PimXmlIO::dateToXml( birthday() );
-    if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Birthday: ") + "</b>"
+    if ( birthday().isValid() ) {
+	str = TimeString::localYMD( birthday() );
+	if ( !str.isEmpty() )
+	    text += "<b>" + QObject::tr("Birthday: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
-    str = PimXmlIO::dateToXml( anniversary() );
-    if ( !str.isEmpty() )
-	text += "<b>" + QObject::tr("Anniversary: ") + "</b>"
+    }
+    if ( anniversary().isValid() ) {
+	str = TimeString::localYMD( anniversary() );
+	if ( !str.isEmpty() )
+	    text += "<b>" + QObject::tr("Anniversary: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
+    }
     str = nickname();
     if ( !str.isEmpty() )
 	text += "<b>" + QObject::tr("Nickname: ") + "</b>"
@@ -294,11 +319,6 @@ QString PimContact::field(int key) const
     } else
 	return mMap[key];
 }
-
-static QMap<int, int> *uniquenessMapPtr = 0;
-static QMap<QCString, int> *identifierToKeyMapPtr = 0;
-static QMap<int, QCString> *keyToIdentifierMapPtr = 0;
-static QMap<int, QString> * trFieldsMapPtr = 0;
 
 QMap<int, QString> PimContact::fields() const
 {
@@ -384,8 +404,7 @@ QString PimContact::displayHomeAddress() const
 }
 
 /*!
-  Sets the persons birthday. Note that this does not create
-  an PimEvent for it in the Calendar (yet).
+  Sets the person's birthday to \a d.
 */
 void PimContact::setBirthday( const QDate &d )
 {
@@ -402,8 +421,7 @@ QDate PimContact::birthday() const
 }
 
 /*!
-  Sets the persons anniversary. Note that this does not create
-  an PimEvent for it in the Calendar (yet).
+  Sets the person's anniversary to \a d.
 */
 void PimContact::setAnniversary( const QDate &d )
 {
@@ -426,6 +444,62 @@ QDate PimContact::anniversary() const
 */
 QString PimContact::fullName() const
 {
+    return fullName(*this);
+}
+
+static bool readConfig = FALSE;
+static QStringList formatList;
+
+QString PimContact::fullName(const PimContact &cnt)
+{
+    if (!readConfig) {
+	// read config for formatted name order.
+	Config cfg("Contacts");
+	cfg.setGroup("formatting");
+	QStringList sl = cfg.readListEntry("NameFormat", ' ');
+	if (sl.isEmpty()) {
+	    const QMap<int,QCString> k2i = keyToIdentifierMap();
+
+	    formatList.append(k2i[NameTitle]);
+	    formatList.append(k2i[FirstName]);
+	    formatList.append(k2i[MiddleName]);
+	    formatList.append(k2i[LastName]);
+	    formatList.append(k2i[Suffix]);
+	} else {
+	    formatList = sl;
+	}
+	readConfig = TRUE;
+    }
+
+    QStringList::Iterator it;
+    QString name;
+    const QMap<QCString, int> i2k = identifierToKeyMap();
+    for( it = formatList.begin(); it != formatList.end(); ++it ) {
+	QCString cit(*it);
+	if (i2k.contains(cit)) {
+	    QString field = cnt.find(i2k[cit]);
+	    if (!field.isEmpty()) {
+		if ( !name.isEmpty() )
+		    name += " ";
+		name += field;
+	    }
+	} else {
+	    if ( !name.isEmpty() )
+		name += *it;
+	}
+    }
+
+#if 0
+
+    if ( !firstName.isEmpty() ) {
+	if ( !name.isEmpty() )
+	    name += " ";
+	name += firstName;
+    }
+    if ( !middleName.isEmpty() ) {
+	if ( !name.isEmpty() )
+    }
+
     QString title = find( NameTitle );
     QString firstName = find( FirstName );
     QString middleName = find( MiddleName );
@@ -453,6 +527,7 @@ QString PimContact::fullName() const
 	    name += " ";
 	name += suffix;
     }
+#endif
     return name.simplifyWhiteSpace();
 }
 
@@ -577,7 +652,7 @@ QStringList PimContact::emailList() const
 }
 
 /*!
-  Sets the default email and adds it to the list.
+  Sets the default email to \a v and adds it to the list.
 */
 void PimContact::setDefaultEmail( const QString &v )
 {
@@ -1148,7 +1223,8 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
 
 static const QtopiaPimMapEntry addressbookentries[] = {
     // name
-    { "Title", QT_TRANSLATE_NOOP("PimContact",  "Title"), PimContact::NameTitle, 0 },
+    { "Title", // No tr
+	    QT_TRANSLATE_NOOP("PimContact",  "Title"), PimContact::NameTitle, 0 },
     { "FirstName", QT_TRANSLATE_NOOP("PimContact",  "First Name" ), PimContact::FirstName, 20 },
     { "MiddleName", QT_TRANSLATE_NOOP("PimContact",  "Middle Name" ), PimContact::MiddleName, 10 },
     { "LastName", QT_TRANSLATE_NOOP("PimContact",  "Last Name" ), PimContact::LastName, 60 },
@@ -1220,7 +1296,7 @@ void PimContact::initMaps()
     delete uniquenessMapPtr;
     uniquenessMapPtr = new QMap<int, int>;
 
-    PimRecord::initMaps(addressbookentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
+    PimRecord::initMaps("PimContact", addressbookentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
 			*trFieldsMapPtr );
 }
 
@@ -1573,9 +1649,3 @@ const QMap<int,int> & PimContact::uniquenessMap()
   \fn void PimContact::p_setUid(QUuid)
   \internal
 */
-
-/*!
-  \fn virtual int PimContact::endFieldMarker() const
-  \internal
-*/
-

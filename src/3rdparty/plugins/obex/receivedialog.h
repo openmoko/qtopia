@@ -21,34 +21,45 @@
 #ifndef RECEIVEDIALOG_H
 #define RECEIVEDIALOG_H
 
+#include <qmainwindow.h>
+
 #include "receivedialogbase.h"
 
 class QIrServer;
 
-class ReceiveDialog : public ReceiveDialogBase
+class ReceiveDialog : public QMainWindow
 {
     Q_OBJECT
 public:
     ReceiveDialog( QIrServer* irserver, QWidget *parent = 0, const char *name = 0);
     ~ReceiveDialog();
     
-    void setInfo( int size, const QString &filename, const QString &mimetype );
+    void failed();
+    void finished();
     
 public slots:
     void progress( int );
+    void receiving( int size, const QString &filename, const QString &mimetype );
     void received();
     void cancelPressed();
+    void discardPressed();
     void savePressed();
     void openPressed();
-    
+    void statusMsg(const QString &);
+
 signals:
     void cancel();
     
 private:
+    void setInfo( int size, const QString &filename, const QString &mimetype );
     void save(bool open);
+
+private:
     QIrServer *server;
     int totalSize;
     QString application;
+
+    ReceiveDialogBase *w;
 };
 
 #endif

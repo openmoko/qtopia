@@ -36,12 +36,12 @@ void qpe_debugTime( const char *file, int line, const char *desc )
     int tdiff = tv.tv_usec - qpe_debuglast.tv_usec;
     tdiff += (tv.tv_sec - qpe_debuglast.tv_sec) * 1000000;
 
-    fprintf( stderr, "%s:%d Time: %ld.%06ld", file, line, tv.tv_sec, tv.tv_usec);
+    fprintf( stderr, "%s:%d Time: %ld.%06ld", file, line, tv.tv_sec, tv.tv_usec); // No tr
 
     static int pid = getpid();
 
     if ( qpe_debuglast.tv_sec )
-	fprintf( stderr, " (pid %d delta %dus)", pid, tdiff );
+	fprintf( stderr, " (pid %d delta %dus)", pid, tdiff ); // No tr
 
     if ( desc )
 	fprintf( stderr, " (%s)", desc );

@@ -3,119 +3,142 @@
     <name>Lan</name>
     <message>
         <source>LAN Setup</source>
-        <translation type="unfinished"></translation>
+        <translation>LANの設定</translation>
     </message>
     <message>
         <source>This name already
 exists. Please choose a
 different name.</source>
-        <translation type="unfinished"></translation>
+        <translation>この名前はすでに使用
+しています。違う名前を
+選んでください。
+</translation>
     </message>
 </context>
 <context>
     <name>LanBase</name>
     <message>
         <source>LAN </source>
-        <translation type="unfinished"></translation>
+        <translation>LAN</translation>
     </message>
     <message>
         <source>Account</source>
-        <translation type="unfinished"></translation>
+        <translation>アカウント</translation>
     </message>
     <message>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>名前:</translation>
     </message>
     <message>
         <source>IP Address</source>
-        <translation type="unfinished"></translation>
+        <translation>IPアドレス</translation>
     </message>
     <message>
         <source>Gateway</source>
-        <translation type="unfinished"></translation>
+        <translation>ゲートウェイ</translation>
     </message>
     <message>
         <source>Subnet Mask</source>
-        <translation type="unfinished"></translation>
+        <translation>サブネットマスク</translation>
     </message>
     <message>
         <source>Broadcast</source>
-        <translation type="unfinished"></translation>
+        <translation>ブロードキャスト</translation>
     </message>
     <message>
         <source>First DNS</source>
-        <translation type="unfinished"></translation>
+        <translation>第1DNS</translation>
     </message>
     <message>
         <source>Second DNS</source>
-        <translation type="unfinished"></translation>
+        <translation>第2DNS</translation>
     </message>
     <message>
         <source>Proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシ</translation>
     </message>
     <message>
         <source>Configure IP manually</source>
-        <translation type="unfinished"></translation>
+        <translation>IPを手動で設定する</translation>
     </message>
     <message>
         <source>Configure IP automatically (DHCP)</source>
-        <translation type="unfinished"></translation>
+        <translation>IPを自動で設定する(DHCP)</translation>
     </message>
     <message>
         <source>IP</source>
-        <translation type="unfinished"></translation>
+        <translation>IP</translation>
     </message>
     <message>
         <source>Wireless</source>
-        <translation type="unfinished"></translation>
+        <translation>ワイヤレス</translation>
     </message>
     <message>
         <source>WEP authentication</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">WEP認証</translation>
     </message>
     <message>
         <source>Key 1:</source>
-        <translation type="unfinished"></translation>
+        <translation>キー 1:</translation>
     </message>
     <message>
         <source>Key 2:</source>
-        <translation type="unfinished"></translation>
+        <translation>キー 2:</translation>
     </message>
     <message>
         <source>Key 3:</source>
-        <translation type="unfinished"></translation>
+        <translation>キー 3:</translation>
     </message>
     <message>
         <source>Key 4:</source>
-        <translation type="unfinished"></translation>
+        <translation>キー 4:</translation>
     </message>
     <message>
         <source>Passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">パスフレーズ</translation>
     </message>
     <message>
         <source>No authentication</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">認証がありません</translation>
     </message>
     <message>
         <source>128 bit keys</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">128ビットキー</translation>
     </message>
     <message>
         <source>Network:</source>
-        <translation type="unfinished"></translation>
+        <translation>ネットワーク:</translation>
     </message>
     <message>
         <source>Channel:</source>
-        <translation type="unfinished"></translation>
+        <translation>チャネル:</translation>
     </message>
     <message>
         <source>Ad-hoc</source>
-        <translation type="unfinished"></translation>
+        <translation>アドホック：</translation>
     </message>
     <message>
         <source>Infrastructure</source>
+        <translation>基盤：</translation>
+    </message>
+    <message>
+        <source>Passphrase:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>40 bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>128 bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>WEP:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -123,62 +146,62 @@ different name.</source>
     <name>LanState</name>
     <message>
         <source>Form2</source>
-        <translation type="unfinished"></translation>
+        <translation>フォーム 2</translation>
     </message>
     <message>
         <source>Service:</source>
-        <translation type="unfinished"></translation>
+        <translation>サービス:</translation>
     </message>
     <message>
         <source>IP address:</source>
-        <translation type="unfinished"></translation>
+        <translation>IPアドレス:</translation>
     </message>
     <message>
         <source>0.0.0.0</source>
-        <translation type="unfinished"></translation>
+        <translation>0.0.0.0</translation>
     </message>
 </context>
 <context>
     <name>ProxiesPageBase</name>
     <message>
         <source>Proxy Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシの設定</translation>
     </message>
     <message>
         <source>No proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシがありません</translation>
     </message>
     <message>
         <source>Auto configure proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシの自動設定</translation>
     </message>
     <message>
         <source>Set proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシを設定する</translation>
     </message>
     <message>
         <source>Config:</source>
-        <translation type="unfinished"></translation>
+        <translation>設定:</translation>
     </message>
     <message>
         <source>Port:</source>
-        <translation type="unfinished"></translation>
+        <translation>ポート:</translation>
     </message>
     <message>
         <source>HTTP:</source>
-        <translation type="unfinished"></translation>
+        <translation>HTTP:</translation>
     </message>
     <message>
         <source>FTP:</source>
-        <translation type="unfinished"></translation>
+        <translation>FTP:</translation>
     </message>
     <message>
         <source>Host:</source>
-        <translation type="unfinished"></translation>
+        <translation>ホスト:</translation>
     </message>
     <message>
         <source>No proxies for:</source>
-        <translation type="unfinished"></translation>
+        <translation>プロキシがありません:</translation>
     </message>
 </context>
 </TS>

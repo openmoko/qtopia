@@ -45,6 +45,7 @@
 
 /*
   \class QMemoryFile qmemoryfile_p.h
+  \intern
   \brief The QMemoryFile class provide means to map a file info memory or refere to a block or memory by name.
 
   Warning: This class is not part of the Qt APi and subject to change.
@@ -70,7 +71,17 @@ Currently this
   \value Create Create file named.
  */
 
+/*!
+  \fn QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags, 
+					 uint size )
+  Initialize the memory map.  If sucessful wil return a pointer to the memory file
+ data.  Otherwise returns null.
+*/
 
+/*!
+  \fn void QMemoryFile::closeData(QMemoryFileData *memoryFile)
+  Close memory file and free any memory used
+*/
 
 /*
   Construct a memory mapped to an actual file or named memory block.

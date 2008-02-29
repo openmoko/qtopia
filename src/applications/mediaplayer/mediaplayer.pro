@@ -18,6 +18,4 @@ multiprocess:SOURCES += main.cpp
 
 unix:LIBS       += -lpthread
 
-static:LIBS	+= -L$(QPEDIR)/plugins/codecs -lffmpegplugin
-
 TRANSLATIONS = mpegplayer-en_GB.ts mpegplayer-de.ts mpegplayer-ja.ts mpegplayer-no.ts

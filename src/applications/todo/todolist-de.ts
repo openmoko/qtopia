@@ -111,6 +111,13 @@ Please change the due date first.</source>
     </message>
 </context>
 <context>
+    <name>TodoSettings</name>
+    <message>
+        <source>Configure columns to display</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>TodoTable</name>
     <message>
         <source>Unfiled</source>
@@ -273,6 +280,35 @@ Please change the due date first.</source>
     </message>
     <message>
         <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Task List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View the list of Tasks.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fit to width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete the %1 selected tasks?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete:
+%1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>the %1 selected tasks</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

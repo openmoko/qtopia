@@ -19,10 +19,10 @@
 **********************************************************************/
 #include <qtopia/qpeapplication.h>
 #define QTOPIA_INTERNAL_LANGLIST
-#include <qtopia/qlibrary.h>
 #include <qtopia/mediaplayerplugininterface.h>
 #include <qtopia/config.h>
 #include <qtopia/global.h>
+#include <qtopia/pluginloader.h>
 #include <qvaluelist.h>
 #include <qobject.h>
 #include <qtimer.h>
@@ -125,7 +125,6 @@ VideoWidget* MediaPlayerState::videoUI()
 
 struct MediaPlayerPlugin {
 #ifndef QT_NO_COMPONENT
-    QLibrary *library;
     MediaPlayerPluginInterface *iface;
 #endif
     MediaPlayerDecoder *decoder;
@@ -135,6 +134,7 @@ struct MediaPlayerPlugin {
 
 
 static QValueList<MediaPlayerPlugin> pluginList;
+static PluginLoader *loader = 0;
 
 
 // Find the first decoder which supports this type of file
@@ -174,62 +174,46 @@ MediaPlayerDecoder *MediaPlayerState::streamingDecoder( const QString& url, cons
 void MediaPlayerState::loadPlugins()
 {
 #ifndef QT_NO_COMPONENT
-    QValueList<MediaPlayerPlugin>::Iterator mit;
-    for ( mit = pluginList.begin(); mit != pluginList.end(); ++mit ) {
-	(*mit).iface->release();
-	(*mit).library->unload();
-	delete (*mit).library;
+    if ( loader ) {
+	QValueList<MediaPlayerPlugin>::Iterator mit;
+	for ( mit = pluginList.begin(); mit != pluginList.end(); ++mit ) {
+	    loader->releaseInterface( (*mit).iface );
+	}
+	pluginList.clear();
+	delete loader;
     }
-    pluginList.clear();
 
-    QString path = QPEApplication::qpeDir() + "plugins/codecs";
-    QDir dir( path, "lib*.so" );
-    QStringList list = dir.entryList();
+    loader = new PluginLoader( "codecs" );
+
+    QStringList list = loader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	MediaPlayerPluginInterface *iface = 0;
-	QLibrary *lib = new QLibrary( path + "/" + *it );
 
-	MediaPlayerDebug(( "querying: %s", QString( path + "/" + *it ).latin1() ));
+	MediaPlayerDebug(( "querying: %s", (*it).latin1() )); // No tr
 
 	DecoderVersion ver = Decoder_Unknown;
 
 	// Some old plugins have dodgy queryInterface implementations which always anwser QS_OK
 	const QUuid IID_evilPlugin( 0x00000666, 0x0666, 0x0666, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x66 );
-	if ( lib->queryInterface( IID_evilPlugin, (QUnknownInterface**)&iface ) == QS_OK ) {
+	if ( loader->queryInterface( *it, IID_evilPlugin, (QUnknownInterface**)&iface ) == QS_OK ) {
 	    qDebug("Detected old evil plugin which answers to any old interface Id!");
-	    lib->queryInterface( IID_MediaPlayerPlugin, (QUnknownInterface**)&iface );
+	    loader->queryInterface( *it, IID_MediaPlayerPlugin, (QUnknownInterface**)&iface );
 	    ver = Decoder_1_5;
-	} else if ( lib->queryInterface( IID_MediaPlayerPlugin_1_6, (QUnknownInterface**)&iface ) == QS_OK ) 
+	} else if ( loader->queryInterface( *it, IID_MediaPlayerPlugin_1_6, (QUnknownInterface**)&iface ) == QS_OK ) 
 	    ver = Decoder_1_6;
-	else if ( lib->queryInterface( IID_MediaPlayerPlugin, (QUnknownInterface**)&iface ) == QS_OK )
+	else if ( loader->queryInterface( *it, IID_MediaPlayerPlugin, (QUnknownInterface**)&iface ) == QS_OK )
 	    ver = Decoder_1_5;
 
 	if ( ver != Decoder_Unknown ) {
-	    MediaPlayerDebug(( "loading: %s", QString( path + "/" + *it ).latin1() ));
+	    MediaPlayerDebug(( "loading: %s", (*it).latin1() )); // No tr
 
 	    MediaPlayerPlugin plugin;
 	    plugin.version = ver;
-	    plugin.library = lib;
 	    plugin.iface = iface;
 	    plugin.decoder = plugin.iface->decoder();
 	    plugin.encoder = plugin.iface->encoder();
 	    pluginList.append( plugin );
-
-	    QString type = (*it).left( (*it).find(".") );
-	    QStringList langs = Global::languageList();
-	    for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
-		QString lang = *lit;
-		QTranslator * trans = new QTranslator(qApp);
-		QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
-		if ( trans->load( tfn ))
-		    qApp->installTranslator( trans );
-		else
-		    delete trans;
-	    }
-
-	} else {
-	    delete lib;
 	}
     }
 #else
@@ -243,9 +227,9 @@ void MediaPlayerState::loadPlugins()
 
 #endif
     if ( pluginList.count() ) 
-	MediaPlayerDebug(( "%i decoders found", pluginList.count() ));
+	MediaPlayerDebug(( "%i decoders found", pluginList.count() )); // No tr
     else
-	MediaPlayerDebug(( "No decoders found" ));
+	MediaPlayerDebug(( "No decoders found" )); // No tr
 }
 
 

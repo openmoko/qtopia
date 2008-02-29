@@ -2,7 +2,8 @@ Files: plugins/textcodecs/libsimple8.so*
 Priority: optional
 Section: qpe/taskbar
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: A collection of 8-bit text codecs.

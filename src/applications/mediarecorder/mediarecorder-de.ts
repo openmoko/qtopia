@@ -64,14 +64,6 @@
         <source>Format:</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Done</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reset</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>MediaRecorder</name>
@@ -89,14 +81,6 @@
     </message>
     <message>
         <source>Configure the recording quality settings.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Documents</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Recorded Sound</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -143,6 +127,35 @@
         <source>%1 secs</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>No playback plugin found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice Recorder was unable to
+locate a suitable plugin to
+play the selected format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No plugin found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice Recorder was unable to
+locate a suitable plugin to
+record in the selected format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recorded Sound %1</source>
+        <comment>date</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MediaRecorderBase</name>
@@ -176,6 +189,10 @@
     </message>
     <message>
         <source>Record</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

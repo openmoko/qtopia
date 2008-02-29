@@ -22,15 +22,16 @@
 #include "taskbar.h"
 #include "stabmon.h"
 #include "launcher.h"
+#include "firstuse.h"
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/network.h>
 #include <qtopia/config.h>
-#ifdef QT_QWS_CUSTOM
 #include <qtopia/custom.h>
-#endif
+#include <qtopia/global.h>
 
 #include <qfile.h>
+#include <qdir.h>
 #ifdef QWS
 #include <qwindowsystem_qws.h>
 #include <qtopia/qcopenvelope_qws.h>
@@ -76,17 +77,17 @@ void initCassiopeia()
     if ( mount("none", "/tmp", "ramfs", 0, 0 ) ) {
 	perror("mounting ramfs /tmp");
     } else {
-	fprintf( stderr, "mounted /tmp\n" );
+	fprintf( stderr, "mounted /tmp\n" ); // No tr
     }
     if ( mount("none", "/home", "ramfs", 0, 0 ) ) {
 	perror("mounting ramfs /home");
     } else {
-	fprintf( stderr, "mounted /home\n" );
+	fprintf( stderr, "mounted /home\n" ); // No tr
     }
     if ( mount("none","/proc","proc",0,0) ) {
 	perror("Mounting - /proc");
     } else {
-	fprintf( stderr, "mounted /proc\n" );
+	fprintf( stderr, "mounted /proc\n" ); // No tr
     }
     if ( mount("none","/mnt","shm",0,0) ) {
 	perror("Mounting - shm");
@@ -164,8 +165,24 @@ void initFloppy()
 }
 #endif
 
+static void cleanup()
+{
+    QDir dir( "/tmp", "qcop-msg-*" );
+
+    QStringList stale = dir.entryList();
+    QStringList::Iterator it;
+    for ( it = stale.begin(); it != stale.end(); ++it ) {
+	qDebug( "Removing: %s", (*it).latin1() );
+	dir.remove( *it );
+    }
+}
+
 void initEnvironment()
 {
+#ifdef Q_OS_WIN32
+  // Config file requires HOME dir which uses QDir which needs the winver 
+  qt_init_winver();
+#endif
   Config config("locale");
   config.setGroup( "Location" );
   QString tz = config.readEntry( "Timezone", getenv("TZ") );
@@ -181,6 +198,7 @@ void initEnvironment()
   QString lang = config.readEntry( "Language", getenv("LANG") );
   if ( !lang.isNull() )
     setenv( "LANG", lang, 1 );
+
 
   config = Config("qpe");
   config.setGroup( "Rotation" );
@@ -222,8 +240,33 @@ static void initKeyboard()
 	qwsSetKeyboardAutoRepeat( ard, arp );
 }
 
+static void firstUse()
+{
+    bool needFirstUse = FALSE;
+#if defined(QPE_NEED_CALIBRATION)
+    if ( !QFile::exists( "/etc/pointercal" ) )
+	needFirstUse = TRUE;
+#endif
+
+    {
+	Config config( "qpe" );
+	config.setGroup( "Startup" );
+	needFirstUse |= config.readBoolEntry( "FirstUse", TRUE );
+    }
+
+    if ( needFirstUse ) {
+	FirstUse *fu = new FirstUse();
+	fu->exec();
+	if ( fu->restartNeeded() )
+	    Global::restart();
+	delete fu;
+    }
+}
+
 int initApplication( int argc, char ** argv )
 {
+    cleanup();
+
 #ifdef QT_QWS_CASSIOPEIA
     initCassiopeia();
 #endif
@@ -246,6 +289,10 @@ int initApplication( int argc, char ** argv )
 
     initBacklight();
 
+    initKeyboard();
+
+    firstUse();
+
     AlarmServer::initialize();
 
 #if defined(QT_QWS_LOGIN)
@@ -255,8 +302,6 @@ int initApplication( int argc, char ** argv )
 	return 0;
       }
 #endif
-
-    initKeyboard();
     
     Desktop *d = new Desktop();
     a.setMainWidget(d->appLauncher());
@@ -274,15 +319,6 @@ int initApplication( int argc, char ** argv )
     (void)new SysFileMonitor(d);
 #ifdef QWS
     Network::createServer(d);
-#endif
-
-#if defined(QPE_NEED_CALIBRATION)
-    if ( !QFile::exists( "/etc/pointercal" ) ) {
-	// Make sure calibration widget starts on top.
-	Calibrate *cal = new Calibrate;
-	cal->exec();
-	delete cal;
-    }
 #endif
 
     d->show();
@@ -303,6 +339,21 @@ int main( int argc, char ** argv )
 
     int retVal = initApplication( argc, argv );
 
+#ifdef Q_WS_QWS
+    // Have we been asked to restart?
+    if ( DesktopApplication::doRestart ) {
+	for ( int fd = 3; fd < 100; fd++ )
+	    close( fd );
+# if defined(QT_DEMO_SINGLE_FLOPPY)
+	execl( "/sbin/init", "qpe", 0 );
+# elif defined(QT_QWS_CASSIOPEIA)
+	execl( "/bin/sh", "sh", 0 );
+# else
+	execl( (QPEApplication::qpeDir()+"bin/qpe").latin1(), "qpe", 0 );
+# endif
+    }
+#endif
+
 #ifndef SINGLE_APP
     // Kill them. Kill them all.
     setpgid( getpid(), getppid() );
@@ -318,6 +369,12 @@ int main( int argc, char ** argv )
 int main( int argc, char ** argv )
 {
     int retVal = initApplication( argc, argv );
+
+    if ( DesktopApplication::doRestart ) {
+	qDebug("Trying to restart");
+	execl( (QPEApplication::qpeDir()+"bin\\qpe").latin1(), "qpe", 0 );
+    }
+
     return retVal;
 }
 

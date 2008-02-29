@@ -151,5 +151,13 @@ Click again to hide the search bar.</source>
         <source>Find: not found</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Empty Text</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

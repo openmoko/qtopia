@@ -8,7 +8,6 @@ mediaplayerdecoder_1_6.h mediaplayerplugininterface.h
 mediarecorderencoder.h mediarecorderplugininterface.h
 storageinfo.h storage.h
 filesystem.h storage.h
-taskbarnamedappletinterface.h taskbarappletinterface.h
 node.h xmlreader.h
 xmlhandler.h xmlreader.h
 addressbookiterator.h addressbookaccess.h

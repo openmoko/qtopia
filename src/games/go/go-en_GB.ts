@@ -2,10 +2,6 @@
 <context>
     <name>GoMainWidget</name>
     <message>
-        <source>New Game</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Pass</source>
         <translation type="unfinished"></translation>
     </message>
@@ -14,11 +10,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Two player option</source>
+        <source>Game</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Game</source>
+        <source>Single player game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Two player game</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

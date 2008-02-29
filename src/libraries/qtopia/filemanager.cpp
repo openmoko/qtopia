@@ -29,6 +29,9 @@
 #include <errno.h>
 #include <stdlib.h>
 
+// defined in applnk.cpp
+bool mkdirRecursive( QString path );
+
 /*!
   \class FileManager
   \brief The FileManager class assists with AppLnk input/output.
@@ -286,21 +289,23 @@ bool FileManager::exists( const DocLnk &f )
 */
 bool FileManager::ensurePathExists( const QString &fn )
 {
-    QDir d(fn);
-    if (!d.exists()){
-	QFileInfo fi(fn);
-	fi.setFile( fi.dirPath(TRUE) );
-	QString dirPath = QDir::convertSeparators(fi.filePath());
-	QString param("");
-#ifndef Q_OS_WIN32
-	param = "-p ";
-#endif
-	QString cmdLine("mkdir " + param + dirPath.latin1());
-	if ( system(cmdLine.latin1()) ){
-	    qDebug("System failed to execute command %s", cmdLine.latin1());
-	    return FALSE;
-	}
+    QFileInfo fi(fn);
+    if (!fi.isDir()){
+      fi = QFileInfo(fi.dirPath(TRUE));
     }
 
+    QString dirPath = fi.absFilePath();
+    if ( !fi.exists() ) {
+#ifndef Q_OS_WIN32
+	// May need to create directories
+	QString cmdLine(QString("mkdir -p ") + dirPath.latin1());
+	if ( system(cmdLine.latin1())){
+#else
+	if ( !mkdirRecursive( dirPath ) ) {
+#endif
+	     qDebug("FileManager::ensurePathExists : System failed to create directory path %s", dirPath.latin1());
+	     return FALSE;
+	}
+    }
     return TRUE;
 }

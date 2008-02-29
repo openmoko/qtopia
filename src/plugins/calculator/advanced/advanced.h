@@ -21,7 +21,7 @@
 #ifndef ADVANCEDIMPL_H
 #define ADVANCEDIMPL_H
 
-#include <qtoolbutton.h>
+#include <qpushbutton.h>
 
 #include <qtopia/calc/engine.h>
 #include <qtopia/calc/stdinputwidgets.h>
@@ -30,20 +30,28 @@ class FormAdvanced:public QWidget {
     Q_OBJECT
 public:
 	FormAdvanced(QWidget *,const char*,WFlags);
-	~FormAdvanced(){};
+	~FormAdvanced();
 
 public slots:
         void showEvent ( QShowEvent * );
 
+protected:
+	void fontChange();
+
 private:
 	Type1DecimalInputWidget *siw;
-	QToolButton *PBDel,*PBC;
-	QToolButton *PBMR,*PBMC,*PBMPlus;
-	QToolButton *PBSin,*PBCos,*PBTan,*PBOneOverX;
-	QToolButton *PBASin,*PBACos,*PBATan;
-	QToolButton *PBLog,*PBLn,*PBFactorial,*PBNegate;
-	QToolButton *PBSquare,*PBPow,*PBSquareRoot,*PBXRootY;
+	QPushButton *PBDel,*PBC;
+	QPushButton *PBMR,*PBMC,*PBMPlus;
+	QPushButton *PBSin,*PBCos,*PBTan,*PBOneOverX;
+	QPushButton *PBASin,*PBACos,*PBATan;
+	QPushButton *PBLog,*PBLn,*PBFactorial,*PBNegate;
+	QPushButton *PBSquare,*PBPow,*PBSquareRoot,*PBXRootY;
 	QGridLayout* AdvancedLayout;
+
+	QPixmap *PMPow,*PMLog,*PMSquare,*PMXRootY,*PMOneOverX,
+	*PMSquareRoot;
+
+	void updatePictures();
 
 private slots:
 	void DelClicked();

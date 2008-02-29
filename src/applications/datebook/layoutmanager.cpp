@@ -35,15 +35,15 @@ int SortedLayoutItems::compareItems(Item i1, Item i2)
     LayoutItem *d1 = (LayoutItem *)i1;
     LayoutItem *d2 = (LayoutItem *)i2;
 
-    if (d1->event().startInTZ() < d2->event().startInTZ())
+    if (d1->event().startInCurrentTZ() < d2->event().startInCurrentTZ())
 	return -1;
-    if (d2->event().startInTZ() < d1->event().startInTZ())
+    if (d2->event().startInCurrentTZ() < d1->event().startInCurrentTZ())
 	return 1;
     return 0;
 
-    if (d1->event().endInTZ() < d2->event().endInTZ())
+    if (d1->event().endInCurrentTZ() < d2->event().endInCurrentTZ())
 	return -1;
-    if (d2->event().endInTZ() < d1->event().endInTZ())
+    if (d2->event().endInCurrentTZ() < d1->event().endInCurrentTZ())
 	return 1;
     return 0;
 }
@@ -197,19 +197,19 @@ LayoutItem *LayoutManager::intersects(LayoutItem *item, QRect geom) const
 void LayoutManager::initializeGeometry(LayoutItem *item)
 {
     int y, yend;
-    if (referenceDate > item->occurrence().startInTZ().date())
+    if (referenceDate > item->occurrence().startInCurrentTZ().date())
 	y = 0;
     else 
-	y = timeToHeight(item->event().startInTZ().time());
+	y = timeToHeight(item->event().startInCurrentTZ().time());
 
     if (referenceDate < 
-	    item->occurrence().startInTZ().date().addDays( 
-		item->event().startInTZ().date().daysTo(item->event().endInTZ().date())
+	    item->occurrence().startInCurrentTZ().date().addDays( 
+		item->event().startInCurrentTZ().date().daysTo(item->event().endInCurrentTZ().date())
 		)
 	    )
 	yend = timeToHeight(QTime(23,59,59));
     else
-	yend = timeToHeight(item->event().endInTZ().time());
+	yend = timeToHeight(item->event().endInCurrentTZ().time());
 
     int h = yend - y;
     if (h < min_height)

@@ -21,7 +21,6 @@
 #include "qirserver.h"
 
 #include <qtopia/mimetype.h>
-#include <qtopia/global.h>
 #include <qtopia/qcopenvelope_qws.h>
 
 #include <qsocketnotifier.h>
@@ -38,14 +37,16 @@ extern "C" {
 #include "openobex/obex.h"
 }
 
-//#include <qmessagebox.h>
-
 class QObexBase :public QObject
 {
     Q_OBJECT;
 public:
     QObexBase( QObject *parent = 0, const char *name = 0 );
     ~QObexBase();
+
+signals:
+    void error();
+    void statusMsg(const QString &);
 
 public slots:
     void abort();
@@ -132,6 +133,7 @@ public:
 
 signals:
     void done();
+    void progress(int);
 
 private slots:
     void tryConnecting(); 
@@ -150,11 +152,12 @@ private:
 	    state = Error;
 	    finished = TRUE;
         } else {
-   	  finished = FALSE;
+	  finished = FALSE;
 	}
     }
 
     void feedStream( obex_object_t *);
+    void updateProgress( obex_object_t *);
 
     void doPending();
 
@@ -184,8 +187,9 @@ protected:
     void doPending();
 
 signals:
-  void receiving( int size, const QString & name );
-  void received( const QString & name );
+    void receiving(bool);
+    void receiving( int size, const QString & name );
+    void received( const QString & name );
 
 private:
     friend void qobex_server_callback(obex_t *handle, obex_object_t *object, gint mode, gint event, gint obex_cmd, gint obex_rs);
@@ -215,6 +219,7 @@ protected:
     void doPending();
 
 signals:
+    void receiving(bool);
     void receiving( int size, const QString & name, const QString & mime );
     void progress( int size );
     void received( const QString & name, const QString & mime );
@@ -226,7 +231,7 @@ private:
 		 Disconnecting, Finished, Error, Aborted };
 
     void readData( obex_object_t *);
-
+    void updateProgress( obex_object_t *);
     void getHeaders( obex_object_t *object );
 
     State state;
@@ -292,6 +297,10 @@ void QObexSender::feedStream( obex_object_t *object )
     }
  }
 
+void QObexSender::updateProgress( obex_object_t * /* obj */)
+{
+    emit progress( file_being_sent->at() );
+}
 
 void QObexSender::putFile( const QString &filename, const QString& mimetype )
 {
@@ -381,9 +390,8 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mod
 {
     QObexSender *sender = (QObexSender*)OBEX_GetUserData( handle );
 
-    //qDebug( "qobex_sender_callback %p, %p, %p, %d, event %x, cmd %x, rsp %x",
-        //sender, handle, obj, mode, event, obex_cmd, obex_rsp );
-
+//    qDebug( "qobex_sender_callback %p, %p, %p, %d, event %x, cmd %x, rsp %x",
+//        sender, handle, obj, mode, event, obex_cmd, obex_rsp );
 
     switch (event) {
     case OBEX_EV_REQDONE:
@@ -395,13 +403,22 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mod
 	break;
 
     case OBEX_EV_LINKERR:
-	abort();
-	sender->state = QObexSender::Error;
-	emit sender->done();
+	// sometime we get a link error after we believed the connection was done.  Ignore this
+	// as emitting an error after done does not make sense
+	if ( !sender->finished ) {
+	    emit sender->error();
+	    sender->abort();
+	    sender->state = QObexSender::Error;
+	} else {
+	    sender->abort();
+	    qDebug("QIrServer:: got link error after done signal, no external signals sent");
+	}
+	
 	break;
 
     case OBEX_EV_PROGRESS:
 	// report progress?
+	sender->updateProgress( obj );
 	break;
 
 	
@@ -411,6 +428,7 @@ static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mod
 	break;
 	
     default:
+	qDebug("qobex_sender_callback:: did not recongnize event signal %d", event);
 	break;
     }
 }
@@ -461,16 +479,18 @@ void QObexSender::tryConnecting()
 	const int maxTry = 20;
 	if ( connectCount > maxTry ) {
 	    abort();
+	    emit error();
+	    deleteMeLater();
 	} else {
-	    Global::statusMessage(tr("Beam failed (%1/%2). Retrying...","eg. 1/3")
-		.arg(connectCount).arg(maxTry));
+	    QString str = tr("Beam failed (%1/%2). Retrying...","eg. 1/3").arg(connectCount).arg(maxTry);
+	    emit statusMsg( str );
 	    QTimer::singleShot( 500, this, SLOT(tryConnecting()) );
 	}
 	return;
     }
 
-    Global::statusMessage(tr("Sending..."));
-    QCopEnvelope env("QPE/Obex","sending()");
+    QString str = tr("Sending...");
+    emit statusMsg( str );
 
     connectSocket();
 
@@ -526,6 +546,10 @@ void QObexServer::doPending()
 void QObexServer::spawnReceiver( obex_t *handle )
 {
     ASSERT( handle == self );
+    
+    // we emit this here, as doing in in QObexReceiver could cause race conditions
+    emit receiving( TRUE );
+    
     QObexReceiver *receiver = new QObexReceiver( handle, this );
     connect( receiver, SIGNAL(receiving(int, const QString&, const QString&)),
 	     parent(), SIGNAL(receiving(int, const QString&, const QString&)) );
@@ -533,10 +557,13 @@ void QObexServer::spawnReceiver( obex_t *handle )
 	     parent(), SIGNAL(progress(int)) );
     connect( receiver, SIGNAL(received(const QString&, const QString&)),
 	     parent(), SIGNAL(received(const QString&, const QString&)) );
+    
+    connect( receiver, SIGNAL(receiving(bool)), parent(), SLOT(receiving(bool)) );
 
     connect( parent(), SIGNAL(abort()), receiver, SLOT(abort()) );
-
-
+    connect(receiver, SIGNAL(error()),
+	    parent(), SLOT(mError()) );
+    
 }
 
 
@@ -700,24 +727,26 @@ void QObexReceiver::readData( obex_object_t *object )
 
     if ( len > 0 ) {
 	outfile.writeBlock( (const char*)buf, len );
-	emit progress( reclen ? reclen : outfile.at() );
     } else if ( len == 0 ) {
-	emit progress( reclen ? reclen : outfile.at() );
 	outfile.close();
 
 	emit received( outfile.name(), mimetype );
     } else {
 	qWarning( "ERROR reading stream" );
-	//emit error();
+	emit error();
     }
     finished = ( len <= 0 );
 }
 
-static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint /*mode*/, gint event, gint obex_cmd, gint obex_rsp)
+void QObexReceiver::updateProgress( obex_object_t * /* obj */)
+{
+    emit progress( outfile.size() );
+}
+
+
+static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint /*mode*/, gint event, gint obex_cmd, gint /* obex_rsp */)
 {
     //qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
-
-
     QObexReceiver* receiver = 
 	(QObexReceiver*)OBEX_GetUserData( handle );
 
@@ -727,6 +756,7 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 	receiver->readData( object );
 	break;
     case OBEX_EV_PROGRESS:
+	receiver->updateProgress( object );
 	// report progress
 	break;
 
@@ -806,8 +836,10 @@ static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint 
 
 void QObexReceiver::doPending()
 {
-    if ( state == Finished )
+    if ( state == Finished ) {
 	deleteMeLater();
+	emit receiving(FALSE);
+    }
 }
 
 
@@ -816,23 +848,80 @@ void QObexReceiver::doPending()
 QIrServer::QIrServer( QObject *parent, const char *name )
     :QObject( parent, name )
 {
-    (void)new QObexServer( this );
+    QObexServer *ob = new QObexServer( this );
+    connect(ob, SIGNAL(receiving(bool)), this, SLOT(receiving(bool)) );
+
+    _state = Ready;
+}
+
+QIrServer::~QIrServer()
+{
 }
 
 void QIrServer::beam( const QString& filename, const QString& mimetype )
 {
+    if ( _state != Ready ) {
+	qDebug("QIrServer not ready, beaming disallowed");
+	emit beamError();
+	return;
+    }
+//    qDebug("beaming %s", filename.data() );
+    _state = Beaming;
+    
     QObexSender *sender = new QObexSender( this );
-    sender->beam( filename, mimetype );
 
     connect( this, SIGNAL(abort()), sender, SLOT(abort()) );
-    connect( sender, SIGNAL(done()), this, SIGNAL(done()) );
-
+    
+    connect( sender, SIGNAL(done()), this, SLOT(mDone()) );
+    connect( sender, SIGNAL(error()), this, SLOT(mError()) );
+    connect( sender, SIGNAL(statusMsg(const QString &)), this, SIGNAL(statusMsg(const QString &)) );
+    connect( sender, SIGNAL(progress(int)), this, SIGNAL( progress(int) ) );
+    
+    sender->beam( filename, mimetype );
+    
     //fire-and forget, auto-cleanup
+}
+
+void QIrServer::receiving(bool b)
+{
+    State old = _state;
+    
+    if ( b )
+	_state = Receiving;
+    else
+	_state = Ready;
+    
+    // no nice way of initializing the first receive call.  avoid sending more than one receiveInit call
+    if ( _state != old && _state == Receiving)
+	emit receiveInit();
+}
+
+void QIrServer::mDone()
+{
+    _state = Ready;
+    emit beamDone();
+}
+
+void QIrServer::mError()
+{
+    State old = _state;
+    _state = Ready;
+    
+    if ( old == Beaming )
+        emit beamError();
+    else if ( old == Receiving )
+	emit receiveError();
+    else
+	qDebug("QIrServer::got error after we though connection was completed");
 }
 
 void QIrServer::cancel()
 {
+    // internal signal
     emit abort();
+    
+    //external (this goes to qir)
+    mError();
 }
 
 void QIrServer::setReceivingEnabled( bool )

@@ -163,8 +163,8 @@ void UniScrollview::contentsMousePressEvent(QMouseEvent* e)
     if ( u >= 'a' && u <= 'z' ) {
 	code = u - 'a' + Key_A;
     }
-    emit key( u, 0, 0, true, false );
-    emit key( u, 0, 0, false, false );
+    emit key( u, code, 0, true, false );
+    emit key( u, code, 0, false, false );
 #endif
 }
 

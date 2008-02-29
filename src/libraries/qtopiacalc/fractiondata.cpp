@@ -111,8 +111,6 @@ void FractionData::set(int n,int d) {
 	dEdited = FALSE;
     else
 	dEdited = TRUE;
-    nString.truncate(0);
-    dString.truncate(0);
     nString.setNum(numerator);
     dString.setNum(denominator);
     buildFormattedString();

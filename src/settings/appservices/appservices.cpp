@@ -29,6 +29,7 @@
 #include <qtopia/config.h>
 #include <qtopia/services.h>
 
+#include <qtimer.h>
 #include <qlistview.h>
 #include <qdir.h>
 #include <qradiobutton.h>
@@ -43,8 +44,14 @@ public:
 	Config service(svdir+".service",Config::File);
 	QString icon;
 	if ( service.isValid() ) {
-	    setText(0,service.readEntry("Name"));
-	    icon = service.readEntry("Icon");
+	    QString nm = service.readEntry("Name");
+	    if ( nm.isEmpty() || service.readNumEntry("Multiple",0) ) {
+		// Not presented to users
+		svr = QString::null;
+	    } else {
+		setText(0,service.readEntry("Name"));
+		icon = service.readEntry("Icon");
+	    }
 	} else if ( lnk ) {
 	    QString name=sv.mid(5); // Strip "Open/"
 	    if ( name.left(12)=="application/" ) {
@@ -134,8 +141,8 @@ AppServices::AppServices( QWidget* parent,  const char* name, bool modal, WFlags
     : AppServicesBase( parent, name, modal, fl )
 {
     allapps=0;
-    loadState();
     connect(lv,SIGNAL(clicked(QListViewItem*)),this,SLOT(check(QListViewItem*)));
+    QTimer::singleShot(1,this,SLOT(loadState()));
 }
 
 void AppServices::check(QListViewItem* i)
@@ -146,9 +153,25 @@ void AppServices::check(QListViewItem* i)
     }
 }
 
+void AppServices::drawWait(bool on)
+{
+    QWidget* waitwi = lv->viewport();
+    QPainter waitpaint(waitwi);
+    QPixmap pm = Resource::loadPixmap("bigwait");
+    int x = (waitwi->width()-pm.width())/2;
+    int y = (waitwi->height()-pm.height())/2;
+    if ( on ) {
+	waitpaint.drawPixmap(x,y,pm);
+    } else {
+	waitpaint.eraseRect(x,y,pm.width(),pm.height());
+    }
+    waitpaint.end();
+}
+
 void AppServices::loadState()
 {
     lv->clear();
+    drawWait(TRUE);
     delete allapps;
     allapps=new AppLnkSet(MimeType::appsFolderName());
 
@@ -231,6 +254,9 @@ void AppServices::loadState()
 	  || n>1 && showmulti->isOn())
 	{
 	    some = TRUE;
+	    if ( n == 1 ) {
+		((ASCheckListItem*)si->firstChild())->setOn(TRUE);
+	    }
 	} else {
 	    delete si;
 	}
@@ -260,6 +286,7 @@ void AppServices::loadState()
 		break;
 	}
     }
+    drawWait(FALSE);
 }
 
 /*  
@@ -275,15 +302,18 @@ void AppServices::done(int y)
 {
     if ( y ) {
 	QListViewItem* s = lv->firstChild();
-	ASCheckListItem* sv=(ASCheckListItem*)s;
-	Config binding("Service-"+sv->service());
-	binding.setGroup("Service");
-	for (QListViewItem* a = s->firstChild(); a; a = a->nextSibling()) {
-	    ASCheckListItem* ap=(ASCheckListItem*)a;
-	    if ( ap->isOn() ) {
-		binding.writeEntry("default",ap->application());
-		break;
+	while ( s ) {
+	    ASCheckListItem* sv=(ASCheckListItem*)s;
+	    Config binding("Service-"+sv->service());
+	    binding.setGroup("Service");
+	    for (QListViewItem* a = s->firstChild(); a; a = a->nextSibling()) {
+		ASCheckListItem* ap=(ASCheckListItem*)a;
+		if ( ap->isOn() ) {
+		    binding.writeEntry("default",ap->application());
+		    break;
+		}
 	    }
+	    s = s->nextSibling();
 	}
     }
     AppServicesBase::done(y);

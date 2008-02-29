@@ -17,7 +17,7 @@
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Security Settings</string>
+        <string>Security</string>
     </property>
     <property>
         <name>layoutMargin</name>

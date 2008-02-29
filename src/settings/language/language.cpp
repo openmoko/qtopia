@@ -118,9 +118,11 @@ void LanguageSettings::reject()
 
 void LanguageSettings::reset()
 {
+    Config config("locale");
+    config.setGroup( "Language" );
     QString l = getenv("LANG");
-    Config config("language");
     l = config.readEntry( "Language", l );
+
     if(l.isEmpty()) l = "en"; // No tr
     actualLanguage = l;
 

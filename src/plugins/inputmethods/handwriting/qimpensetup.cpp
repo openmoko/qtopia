@@ -256,10 +256,10 @@ QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
     hb = new QHBoxLayout();
     vb->addLayout( hb );
 
-    QPushButton *pb = new QPushButton( "OK", this );
+    QPushButton *pb = new QPushButton( tr("OK"), this );
     connect( pb, SIGNAL(clicked()), SLOT(accept()));
     hb->addWidget( pb );
-    pb = new QPushButton( "Cancel", this );
+    pb = new QPushButton( tr("Cancel"), this );
     connect( pb, SIGNAL(clicked()), SLOT(reject()));
     hb->addWidget( pb );
 
@@ -270,7 +270,7 @@ void QIMPenInputCharDlg::addSpecial( QComboBox *cb )
 {
     int i = 0;
     while ( qimpen_specialKeys[i].code != Key_unknown ) {
-	cb->insertItem( qimpen_specialKeys[i].name );
+	cb->insertItem( qApp->translate("Handwriting",qimpen_specialKeys[i].name) );
 	i++;
     }
 }
@@ -395,12 +395,12 @@ QIMPenEdit::QIMPenEdit( QIMPenProfile *p, QWidget *parent,
 
     int ch = lastCh;
 
-    if ( lastCs > profile->charSets().count()-1 )
+    if ( lastCs > int(profile->charSets().count())-1 )
 	lastCs = 0;
     charSetCombo->setCurrentItem( lastCs );
     selectCharSet( lastCs );
 
-    if ( ch < charList->count() ) {
+    if ( ch < int(charList->count()) ) {
 	selectChar( ch );
         charList->setSelected( ch, TRUE );
     } else {

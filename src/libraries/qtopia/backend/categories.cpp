@@ -26,12 +26,6 @@
 #include <qtopia/qcopenvelope_qws.h>
 #endif
 
-#if defined(Q_TEMPLATEDLL) && (QT_VERSION < 300)
-// MOC_SKIP_BEGIN
-template class Q_EXPORT QValueList<int>;
-// MOC_SKIP_END
-#endif
-
 using namespace Qtopia;
 
 /***********************************************************
@@ -680,8 +674,8 @@ bool Categories::save( const QString &fname ) const
 
     for ( QMap<int, QString>::ConstIterator git = mGlobalCats.idMap().begin();
 	  git != mGlobalCats.idMap().end(); ++git )
-	out += "<Category id=\"" + QString::number(git.key()) + "\"" +
-	  " name=\"" + escapeString(*git) + "\" />\n";
+	out += "<Category id=\"" + QString::number(git.key()) + "\"" + // No tr
+	  " name=\"" + escapeString(*git) + "\" />\n"; // No tr
 
     for ( QMap<QString, CategoryGroup>::ConstIterator appsIt=mAppCats.begin();
 	  appsIt != mAppCats.end(); ++appsIt ) {
@@ -689,9 +683,9 @@ bool Categories::save( const QString &fname ) const
 	const QMap<int, QString> &appcats = (*appsIt).idMap();
 	for ( QMap<int, QString>::ConstIterator appcatit = appcats.begin();
 	      appcatit != appcats.end(); ++appcatit )
-	    out += "<Category id=\"" + QString::number(appcatit.key()) + "\"" +
+	    out += "<Category id=\"" + QString::number(appcatit.key()) + "\"" + // No tr
 	      " app=\"" + escapeString(app) + "\"" +
-	      " name=\"" + escapeString(*appcatit) + "\" />\n";
+	      " name=\"" + escapeString(*appcatit) + "\" />\n"; // No tr
     }
     out += "</Categories>\n";
 
@@ -754,7 +748,7 @@ bool Categories::load( const QString &fname )
     QString id;
     QString app;
     int i = 0;
-    while ( (i = data.find( "<Category ",  i)) != -1 ) {
+    while ( (i = data.find( "<Category ",  i)) != -1 ) { // No tr
 
 	i += 10;
 	name = QString::null;
@@ -787,7 +781,7 @@ bool Categories::load( const QString &fname )
 	    else if ( attr == "app" )
 		app = value;
 
-	    else if ( attr == "name" )
+	    else if ( attr == "name" ) // No tr
 		name = value;
 	}
 

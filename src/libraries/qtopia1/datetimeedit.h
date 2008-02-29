@@ -44,9 +44,9 @@ signals:
 
 public slots:
     virtual void setTime( const QTime & );
-    void setClock(bool b);
     void stepDown();
     void stepUp();
+    void clockChanged();
 
 protected:
     QString mapValueToText(int);
@@ -63,29 +63,53 @@ private:
 };
 
 class QPEDateEditPrivate;
-
-// more of a wrapper class.
-class QTOPIA_EXPORT QPEDateEdit : public QPEDateButton
+class QTOPIA_EXPORT QPEDateEdit : public QPushButton
 {
     Q_OBJECT
 
 public:
-    QPEDateEdit( QWidget *parent = 0, const char *name = 0);
-    QPEDateEdit( const QDate &, bool longDate, QWidget *parent = 0, const char *name = 0 );
+    QPEDateEdit(  QWidget *parent, const char * name = 0,
+		    bool longFormat = FALSE,
+		    bool allowNullDate = FALSE );
+    QPEDateEdit(  const QDate &, QWidget *parent, const char * name = 0,
+		    bool longFormat = FALSE,
+		    bool allowNullDate = FALSE );
 
-    ~QPEDateEdit();
+    QDate date() const;
+
+    void setDateFormat( DateFormat );
+    void setLongFormat( bool l );
+    bool longFormat() const { return longFmt; }
+    bool allowNullDate() const;
+    // void setAllowNullDate();
 
 public slots:
-    virtual void setDate( const QDate &dt );
+    //void setDate( int y, int m, int d );
+    virtual void setDate( const QDate & );
+
+    // these will later be removed.
+    void setWeekStartsMonday( bool );
 
 signals:
-    void valueChanged( const QDate & );
+    void valueChanged( const QDate &);
 
 private slots:
-    void selectDate( const QDate &);
+    void setNull();
+    void updateButtonText();
+    void clockChanged();
 
 private:
-    QPEDateEditPrivate *d;
+    void init();
+
+    bool longFmt;
+    bool weekStartsMonday;
+    bool mAllowNullButton;
+    DateFormat df;
+    QDate currDate;
+    QPEDatePicker *monthView;
+    QPushButton *noneButton;
+
+    class QPEDateEditPrivate *d;
 };
 
 
@@ -117,9 +141,6 @@ public slots:
 
 signals:
     void valueChanged( const QDateTime & );
-
-public slots:
-    void setClock(bool b);
 
 private:
     QPEDateEdit *de;

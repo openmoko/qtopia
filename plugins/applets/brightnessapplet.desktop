@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Screen Light
+Comment=Adjusts the screen brightness.
+X-QPE-Library=libbrightnessapplet.so

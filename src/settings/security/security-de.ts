@@ -43,12 +43,16 @@ Zugang nicht gestattet</translation>
         <source>Mismatch: Retry new code</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Invalid: Retry new code</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SecurityBase</name>
     <message>
         <source>Security Settings</source>
-        <translation>Sicherheitseinstellungen</translation>
+        <translation type="obsolete">Sicherheitseinstellungen</translation>
     </message>
     <message>
         <source>Passcode</source>
@@ -100,6 +104,10 @@ Zugang nicht gestattet</translation>
     </message>
     <message>
         <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

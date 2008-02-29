@@ -1,3 +1,6 @@
+[Global]
+Name = Yellow
+Name[ja] = ???
 [Colors]
 Background = #EFEFAA
 Button = #D1D194

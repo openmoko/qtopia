@@ -27,15 +27,6 @@
 #include <qvaluelist.h>
 #include <qtopia/quuid.h>
 
-
-#if defined(Q_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<QString, QString>;
-Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<int, QString>;
-Q_TEMPLATE_EXTERN template class Q_EXPORT QArray<int>;
-// MOC_SKIP_END
-#endif
-
 class PimRecordPrivate;
 
 
@@ -50,16 +41,10 @@ struct QtopiaPimMapEntry {
 class QTOPIAPIM_EXPORT PimRecord
 {
 public:
-    /*!
-      \internal
-    */
     enum PrivateFields {
 	UID_ID = 0,
 	PrivateFieldsEnd = 10
     };
-    /*!
-      \internal
-    */
     enum CommonFields {
 	Categories = PrivateFieldsEnd,
 	CommonFieldsEnd = 20
@@ -88,14 +73,30 @@ public:
 	mCategories[0] = id;
     }
 
-    /*!
-      \internal
-    */
     void reassignCategoryId( int oldId, int newId )
     {
 	int index = mCategories.find( oldId );
 	if ( index >= 0 )
 	    mCategories[index] = newId;
+    }
+
+    bool pruneDeadCategories(const QArray<int> &validCats)
+    {
+	QArray<int> newCats;
+
+	for (int i = 0; i < (int) mCategories.count(); i++ ) {
+	    if ( validCats.contains( mCategories[i] ) ) {
+		newCats.resize( newCats.count() + 1 );
+		newCats[(int)newCats.count() - 1] = mCategories[i];
+	    }
+	}
+
+	if ( newCats.count() != mCategories.count() ) {
+	    mCategories = newCats;
+	    return TRUE;
+	}
+
+	return FALSE;
     }
     
     QArray<int> categories() const { return mCategories; }
@@ -121,12 +122,8 @@ public:
 #endif
 
 protected:
-    /*!
-      \internal
-    */
-    //virtual int endFieldMarker() const = 0;
 
-    static void initMaps(const QtopiaPimMapEntry *, QMap<int,int> &, QMap<QCString,int> &,
+    static void initMaps(const char* trclass, const QtopiaPimMapEntry *, QMap<int,int> &, QMap<QCString,int> &,
 			QMap<int,QCString> &, QMap<int,QString> &);
 			
     // While it can store a full UID, we won't actually in the current

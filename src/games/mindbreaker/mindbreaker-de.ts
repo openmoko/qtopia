@@ -10,6 +10,10 @@
         <translation>Durchschnittlich gewonnen:
 %1 von %2 Spielen</translation>
     </message>
+    <message>
+        <source>Mind Breaker</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MindBreakerBoard</name>

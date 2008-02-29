@@ -37,6 +37,7 @@ private slots:
     void check(QListViewItem*);
 
 private:
+    void drawWait(bool on);
     AppLnkSet* allapps;
 };
 

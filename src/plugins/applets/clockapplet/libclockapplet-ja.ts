@@ -3,15 +3,15 @@
     <name>LauncherClock</name>
     <message>
         <source>Set time...</source>
-        <translation type="unfinished"></translation>
+        <translation>時間設定...</translation>
     </message>
     <message>
         <source>Clock..</source>
-        <translation type="unfinished"></translation>
+        <translation>時計...</translation>
     </message>
     <message>
         <source>Alarm...</source>
-        <translation type="unfinished"></translation>
+        <translation>アラーム...</translation>
     </message>
 </context>
 </TS>

@@ -25,7 +25,8 @@
 <context>
     <name>CategoryCombo</name>
     <message>
-        <source> (Multi.)</source>
+        <source> (multi.)</source>
+        <comment>short &apos;multiple&apos;</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -119,6 +120,10 @@ editing categories.</source>
     </message>
     <message>
         <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Categories</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -293,66 +298,6 @@ before entering data</source>
     <message>
         <source>Unable to schedule alarm.
 Free some memory and try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>D</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>M</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>day</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>month</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>year</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>PM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>AM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Mon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Tue</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Thu</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Fri</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sat</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Sun</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -696,6 +641,79 @@ Free some memory and try again.</source>
     <name>TZCombo</name>
     <message>
         <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TimeStringFormat</name>
+    <comment>month-date separator</comment>
+    <message>
+        <source>M</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>month</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>year</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>, </source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>, </source>
+        <comment>year-date seperator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 %2</source>
+        <comment>1=Monday 2=January 12</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1, %2</source>
+        <comment>1=Monday 2=12 January</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 %2</source>
+        <comment>1=Monday 2=12:45</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>D</source>
+        <comment>day in month</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>day</source>
+        <comment>in month</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> </source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> </source>
+        <comment>month-date separator</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

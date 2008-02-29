@@ -2,7 +2,8 @@ Files: plugins/calculator/libconversion.so* etc/unit_conversion.dat
 Priority: optional
 Section: qpe/inputmethods
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-11
 Depends: qpe-libqtopia
 Description: Conversion calculator plugin

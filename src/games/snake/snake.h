@@ -32,6 +32,7 @@ public:
 
    Snake(QCanvas*);
    ~Snake();
+   void pause();
    void go(int newkey);
    void move(Direction dir);
    void changeHead(int last);
@@ -63,6 +64,9 @@ private:
    int score;
    Direction currentdir;
    Direction newdir;
+
+   bool paused;
+   bool deadSnake;
 };
 
 #endif

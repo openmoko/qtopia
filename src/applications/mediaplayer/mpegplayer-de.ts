@@ -1,20 +1,16 @@
 <!DOCTYPE TS><TS>
 <context>
-    <name>@default</name>
-    <message>
-        <source>All Locations</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Document View</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ControlWidgetBase</name>
     <message>
         <source>Media Player</source>
         <translation type="unfinished">Medienwiedergabe</translation>
+    </message>
+</context>
+<context>
+    <name>FileSelector</name>
+    <message>
+        <source>Document View</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -37,6 +33,33 @@
     </message>
     <message>
         <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ID3TagEditWidget</name>
+    <message>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Artist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Album</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -259,6 +282,21 @@ Playlist beim nächsten Mal fehlen.</translation>
     </message>
     <message>
         <source>Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TabbedSelector</name>
+    <message>
+        <source>Audio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Playlist</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

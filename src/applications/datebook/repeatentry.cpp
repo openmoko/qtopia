@@ -169,7 +169,7 @@ WeekGroup::WeekGroup(int oM, QWidget *parent)
     connect(this, SIGNAL(clicked(int)), this, SLOT(setDay(int)));
 }
 
-void WeekGroup::setStartOnMonday(bool b)
+void WeekGroup::setStartOnMonday(bool /* b */)
 {
     /*
     if (onMonday == b)
@@ -217,11 +217,21 @@ void WeekGroup::setDay(int i)
     }
 }
 
-RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
+QString RepeatEntry::trOrdinal(int n) const
+{
+    if ( n == 1 ) return tr("first","eg. first Friday of month");
+    else if ( n == 2 ) return tr("second");
+    else if ( n == 3 ) return tr("third");
+    else if ( n == 4 ) return tr("fourth");
+    else if ( n == 5 ) return tr("fifth");
+    else return QString::number(n);
+}
+
+RepeatEntry::RepeatEntry( bool /* startOnMonday */, const PimEvent &rp,
 	QWidget *parent, const char *name, bool modal,
 	WFlags fl) : QDialog(parent, name, modal, fl), mEvent(rp)
 {
-
+    setCaption(tr("Repeating Event"));
     // RepeatType
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(6);
@@ -232,20 +242,28 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
     typeSelector = new QButtonGroup(this);
     typeSelector->hide();
     typeSelector->setExclusive(TRUE);
-    QPushButton *pb = new QPushButton(tr("Day"), this);
+    QPushButton *pb = new QPushButton(tr("Day","Day, not date"), this);
     pb->setToggleButton(TRUE);
+    pb->setFocusPolicy(StrongFocus);
+    pb->setAutoDefault(FALSE);
     buttonLayout->addWidget(pb);
     typeSelector->insert(pb, 0);
     pb = new QPushButton(tr("Week"), this);
     pb->setToggleButton(TRUE);
+    pb->setFocusPolicy(StrongFocus);
+    pb->setAutoDefault(FALSE);
     buttonLayout->addWidget(pb);
     typeSelector->insert(pb, 1);
     pb = new QPushButton(tr("Month"), this);
     pb->setToggleButton(TRUE);
     buttonLayout->addWidget(pb);
+    pb->setFocusPolicy(StrongFocus);
+    pb->setAutoDefault(FALSE);
     typeSelector->insert(pb, 2);
     pb = new QPushButton(tr("Year"), this);
     pb->setToggleButton(TRUE);
+    pb->setFocusPolicy(StrongFocus);
+    pb->setAutoDefault(FALSE);
     buttonLayout->addWidget(pb);
     typeSelector->insert(pb, 3);
 
@@ -278,8 +296,9 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
     QHBoxLayout *subLayout2 = new QHBoxLayout(subLayout);
     subLayout2->setSpacing(6);
 
-    QLabel *l = new QLabel(tr("Every:"), freqBox);
-    subLayout2->addWidget(l);
+    everyLabel = new QLabel("", freqBox);
+    subLayout2->addWidget(everyLabel);
+    everyLabel->setAlignment(AlignRight|AlignVCenter);
     freqSelector = new QSpinBox(freqBox);
     freqSelector->setMinValue(1);
     subLayout2->addWidget(freqSelector);
@@ -314,26 +333,17 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
 
     monthGroup = new QVButtonGroup(tr("Repeat On"), subStack);
     monthGroup->setExclusive(TRUE);
-    /*
-    QToolButton *b1 = new QToolButton(monthGroup);
-    b1->setText(tr("Day"));
-    b1->setToggleButton(TRUE);
-    b1 = new QToolButton(monthGroup);
-    b1->setText(tr("Date"));
-    b1->setToggleButton(TRUE);
-    */
 
-    strDate = tr("the %1 of the month.","eg. %1 = 3rd");
-    strWeekDay = tr("the %1 %2 of the month.","eg. %1 %2 = 2nd Friday");
-    QString strEndWeekDay1 = tr("the last %1 of the month.","eg. %1 = Friday");
-    strEndWeekDay = tr("the %1 last %2 of the month.","eg. %1 last %2 = 2nd last Friday");
+    QString strEndWeekDay1 = tr("the last %1.","eg. %1 = Friday");
+    strEndWeekDay = tr("the %1 last %2.","eg. %1 last %2 = 2nd last Friday");
 
-    strDate = strDate
-	.arg(Calendar::ordinalNumber(mEvent.start().date().day()));
-    strWeekDay = strWeekDay
-	.arg(Calendar::ordinalNumber(
+    strDate = tr("day %1 of the month.","eg. %1 = 3")
+	.arg(mEvent.start().date().day());
+
+    strWeekDay = tr("the %1 %2.","eg. %1 %2 = 2nd Friday")
+	.arg(trOrdinal(
 		    Calendar::weekInMonth(mEvent.start().date())))
-	.arg(Calendar::nameOfDay(mEvent.start().date(), TRUE));
+	.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long));
 
     int fromEndOfWeek = mEvent.start().date().daysInMonth()
 	- mEvent.start().date().day();
@@ -341,14 +351,13 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
 
     strEndWeekDay =
 	((fromEndOfWeek > 1)
-	    ? strEndWeekDay.arg( Calendar::ordinalNumber(fromEndOfWeek) )
+	    ? strEndWeekDay.arg( trOrdinal(fromEndOfWeek) )
 	    : strEndWeekDay1)
-	.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) );
+	.arg( TimeString::localDayOfWeek( mEvent.start().date(), TimeString::Long ) );
 
     QRadioButton *r1 = new QRadioButton(strDate, monthGroup);
     r1 = new QRadioButton(strWeekDay, monthGroup);
-    // XXX uncomment next line to allow end of month recurrance
-    //r1 = new QRadioButton(strEndWeekDay, monthGroup);
+    r1 = new QRadioButton(strEndWeekDay, monthGroup);
 
 
 
@@ -402,6 +411,7 @@ RepeatEntry::~RepeatEntry() {}
 
 void RepeatEntry::refreshLabels()
 {
+    QString type;
     switch (mEvent.repeatType())
     {
 	case PimEvent::NoRepeat:
@@ -412,11 +422,11 @@ void RepeatEntry::refreshLabels()
 		descLabel->setText(tr("Repeat every day."));
 	    else
 		descLabel->setText(tr("Repeat every %1 days.").arg(mEvent.frequency()));
-	    typeLabel->setText(tr("day(s)"));
+	    type = tr("Every %1 day(s)");
 	    break;
 	case PimEvent::Weekly:
 	    {
-		typeLabel->setText(tr("week(s)"));
+		type = tr("Every %1 week(s)");
 		// first work out how many items in the list of weeks
 		int i;
 		int count = 0;
@@ -490,8 +500,8 @@ void RepeatEntry::refreshLabels()
 		    buf = buf.arg(mEvent.frequency());
 		    if (count == 7) {
 			// fill in aditional days now.
-			buf = buf.arg( Calendar::nameOfDay(firstday, TRUE) );
-			buf = buf.arg( Calendar::nameOfDay(lastday, TRUE) );
+			buf = buf.arg( TimeString::localDayOfWeek(firstday, TimeString::Long ) );
+			buf = buf.arg( TimeString::localDayOfWeek(lastday, TimeString::Long ) );
 		    }
 		}
 
@@ -499,7 +509,7 @@ void RepeatEntry::refreshLabels()
 		    dow = mEvent.start().date().dayOfWeek();
 		    for (i = 0; i < 7; i++) {
 			if (mEvent.repeatOnWeekDay(dow))
-			    buf = buf.arg( Calendar::nameOfDay(dow, TRUE) );
+			    buf = buf.arg( TimeString::localDayOfWeek(dow, TimeString::Long ) );
 			dow++;
 			if (dow > 7) dow = 1;
 		    }
@@ -510,32 +520,32 @@ void RepeatEntry::refreshLabels()
 	case PimEvent::MonthlyDate:
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(
-			tr("Repeat every month on the %1 of the month.","eg. %1 = 3rd")
-			.arg(Calendar::ordinalNumber(mEvent.start().date().day()))
+			tr("Repeat every month on day %1 of the month.","eg. %1 = 3")
+			.arg(mEvent.start().date().day())
 			);
 	    else
 		descLabel->setText(
 			tr("Repeat every %1 months on the %2 of the month.", "eg. %1 = 4, %2 = 3rd")
 			.arg(mEvent.frequency())
-			.arg(Calendar::ordinalNumber(mEvent.start().date().day()))
+			.arg(trOrdinal(mEvent.start().date().day()))
 			);
-	    typeLabel->setText(tr("month(s)"));
+	    type = tr("Every %1 month(s)");
 	    break;
 	case PimEvent::MonthlyDay:
 	    if (mEvent.frequency() == 1)
 		descLabel->setText(tr("Repeat every month on the %1 %2 of the month.", "eg. %1 %2 = 2nd Friday")
-			.arg(Calendar::ordinalNumber(
+			.arg(trOrdinal(
 				Calendar::weekInMonth(mEvent.start().date())))
-			.arg(Calendar::nameOfDay(mEvent.start().date(), TRUE))
+			.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 			);
 	    else
 		descLabel->setText(tr("Repeat every %1 months on the %2 %3 of the month.", "eg. %1 = 4, %2 %3 = 2nd Friday")
 			.arg(mEvent.frequency()) 
-			.arg(Calendar::ordinalNumber(
+			.arg(trOrdinal(
 				Calendar::weekInMonth(mEvent.start().date())))
-			.arg(Calendar::nameOfDay(mEvent.start().date(), TRUE))
+			.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 			);
-	    typeLabel->setText(tr("month(s)"));
+	    type = tr("Every %1 month(s)");
 	    break;
 	case PimEvent::MonthlyEndDay:
 	    {
@@ -547,32 +557,32 @@ void RepeatEntry::refreshLabels()
 		    if (fromEndOfWeek > 1) {
 			descLabel->setText(
 				tr("Repeat every month on the last %1 of the month.","eg. %1 = Friday")
-				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 				);
 		    } else {
 			descLabel->setText(
 				tr("Repeat every month on %1 last %2 of the month.", "eg. %1 = 2nd, %2 = Friday")
-				.arg( Calendar::ordinalNumber(fromEndOfWeek) )
-				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				.arg( trOrdinal(fromEndOfWeek) )
+				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 				);
 		    }
 		} else {
 		    if (fromEndOfWeek > 1) {
 			descLabel->setText(
 				tr("Repeat every %2 months on the last %1 of the month.","eg. %1 = Friday, %2 = 4")
-				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 				.arg(mEvent.frequency()) 
 				);
 		    } else {
 			descLabel->setText(
 				tr("Repeat every %3 months on %1 last %2 of the month.", "eg. %1 = 2nd, %2 = Friday, %3 = 4")
-				.arg( Calendar::ordinalNumber(fromEndOfWeek) )
-				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				.arg( trOrdinal(fromEndOfWeek) )
+				.arg(TimeString::localDayOfWeek(mEvent.start().date(), TimeString::Long))
 				.arg(mEvent.frequency()) 
 				);
 		    }
 		}
-		typeLabel->setText(tr("month(s)"));
+		type = tr("Every %1 month(s)");
 	    }
 	    break;
 	case PimEvent::Yearly:
@@ -580,12 +590,14 @@ void RepeatEntry::refreshLabels()
 		descLabel->setText(tr("Repeat every year."));
 	    else
 		descLabel->setText(tr("Repeat every %1 years.").arg(mEvent.frequency()));
-	    typeLabel->setText(tr("year(s)"));
+	    type = tr("Every %1 year(s)");
 	    break;
 	default:
-	    descLabel->setText("Bug <2316>");
-	    typeLabel->setText("");
+	    descLabel->setText("Bug <2316>"); // No tr
     }
+    int spinbox = type.find("%1");
+    everyLabel->setText(type.left(spinbox));
+    typeLabel->setText(type.mid(spinbox+2));
 }
 
 PimEvent RepeatEntry::event() const

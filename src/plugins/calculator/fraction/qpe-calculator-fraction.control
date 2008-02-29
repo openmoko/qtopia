@@ -2,7 +2,8 @@ Files: plugins/calculator/libfraction.so*
 Priority: optional
 Section: qpe/plugins
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-11
 Depends: qpe-libqtopia
 Description: Fractional calculator plugin

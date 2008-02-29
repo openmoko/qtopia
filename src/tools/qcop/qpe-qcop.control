@@ -2,7 +2,8 @@ Files: bin/qcop
 Priority: required
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qt-embedded (>=$QTE_VERSION)
 Description: Interprocess communication client

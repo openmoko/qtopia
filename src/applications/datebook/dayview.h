@@ -34,6 +34,7 @@ class QDateTime;
 class QMouseEvent;
 class QPaintEvent;
 class QResizeEvent;
+class QTimer;
 class DayView;
 class DayViewContents;
 
@@ -53,7 +54,7 @@ public:
 	CompressedDay
     };
 
-    DayViewContents( Type viewType, bool hourClock,
+    DayViewContents( Type viewType,
 	    QWidget *parent = 0, const char *name = 0 );
 
     ~DayViewContents();
@@ -68,13 +69,14 @@ public:
 
     int startHour() const { return QMIN(startSel, endSel); }
     int endHour() const { return QMAX(startSel, endSel) + 1; }
+    void clearSelectedTimes();
 
-    DayItem *firstItem();
-    DayItem *lastItem();
-    DayItem *nextItem();
-    DayItem *previousItem();
+    DayItem *firstItem( bool show=TRUE );
+    DayItem *lastItem( bool show=TRUE );
+    DayItem *nextItem( bool show=TRUE );
+    DayItem *previousItem( bool show=TRUE );
     DayItem *currentItem() const;
-    void setCurrentItem(DayItem *);
+    void setCurrentItem(DayItem *, bool show=TRUE);
 
 public slots:
     void startAtTime(int);
@@ -82,7 +84,6 @@ public slots:
     void moveDown();
     void selectDate(const QDate &);
     void showStartTime();
-    void set24HourClock( bool );
 
 signals:
     void sigColWidthChanged();
@@ -103,14 +104,18 @@ protected:
     void contentsMouseReleaseEvent( QMouseEvent * );
     void contentsMouseMoveEvent( QMouseEvent * );
 
+private slots:
+    void makeVisible();
+    void timeStringChanged();
+
 private:
 
-    bool ampm;
     Type typ;
 
     DayViewLayout *itemList;
     int hourAtPos(int) const;
     int posOfHour(int) const;
+    void moveSelection( DayItem *, DayItem * );
     //QList<DayItem> itemList;
     //DayViewWidget *intersects( const DayViewWidget *item, const QRect &geom );
 
@@ -121,6 +126,9 @@ private:
     int time_width;
 
     int time_height;
+    QRect visRect;
+
+    QTimer *visibleTimer;
 };
 
 
@@ -129,10 +137,11 @@ class DayView : public PeriodView
     Q_OBJECT
 
 public:
-    DayView( DateBookTable *newDb, bool ampm, bool startOnMonday,
+    DayView( DateBookTable *newDb, bool startOnMonday,
 		 QWidget *parent, const char *name );
 
     void selectedDates( QDateTime &start, QDateTime &end );
+    void clearSelectedDates();
     
     //int startViewTime() const;
 
@@ -148,7 +157,6 @@ public slots:
     void redraw();
     void setStartOnMonday( bool bStartOnMonday );
     void setDayStarts( int startHere );
-    void set24HourClock( bool );
 
 signals:
     void removeOccurrence( const Occurrence& );

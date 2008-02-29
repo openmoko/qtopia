@@ -72,6 +72,18 @@ AddressBookAccess::~AddressBookAccess()
 }
 
 /*!
+  If there exists an contact with the uid \a u, return 
+  that contact.  Returns a null contact if otherwise.
+
+  If \a ok is non-null, *ok is set to TRUE if the contact is
+  found, and FALSE if the contact is not found.
+*/
+PimContact AddressBookAccess::contactForId(const QUuid &u, bool *ok) const
+{
+    return m_AccessPrivate->contactForId(u, ok);
+}
+
+/*!
   If supported will update \a contact in pim data.
 
  Updating contacts requires the Contacts service to be available.
@@ -128,7 +140,7 @@ void AddressBookAccess::addContact(const PimContact& contact)
 bool AddressBookAccess::editSupported() const
 {
 #ifndef QT_NO_COP
-    return Service::list().contains("Contacts");
+    return Service::list().contains("Contacts"); // No tr
 #else
     return FALSE;
 #endif

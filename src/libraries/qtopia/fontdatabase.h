@@ -26,13 +26,10 @@
 #include <qfontdatabase.h>
 #include <qvaluelist.h>
 
-class QLibrary;
+class PluginLoaderIntern;
 
 struct QTOPIA_EXPORT FontFactory
 {
-#ifndef QT_NO_COMPONENT
-    QLibrary *library;
-#endif
     FontFactoryInterface *interface;
     QFontFactory *factory;
 };
@@ -58,6 +55,7 @@ private:
 
 private:
     static QValueList<FontFactory> *factoryList;
+    static PluginLoaderIntern *loader;
 };
 
 #endif

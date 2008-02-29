@@ -1,8 +1,11 @@
 [Desktop Entry]
+CanFastload=0
 Type=Application
 Exec=appearance
 Icon=Appearance
 Name=Appearance
+Name[ja]=???
 Name[no]=Utseende
 Name[de]=Erscheinungsbild
 Name[hu]=Megjelenés
+CanFastload=0

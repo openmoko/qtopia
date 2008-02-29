@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   if ( qstrcmp( shell, "/bin/shell" ) == 0 && QFile::exists( "/bin/bash" ) )
       shell = "/bin/bash";
 #else
-      shell ="command";
+      shell ="command"; // No tr
 #endif
   }
 
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   
   putenv((char*)"COLORTERM="); // to trigger mc's color detection
 
-  Konsole m( "test", shell, tmp, TRUE  );
+  Konsole m( "test", shell, tmp, TRUE  ); // No tr
   m.setCaption( Konsole::tr("Terminal") );
   a.showMainWidget( &m );
 

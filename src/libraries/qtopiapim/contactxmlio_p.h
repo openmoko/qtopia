@@ -99,19 +99,13 @@ public:
 	}
 
     /**
-     * Returns the full contact list in a very expensive
-     * way. This is needed in a couple of places
-     * but should be avoided unless a valuelist is
-     * required
-     */
-    QValueList<PimContact> contactValueList() const;
-
-    /**
      * Returns the full contact list.  This is guaranteed
      * to be current against what is stored by other apps.
      */
-    QList<PrContact>& contacts();
+    const QList<PrContact>& contacts();
     uint count() const { return m_Contacts.count(); }
+
+    PrContact contactForId( const QUuid &, bool *ok ) const;
     const SortedContacts &sortedContacts();
 
     /**
@@ -130,7 +124,7 @@ public:
     void clear();
 
     // external methods.
-    void addContact(const PimContact &, bool assignNewUid = TRUE);
+    QUuid addContact(const PimContact &, bool assignNewUid = TRUE);
     void updateContact( const PimContact &);
     bool removeContact( const PimContact &);
 
@@ -153,7 +147,7 @@ public:
 
 protected:
 
-    const char *recordStart() const { return "<Contact "; }
+    const char *recordStart() const { return "<Contact "; } // No tr
     const char *listStart() const { return
 					"<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE Addressbook >"
 					"<AddressBook>\n<Groups>\n</Groups>\n<Contacts>\n"; }

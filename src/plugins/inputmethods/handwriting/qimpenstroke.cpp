@@ -455,7 +455,7 @@ QArray<int> QIMPenStroke::scale( const QArray<int> &s, unsigned count, bool t )
     int si = 0;
     if ( s.count() > count ) {
         int next = 0;
-        for ( int i = 0; i < count; i++ ) {
+        for ( uint i = 0; i < count; i++ ) {
             next = (i+1) * s.count() / count;
             int maxval = 0;
             if ( t ) {
@@ -469,9 +469,9 @@ QArray<int> QIMPenStroke::scale( const QArray<int> &s, unsigned count, bool t )
                     sum += 256;
                 sum += s[j];
             }
-            d[i] = sum / (next-si);
-            if ( t && d[i] > 256 )
-                d[i] %= 256;
+            d[int(i)] = sum / (next-si);
+            if ( t && d[int(i)] > 256 )
+                d[int(i)] %= 256;
             si = next;
         }
     } else {

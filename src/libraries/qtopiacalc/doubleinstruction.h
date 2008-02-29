@@ -42,7 +42,7 @@ public:
     ~BaseDoubleInstructionDescription(){};
 };
 
-// Conversions
+// Factory 
 class QTOPIA_EXPORT iDoubleFactory:public BaseDoubleInstruction {
 public:
     iDoubleFactory():BaseDoubleInstruction(){};
@@ -69,7 +69,7 @@ public:
     Instruction *getInstruction(){return new iDoubleCopy();};
 };
 
-#ifdef TYPE_CONVERSION
+#ifdef ENABLE_INTEGER
 class QTOPIA_EXPORT iConvertIntDouble:public Instruction {
 public:
     iConvertIntDouble():Instruction(){};
@@ -82,7 +82,8 @@ public:
     ~ConvertIntDouble(){};
     Instruction *getInstruction() {return new iConvertIntDouble();};
 };
-
+#endif
+#ifdef ENABLE_FRACTION
 class QTOPIA_EXPORT iConvertFractionDouble:public Instruction {
 public:
     iConvertFractionDouble():Instruction(){};
@@ -96,6 +97,7 @@ public:
     Instruction *getInstruction() {return new iConvertFractionDouble();};
 };
 #endif
+
 // Mathematical functions
 class QTOPIA_EXPORT iAddDoubleDouble:public BaseDoubleInstruction {
 public:

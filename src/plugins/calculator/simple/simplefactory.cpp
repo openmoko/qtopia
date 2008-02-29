@@ -23,9 +23,7 @@
 #include <qstringlist.h>
 
 QWidget * SimpleInterface::create (QWidget *parent) {
-    if ( !input )
-	input = new FormSimple(parent,"Simple",0);
-    return input;
+    return new FormSimple(parent,pluginName(),0);
 }
 
 #ifndef QT_NO_COMPONENT

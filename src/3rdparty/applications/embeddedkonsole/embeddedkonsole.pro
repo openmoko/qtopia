@@ -26,11 +26,6 @@ SOURCES		= TEScreen.cpp \
 		  main.cpp 
 
 unix:SOURCES  += MyPty.cpp 
-win32:SOURCES +=  \
-                  ../../../server/qprocess.cpp \
-                  ../../../server/qprocess_win.cpp 
-
-win32:HEADERS += ../../../server/qprocess.h 
 
 TARGET		= embeddedkonsole
 

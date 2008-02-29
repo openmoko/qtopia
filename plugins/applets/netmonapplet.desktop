@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=Diap-up Monitor
+Comment=Monitor for dial-up internet connections.
+X-QPE-Library=libnetmonapplet.so

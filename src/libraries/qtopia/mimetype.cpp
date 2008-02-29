@@ -22,13 +22,9 @@
 
 #include <qtopia/qpeglobal.h>
 #include <qmap.h>
-#if defined(Q_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<QString, QString>;
-// MOC_SKIP_END
-#endif
 
 #include "mimetype.h"
+#include <qtopia/qtopiawinexport.h> 
 #include "applnk.h"
 #include "resource.h"
 #include "qpeapplication.h"
@@ -258,7 +254,7 @@ static QString serviceBinding(const QString& service)
     QString svrc = service;
     for (int i=0; i<(int)svrc.length(); i++)
         if ( svrc[i]=='/' ) svrc[i] = '-';
-    return "Service-"+svrc;
+    return "Service-"+svrc; // No tr
 }
 
 /*!

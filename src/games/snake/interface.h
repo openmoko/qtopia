@@ -44,6 +44,8 @@ public:
 protected:
     virtual void keyPressEvent(QKeyEvent*); 
     virtual void resizeEvent(QResizeEvent *e);
+    virtual void focusOutEvent(QFocusEvent *);
+    virtual void focusInEvent(QFocusEvent *);
 
 signals:
     void moveFaster();
@@ -51,10 +53,8 @@ signals:
 private slots:
     void newGame();
     void gameOver();
-    void wait();
     void levelUp();
     void scoreInc();
-    void welcomescreen();
  
 private:
     void showScore(int);
@@ -62,7 +62,6 @@ private:
     QCanvasView* cv;
     QLabel* scorelabel;
     QCanvas canvas;
-    QTimer* pauseTimer;
     Snake* snake;
     int last;  
     int level; 

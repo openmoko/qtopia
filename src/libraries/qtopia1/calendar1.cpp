@@ -21,41 +21,6 @@
 #include <qapplication.h>
 
 
-
-const char* const longWeekNames[7] =
-{
-    QT_TRANSLATE_NOOP("LongWeekName", "Monday"),
-    QT_TRANSLATE_NOOP("LongWeekName", "Tuesday"),
-    QT_TRANSLATE_NOOP("LongWeekName", "Wednesday"),
-    QT_TRANSLATE_NOOP("LongWeekName", "Thursday"),
-    QT_TRANSLATE_NOOP("LongWeekName", "Friday"),
-    QT_TRANSLATE_NOOP("LongWeekName", "Saturday"),
-    QT_TRANSLATE_NOOP("LongWeekName", "Sunday")
-};
-
-
-QString Calendar::nameOfDay( int d, bool lname )
-{
-    //return QDate::shortDayName(d); // 3.0
-    if (d < 1 || d > 7)
-	return QString::null;
-
-    if (lname)
-	return qApp->translate("LongWeekName", longWeekNames[d-1]);
-
-    QDate td;
-    return td.dayName(d);
-}
-
-QString Calendar::nameOfDay( const QDate &td, bool lname )
-{
-    //return QDate::shortDayName(d); // 3.0
-    if (lname)
-	return qApp->translate("LongWeekName", longWeekNames[td.dayOfWeek()-1]);
-
-    return td.dayName(td.dayOfWeek());
-}
-
 QValueList<QDate> Calendar::datesOfMonth( int year, int month,
 						 bool startWithMonday )
 {
@@ -149,73 +114,6 @@ void Calendar::coordForDate( int year, int month,
     }
 }
 
-
-const char* const ordinal[54] = 
-{
-    QT_TRANSLATE_NOOP("Ordinal", "first"),
-    QT_TRANSLATE_NOOP("Ordinal", "second"),
-    QT_TRANSLATE_NOOP("Ordinal", "third"),
-    QT_TRANSLATE_NOOP("Ordinal", "fourth"),
-    QT_TRANSLATE_NOOP("Ordinal", "fifth"),
-    QT_TRANSLATE_NOOP("Ordinal", "sixth"),
-    QT_TRANSLATE_NOOP("Ordinal", "seventh"),
-    QT_TRANSLATE_NOOP("Ordinal", "eighth"),
-    QT_TRANSLATE_NOOP("Ordinal", "ninth"),
-    QT_TRANSLATE_NOOP("Ordinal", "tenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "eleventh"),
-    QT_TRANSLATE_NOOP("Ordinal", "twelfth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirteenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "fourteenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "fifteenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "sixteenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "seventeenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "eighteenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "nineteenth"),
-    QT_TRANSLATE_NOOP("Ordinal", "twentieth"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-first"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-second"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-third"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-fourth"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-fifth"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-sixth"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-seventh"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-eighth"),
-    QT_TRANSLATE_NOOP("Ordinal", "twenty-ninth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirtieth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-first"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-second"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-third"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-forth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-fifth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-sixth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-seventh"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-eighth"),
-    QT_TRANSLATE_NOOP("Ordinal", "thirty-ninth"),
-    QT_TRANSLATE_NOOP("Ordinal", "fortieth"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-first"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-second"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-third"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-forth"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-fifth"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-sixth"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-seventh"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-eighth"),
-    QT_TRANSLATE_NOOP("Ordinal", "forty-ninth"),
-    QT_TRANSLATE_NOOP("Ordinal", "fiftieth"),
-    QT_TRANSLATE_NOOP("Ordinal", "fifty-first"),
-    QT_TRANSLATE_NOOP("Ordinal", "fifty-second"),
-    QT_TRANSLATE_NOOP("Ordinal", "fifty-third"),
-    QT_TRANSLATE_NOOP("Ordinal", "fifty-forth")
-};
-
-/* Handles up to 54th */
-QString Calendar::ordinalNumber(int num)
-{
-    if (num < 1 || num > 54)
-	return QString::null;
-
-    return qApp->translate("Ordinal", ordinal[num-1]);
-}
 
 int Calendar::weekInMonth(const QDate &dt)
 {

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/qlibrary.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/include/qtopia/qlibrary.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -48,17 +48,29 @@ body { background: #ffffff; color: black; }
 **
 **********************************************************************/
 
+#include &lt;qnamespace.h&gt;
+#if !(QT_VERSION-0 &lt; 0x030000)
+#include &lt;qlibrary.h&gt;
+#include &lt;private/qcom_p.h&gt;
+#include &lt;private/qcomlibrary_p.h&gt;
+#else
+
 #ifndef QLIBRARY_H
 #define QLIBRARY_H
 
 #include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qstring.h&gt;
+#include &lt;qdict.h&gt;
 
 #ifndef QT_NO_COMPONENT
 
 #include &lt;qtopia/qcom.h&gt;
 
+#ifndef QTOPIA_FAKE_COMPONENT
 class QLibraryPrivate;
+#else
+#include &lt;qdict.h&gt;
+#endif
 
 class QTOPIA_EXPORT QLibrary
 {
@@ -73,8 +85,10 @@ public:
     QLibrary( const QString&amp; filename, Policy = Delayed );
     ~QLibrary();
 
+#ifndef QTOPIA_FAKE_COMPONENT
     void *resolve( const char* );
     static void *resolve( const QString &amp;filename, const char * );
+#endif
 
     bool unload( bool force = FALSE );
     bool isLoaded() const;
@@ -87,10 +101,12 @@ public:
     QRESULT queryInterface( const QUuid&amp;, QUnknownInterface** );
 
 private:
-    bool load();
     void createInstanceInternal();
-
+#ifndef QTOPIA_FAKE_COMPONENT
     QLibraryPrivate *d;
+#endif
+
+    bool load();
 
     QString libfile;
     Policy libPol;
@@ -105,7 +121,11 @@ private:	// Disabled copy constructor and operator=
 
 #endif // QT_NO_COMPONENT
 
+#define Q_DEFINED_QLIBRARY
+#include &lt;qtopia/qtopiawinexport.h&gt;
 #endif //QLIBRARY_H
+
+#endif // Qt &lt; 3.0
 </pre>
 <!-- eof -->
 <p><address><hr><div align=center>

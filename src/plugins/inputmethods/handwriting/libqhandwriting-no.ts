@@ -1,5 +1,57 @@
 <!DOCTYPE TS><TS>
 <context>
+    <name>Handwriting</name>
+    <message>
+        <source>[Esc]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Tab]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[BackSpace]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Return]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Uppercase]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Caps Lock]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Shortcut]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Punctuation]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Symbol]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Extended]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Handwriting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unnamed</source>
+        <comment>Character set name</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>HandwritingHelp</name>
     <message>
         <source>Handwriting Help</source>
@@ -38,13 +90,6 @@
     </message>
     <message>
         <source>%1%</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>InputMethods</name>
-    <message>
-        <source>Handwriting</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -94,6 +139,14 @@
     </message>
     <message>
         <source>Character:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

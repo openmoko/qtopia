@@ -12,7 +12,9 @@ win32:CONFIG += dll
 HEADERS	=   accessory.h \
 	    datepicker.h \
 	    datetimeedit.h \
-	    fieldmapimpl.h
+	    fieldmapimpl.h \
+	    qprocess.h \
+	    timezone.h
 SOURCES	=   applnk1.cpp \
 	    categories1.cpp \
 	    categoryselect1.cpp \
@@ -23,21 +25,35 @@ SOURCES	=   applnk1.cpp \
 	    resource1.cpp \
 	    datepicker.cpp \
 	    datetimeedit.cpp \
+	    timeconversion1.cpp \
+	    timestring1.cpp \
 	    global1.cpp \
-	    fieldmapimpl.cpp
+	    fieldmapimpl.cpp \
+	    qprocess.cpp \
+	    timezone.cpp
 
 embedded:HEADERS +=	services.h \
 	devicebuttonmanager.h \
 	devicebutton.h \
 	qwizard.h \
-	docproperties.h
+	locationcombo.h \
+	docproperties.h \
+	pluginloader.h
 
 embedded:SOURCES +=  	   services.cpp \
 	devicebuttonmanager.cpp \
 	devicebutton.cpp \
 	fileselector1.cpp \
 	qwizard.cpp \
-	docproperties.cpp
+	locationcombo.cpp \
+	docproperties.cpp \
+	pluginloader.cpp \
+	pluginloaderlib.cpp 
+
+
+unix:SOURCES += qprocess_unix.cpp
+win32:SOURCES += qprocess_win.cpp
+
 
 INCLUDEPATH += $(QPEDIR)/src/server
 
@@ -47,6 +63,8 @@ win32:LIBS += rpcrt4.lib
 TARGET		= qtopia
 qdesktop:TARGET		= qd-qtopia
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
+win32:DLLDESTDIR = $(QPEDIR)/bin
 VERSION		= 1.6.0
 
 TRANSLATIONS = libqtopia-en_GB.ts libqtopia-de.ts libqtopia-ja.ts libqtopia-no.ts
+

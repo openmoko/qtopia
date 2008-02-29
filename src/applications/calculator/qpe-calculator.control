@@ -2,7 +2,8 @@ Files: bin/calculator apps/Applications/calculator.desktop plugins/calculator/li
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-12
 Depends: qpe-libqtopia
 Description: Calculator

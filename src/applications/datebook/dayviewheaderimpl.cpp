@@ -19,7 +19,7 @@
 **********************************************************************/
 #include "dayviewheaderimpl.h"
 
-#include <qtopia/datepicker.h>
+#include <qtopia/datetimeedit.h>
 #include <qtopia/resource.h>
 #include <qtopia/timestring.h>
 
@@ -50,8 +50,8 @@ DayViewHeader::DayViewHeader( bool useMonday,
     setBackgroundMode( PaletteButton );
     grpDays->setBackgroundMode( PaletteButton );
 
-    dButton->setDate( currDate.year(), currDate.month(), currDate.day() );
-    connect(dButton,SIGNAL(dateSelected(const QDate &)),this,SIGNAL(dateChanged(const QDate &)));
+    dButton->setDate( currDate );
+    connect(dButton,SIGNAL(valueChanged(const QDate &)),this,SIGNAL(dateChanged(const QDate &)));
 }
 
 /*
@@ -114,7 +114,7 @@ void DayViewHeader::goForward()
 void DayViewHeader::setDate( int y, int m, int d )
 {
     currDate.setYMD( y, m, d );
-    dButton->setDate(y,m,d);
+    dButton->setDate(QDate(y,m,d));
 
     int iDayOfWeek = currDate.dayOfWeek();
     // cleverly adjust the day depending on how we start the week

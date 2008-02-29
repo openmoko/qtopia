@@ -71,6 +71,7 @@ signals:
 public slots:
     void nextTab();
     void prevTab();
+    void showTab(const QString&);
 
 protected slots:
     void tabProperties();
@@ -104,6 +105,7 @@ public:
 
 public slots:
     void viewSelected(const QString&);
+    void showTab(const QString&);
     void select( const AppLnk * );
     void properties( AppLnk * );
     void nextView();

@@ -10,3 +10,5 @@ INTERFACES      = mediarecorderbase.ui confrecorderbase.ui
 
 TARGET		= mediarecorder
 TRANSLATIONS = mediarecorder-en_GB.ts mediarecorder-de.ts mediarecorder-ja.ts mediarecorder-no.ts
+
+unix:LIBS       += -lpthread

@@ -1,0 +1,9 @@
+Files: lib/fonts/helvetica_*_{50,50i,75,75i}.* lib/fonts/fixed_*_50.* lib/fonts/micro_*50.* lib/fonts/smallsmooth_*50.* lib/fonts/smoothtimes_{170,100}_50.* 
+Priority: optional
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: 2.3.2-11
+Description: Qt/Embedded 0-degree rotation fonts
+ ie. physical screen is same orientation as logical screen.

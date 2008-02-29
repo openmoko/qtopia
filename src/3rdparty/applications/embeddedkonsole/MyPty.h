@@ -16,7 +16,7 @@
 /*									      */
 /* -------------------------------------------------------------------------- */
 
-/*! \file
+/* \file
 */
 
 #ifndef MY_PTY_H
@@ -40,7 +40,7 @@ Q_OBJECT
     MyPty();
     ~MyPty();
 
-    /*!
+    /*
         having a `run' separate from the constructor allows to make
         the necessary connections to the signals and slots of the
         instance before starting the execution of the client.
@@ -55,13 +55,13 @@ Q_OBJECT
 
   signals:
 
-    /*!
+    /*
         emitted when the client program terminates.
         \param status the wait(2) status code of the terminated client program.
     */
     void done(int status);
 
-    /*!
+    /*
         emitted when a new block of data comes in.
         \param s - the data
         \param len - the length of the block

@@ -98,6 +98,8 @@ private:
     BackgroundType bgType;
     QString bgName;
     QColor textCol;
+
+    QImage loadBackgroundImage(QString &fname);
 };
 
 #endif // LAUNCHERVIEW_H

@@ -29,6 +29,8 @@
 #include <qmap.h>
 #include <qstring.h>
 
+#include <qtopia/qtopiawinexport.h> 
+
 #ifdef PALMTOPCENTER
 #include <common/qsorter.h>
 #endif

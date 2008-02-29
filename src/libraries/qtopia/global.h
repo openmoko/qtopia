@@ -41,6 +41,8 @@ public:
     static QString journalFileName(const QString &filename);
     static QString applicationFileName(const QString& appname, const QString& filename);
     static void findDocuments(DocLnkSet* folder, const QString &mimefilter=QString::null);
+    static bool isDocumentFileName(const QString& file);
+    static bool isAppLnkFileName(const QString& file);
 
 #ifdef QTOPIA_INTERNAL_LANGLIST
     static QStringList languageList();
@@ -74,6 +76,8 @@ public:
 	bool documentary;
     };
     static void setBuiltinCommands( Command* );
+    static Command* builtinCommands();
+    static QGuardedPtr<QWidget>* builtinRunning();
 
     static void execute( const QString &exec, const QString &document=QString::null );
     static void setDocument( QWidget* receiver, const QString& document );

@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+  <title>Installing the QtopiaWin32SDK</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR" content="Quanta Plus">
+  <style type="text/css"><!--
+        h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+        a:link { color: #004faf; text-decoration: none }
+        a:visited { color: #672967; text-decoration: none }
+        body { background: #ffffff; color: black; }
+  --></style>
+
+</head>
+<body>
+  <h1>Installing the QtopiaWin32SDK</h1>
+	<h2>Lengend of symbols</h2>
+		 A &quot;-> &quot; is used to separate steps, for example Start -> Run means click the Start button then 
+			click the Run menu item. <br />
+		 Text in <i>italics</i> indicate a point to be mindful of, or a common problem <br />
+		 A "X" is commonly use in place of a version number eg: GCC 2.95.X  means any GCC 2.95 compiler <br />
+		 A foobar[version] is a unspecified version number of foobar.<br />
+
+        <h2>Installing Qtopia for Win32</h2>
+                Installation is achieved using the QtopiaWin32SDK[version].exe supplied.
+
+
+
+        <h2>Installing the Arm toolchain</h2>
+		Open a Web browser and open <a href="http://intern.troll.no/qtopia/internal_binaries/QtopiaWin32SDK_current/">http://intern.troll.no/qtopia/internal_binaries/QtopiaWin32SDK_current</a>
+                Download the supplied armtoolchain[qtopia version].tar.gz, qtopiacygwin-tmake[tmake version].tar.gz and 
+		 and either qtopiacygwin-sharp-[qtopia version].tar.gz or qtopiacygwin-ipaq-[qtopia version].tar.gz using a Web browser to c:\ 
+		
+		<p><i>nb: Windows may automaticaly convert the supplied tar.gz's into tar file without renaming the file. 
+		    If the file size of actual file downloaded is much greater than the size indicated on the web site then the file has most likely been converted   
+		    to a tar file (but still has a .gz suffix). In that case don't supply the "-z" option to tar.</i>
+		<p>
+		Install <a href="http://cygwin.com/">Cygwin</a>  after manualy selecting to instal
+		    <ul>
+			<li>Perl</li>
+			<li>Automake</li>
+			<li>Autoconf (required if building arm toolchain)</li>
+			<li>GCC 2.95.X (required if building arm toolchain)</li>
+			<li>GCC 2.95.X source (required if building arm toolchain)</li>
+		    </ul>
+		  <i>nb:Maually deselect GCC-3.X.X if installing GCC 2.95.X</i>
+		<p>Start Cygwin
+		<p>
+                To install Qtopia for Cygwin to suit the Sharp Zaurus, at shell prompt run
+		<pre>
+		cd  / 
+                tar -xzvf /CYGDRIVE/C/armtoolchain[qtopia version].tar.gz
+                tar -xzvf /CYGDRIVE/C/qtopiacygwin-sharp-[qtopia version].tar.gz 
+		tar -xzvf /CYGDRIVE/C/qtopiacygwin-tmake[tmake version].tar.gz
+                export QPEDIR=/opt/Qtopia                             
+		export QTDIR=$QPEDIR
+                export TMAKEDIR=/opt/Qtopia/tmake                            
+                export PATH=$QPEDIR/bin:$TMAKEDIR/bin:/tools/arm/bin:$PATH
+		</pre>
+		<br />
+		Where [qtopia version] is relaced by the current version of Qtopia <br />
+		and [tmake version]  is relaced by the current version of
+		See the <a href="exampleSetup.sh">example of setup for bash with Qtopia</a>.<br /> 
+		<i>nb:If you have an Ipaq then use tar -xzvf /CYGDRIVE/C/qtopiacygwin-ipaq-[qtopia version].tar.gz</i> 
+
+
+
+                <p>
+                For building binaries for the final device use the folling values for TMAKEDIR for example
+                <blockquote>			
+                        export TMAKEPATH=$TMAKEDIR/lib/qws/cygwin-arm-g++
+                </blockquote>
+                <br />
+                <table frame="border" border="1">
+                        <tr>
+                        <th>Processor/Device types</th>
+                        <th>TMAKEPATH value</th>
+                        </tr>
+                        <tr>
+                        <td> Generic Arm</td>
+                        <td> $TMAKEDIR/lib/qws/cygwin-arm-g++</td>
+                        </tr>
+                        <tr>
+                        <td> Ipaq </td>
+                        <td> $TMAKEDIR/lib/qws/cygwin-ipaq-g++ </td>
+                        </tr>
+                        <tr>
+                        <td> Sharp Zaurus </td>
+                        <td> $TMAKEDIR/lib/qws/cygwin-sharp-g++</td>
+                        </tr>
+                </table>
+		<p>
+		Then you will need to select the configuration that qtopia was built with. Normally this is done by
+		issuing the following command
+		<blockquote>
+		    export QCONFIG="CONFIG+=cygwin CONFIG+=qtopia DEFINES+=QCONFIG=\\\"qconfig-qpe.h\\\""
+		</blockquote>
+
+
+
+  <h1>Getting started</h1>
+        <h2>Using Qtopia under Win32</h2>
+                <h3>Starting Qtopia</h3> 
+                Click the Start -> QtopiaWin32SDK -> Run Qtopia. <br /> 
+		It may take up to fifteen seconds
+                for Qtopia to start. If Qtopia has not appeared inside the virtual framebuffer in that time shutdown 
+		the virtual framebufer and restart Qtopia. The first time that Qtopia is started, and when the configuration files 
+		    have been removed there will be a message indicating that Qtopia was unable to start applets. 
+		    That message should not be displayed for more than one restart of Qtopia. It recommened that you 
+		    browse the Qtopia documentation by clicking on the <img src="../pics/inline/HelpBrowser.png">HelpBrowser icon</a>
+
+		<p>To shutdown Qtopia right mouse click the Qt logo on the virtual frame buffer then click File -> Quit or 
+		    select File -> Quit from the menubar when the skin is used.    
+
+		<h3>Running a single application</h3>
+		Several applications that are can compiled, are only available via the command line. 
+		Please note that such an application is likely to less than fully functional. They have been supplied
+		to demonstrate how complete they are <br />
+		Click Start -> QtopiaWin32SDK -> Run single application <br />
+		The virual frame buffer will display after a short delay, then you will be presented a command prompt.
+		Type the name of the application to run with the -qws suffix for example:
+		<blockquote>
+		    cd %QPEDIR%
+		    %QPEDIR%/bin/textedit -qws
+		</blockquote>
+		You must be in the %QPEDIR% before starting an application or the required files for Qtopia will not be found
+		by the application.
+
+                <h3>Creating MSVC++ projects</h3> (not available yet)
+                    For example to create the "example.dsp" file for an application called "example".
+                    Go to an windows command prompt to where the application source is located after settings up
+		    your TMAKEPATH to point to [TMAKEDIR]/lib/qws/win32-msvc
+		    <blockquote>
+                    tmake -t vcapp -o myapp.dsp myapp.pro
+		    </blockquote>
+
+        <h2>Using the Arm toolchain</h2>
+	    <h3>Building a device binary</h3>
+	<pre>
+Use tmake as normal using the correct TMAKEPATH for the destination device.
+For example to build /opt/Qtopia/examples/application do 
+	cd /opt/Qtopia/examples/application
+	tmake -o Makefile $QCONFIG example.pro
+	make
+If you end up with an &quot;.exe&quot; after compilation is finished you may
+ have forgotten  &quot;CONFIG+=cygwin&quot; in your QCONFIG environment variable
+
+If you get linking errors related to &quot;QWidget::dragEnterEvent&quot; you have not supplied $QCONFIG to tmake or 
+$QCONFIG is empty.
+
+If you get linking errors and during linking -lqtopia is not used then you will need to update the applications &quot;pro&quot; file
+: See <a href="#troubleshooting">trouble shooting</a>
+	</pre>
+	<h3>Building a ipk for the device </h3>
+	For example to build the ipk for the example application
+<pre>
+	cd /opt/Qtopia/examples/application
+	rem Copy the files listed in the control file to where whe are to go on the device eg:
+	cp example $QPEDIR/bin/
+	cp example.desktop $QPEDIR/apps/Applications/
+	rem The follow files are already in place amd have initally been set to read only files 
+	rem    cp Example.png $QPEDIR/pics/
+	rem    cp example.html $QPEDIR/help/html
+	mkipks example.control
+</pre>
+	    
+
+  <h1>Requirements</h1>
+        <h2>Qtopia for Win32</h2>
+                Windows NT, Windows 2000 or Window XP
+        <h2>Arm toolchain</h2>
+                Cygwin 1.9 or later with
+                        <ul>
+                                <li>autoconf</li>
+                                <li>automake</li>
+                                <li>make</li>
+                                <li>perl</li>
+                        </ul>
+
+<a name="troubleshooting" />
+  <h1>Trouble shooting</h1>
+    <h2>Qtopia won't start</h2>
+    If there is a running Qt/Embedded Virtual Framebuffer close it by clicking on the Qt logo and then click File -> Quit.
+    <p>
+    It is possible that your Qtopia setting are corrupted, remove them by going to a command prompt . ie click Start -> Run, type &quot;cmd &quot;, press &lt;ENTER&gt; key <br />
+	And type
+	<blockquote>
+	    rmdir /q/s %HOMEDRIVE%%HOMEPATH%\Settings<br />
+	    exit
+	</blockquote>
+    The default Settings will be installed next time you start Qtopia   
+
+    <h2>Unable to use mail program in Qtopia</h2>
+    The Qtopia mail program is not fully ported to QtopiaWin32SDK
+
+    <h2>Qtopia takes a long to start</h2>
+	This will occur if you have installed the optional fonts. Font handling has yet to 
+	be optimized for speed; to fix speed problems uninstall the optional fonts. 
+
+
+    <h2>Compile of application for device fails</h2>
+    You may need to corrrect the programs &quot;pro&quot; files so that they each have a line like
+	<blockquote>
+    	CONFIG		+= qtopia warn_on release
+    	</blockquote>
+	or 
+	<blockquote>
+    	CONFIG		+= qt warn_on release
+    	</blockquote>
+
+
+    <p>
+    If your problem is not listed here check the web site for an updated version of this file
+
+   
+  <h1>FAQ</h1>
+   
+	<h2>Where are my Qtopia documents stored</h2>
+	This can be found out by going to a command prompt . ie click Start -> Run , then type &quot;cmd &quot;, press &lt;ENTER&gt; key <br />
+	And type
+	<blockquote>
+	    echo %HOMEDRIVE%%HOMEPATH%\Documents <br />
+	    exit
+	</blockquote>
+
+	<h2>Where are my Qtopia settings stored</h2>
+	This can be found out by going to a command prompt . ie click Start -> Run , then type &quot;cmd &quot;, press &lt;ENTER&gt; key <br />
+	And type
+	<blockquote>
+	    echo %HOMEDRIVE%%HOMEPATH%\Settings <br />
+	    exit
+	</blockquote>
+
+	<h2>Some buttons on the Qt/Embedded Virtual Framebuffer do not do any thing</h2>
+	Some buttons are yet to be allocated to a function
+
+	<h2>Why does Qtopia take so long to start</h2>
+	This will occur if you have installed the optional fonts. Font handling has yet to 
+	be optimized for speed; to fix this problem uninstall the optional fonts. 
+
+	<h2>How do I run an unlisted Qtopia application</h2>
+	Several applications that are can compiled, are only available via the command line. 
+	Please note that such an application is likely to not functional <br />
+	Click Start -> QtopiaWin32SDK -> Run single application <br />
+	The virtual frame buffer will display after a short delay, then you will be presented a command prompt.
+	Type the name of the application to run with the -qws suffix for example:
+	<blockquote>
+	    cd %QPEDIR% <br />
+	    %QPEDIR%/bin/textedit -qws
+	</blockquote>
+	You must be in the %QPEDIR% before starting an application or the required files for Qtopia will not be found
+	by the application. 
+
+
+	<h2>I see a message about System not starting properly</h2>
+	Most likely Qtopia has started for the first time or the Qtopia configuration files 
+	have been removed. This message should not be displayed the next time Qtopia is started.
+	If the message does appear again, disable the loading of all applets in the Taskbar settings. 
+	To determine which applet caused the problem enable the applets one by one, then exit and restart Qtopia.
+
+
+
+  <h1>Limitations of the QtopiaWin32SDK</h1>
+	<ul>
+	    <li>Font handling under QtopiaWin32SDK can cause applications to abort, and is slow on large fonts ie any unicode font.</li>
+	    <li>Device rotation and resolution change is not supported</li>
+	    <li>Several applications have not been &quot;ported&quot; to QtopiaWin32SDK</li>
+	    <li>Some applications have not been completely &quot;ported&quot; to QtopiaWin32SDK, whilst they compile they are not fully functional</li>
+	    <li>Timezone support is incomplete</li>
+	    <li>Windows 98 is not supported</li>
+	    <li>Source files for application should be in the same directory</li>
+	    <li>Creating libraries and dynamic libraries are not supported</li>
+
+	</ul>
+	<i>nb:Most of limitations listed above will be resolved in the future. Some of these limitations
+	are imposed by the usage of non-cygwin based moc.exe and uic.exe</i> 
+
+
+    <p>
+    If your question is not listed here check the web site for an updated version of this file
+
+    <p>
+    <p>
+    Last updated : 10th Jan 2002
+
+</body>
+</html>

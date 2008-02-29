@@ -22,40 +22,52 @@
 #define RUNNING_APP_BAR_H
 
 #include <qtopia/applnk.h>
+#include <qtopia/global.h>
 
 #include <qframe.h>
 #include <qlist.h>
 #include <qtimer.h>
+#include <qmap.h>
+#include <qguardedptr.h>
 
 class AppLnkSet;
 class QCString;
 class QProcess;
 class QMessageBox;
+class TempScreenSaverMonitor;
+class AppLauncher;
 
-class RunningAppBar : public QFrame {
-  Q_OBJECT
+class RunningAppBar : public QFrame
+{
+    Q_OBJECT
 
- public:
-  RunningAppBar(QWidget* parent);
-  ~RunningAppBar();
-  
-  void addTask(const AppLnk& appLnk);
-  void removeTask(const AppLnk& appLnk);
-  void paintEvent(QPaintEvent* event);
-  void mousePressEvent(QMouseEvent*);
-  void mouseReleaseEvent(QMouseEvent*);
-  QSize sizeHint() const;
+public:
+    RunningAppBar(QWidget* parent);
+    ~RunningAppBar();
 
- private slots:
-   void newQcopChannel(const QString& channel);
-   void removedQcopChannel(const QString& channel);
- void received(const QCString& msg, const QByteArray& data);
+    void addTask(const AppLnk& appLnk);
+    void removeTask(const AppLnk& appLnk);
+    void paintEvent(QPaintEvent* event);
+    void mousePressEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent*);
+    QSize sizeHint() const;
+    void reloadApps();
 
- private:
-  AppLnkSet* m_AppLnkSet;
-  QList<AppLnk> m_AppList;
-  int m_SelectedAppIndex;
-  int spacing;
+signals:
+    void forceSuspend();
+
+private slots:
+    void received(const QCString& msg, const QByteArray& data);
+    void applicationLaunched(int, const QString &);
+    void applicationTerminated(int, const QString &);
+
+private:
+    AppLnkSet* m_AppLnkSet;
+    QList<AppLnk> m_AppList;
+    int m_SelectedAppIndex;
+    int spacing;
+    TempScreenSaverMonitor *tsmMonitor;
+    AppLauncher *appLauncher;    
 };
 
 /**
@@ -65,7 +77,7 @@ class RunningAppBar : public QFrame {
  */
 class AppMonitor : public QObject {
   Q_OBJECT
-    
+
  public:
   static const int RAISE_TIMEOUT_MS;
 
@@ -83,6 +95,32 @@ class AppMonitor : public QObject {
   QTimer m_Timer;
   QProcess* m_PsProc;
   QMessageBox* m_AppKillerBox;
+};
+
+class TempScreenSaverMonitor : public QObject
+{
+    Q_OBJECT
+public:
+    TempScreenSaverMonitor(QObject *parent = 0, const char *name = 0);
+
+    void setTempMode(int,int);
+    void applicationTerminated(int);
+
+signals:
+    void forceSuspend();
+
+protected:
+    void timerEvent(QTimerEvent *);
+
+private:
+    bool removeOld(int);
+    void updateAll();
+    int timerValue();
+
+private:
+    QValueList<int> sStatus[3];
+    int currentMode;
+    int timerId;
 };
 
 #endif

@@ -45,10 +45,8 @@ public:
 
     static QString nameOfMonth( int m );
     static QString nameOfDay( int d );
-    // New functions
-    static QString nameOfDay( int d, bool lname );
-    static QString nameOfDay( const QDate &d, bool lname = FALSE );
 
+    // New functions
     static QValueList<QDate> datesOfMonth( int year, int month, bool startWithMonday = FALSE );
 
     static QDate dateAtIndex( int year, int month, int index, 
@@ -65,8 +63,6 @@ public:
 	    bool startWithMonday = FALSE);
 
     static int weekInMonth(const QDate &d);
-
-    static QString ordinalNumber(int);
 
     static QDate addMonths(int nmonths, const QDate &orig);
     static QDate addYears(int nyears, const QDate &orig);

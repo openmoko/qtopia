@@ -1,0 +1,9 @@
+Files: lib/fonts/helvetica_*t5.* lib/fonts/fixed_*t5.* lib/fonts/micro_*t5.* lib/fonts/smallsmooth_*t5.* lib/fonts/smoothtimes_{170,100}_50*t5.*
+Priority: required
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QTE_VERSION-24
+Description: Qt/Embedded fonts, 90 degree rotation.
+ eg. iPAQ and SL5500 use this normally.

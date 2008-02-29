@@ -20,6 +20,8 @@
 
 #include <qtopia/global.h>
 #include <qtopia/config.h>
+#include <qtopia/storage.h>
+#include <qtopia/mimetype.h>
 #include <qtopia/private/contact.h>
 
 #include <qdir.h>
@@ -74,6 +76,32 @@ QUuid Global::generateUuid()
 #endif
 }
 
+bool Global::isDocumentFileName(const QString& file)
+{
+    if ( file.right(1) == "/" )
+	return FALSE;
+    QString homedocs = QDir::homeDirPath() + "/Documents";
+    if ( file.find(homedocs+"/")==0 )
+	return TRUE;
+    StorageInfo storage;
+    const QList<FileSystem> &fs = storage.fileSystems();
+    QListIterator<FileSystem> it ( fs );
+    for ( ; it.current(); ++it ) {
+	if ( (*it)->isRemovable() ) {
+	    if ( file.find((*it)->path()+"/")==0 )
+		return TRUE;
+	}
+    }
+    return FALSE;
+}
+
+bool Global::isAppLnkFileName(const QString& file)
+{
+    if ( file.right(1) == "/" )
+	return FALSE;
+    return file.find(MimeType::appsFolderName()+"/")==0;
+}
+
 #ifdef Q_WS_QWS
 
 /*!
@@ -98,6 +126,16 @@ QString Global::ownerName()
     cfg.setGroup("Sync");
     QString r=cfg.readEntry("ownername");
     return r;
+}
+
+Global::Command* Global::builtinCommands()
+{
+    return builtin;
+}
+
+QGuardedPtr<QWidget>* Global::builtinRunning()
+{
+    return running;
 }
 
 #endif

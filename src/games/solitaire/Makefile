@@ -136,7 +136,8 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 ####### Files
 
-HEADERS =	cardmetrics.h \
+HEADERS =	canvasitemtimer.h \
+		cardmetrics.h \
 		canvascard.h \
 		canvasshapes.h \
 		cardgame.h \
@@ -148,7 +149,8 @@ HEADERS =	cardmetrics.h \
 		freecellcardgame.h \
 		patiencecardgame.h \
 		canvascardwindow.h
-SOURCES =	cardmetrics.cpp \
+SOURCES =	canvasitemtimer.cpp \
+		cardmetrics.cpp \
 		canvascard.cpp \
 		canvasshapes.cpp \
 		cardgame.cpp \
@@ -161,7 +163,8 @@ SOURCES =	cardmetrics.cpp \
 		patiencecardgame.cpp \
 		canvascardwindow.cpp \
 		main.cpp
-OBJECTS =	$(OBJECTS_DIR)/cardmetrics.o \
+OBJECTS =	$(OBJECTS_DIR)/canvasitemtimer.o \
+		$(OBJECTS_DIR)/cardmetrics.o \
 		$(OBJECTS_DIR)/canvascard.o \
 		$(OBJECTS_DIR)/canvasshapes.o \
 		$(OBJECTS_DIR)/cardgame.o \
@@ -177,8 +180,10 @@ OBJECTS =	$(OBJECTS_DIR)/cardmetrics.o \
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	$(MOC_DIR)/moc_canvascardwindow.cpp
-OBJMOC	=	$(OBJECTS_DIR)/moc_canvascardwindow.o
+SRCMOC	=	$(MOC_DIR)/moc_canvasitemtimer.cpp \
+		$(MOC_DIR)/moc_canvascardwindow.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_canvasitemtimer.o \
+		$(OBJECTS_DIR)/moc_canvascardwindow.o
 
 
 ####### Implicit rules
@@ -244,6 +249,10 @@ REQUIRES=
 
 ####### Compile
 
+$(OBJECTS_DIR)/canvasitemtimer.o: canvasitemtimer.cpp \
+		canvasitemtimer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvasitemtimer.o canvasitemtimer.cpp
+
 $(OBJECTS_DIR)/cardmetrics.o: cardmetrics.cpp \
 		cardmetrics.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardmetrics.o cardmetrics.cpp
@@ -255,6 +264,7 @@ $(OBJECTS_DIR)/canvascard.o: canvascard.cpp \
 		carddeck.h \
 		cardgamelayout.h \
 		canvascard.h \
+		canvasitemtimer.h \
 		cardmetrics.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvascard.o canvascard.cpp
 
@@ -298,6 +308,7 @@ $(OBJECTS_DIR)/canvascardgame.o: canvascardgame.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
+		canvasitemtimer.h \
 		canvascardgame.h \
 		cardmetrics.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvascardgame.o canvascardgame.cpp
@@ -313,6 +324,7 @@ $(OBJECTS_DIR)/freecellcardgame.o: freecellcardgame.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
+		canvasitemtimer.h \
 		cardmetrics.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/freecellcardgame.o freecellcardgame.cpp
 
@@ -326,6 +338,7 @@ $(OBJECTS_DIR)/patiencecardgame.o: patiencecardgame.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
+		canvasitemtimer.h \
 		cardmetrics.h \
 		canvascardwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/patiencecardgame.o patiencecardgame.cpp
@@ -341,6 +354,7 @@ $(OBJECTS_DIR)/canvascardwindow.o: canvascardwindow.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
+		canvasitemtimer.h \
 		cardmetrics.h \
 		freecellcardgame.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvascardwindow.o canvascardwindow.cpp
@@ -349,9 +363,16 @@ $(OBJECTS_DIR)/main.o: main.cpp \
 		canvascardwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
+$(OBJECTS_DIR)/moc_canvasitemtimer.o: $(MOC_DIR)/moc_canvasitemtimer.cpp \
+		canvasitemtimer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_canvasitemtimer.o $(MOC_DIR)/moc_canvasitemtimer.cpp
+
 $(OBJECTS_DIR)/moc_canvascardwindow.o: $(MOC_DIR)/moc_canvascardwindow.cpp \
 		canvascardwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_canvascardwindow.o $(MOC_DIR)/moc_canvascardwindow.cpp
+
+$(MOC_DIR)/moc_canvasitemtimer.cpp: canvasitemtimer.h
+	$(MOC) canvasitemtimer.h -o $(MOC_DIR)/moc_canvasitemtimer.cpp
 
 $(MOC_DIR)/moc_canvascardwindow.cpp: canvascardwindow.h
 	$(MOC) canvascardwindow.h -o $(MOC_DIR)/moc_canvascardwindow.cpp
@@ -359,14 +380,14 @@ $(MOC_DIR)/moc_canvascardwindow.cpp: canvascardwindow.h
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <solitaire.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <solitaire.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease solitaire.pro
 	$(QPEDIR)/bin/qtopia-linstall solitaire.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

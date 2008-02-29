@@ -37,10 +37,10 @@ static void write( QString& buf, const Event::RepeatPattern &r )
     buf += " rtype=\"";
     switch ( r.type ) {
 	case Event::Daily:
-	    buf += "Daily";
+	    buf += "Daily"; // No tr
 	    break;
 	case Event::Weekly:
-	    buf += "Weekly";
+	    buf += "Weekly"; // No tr
 	    break;
 	case Event::MonthlyDay:
 	    buf += "MonthlyDay";
@@ -49,7 +49,7 @@ static void write( QString& buf, const Event::RepeatPattern &r )
 	    buf += "MonthlyDate";
 	    break;
 	case Event::Yearly:
-	    buf += "Yearly";
+	    buf += "Yearly"; // No tr
 	    break;
 	default:
 	    buf += "NoRepeat";
@@ -67,7 +67,7 @@ static void write( QString& buf, const Event::RepeatPattern &r )
 	buf += " enddt=\""
 	       + QString::number( r.endDateUTC ? r.endDateUTC : time( 0 ) )
 	       + "\"";
-    buf += " created=\"" + QString::number( r.createTime ) + "\"";
+    buf += " created=\"" + QString::number( r.createTime ) + "\""; // No tr
 }
 
 
@@ -719,36 +719,36 @@ bool Event::operator==( const Event &e ) const
 */
 void Event::save( QString& buf )
 {
-    buf += " description=\"" + Qtopia::escapeString(descript) + "\"";
+    buf += " description=\"" + Qtopia::escapeString(descript) + "\""; // No tr
     if ( !locat.isEmpty() )
-	buf += " location=\"" + Qtopia::escapeString(locat) + "\"";
+	buf += " location=\"" + Qtopia::escapeString(locat) + "\""; // No tr
     // save the categoies differently....
     QString strCats = idsToString( categories() );
-    buf += " categories=\"" + Qtopia::escapeString(strCats) + "\"";
+    buf += " categories=\"" + Qtopia::escapeString(strCats) + "\""; // No tr
     buf += " uid=\"" + QString::number( uid() ) + "\"";
     if ( (Type)typ != Normal )
 	buf += " type=\"AllDay\"";
     if ( hAlarm ) {
-	buf += " alarm=\"" + QString::number( aMinutes ) + "\" sound=\"";
+	buf += " alarm=\"" + QString::number( aMinutes ) + "\" sound=\""; // No tr
 	if ( aSound == Event::Loud )
-	    buf += "loud";
+	    buf += "loud"; // No tr
 	else
-	    buf += "silent";
+	    buf += "silent"; // No tr
 	buf += "\"";
     }
     if ( hRepeat )
 	write( buf, pattern );
 
-    buf += " start=\""
+    buf += " start=\"" // No tr
 	   + QString::number( startUTC )
 	   + "\"";
 
-    buf += " end=\""
+    buf += " end=\"" // No tr
 	   + QString::number( endUTC )
 	   + "\"";
 
     if ( !note.isEmpty() )
-	buf += " note=\"" + Qtopia::escapeString( note ) + "\"";
+	buf += " note=\"" + Qtopia::escapeString( note ) + "\""; // No tr
     buf += customToXml();
 }
 
@@ -1113,7 +1113,7 @@ static VObject *createVObject( const Event &e )
 	dt = dt.addSecs( -e.alarmTime()*60 );
 	safeAddPropValue( alarm, VCRunTimeProp, TimeConversion::toISO8601( dt ) );
 	safeAddPropValue( alarm, VCAudioContentProp,
-			  (e.alarmSound() == Event::Silent ? "silent" : "alarm" ) );
+			  (e.alarmSound() == Event::Silent ? "silent" : "alarm" ) ); // No tr
     }
 
     safeAddPropValue( event, "X-Qtopia-TIMEZONE", e.timeZone() );
@@ -1173,7 +1173,7 @@ static Event parseVObject( VObject *obj )
 		if ( name == VCRunTimeProp )
 		    alarmTime = TimeConversion::fromISO8601( value );
 		else if ( name == VCAudioContentProp ) {
-		    if ( value == "silent" )
+		    if ( value == "silent" ) // No tr
 			soundType = Event::Silent;
 		    else
 			soundType = Event::Loud;

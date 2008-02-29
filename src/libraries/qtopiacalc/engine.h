@@ -40,21 +40,21 @@ public:
     ~Engine();
 
     void registerInstruction(InstructionDescription *);
-    void pushInstruction(InstructionDescription *);
-    void pushInstruction2(QString);
+#ifdef NEW_STYLE_STACK
+    void pushInstruction(QString);
     void immediateInstruction(QString);
+#else
+    void pushInstruction(InstructionDescription *);
+#endif
     void evaluate();
 
     void dualReset();
     void softReset();
-    void softReset2();
     void hardReset();
     void pushChar(char);
-    void pushChar2(char);
     void delChar();
     void memoryRecall();
     void memorySave();
-    void memorySave2();
     void memoryReset();
 
     void openBrace();
@@ -64,7 +64,6 @@ public:
     void setError(QString);
     void setDisplay(QLineEdit *);
     void setAccType(QString);
-    void setAccType2(QString);
     QString getDisplay();
 protected:
     friend class iBraceOpen;
@@ -75,10 +74,12 @@ private:
     Instruction *resolveInstruction(InstructionDescription *);
 
     void updateDisplay();
-    void updateDisplay2();
     Data *evalStack(Data *,bool,int=0);
+#ifdef NEW_STYLE_STACK
+    void executeInstructionOnStack(QString, QStack<Data>);
+#else
     void executeInstructionOnStack(QString, QStack<InstructionDescription>);
-    void executeInstructionOnStack2(QString, QStack<Data>);
+#endif
     int previousInstructionsPrecedence;
     inline bool checkState();
 

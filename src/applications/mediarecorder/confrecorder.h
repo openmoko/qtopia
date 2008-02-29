@@ -39,6 +39,8 @@ public:
 public:
     int currentQuality() const { return quality; }
 
+    void processPopup();
+
 public slots:
     void setQuality( int index );
     void saveConfig();

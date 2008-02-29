@@ -42,6 +42,8 @@ public:
     bool clockwise() const;
     void setFastLoad(bool f);
     bool fastLoad() const;
+    void setSmallScale(bool s);
+    bool smallScale() const;
 
 private slots:
     void delayChanged( int );

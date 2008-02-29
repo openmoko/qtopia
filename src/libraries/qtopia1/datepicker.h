@@ -89,47 +89,4 @@ private:
     class DatePickerPrivate *d;
 };
 
-class QPEDateButtonPrivate;
-class QTOPIA_EXPORT QPEDateButton : public QPushButton
-{
-    Q_OBJECT
-
-public:
-    QPEDateButton(  QWidget *parent, const char * name = 0,
-		    bool longFormat = FALSE,
-		    bool allowNullDate = FALSE );
-
-    QDate date() const;
-    void setLongFormat( bool l );
-    bool longFormat() const { return longFmt; }
-    bool allowNullDate() const;
-    void setAllowNullDate( bool b);
-
-public slots:
-    void setDate( int y, int m, int d );
-    void setDate( const QDate & );
-    void setWeekStartsMonday( bool );
-    void setDateFormat( DateFormat );
-
-signals:
-    void dateSelected( const QDate &);
-
-private slots:
-    void setNull();
-
-private:
-    void init();
-    void updateButtonText();
-
-    bool longFmt;
-    bool weekStartsMonday;
-    QDate currDate;
-    DateFormat df;
-    QPEDatePicker *monthView;
-    QPushButton *noneButton;
-
-    class QPEDateButtonPrivate *d;
-};
-
-
 #endif

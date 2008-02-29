@@ -30,6 +30,7 @@
 
 class QHBoxLayout;
 class QLibrary;
+class PluginLoader;
 
 struct TaskbarApplet
 {
@@ -38,6 +39,7 @@ struct TaskbarApplet
     TaskbarAppletInterface *iface;
 #endif
     QWidget *applet;
+    QString name;
 };
 
 class SysTray : public QFrame {
@@ -49,14 +51,11 @@ public:
     void clearApplets();
     void addApplets();
 
-protected:
-    void timerEvent(QTimerEvent* e);
-
 private:
     void loadApplets();
-    int safety_tid;
     QHBoxLayout *layout;
     QValueList<TaskbarApplet*> appletList;
+    PluginLoader *loader;
 };
 
 

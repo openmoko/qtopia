@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/pimrecord.cpp:35 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/src/libraries/qtopiapim/pimrecord.cpp:38 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -29,7 +29,7 @@ body { background: #ffffff; color: black; }
 Qtopia database.
 <a href="#details">More...</a>
 <p><tt>#include &lt;<a href="pimrecord-h.html">pimrecord.h</a>&gt;</tt>
-<p>Inherited by <a href="pimcontact.html">PimContact</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimtask.html">PimTask</a>, <a href="pimtask.html">PimTask</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimtask.html">PimTask</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, and <a href="pimtask.html">PimTask</a>.
+<p>Inherited by <a href="pimcontact.html">PimContact</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimtask.html">PimTask</a>, <a href="pimtask.html">PimTask</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimtask.html">PimTask</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, <a href="pimtask.html">PimTask</a>, <a href="pimcontact.html">PimContact</a>, <a href="pimevent.html">PimEvent</a>, and <a href="pimtask.html">PimTask</a>.
 <p><a href="pimrecord-members.html">List of all member functions.</a>
 <h2>Public Members</h2>
 <ul>
@@ -41,6 +41,8 @@ Qtopia database.
 <li><div class=fn>bool <a href="#operator!-eq"><b>operator!=</b></a> ( const&nbsp;PimRecord&nbsp;&amp;&nbsp;other ) const</div></li>
 <li><div class=fn>void <a href="#setCategories"><b>setCategories</b></a> ( const&nbsp;QArray&lt;int&gt;&nbsp;&amp;&nbsp;categories )</div></li>
 <li><div class=fn>void <a href="#setCategories-2"><b>setCategories</b></a> ( int&nbsp;id )</div></li>
+<li><div class=fn>QArray&lt;int&gt; <a href="#categories"><b>categories</b></a> () const</div></li>
+<li><div class=fn>virtual QString <a href="#customField"><b>customField</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const</div></li>
 <li><div class=fn>virtual void <a href="#setCustomField"><b>setCustomField</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )</div></li>
 <li><div class=fn>virtual void <a href="#removeCustomField"><b>removeCustomField</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key )</div></li>
 <li><div class=fn>QUuid <a href="#uid"><b>uid</b></a> () const</div></li>
@@ -57,7 +59,7 @@ by the PIM applications, in particular a unique ID and a set of
 categories.
 <p> A PimRecord's ID is returned by <a href="#uid">uid</a>() and is set with setUid(). Each
 category is represented by an integer. A PimRecord's categories are
-returned by categories() and are set with <a href="#setCategories">setCategories</a>().
+returned by <a href="#categories">categories</a>() and are set with <a href="#setCategories">setCategories</a>().
 <p> PimRecord comparisons are provided by <a href="#operator-eq-eq">operator==</a>() and <a href="#operator!-eq">operator!=</a>().
 <p>See also <a href="qpepim.html">QPEPIM Library</a>.
 
@@ -73,6 +75,17 @@ Creates a clone of the record <em>other</em>.
 <h3 class=fn><a name="~PimRecord"></a>PimRecord::~PimRecord ()<tt> [virtual]</tt>
 </h3>
 Destroys the record.
+
+<h3 class=fn>QArray&lt;int&gt; <a name="categories"></a>PimRecord::categories () const
+</h3>
+
+<p> Returns the set of categories the record belongs to.
+<p> <p>See also <a href="#setCategories">setCategories</a>().
+
+<h3 class=fn>QString <a name="customField"></a>PimRecord::customField ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const<tt> [virtual]</tt>
+</h3>
+Returns the string stored for the custom field <em>key</em>.
+Returns a null string if the field does not exist.
 
 <h3 class=fn>bool <a name="operator!-eq"></a>PimRecord::operator!= ( const&nbsp;<a href="pimrecord.html">PimRecord</a>&nbsp;&amp;&nbsp;other ) const
 </h3>
@@ -98,19 +111,19 @@ Removes the custom field <em>key</em>.
 
 <p> Sets the record to belong to the set of categories specificed
 by <em>categories</em>.
-<p> <p>See also categories().
+<p> <p>See also <a href="#categories">categories</a>().
 
 <h3 class=fn>void <a name="setCategories-2"></a>PimRecord::setCategories ( int&nbsp;id )
 </h3>
 This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
 <p> Sets the record to belong only to the category specified by <em>id</em>.
-<p> <p>See also categories().
+<p> <p>See also <a href="#categories">categories</a>().
 
 <h3 class=fn>void <a name="setCustomField"></a>PimRecord::setCustomField ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )<tt> [virtual]</tt>
 </h3>
 Sets the string stored for the custom field <em>key</em> to <em>value</em>.
 
-<h3 class=fn>QUuid <a name="uid"></a>PimRecord::uid () const
+<h3 class=fn><a href="quuid.html">QUuid</a> <a name="uid"></a>PimRecord::uid () const
 </h3>
 
 <p> Returns the unique ID for this record.

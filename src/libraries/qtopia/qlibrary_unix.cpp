@@ -18,9 +18,8 @@
 **
 **********************************************************************/
 
+#if !defined(QTOPIA_FAKE_COMPONENT) && !defined(QT_NO_COMPONENT)
 #include "qlibrary_p.h"
-
-#ifndef QT_NO_COMPONENT
 
 /*
   The platform dependent implementations of
@@ -88,10 +87,8 @@ bool QLibraryPrivate::loadLibrary()
     QString filename = library->library();
 
     pHnd = dlopen( filename.latin1() , RTLD_LAZY );
-#if defined(QT_DEBUG) || defined(QT_DEBUG_COMPONENT)
     if ( !pHnd )
 	qWarning( "%s", dlerror() );
-#endif
     return pHnd != 0;
 }
 
@@ -129,4 +126,4 @@ void* QLibraryPrivate::resolveSymbol( const char* f )
 
 #endif // POSIX
 
-#endif // QT_NO_COMPONENT
+#endif 

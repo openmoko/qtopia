@@ -35,12 +35,14 @@ class QAction;
 class MediaRecorderPluginList;
 class MediaPlayerPluginList;
 class AudioInput;
+class AudioDevice;
 class SampleBuffer;
 class MediaRecorderBase;
-class StorageInfo;
 class ConfigureRecorder;
 class Waveform;
 class MediaRecorderEncoder;
+class MediaPlayerDecoder;
+class QCopChannel;
 
 
 // Define this to record to memory before saving to disk.
@@ -75,12 +77,10 @@ private:
     void initializeContents();
     void setQualityDisplay( const QualitySetting& quality );
     void recomputeMaxTime();
-    void loadDocPaths();
 
 private slots:
     void qualityChanged( int id );
-    void disksChanged();
-    void storageChanged( int index );
+    void newLocation();
     void startSave();
     void endSave();
     void startRecording();
@@ -92,10 +92,11 @@ private slots:
     void clearData();
     void processAudioData();
     void configure();
-    void configureDone();
     void noPluginError();
     void setRecordLight( bool enable );
     void recordLightBlink();
+    void audioOutputDone();
+    void traySocket( const QCString&, const QByteArray& );
 
 protected:
     void closeEvent( QCloseEvent *e );
@@ -108,26 +109,25 @@ private:
     QWidgetStack *stack;
     MediaRecorderPluginList *recorderPlugins;
     MediaPlayerPluginList *playerPlugins;
-    AudioInput *audio;
+    AudioInput *audioInput;
+    AudioDevice *audioOutput;
 #ifdef RECORD_THEN_SAVE
     SampleBuffer *samples;
-#else
-    short *sampleBuffer;
 #endif
+    short *sampleBuffer;
     QIODevice *io;
     MediaRecorderEncoder *encoder;
+    MediaPlayerDecoder *decoder;
     QualitySetting qualities[MaxQualities];
-    StorageInfo *storage;
     long recordTime;
     long maxRecordTime;
     bool recording;
     bool playing;
-    QString homeDocuments;
-    QString currentDocPath;
-    QStringList docPaths;
     QString lastSaved;
     QTimer *lightTimer;
     bool recordLightState;
+    QCopChannel *trayChannel;
+
 };
 
 #endif

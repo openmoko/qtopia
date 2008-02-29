@@ -39,6 +39,7 @@
 #include <qfile.h>
 #include <qapplication.h>
 #include <qstyle.h>
+#include <qtimer.h>
 
 #include "abtable.h"
 
@@ -58,6 +59,7 @@ const int AbTable::FREQ_CONTACT_FIELD = PimContact::ContactFieldsEnd;
 
 static Qt::ButtonState bState = Qt::NoButton;
 static int selectionBeginRow = -1;
+static bool constructorDone = FALSE;
 
 static QString applicationPath;
 /*!
@@ -96,6 +98,7 @@ AbTable::AbTable( const SortedContacts &c, QWidget *parent, const char *name, co
     mAscending = TRUE;
     mSortColumn = 0;
     readSettings();
+    constructorDone = TRUE;
 }
 
 
@@ -163,14 +166,21 @@ void AbTable::paintCell( QPainter *p, int row, int col,
 	{
 	    QDate d = c.birthday();
 	    if ( !d.isNull() )
-		text = TimeString::shortDate( d );
+		text = TimeString::localYMD( d );
 	}
 	break;
     case PimContact::Anniversary:
 	{
 	    QDate d = c.anniversary();
 	    if ( !d.isNull() )
-		text = TimeString::shortDate( d );
+		text = TimeString::localYMD( d );
+	}
+	break;
+    case PimContact::Gender:
+	switch( c.gender().toInt() ) {
+	    case 1: text = tr("Male"); break;
+	    case 2: text = tr("Female"); break;
+	    default: text = ""; break;
 	}
 	break;
     default:
@@ -211,10 +221,10 @@ void AbTable::paintCell( QPainter *p, int row, int col,
     p->restore();
 }
 
-void AbTable::setCurrentCell( int row, int col )
+void AbTable::setCurrentCell( int row, int )
 {
     int orow = currentRow();
-    QTable::setCurrentCell(row, col);
+    QTable::setCurrentCell(row, 0);
     for (int i = 0; i < numCols(); i++) {
 	updateCell(orow, i);
 	updateCell(row, i);
@@ -389,6 +399,69 @@ void AbTable::contentsMouseReleaseEvent( QMouseEvent *e )
     QTable::contentsMouseReleaseEvent( e );
 }
 
+void AbTable::resizeEvent( QResizeEvent *e )
+{
+    QTable::resizeEvent( e );
+    
+    // we receive a resize event from qtable in the middle of the constrution, since
+    // QTable::columnwidth does qApp->processEvents.  Ignore this event as it causes
+    // all sorts of init problems for us
+    if ( !constructorDone )
+	return;
+    
+    
+    /*	Disabled this, as mixing manual and automatic resizing causes a few problems
+    // yet another hack to avoid repaint problems
+    oldSize = e->oldSize().width();
+    newSize = e->size().width();
+    QTimer::singleShot( 0, this, SLOT( fitHeadersToWidth() ) );
+    */
+}
+
+void AbTable::fitHeadersToWidth()
+{
+    // work out the avail width.  May need to subtract scrollbar.
+    int w = width();
+    if (contentsHeight() >= (height() - horizontalHeader()->height()) ) 
+	w -= style().scrollBarExtent().width();
+    calcFieldSizes(0, w);
+}
+
+void AbTable::calcFieldSizes(int oldSize, int size)
+{
+    constructorDone = FALSE; //don't let QTable mess up our logic
+    int col = headerKeyFields.count();
+
+    int max = 0;
+    int i;
+    for ( i = 0; i < col; i++) {
+	max += columnWidth(i);
+    }
+    if ( oldSize < max )
+	oldSize = max;
+
+    int accumulated = 0;
+    for ( i = 0; i < col; i++) {
+	float l = (float) columnWidth( i ) / (float) oldSize;
+	float l2 = l * size;
+	int newColLen = (int) l2;
+	
+	int min = minimumFieldSize( (PimContact::ContactFields) headerKeyFields[i] );
+	if ( newColLen < min )
+	    newColLen =  min;
+
+	// make sure we fill out the space if there's some integer rounding leftover
+	if ( i == col - 1 )
+	   newColLen = size - accumulated - 2;
+	else
+	    accumulated += newColLen;
+	
+	setColumnWidth( i, newColLen );
+    }
+
+    constructorDone = TRUE;
+}
+
 void AbTable::moveTo( const QString &cl )
 {
     int rows = numRows();
@@ -548,7 +621,7 @@ void AbTable::findNext( const QString &findString, int category )
 	foundSelection.init( currFindRow, 0 );
 	foundSelection.expandTo( currFindRow, numCols() - 1 );
 	addSelection( foundSelection );
-	setCurrentCell( currFindRow, numCols() - 1 );
+	setCurrentCell( currFindRow, 0);
 	emit findFound();
 	wrapAround = true;
     }
@@ -702,6 +775,8 @@ void AbTable::setFields(QValueList<int> f)
     }
     
     setFields(f, sizes);
+    
+    saveSettings();
 }
 
 void AbTable::setFields(QValueList<int> f, QStringList sizes)
@@ -769,10 +844,15 @@ QValueList<int> AbTable::defaultFields()
 int AbTable::defaultFieldSize(PimContact::ContactFields f)
 {
     switch( f ) {
-	case PimContact::FileAs: return 100;
-	case FREQ_CONTACT_FIELD: return 100;
+	case PimContact::FileAs: return 119;
+	case FREQ_CONTACT_FIELD: return 119;
 	default: return 80;
     }
+}
+
+int AbTable::minimumFieldSize(PimContact::ContactFields)
+{
+    return 40;
 }
 
 void AbTable::readSettings()
@@ -804,7 +884,7 @@ void AbTable::readSettings()
     } else {
 	QMap<QCString, int> identifierToKey = PimContact::identifierToKeyMap();
 	for ( QStringList::Iterator it = selectedFields.begin(); it != selectedFields.end(); ++it) {
-	    if ( *it == "Contact" ) {
+	    if ( *it == "Contact" ) { // No tr
 		headerKeyFields.append( FREQ_CONTACT_FIELD );
 	    } else {
 		int field = identifierToKey[ (*it).data() ];
@@ -825,7 +905,7 @@ void AbTable::saveSettings()
 	if ( headerKeyFields[i] != FREQ_CONTACT_FIELD )
 	    fieldList.append( keyToIdentifier[ headerKeyFields[i]  ]  );
 	else
-	    fieldList.append( "Contact" );
+	    fieldList.append( "Contact" ); // No tr
 
 	sizeList.append( QString::number(header->sectionSize(i)) );
     }

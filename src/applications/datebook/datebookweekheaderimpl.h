@@ -45,10 +45,10 @@ public slots:
     void weekChanged( int );
 
 protected slots:
-    void keyPressEvent(QKeyEvent *e)
-    {
-	e->ignore();
-    }
+    void timeStringChanged();
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
 
 private:
     int year,

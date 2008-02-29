@@ -56,6 +56,7 @@ static Qt::ButtonState bState = Qt::NoButton;
 static int selectionBeginRow = -1;
 
 static QString applicationPath;
+static bool constructorDone = FALSE;
 
 static bool taskCompare( const PimTask &task, const QRegExp &r, int category );
 
@@ -203,6 +204,7 @@ TodoTable::TodoTable(const SortedTasks &tasks, QWidget *parent, const char *name
 
     menuTimer = new QTimer( this );
     connect( menuTimer, SIGNAL(timeout()), this, SIGNAL(pressed()) );
+    constructorDone = TRUE;
 }
 
 TodoTable::~TodoTable()
@@ -503,7 +505,7 @@ PimTask TodoTable::currentEntry()
     return PimTask(*(mTasks.at(currentRow())));
 }
 
-void TodoTable::setCurrentEntry(QUuid &u)
+void TodoTable::setCurrentEntry(const QUuid &u)
 {
     int rows, row;
     rows = numRows();
@@ -571,10 +573,71 @@ void TodoTable::contentsMouseReleaseEvent( QMouseEvent *e )
     if ( mSel == Extended ) {
 	selectionBeginRow = -1;
 	bState = Qt::NoButton;
-	qDebug("selected %d tasks", mSelected.count() );
     }
 
     QTable::contentsMouseReleaseEvent( e );
+}
+
+void TodoTable::resizeEvent( QResizeEvent *e )
+{
+    // we receive a resize event from qtable in the middle of the constrution, since
+    // QTable::columnwidth does qApp->processEvents.  Ignore this event as it causes
+    // all sorts of init problems for us
+    if ( !constructorDone ) {
+	QTable::resizeEvent( e );
+	return;
+    }
+    
+    QTable::resizeEvent( e );
+
+/*  Disabled for now, mixing automatic/manual resizing creates a few problems
+
+    // yet another hack to avoid repaint problems
+    oldSize = e->oldSize();
+    newSize = e->size();
+    QTimer::singleShot( 0, this, SLOT( delayedCalc() ) );
+*/
+}
+
+void TodoTable::fitHeadersToWidth()
+{
+    calcFieldSizes( 0, width() );
+}
+
+void TodoTable::calcFieldSizes(int oldSize, int size)
+{
+//    qDebug("resize event called for todotable, which we will process");
+    constructorDone = FALSE; //don't let QTable mess up our logic
+    int col = headerKeyFields.count();
+    
+    int max = 0;
+    int i;
+    for (i = 0; i < col; i++) {
+	max += columnWidth(i);
+    }
+    if ( oldSize < max )
+	oldSize = max;
+    
+    int accumulated = 0;
+    for (i = 0; i < col; i++) {
+	float l = (float) columnWidth( i ) / (float) oldSize;
+	float l2 = l * size;
+	int newColLen = (int) l2;
+	
+	int min = minimumFieldSize( (PimTask::TaskFields) headerKeyFields[i] );
+	if ( newColLen < min )
+	    newColLen =  min;
+
+	// make sure we fill out the space if there's some integer rounding leftover
+	if ( i == col - 1 )
+	   newColLen = size - accumulated - 2;
+	else
+	    accumulated += newColLen;
+	
+	setColumnWidth( i, newColLen );
+    }
+
+    constructorDone = TRUE;
 }
 
 QString TodoTable::categoryLabel( int id )
@@ -586,7 +649,7 @@ QString TodoTable::categoryLabel( int id )
 	return tr( "Unfiled" );
     else if ( id == -2 )
 	return tr( "All" );
-    return mCat.label( "Todo List", id );
+    return mCat.label( "Todo List", id ); // No tr
 }
 
 void TodoTable::cornerButtonClicked()
@@ -615,7 +678,6 @@ void TodoTable::refresh()
 	}
     }
 
-    qDebug("refresh called");
     setNumRows(mTasks.count());
 }
 
@@ -649,11 +711,7 @@ void TodoTable::slotDoFind( const QString &findString, int category )
 	    emit findNotFound();
     } else {
 	currFindRow = row;
-	QTableSelection foundSelection;
-	foundSelection.init( currFindRow, 0 );
-	foundSelection.expandTo( currFindRow, numCols() - 1 );
-	addSelection( foundSelection );
-	setCurrentCell( currFindRow, numCols() - 1 );
+	setCurrentCell( currFindRow, currentColumn() );
 	// we should always be able to wrap around and find this again,
 	// so don't give confusing not found message...
 	emit findFound();
@@ -755,7 +813,7 @@ void TodoTable::paintCell(QPainter *p, int row, int col,
     switch(field) {
 	case PimTask::CompletedField:
 	    {
-		qDebug("BoxSize, Rowheight, %d, %d", BoxSize, RowHeight);
+		//qDebug("BoxSize, Rowheight, %d, %d", BoxSize, RowHeight);
 		// completed field
 		int marg = ( cr.width() - BoxSize ) / 2;
 		int x = 0;
@@ -812,7 +870,7 @@ void TodoTable::paintCell(QPainter *p, int row, int col,
 	case PimTask::StartedDate:
 	    {
 		if ( task.hasStartedDate() )
-		    p->drawText(2,2 + fm.ascent(), TimeString::shortDate( task.startedDate() ) );
+		    p->drawText(2,2 + fm.ascent(), TimeString::localYMD( task.startedDate() ) );
 		else
 		    p->drawText(2,2 + fm.ascent(), tr("Not started") );
 	    }
@@ -820,7 +878,7 @@ void TodoTable::paintCell(QPainter *p, int row, int col,
 	case PimTask::CompletedDate:
 	    {
 		if ( task.isCompleted() )
-		    p->drawText(2,2 + fm.ascent(), TimeString::shortDate( task.completedDate() ) );
+		    p->drawText(2,2 + fm.ascent(), TimeString::localYMD( task.completedDate() ) );
 		else
 		    p->drawText(2,2 + fm.ascent(), tr("Unfinished") );
 	    }
@@ -912,7 +970,6 @@ void TodoTable::setCellContentFromEditor(int row, int col)
 
 void TodoTable::clearCellWidget(int row, int col)
 {
-    qDebug("clear cell widget called");
     QTable::clearCellWidget(row, col);
 }
 
@@ -1003,6 +1060,8 @@ void TodoTable::setFields(QValueList<int> f)
     }
     
     setFields(f, sizes);
+
+    saveSettings();
 }
 
 void TodoTable::setFields(QValueList<int> f, QStringList sizes)
@@ -1034,16 +1093,21 @@ void TodoTable::setFields(QValueList<int> f, QStringList sizes)
     QMap<int, QString> trFields = PimTask::trFieldsMap();
     i = 0;
     for (iit = f.begin(); iit != f.end(); ++iit) {
+#ifndef QTOPIA_DESKTOP
 	if ( *iit == PimTask::CompletedField )
 	    header->setLabel( i++, Resource::loadPixmap("task-completed"), "" );
 	else
 	    header->setLabel(i++, trFields[*iit] );
+#else
+	header->setLabel(i++, trFields[*iit] );
+#endif
     }
 
     i = 0;
     for (QStringList::ConstIterator it = sizes.begin(); it != sizes.end(); ++it) {
 	if ( i < (int) f.count() )
 	    setColumnWidth(i, (*it).toInt() );
+	
 	i++;
     }
 }
@@ -1068,12 +1132,20 @@ int TodoTable::defaultFieldSize(PimTask::TaskFields f)
     switch( f ) {
 	case PimTask::CompletedField: return 31;
 	case PimTask::Status: return 70;
-	case PimTask::Description: return 90;
-	case PimTask::Priority: return 42;
+	case PimTask::Description: return 157;
+	case PimTask::Priority: return 52;
 	case PimTask::PercentCompleted: return 45;
 	case PimTask::StartedDate: return 100;
 	case PimTask::CompletedDate: return 100;
 	default: return 70;
+    }
+}
+
+int TodoTable::minimumFieldSize(PimTask::TaskFields f)
+{
+    switch( f ) {
+	case PimTask::CompletedField: return 31;
+	default: return 40;
     }
 }
 

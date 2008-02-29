@@ -180,7 +180,7 @@
 
   Returns when the first occurrence of the event starts.
 
-  \sa startInTZ() setStart()
+  \sa startInCurrentTZ() setStart()
 */
 
 /*!
@@ -188,7 +188,7 @@
 
   Returns when the first occurrence of the event starts.
 
-  \sa endInTZ() setEnd()
+  \sa endInCurrentTZ() setEnd()
 */
 
 /*!
@@ -197,10 +197,14 @@
 */
 
 /*!
-  \fn virtual int PimEvent::endFieldMarker() const
+  \enum PimEvent::EventFields
   \internal
 */
 
+/*!
+  \fn QMap<int,QString> PimEvent::fields() const
+  \internal
+*/
 
 /*!
   Constructs a new PimEvent.
@@ -285,7 +289,7 @@ void PimEvent::setLocation( const QString &text )
   Sets the start time of the event to \a time.
   This will change the end time fo the event to maintain the same duration.
 
-  \sa start(), startInTZ()
+  \sa start(), startInCurrentTZ()
 */
 void PimEvent::setStart( const QDateTime &time )
 {
@@ -305,7 +309,7 @@ void PimEvent::setStart( const QDateTime &time )
   This will also change the duration of the event. \a time must be at least
   5 minutes after the start time of the event.
 
-  \sa end(), endInTZ()
+  \sa end(), endInCurrentTZ()
 */
 void PimEvent::setEnd( const QDateTime &time )
 {
@@ -330,24 +334,27 @@ void PimEvent::setNotes( const QString &text )
 }
 
 /*!
-  Sets the time zone of the event to \a text.
+  Sets the time zone of the event to \a zone.
   This will affect when the event occurs in UTC.  All day events cannot have
   a time zone set.
 
+  Setting the time zone to an invalid TimeZone will cause the event to
+  have no associated time zone.
+
   \sa timeZone(), isAllDay()
 */
-void PimEvent::setTimeZone( const QString &text )
+void PimEvent::setTimeZone( const TimeZone &zone )
 {
-    mTimeZone = text;
+    mTimeZone = zone;
 }
 
 /*!
   \internal for the moment. finish documenting when adding travel events.
   Sets the end TimeZone of the event.
 */
-void PimEvent::setEndTimeZone( const QString &text )
+void PimEvent::setEndTimeZone( const TimeZone &zone )
 {
-    mEndTimeZone = text;
+    mEndTimeZone = zone;
 }
 
 /*!
@@ -418,15 +425,24 @@ void PimEvent::setAllDay( bool enable )
 }
 
 /*!
-  Returns the time zone of the event or a empty string if the event has
+  Returns the time zone of the event or an invalid TimeZone if the event has
   no time zone.  All day events allways have no time zone.
 
   \sa setTimeZone(), isAllDay()
 */
-QString PimEvent::timeZone() const
+TimeZone PimEvent::timeZone() const
 {
-    return mAllDay ? QString("") : mTimeZone;
+    return mAllDay ? TimeZone() : mTimeZone;
 }
+
+/*!
+  \internal
+*/
+TimeZone PimEvent::endTimeZone() const
+{
+    return mAllDay ? TimeZone() : mEndTimeZone;
+}
+
 
 /*!
   Returns the date the event will repeat until
@@ -877,15 +893,43 @@ static inline VObject *safeAddProp( VObject *o, const char *prop)
     return ret;
 }
 
+const char *dayToString(int d)
+{
+    switch (d) {
+	case 1:
+	    return "MO ";
+	case 2:
+	    return "TU ";
+	case 3:
+	    return "WE ";
+	case 4:
+	    return "TH ";
+	case 5:
+	    return "FR ";
+	case 6:
+	    return "SA ";
+	case 7:
+	default:
+	    return "SU ";
+    }
+}
+
 static VObject *createVObject( const PimEvent &e )
 {
     VObject *vcal = newVObject( VCCalProp );
     safeAddPropValue( vcal, VCVersionProp, "1.0" );
     VObject *event = safeAddProp( vcal, VCEventProp );
 
-    safeAddPropValue( event, VCDTstartProp, TimeConversion::toISO8601( e.start() ) );
-    safeAddPropValue( event, VCDTendProp, TimeConversion::toISO8601( e.end() ) );
-    safeAddPropValue( event, "X-Qtopia-NOTES", e.description() );
+    // don't give UTC times if we don't have a timezone, or we
+    // are an allday event.
+    bool timeAsUTC = (e.timeZone().isValid() && !e.isAllDay());
+
+    safeAddPropValue( event, VCDTstartProp, 
+	    TimeConversion::toISO8601( e.start(), timeAsUTC ) );
+    safeAddPropValue( event, VCDTendProp, 
+	    TimeConversion::toISO8601( e.end(), timeAsUTC ) );
+
+    safeAddPropValue( event, VCAttachProp, e.description() );
     safeAddPropValue( event, VCDescriptionProp, e.description() );
     safeAddPropValue( event, VCLocationProp, e.location() );
 
@@ -893,20 +937,271 @@ static VObject *createVObject( const PimEvent &e )
 	QDateTime dt = e.start();
 	dt = dt.addSecs( -e.alarmDelay()*60 );
 	VObject *alarm = safeAddProp( event, VCDAlarmProp );
-	safeAddPropValue( alarm, VCRunTimeProp, TimeConversion::toISO8601( dt ) );
+	safeAddPropValue( alarm, VCRunTimeProp, 
+		TimeConversion::toISO8601( dt, timeAsUTC ) );
 	if (e.alarmSound() != PimEvent::Silent)  {
 	    VObject *aalarm = safeAddProp( event, VCAAlarmProp );
-	    safeAddPropValue( aalarm, VCRunTimeProp, TimeConversion::toISO8601( dt ) );
+	    safeAddPropValue( aalarm, VCRunTimeProp, 
+		    TimeConversion::toISO8601( dt , timeAsUTC ) );
 	}
     }
 
-    safeAddPropValue( event, "X-Qtopia-TIMEZONE", e.timeZone() );
+    if (timeAsUTC)
+	safeAddPropValue( event, "X-Qtopia-TIMEZONE", e.timeZone().id() );
 
-    // ### repeat missing
+    if (e.hasRepeat()) {
+	// minimal data.  if its optional and we want the default, stay quiet.
+	QString repeat_format;
+	switch (e.repeatType())
+	{
+	    default:
+	    case PimEvent::NoRepeat:
+		break;
+	    case PimEvent::Daily:
+		repeat_format = "D%1 %2";
+		break;
+	    case PimEvent::Weekly:
+		repeat_format = "W%1 ";
+		{
+		    for (int i = 1; i < 8; i++) {
+			if (e.repeatOnWeekDay(i)) {
+			    repeat_format += dayToString(i);
+			}
+		    }
+		}
+		repeat_format += "%2";
+		break;
+	    case PimEvent::MonthlyDate:
+		repeat_format = "MD%1 %2";
+		break;
+	    case PimEvent::MonthlyDay:
+		repeat_format = "MP%3 %1 %2%4";
+		repeat_format = repeat_format.arg(e.weekOffset());
+		repeat_format = repeat_format.arg(dayToString(e.start().date().dayOfWeek()));
+		// other stuff is default.
+		break;
+	    case PimEvent::MonthlyEndDay:
+		repeat_format = "MP%3 %1- %2%4";
+		repeat_format = repeat_format.arg(-e.weekOffset());
+		repeat_format = repeat_format.arg(dayToString(e.start().date().dayOfWeek()));
+		break;
+	    case PimEvent::Yearly:
+		repeat_format = "YM%1 %2";
+		break;
+	}
 
-    // ### categories missing
+	repeat_format = repeat_format.arg(e.frequency())
+	    .arg(
+		    e.repeatForever() ? "#0" : (const char *)TimeConversion::toISO8601(e.repeatTill(), FALSE));
+
+	safeAddPropValue( event, VCRRuleProp, repeat_format );
+	// Palm enters exceptions, but not their parents/not-parents.
+	// We will to because the uid's are meaningless outside of the little world of one
+	// device and one Qtopia Desktop.
+
+	if (e.hasExceptions()) {
+	    QValueList<QDate>::ConstIterator it;
+	    QString val;
+	    const QValueList<QDate> datelist = ((PrEvent &)e).exceptions();
+	    for (it = datelist.begin(); it != datelist.end(); it++) {
+		if (it != datelist.begin())
+		    val += " ";
+		val += TimeConversion::toISO8601(*it, FALSE);
+	    }
+	    // list of ISO (not UTC) dates.  may need to express as datetimes.
+	    safeAddPropValue( event, VCExpDateProp, val );
+	}
+    }
+
+    // ### categories missing XXX Mandatory if we want to claim conformance
 
     return vcal;
+}
+
+static void parseRrule( PimEvent &e, const QString &v)
+{
+    QString value = v.simplifyWhiteSpace();
+    enum state {
+	type,
+	interval,
+	occurrencelist,
+	weekdaylist,
+	daynumberlist,
+	monthlist,
+	daylist, // not used, we don't do this type.
+	duration,
+    };
+    state st = type; // state;
+    int i = 0; // index;
+    int acc = 0; // for building ints.
+
+    for (i = 0; i < (int)value.length(); i++) {
+	switch (st) {
+	    case type: // repeat class/type
+		// work out the basic rule type.
+		if (value[i] == QChar('D')) {
+		    e.setRepeatType(PimEvent::Daily);
+		} else if (value[i] == QChar('W')) {
+		    e.setRepeatType(PimEvent::Weekly);
+		} else if (value[i] == QChar('M')) {
+		    i++;
+		    if (i >= (int)value.length())
+			return;
+
+		    // may need to change from MonthlyDay to MonthlyEndDay
+		    // later.
+		    if (value[i] == QChar('P'))
+			e.setRepeatType(PimEvent::MonthlyDay);
+		    else 
+			e.setRepeatType(PimEvent::MonthlyDate);
+		} else if (value[i] == QChar('Y')) {
+		    i++;
+		    if (i >= (int)value.length() ||
+			    value[i] != QChar('M'))
+			return;  // only know Yearly Month.
+		    e.setRepeatType(PimEvent::Yearly);
+		}
+		st = interval; // frequency;
+		break;
+	    case interval: // repeat frequency
+		if (value[i].isSpace()) {
+		    // finished frequency;
+		    e.setFrequency(acc);
+		    if (e.repeatType() == PimEvent::Daily)
+			st = duration; // duration;
+		    else if (e.repeatType() == PimEvent::Weekly)
+			st = weekdaylist;
+		    else if (e.repeatType() == PimEvent::MonthlyDay)
+			st = daylist;
+		    else if (e.repeatType() == PimEvent::MonthlyDate)
+			st = daynumberlist;
+		    else 
+			st = monthlist;
+		    acc = 0;
+		} else if (value[i].isDigit()) {
+		    if (acc)
+			acc *=10;
+		    acc += value[i].digitValue();
+		} else {
+		    // fail.  parse error.
+		    qDebug("failed to parse RRULE: non-digit in frequency");
+		    return;
+		}
+		break;
+	    case occurrencelist:
+		// this could actually be duration.
+		// read next two to check, i+1 should be either 
+		// a + or a -;
+		if (i+1 < (int)value.length() &&
+			value[i].isDigit()) {
+		    // what the digit is won't help, we always work
+		    // of the start date.
+		    if (value[i+1] == QChar('+')) {
+			e.setRepeatType(PimEvent::MonthlyDay);
+			i += 2; // get past inevitable ' '
+			st = weekdaylist;
+			break;
+		    } else if (value[i+1] == QChar('-')) {
+			e.setRepeatType(PimEvent::MonthlyEndDay);
+			st = weekdaylist;
+			i += 2; // get past inevitable ' '
+			break;;
+		    }
+		}
+		// not an occurance list, but still monthly day.
+		i--;
+		st = weekdaylist;;
+		break;
+	    case weekdaylist:
+		// end on digit or #.  otherwise try it as a day.
+		if (value[i] == QChar('#') || value[i].isDigit()) {
+		    st = duration;
+		    i--;
+		    break;
+		}
+		// read the next 2/3 (if third is space)
+		if (i+1 >= (int)value.length())
+		    return;
+		if (value[i] == QChar('M'))
+		    e.setRepeatOnWeekDay(1, TRUE);
+		else if (value[i] == QChar('T') && 
+			value[i+1] == QChar('U'))
+		    e.setRepeatOnWeekDay(2, TRUE);
+		else if (value[i] == QChar('W'))
+		    e.setRepeatOnWeekDay(3, TRUE);
+		else if (value[i] == QChar('T') && 
+			value[i+1] == QChar('H'))
+		    e.setRepeatOnWeekDay(4, TRUE);
+		else if (value[i] == QChar('F'))
+		    e.setRepeatOnWeekDay(5, TRUE);
+		else if (value[i] == QChar('S') && 
+			value[i+1] == QChar('A'))
+		    e.setRepeatOnWeekDay(6, TRUE);
+		else if (value[i] == QChar('S') && 
+			value[i+1] == QChar('U'))
+		    e.setRepeatOnWeekDay(7, TRUE);
+
+		// no to the inc.
+		i += 2;  // safe, as either while will cut out, or i+1 would be a ' '
+		break;
+		// can't use either of these of these.
+	    case daylist:
+		// FALL THROUGH
+	    case daynumberlist:
+		// FALL THROUGH
+	    case monthlist:
+		// find the optional duration.
+		// find a # or more than 3 digets from end.
+		{
+		    int space = value.findRev(QChar(' '));
+		    if (space < i)
+			return;  // no duration;
+		    if (space + 4 < (int)value.length()
+			    || value[i+1] == QChar('#')) {
+			i = space;
+			st = duration;
+		    } else {
+			return;
+		    }
+		}
+		break;
+	    case duration: // repeat duration
+		// duration.
+		// expect either a # or a datetime.
+		// if # just finish of the number now.
+		if (value[i] == QChar('#')) {
+		    i++;
+		    acc = 0;
+		    while (i < (int)value.length()) {
+			if (value[i].isDigit()) {
+			    acc *= 10;
+			    acc += value[i].digitValue();
+			} else {
+			    qDebug("failed to parse RRULE: non-digit in duration count");
+			}
+			i++;
+		    }
+		    // if 0, repeat forever.  if anything else will need
+		    if (acc == 0)
+			e.setRepeatForever(TRUE);
+		    i = (int)value.length();
+		    // XXX Could add code to work out the count -> date.
+		} else {
+		    // from hear till the end is an ISO value, and we want it.
+		    e.setRepeatTill(
+			    TimeConversion::fromISO8601(
+				QCString(value.mid(i))).date());
+		    i = (int)value.length();
+		}
+	}
+    }
+
+    // out without errors.
+    if (!(e.frequency() % 12) && e.repeatType() == PimEvent::MonthlyDate)
+    {
+	e.setRepeatType(PimEvent::Yearly);
+	e.setFrequency(e.frequency() / 12);
+    }
 }
 
 static PimEvent parseVObject( VObject *obj )
@@ -944,7 +1239,13 @@ static PimEvent parseVObject( VObject *obj )
 	    value = vObjectStringZValue( o );
 
 
+	// XXX We may need to modify this by timezone later if there
+	// is a timezone.  if you have a recieve event bug, check
+	// this first.
 	if ( name == VCDTstartProp ) {
+	    // check string-length.  if no time, its an allday.
+	    if (value.length() == 8)
+		e.setAllDay(TRUE);
 	    startTime = TimeConversion::fromISO8601( QCString(value) );
 	    e.setStart( startTime );
 	    haveStart = TRUE;
@@ -953,7 +1254,7 @@ static PimEvent parseVObject( VObject *obj )
 	    e.setEnd( TimeConversion::fromISO8601( QCString(value) ) );
 	    haveEnd = TRUE;
 	}
-	else if ( name == "X-Qtopia-NOTES" ) {
+	else if ( name == "X-Qtopia-NOTES" || name == VCAttachProp) {
 	    e.setNotes( value );
 	}
 	else if ( name == VCDescriptionProp ) {
@@ -962,26 +1263,6 @@ static PimEvent parseVObject( VObject *obj )
 	else if ( name == VCLocationProp ) {
 	    e.setLocation( value );
 	}
-#if 0
-	else if ( name == VCAudioContentProp ) {
-	    haveAlarm = TRUE;
-	    VObjectIterator nit;
-	    initPropIterator( &nit, o );
-	    while( moreIteration( &nit ) ) {
-		VObject *o = nextVObject( &nit );
-		QCString name = vObjectName( o );
-		// in this case, is unlikely to be encoded.. so don't bother converting.
-		//if (tc) value = tc->toUnicode( vObjectStringZValue( o ) ); else value = vObjectStringZValue( o );
-		QCString value = vObjectStringZValue( o );
-		if ( name == VCRunTimeProp )
-		    alarmTime = TimeConversion::fromISO8601( value );
-		else if ( name == VCAudioContentProp ) {
-		    if ( value != "silent" )
-			soundType = PimEvent::Loud;
-		}
-	    }
-	}
-#endif
 	else if ( name == VCAAlarmProp || name == VCDAlarmProp ) {
 	    haveAlarm = TRUE;
 	    VObjectIterator nit;
@@ -998,22 +1279,21 @@ static PimEvent parseVObject( VObject *obj )
 	    if ( name == VCAAlarmProp )
 		soundType = PimEvent::Loud;
 	}
+	// We don't use VCTimeZoneProp as that has the form +05:30.
+	// We are a bit better at timezones than this so we need the actual name
+	// We _may_ want to use VCGeoLocationProp ( lang long )
 	else if ( name == "X-Qtopia-TIMEZONE") {
-	    e.setTimeZone( value );
+	    e.setTimeZone( TimeZone(value) );
 	}
-#if 0
-	else {
-	    printf("Name: %s, value=%s\n", name.data(), vObjectStringZValue( o ) );
-	    VObjectIterator nit;
-	    initPropIterator( &nit, o );
-	    while( moreIteration( &nit ) ) {
-		VObject *o = nextVObject( &nit );
-		QCString name = vObjectName( o );
-		QString value = vObjectStringZValue( o );
-		printf(" subprop: %s = %s\n", name.data(), value.latin1() );
+	else if ( name == VCRRuleProp) {
+	    parseRrule(e, value);
+	}
+	else if ( name == VCExpDateProp ) {
+	    QStringList list = QStringList::split(' ', value);
+	    for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
+		((PrEvent&)e).addException(TimeConversion::fromISO8601(QCString(*it)).date());
 	    }
 	}
-#endif
     }
 
     if ( !haveStart && !haveEnd )
@@ -1130,153 +1410,67 @@ QColor PimEvent::color(bool t)
 	return QColor(255,0,0);
 }
 
-// Timezone dependent functions.
-
-time_t asUTC(const QDateTime &time, const QString &z)
-{
-    QString realTZ = QString::fromLocal8Bit( getenv("TZ") );
-
-    if (z.isEmpty())
-	unsetenv("TZ");
-    else
-	if ( setenv( "TZ", z, true ) != 0 )
-	    qWarning( "There was a problem setting the timezone" );
-
-    time_t result = TimeConversion::toUTC( time );
-
-    unsetenv("TZ");
-    if (!realTZ.isNull())
-	if ( setenv( "TZ", realTZ, true ) != 0 )
-	    qWarning( "There was a problem resetting the timezone" );
-
-    return result;
-}
-
-QDateTime asDateTime(time_t time, const QString &z)
-{
-    QString realTZ = QString::fromLocal8Bit( getenv("TZ") );
-
-    if (z.isEmpty())
-	unsetenv("TZ");
-    else
-	if ( setenv( "TZ", z, true ) != 0 )
-	    qWarning( "There was a problem setting the timezone" );
-
-    // 5. get QDateTime from utc.
-    QDateTime result = TimeConversion::fromUTC( time );
-
-    unsetenv("TZ");
-    if (!realTZ.isNull())
-	if ( setenv( "TZ", realTZ, true ) != 0 )
-	    qWarning( "There was a problem resetting the timezone" );
-
-    return result;
-}
-
-
-QDateTime shiftZones(const QDateTime &time, const QString &z1, const QString &z2)
-{
-    // need to do a conversion.  to utc and back out again on the start.. then
-
-    // 1. store current timezone
-    QString realTZ = QString::fromLocal8Bit( getenv("TZ") );
-
-    // 2. set current timezone to z1
-    if (z1.isEmpty())
-	unsetenv("TZ");
-    else
-	if ( setenv( "TZ", z1, true ) != 0 )
-	    qWarning( "There was a problem setting the timezone" );
-
-    // 3. get utc time.
-    time_t start_utc = TimeConversion::toUTC( time );
-
-    // 4. set current timezone to z2.
-    if (z2.isEmpty())
-	unsetenv("TZ");
-    else
-	if ( setenv( "TZ", z2, true ) != 0 )
-	    qWarning( "There was a problem setting the timezone" );
-
-    // 5. get QDateTime from utc.
-    QDateTime result = TimeConversion::fromUTC( start_utc );
-
-    // 6. reset timezone.
-    unsetenv("TZ");
-    if (!realTZ.isNull())
-	if ( setenv( "TZ", realTZ, true ) != 0 )
-	    qWarning( "There was a problem resetting the timezone" );
-
-    return result;
-}
-
 /*!
-  Returns the start time of the event in timezone \a zone.
-  If \a zone is NULL, returns the start time of the event
-  in the current time zone.
+  Returns the start time of the event in the current system timezone.
 
   \sa start()
 */
-QDateTime PimEvent::startInTZ(const QString &zone) const
+QDateTime PimEvent::startInCurrentTZ() const
 {
-    if (timeZone().isEmpty())
+    if (!timeZone().isValid())
 	return start();
 
     // if no zone given.. assume local
-    if (zone.isEmpty())
-	return shiftZones(start(), timeZone(),
-		QString::fromLocal8Bit( getenv("TZ") ) );
-
-    return shiftZones(start(), timeZone(), zone);
+    return timeZone().toCurrent(start());
 }
 
 /*!
-  Returns the end time of the event in timezone \a zone.
-  If \a zone is NULL, returns the end time of the event
-  in the current time zone.
+  Returns the end time of the event in the current system timezone.
 
   \sa end()
 */
-QDateTime PimEvent::endInTZ(const QString &zone) const
+QDateTime PimEvent::endInCurrentTZ() const
 {
-    if (timeZone().isEmpty())
+    if (!timeZone().isValid())
 	return end();
 
-    // duration should be the same... shift the start.. dif to end.
-    // if no zone given.. assume local
-    QDateTime nStart;
-    if (zone.isEmpty())
-	nStart = shiftZones(start(), timeZone(),
-	    QString::fromLocal8Bit( getenv("TZ") ) );
-    else
-	nStart = shiftZones(start(), timeZone(), zone);
+    QDateTime nStart = timeZone().toCurrent(start());
 
     return end().addSecs(start().secsTo(nStart));
 }
 
 /*!
-  Returns the date the event will repeat till in timezone \a zone.
-  If \a zone is NULL, returns the date the event will repeat till
-  in the current time zone.
+  Returns the date the event will repeat till in the current system timezone.
 
   \sa repeatTill()
 */
-QDate PimEvent::repeatTillInTZ(const QString &zone) const
+QDate PimEvent::repeatTillInCurrentTZ() const
 {
-    if (timeZone().isEmpty())
+    if (!timeZone().isValid())
 	return repeatTill();
 
     // duration should be the same... shift the start.. dif to end.
     // if no zone given.. assume local
-    QDateTime nStart;
-    if (zone.isEmpty())
-	nStart = shiftZones(start(), timeZone(),
-	    QString::fromLocal8Bit( getenv("TZ") ) );
-    else
-	nStart = shiftZones(start(), timeZone(), zone);
+    QDateTime nStart = timeZone().toCurrent(start());
 
     QDateTime rtDateTime = QDateTime(repeatTill(), QTime(0,0,0));
     return rtDateTime.addSecs(start().secsTo(nStart)).date();
+}
+
+time_t asUTC(const QDateTime &dt, const TimeZone &z)
+{
+    if (z.isValid())
+	return z.toTime_t(dt);
+    else
+	return TimeZone::utc().toTime_t(dt);
+}
+
+QDateTime asDateTime( time_t dt, const TimeZone &z)
+{
+    if (z.isValid())
+	return z.fromTime_t(dt);
+    else
+	return TimeZone::utc().fromTime_t(dt);
 }
 
 /*!
@@ -1354,28 +1548,23 @@ QDateTime Occurrence::end() const
 
 // Timezone dependent functions...
 
-QDateTime Occurrence::startInTZ(const QString &zone) const
+QDateTime Occurrence::startInCurrentTZ() const
 {
-    if (eventCache.timeZone().isEmpty())
+    if (!eventCache.timeZone().isValid())
 	return start();
-    // if no zone given.. assume local
-    if (zone.isEmpty())
-	return shiftZones(start(), eventCache.timeZone(),
-		QString::fromLocal8Bit( getenv("TZ") ) );
 
-    return shiftZones(start(), eventCache.timeZone(), zone);
+    return eventCache.timeZone().toCurrent(start());
 }
 
-QDateTime Occurrence::endInTZ(const QString &zone) const
+QDateTime Occurrence::endInCurrentTZ() const
 {
-    if (eventCache.timeZone().isEmpty())
+    if (!eventCache.timeZone().isValid())
 	return end();
-    // if no zone given.. assume local
-    if (zone.isEmpty())
-	return shiftZones(end(), eventCache.timeZone(),
-		QString::fromLocal8Bit( getenv("TZ") ) );
 
-    return shiftZones(end(), eventCache.timeZone(), zone);
+
+    QDateTime nStart = eventCache.timeZone().toCurrent(start());
+
+    return end().addSecs(start().secsTo(nStart));
 }
 
 // used when loading to finalize records.
@@ -1406,7 +1595,7 @@ void PimEvent::finalizeRecord()
     if (!hasTimeZone) {
 	// make one up.  Can't be "None" because in old datebook all
 	// events were in UTC.  So make it the current locale.
-	setTimeZone( QString::fromLocal8Bit( getenv( "TZ" ) ) );
+	setTimeZone( TimeZone::current() );
     }
 
     // if there was a timezone, it would be set by now.
@@ -1437,9 +1626,9 @@ void PimEvent::setField(int key,const QString &value)
 	case Location:
 	    setLocation( value );
 	    break;
-	case TimeZone:
-	    if (value != "None")
-		setTimeZone( value);
+	case StartTimeZone:
+	    if (value != "None") // No tr
+		setTimeZone( TimeZone(value) );
 	    // hasTimeZone in that one is set, even if it is none.
 	    hasTimeZone = TRUE;
 	    break;
@@ -1456,7 +1645,7 @@ void PimEvent::setField(int key,const QString &value)
 	    setAllDay( value == "AllDay" );
 	    break;
 	case HasAlarm:
-	    if ( value.contains("true", FALSE)) {
+	    if ( value.contains("true", FALSE)) { // No tr
 		mHasAlarm = TRUE;
 	    } else {
 		mHasAlarm = FALSE;
@@ -1466,12 +1655,12 @@ void PimEvent::setField(int key,const QString &value)
 	    mAlarmDelay = value.toInt();
 	    break;
 	case SoundType:
-	    mAlarmSound = value == "loud" ? Loud : Silent;
+	    mAlarmSound = value == "loud" ? Loud : Silent; // No tr
 	    break;
 	case RepeatPattern:
-	    if ( value == "Daily" )
+	    if ( value == "Daily" ) // No tr
 		setRepeatType(Daily);
-	    else if ( value == "Weekly" )
+	    else if ( value == "Weekly" ) // No tr
 		setRepeatType(Weekly);
 	    else if ( value == "MonthlyDay" )
 		setRepeatType(MonthlyDay);
@@ -1479,7 +1668,7 @@ void PimEvent::setField(int key,const QString &value)
 		setRepeatType(MonthlyDate);
 	    else if ( value == "MonthlyEndDay" )
 		setRepeatType(MonthlyEndDay);
-	    else if ( value == "Yearly" )
+	    else if ( value == "Yearly" ) // No tr
 		setRepeatType(Yearly);
 	    else
 		setRepeatType(NoRepeat);
@@ -1548,7 +1737,13 @@ QString PimEvent::field(int key) const
     switch( key ) {
 	case Description: return mDescription;
 	case Location: return mLocation;
-	case TimeZone: return mTimeZone;
+	case StartTimeZone:
+        {
+	    if (timeZone().isValid())
+		return timeZone().id();
+	    else
+		return "None"; // No tr
+	}
 	case Notes: return mNotes;
 	case StartDateTime: return QString::number( startAsUTC() );
 	case EndDateTime: return QString::number( endAsUTC() );
@@ -1557,28 +1752,28 @@ QString PimEvent::field(int key) const
 	    if ( isAllDay() )
 		return "AllDay";
 	    else
-		return "Timed";
+		return "Timed"; // No tr
 	}
 
-	case HasAlarm: return hasAlarm() ? "true" : "false";
+	case HasAlarm: return hasAlarm() ? "true" : "false"; // No tr
 	case AlarmDelay: return QString::number( alarmDelay() );
 	case SoundType:
 	{
 	    if ( alarmSound() == Loud )
-		return "loud";
+		return "loud"; // No tr
 	    else
-		return "silent";
+		return "silent"; // No tr
 	}
 
 	case RepeatPattern:
 	{
 	    switch ( repeatType() ) {
-		case Daily: return "Daily";
-		case Weekly: return "Weekly";
+		case Daily: return "Daily"; // No tr
+		case Weekly: return "Weekly"; // No tr
 		case MonthlyDay: return "MonthlyDay";
 		case MonthlyEndDay: return "MonthlyEndDay";
 		case MonthlyDate: return "MonthlyDate";
-		case Yearly: return "Yearly";
+		case Yearly: return "Yearly"; // No tr
 		default: return "NoRepeat";
 	    }
 	}
@@ -1646,9 +1841,10 @@ QMap<int, QString> PimEvent::fields() const
 }
 
 static const QtopiaPimMapEntry datebookentries[] = {
-    { "description", QT_TRANSLATE_NOOP("PimEvent", "Description"), PimEvent::Description, 40},
+    { "description", // No tr
+	QT_TRANSLATE_NOOP("PimEvent", "Description"), PimEvent::Description, 40},
     { "location", QT_TRANSLATE_NOOP("PimEvent", "Location"), PimEvent::Location, 0 },
-    { "timezone", QT_TRANSLATE_NOOP("PimEvent", "Time zone"), PimEvent::TimeZone, 0 },
+    { "timezone", QT_TRANSLATE_NOOP("PimEvent", "Time zone"), PimEvent::StartTimeZone, 0 },
     { "note", QT_TRANSLATE_NOOP("PimEvent", "Notes"), PimEvent::Notes, 0 },
     { "start", QT_TRANSLATE_NOOP("PimEvent", "Start Date"), PimEvent::StartDateTime, 25 },
     { "end", QT_TRANSLATE_NOOP("PimEvent", "End Date"), PimEvent::EndDateTime, 25 },
@@ -1684,7 +1880,7 @@ void PimEvent::initMaps()
     delete uniquenessMapPtr;
     uniquenessMapPtr = new QMap<int, int>;
 
-    PimRecord::initMaps(datebookentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
+    PimRecord::initMaps("PimEvent", datebookentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
 			*trFieldsMapPtr );
 
     // Datebook xml file used lowercase letters for Categories and Uid
@@ -1692,9 +1888,9 @@ void PimEvent::initMaps()
     identifierToKeyMapPtr->remove("Uid");
     (*identifierToKeyMapPtr)["uid"] = UID_ID;
 
-    (*keyToIdentifierMapPtr)[Categories] = "categories";
-    identifierToKeyMapPtr->remove("Categories");
-    (*identifierToKeyMapPtr)["categories"] = Categories;
+    (*keyToIdentifierMapPtr)[Categories] = "categories"; // No tr
+    identifierToKeyMapPtr->remove("Categories"); // No tr
+    (*identifierToKeyMapPtr)["categories"] = Categories; // No tr
 }
 
 /*!

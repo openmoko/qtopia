@@ -39,9 +39,9 @@ public:
 	StartMenu *menu = startMenu();
 	QPopupMenu* popup = menu->launchMenu;
 	QString n = popup->name();
-	if ( n != "accessories" ) {
+	if ( n != "accessories" ) { // No tr
 	    if ( n == "accessories_need_sep" ) {
-		popup->setName("accessories");
+		popup->setName("accessories"); // No tr
 		popup->insertSeparator(0);
 	    } else {
 		// First accessory on device that doesn't follow the new protocol.

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/inputmethods.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/doc/inputmethods.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -77,7 +77,7 @@ public:
     virtual ~SimpleInputMethodImpl();
 
 #ifndef QT_NO_COMPONENT
-    QRESULT queryInterface( const QUuid&amp;, QUnknownInterface** );
+    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
     Q_REFCOUNT
 #endif
 
@@ -111,7 +111,7 @@ SimpleInputMethodImpl::~SimpleInputMethodImpl()
 <p> The queryInterface() function can be implemented using the
 following boilerplate code:
 <p> <pre>
-QRESULT SimpleInputMethodImpl::queryInterface( const QUuid &amp;uuid, QUnknownInterface **iface )
+QRESULT SimpleInputMethodImpl::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
 {
     *iface = 0;
     if ( uuid == IID_QUnknown )

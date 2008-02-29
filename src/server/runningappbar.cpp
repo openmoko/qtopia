@@ -23,89 +23,93 @@
 
 #include <qtopia/qpeglobal.h>
 
-// For "kill"
-#ifdef Q_OS_WIN32
-#include <sys/types.h>
-#endif
-#include <signal.h>
+#include <signal.h>	// for killl
+#include <stdlib.h>
 
 #include <qtimer.h>
 #include <qpopupmenu.h>
-#include <qmessagebox.h>
 #include <qpainter.h>
-#include "qprocess.h"
+#include <qmessagebox.h>
+
+#include <qtopia/qprocess.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/applnk.h>
 #include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/global.h>
-#include <qwindowsystem_qws.h>
+#include <qtopia/mimetype.h>
+
 #include "runningappbar.h"
+#include "applauncher.h"
+
+// 3600 seconds before a temporary disabled screensaver is reenabled by server
+//#define QTOPIA_MAX_SCREEN_DISABLE_TIME ((int) 3600)
+#ifdef QTOPIA_MAX_SCREEN_DISABLE_TIME
+#define QTOPIA_MIN_SCREEN_DISABLE_TIME ((int) 300)  // min 5 minutes before forced suspend kicks in
+#endif
 
 static QStringList checkingApps;
 
 RunningAppBar::RunningAppBar(QWidget* parent) 
   : QFrame(parent), m_AppLnkSet(0L), m_SelectedAppIndex(-1)
 {
-    m_AppLnkSet = new AppLnkSet( QPEApplication::qpeDir() + "apps" );
+    m_AppLnkSet = new AppLnkSet( MimeType::appsFolderName() );
 
-    connect(qwsServer, SIGNAL(newChannel(const QString&)), this, SLOT(newQcopChannel(const QString&)));
-    connect(qwsServer, SIGNAL(removedChannel(const QString&)), this, SLOT(removedQcopChannel(const QString&)));
+    tsmMonitor = new TempScreenSaverMonitor();
+    connect(tsmMonitor, SIGNAL(forceSuspend()), this, SIGNAL(forceSuspend()) );
+    
     QCopChannel* channel = new QCopChannel( "QPE/System", this );
     connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
 	     this, SLOT(received(const QCString&, const QByteArray&)) );
 
     spacing = AppLnk::smallIconSize()+3;
+    
+    appLauncher = new AppLauncher(m_AppLnkSet, this);
+    connect(appLauncher, SIGNAL(launched(int, const QString &)), this, SLOT(applicationLaunched(int, const QString &)) );
+    connect(appLauncher, SIGNAL(terminated(int, const QString &)), this, SLOT(applicationTerminated(int, const QString &)) );
 }
 
-RunningAppBar::~RunningAppBar() {
+RunningAppBar::~RunningAppBar() 
+{
     delete m_AppLnkSet;
+    delete tsmMonitor;
+    delete appLauncher;
 }
 
-void RunningAppBar::newQcopChannel(const QString& channelName) {
-  QString prefix("QPE/Application/");
-  if (channelName.startsWith(prefix)) {
-    QString appName = channelName.mid(prefix.length());
-//     qDebug("App %s just connected!", appName.latin1());
-    const AppLnk* newGuy = m_AppLnkSet->findExec(appName);
-    if (newGuy && !newGuy->isPreloaded()) {
-      addTask(*newGuy);
-    }
-  }
-}
-
-void RunningAppBar::removedQcopChannel(const QString& channelName) {
-  QString prefix("QPE/Application/");
-  if (channelName.startsWith(prefix)) {
-    QString appName = channelName.mid(prefix.length());
-//     qDebug("App %s just disconnected!", appName.latin1());
-    const AppLnk* newGuy = m_AppLnkSet->findExec(appName);
-    if (newGuy) {
-      removeTask(*newGuy);
-    }
-  }
+void RunningAppBar::reloadApps()
+{
+    appLauncher->setAppLnkSet(0);
+    delete m_AppLnkSet;
+    m_AppLnkSet = new AppLnkSet( MimeType::appsFolderName() );
+    appLauncher->setAppLnkSet(m_AppLnkSet);
 }
 
 void RunningAppBar::received(const QCString& msg, const QByteArray& data) {
-  // Since fast apps appear and disappear without disconnecting from their
-  // channel we need to watch for the showing/hiding events and update according.
-  QDataStream stream( data, IO_ReadOnly );
-  if ( msg == "fastAppShowing(QString)") {
-    QString appName;
-    stream >> appName;
-    addTask(*m_AppLnkSet->findExec(appName));
-  } else if ( msg == "fastAppHiding(QString)") {
-    QString appName;
-    stream >> appName;
-    removeTask(*m_AppLnkSet->findExec(appName));
-  }
+    // Since fast apps appear and disappear without disconnecting from their
+    // channel we need to watch for the showing/hiding events and update according.
+    QDataStream stream( data, IO_ReadOnly );
+    if ( msg == "fastAppShowing(QString)") {
+	QString appName;
+	stream >> appName;
+	//    qDebug("fastAppShowing %s", appName.data() );
+	const AppLnk* f = m_AppLnkSet->findExec(appName);
+	if ( f ) addTask(*f);
+    } else if ( msg == "fastAppHiding(QString)") {
+	QString appName;
+	stream >> appName;
+	const AppLnk* f = m_AppLnkSet->findExec(appName);
+	if ( f ) removeTask(*f);
+    } else if ( msg == "setTempScreenSaverMode(int,int)" ) {
+	int mode, pid;
+	stream >> mode >> pid;
+	tsmMonitor->setTempMode(mode, pid);
+    }
 }
 
 void RunningAppBar::addTask(const AppLnk& appLnk) {
-//   qDebug("Added %s to app list.", appLnk.name().latin1());
-  AppLnk* newApp = new AppLnk(appLnk);
-  newApp->setExec(appLnk.exec());
-  m_AppList.prepend(newApp);
-  update();
+//    qDebug("Added %s to app list.", appLnk.name().latin1());
+    AppLnk* newApp = new AppLnk(appLnk);
+    newApp->setExec(appLnk.exec());
+    m_AppList.prepend(newApp);
+    update();
 }
 
 void RunningAppBar::removeTask(const AppLnk& appLnk) {
@@ -118,7 +122,7 @@ void RunningAppBar::removeTask(const AppLnk& appLnk) {
       delete target;
     }
   }
-  update();	
+  update();
 }
 
 void RunningAppBar::mousePressEvent(QMouseEvent *e)
@@ -151,26 +155,29 @@ void RunningAppBar::mouseReleaseEvent(QMouseEvent *e)
 	return;
     }
     if ( m_SelectedAppIndex >= 0 ) {
-    QString app = m_AppList.at(m_SelectedAppIndex)->exec(); 
-    QString channel = QString("QPE/Application/") + app;
-
-    if (QCopChannel::isRegistered(channel.latin1())) {
-	// qDebug("%s is running!", m_AppList.at(m_SelectedAppIndex)->exec().latin1());
-	if ( checkingApps.find(app) == checkingApps.end() ) {
-	    checkingApps.append( app );
-	    QCopEnvelope e(channel.latin1(), "raise()");
-	    // This class will delete itself after hearing from the app or the timer expiring
-	    (void)new AppMonitor(*m_AppList.at(m_SelectedAppIndex), *this);
+	QString app = m_AppList.at(m_SelectedAppIndex)->exec(); 
+	QString channel = QString("QPE/Application/") + app;
+	
+	// it might be started but not yet opened a qcop channel.  Test for both
+	if ( appLauncher->isRunning(app) ) {
+	    if ( QCopChannel::isRegistered(channel.latin1()) ) {
+		//qDebug("%s is running!", m_AppList.at(m_SelectedAppIndex)->exec().latin1());
+		if ( checkingApps.find(app) == checkingApps.end() ) {
+		    checkingApps.append( app );
+		    QCopEnvelope e(channel.latin1(), "raise()");
+		    // This class will delete itself after hearing from the app or the timer expiring
+		    (void)new AppMonitor(*m_AppList.at(m_SelectedAppIndex), *this);
+		} else {
+		  //  qDebug("already quering %s", app.data() );
+		}
+	    }
 	} else {
-	  //  qDebug("already quering %s", app.data() );
+	    // this should never happen with the new implementation
+	    removeTask(*m_AppList.at(m_SelectedAppIndex));
 	}
-    }
-    else {
-      removeTask(*m_AppList.at(m_SelectedAppIndex));
-    }
 
-    m_SelectedAppIndex = -1;
-    update();
+	m_SelectedAppIndex = -1;
+	update();
     }
 }
 
@@ -204,6 +211,26 @@ QSize RunningAppBar::sizeHint() const
     return QSize( frameWidth(), AppLnk::smallIconSize()+frameWidth()*2+3 );
 }
 
+void RunningAppBar::applicationLaunched(int, const QString &appName)
+{
+    // qDebug("desktop:: app: %s launched with pid %d", appName.data(), pid);
+    const AppLnk* newGuy = m_AppLnkSet->findExec(appName);
+    if ( newGuy && !newGuy->isPreloaded() ) {
+	addTask( *newGuy );
+	QCopEnvelope e("QPE/System", "busy()");
+    }
+}
+
+void RunningAppBar::applicationTerminated(int pid, const QString &app)
+{
+    const AppLnk* gone = m_AppLnkSet->findExec(app);
+    if ( gone ) {
+	removeTask(*gone);
+	tsmMonitor->applicationTerminated(pid);
+    }
+}
+
+/*	App Monitor	*/
 const int AppMonitor::RAISE_TIMEOUT_MS = 500;
 
 AppMonitor::AppMonitor(const AppLnk& app, RunningAppBar& owner) 
@@ -305,3 +332,127 @@ void AppMonitor::psProcFinished() {
   // WE DELETE OURSELVES HERE!  Don't do anything else!!
   delete this;
 }
+
+TempScreenSaverMonitor::TempScreenSaverMonitor(QObject *parent, const char *name)
+    : QObject(parent, name)
+{
+    currentMode = QPEApplication::Enable;
+    timerId = 0;
+}
+
+void TempScreenSaverMonitor::setTempMode(int mode, int pid)
+{
+    removeOld(pid);
+    switch(mode) {
+	case QPEApplication::Disable: sStatus[0].append(pid); break;
+	case QPEApplication::DisableLightOff: sStatus[1].append(pid); break;
+	case QPEApplication::DisableSuspend: sStatus[2].append(pid); break;
+	case QPEApplication::Enable: break;
+	default: qWarning("Unrecognized temp power setting.  Ignored"); return;
+    }
+    updateAll();
+}
+
+// Returns true if app had set a temp Mode earlier
+bool TempScreenSaverMonitor::removeOld(int pid)
+{
+    QValueList<int>::Iterator it;
+    for (int i = 0; i < 3; i++) {
+	it = sStatus[i].find(pid);
+	if ( it != sStatus[i].end() ) {
+	    sStatus[i].remove( it );
+	    return TRUE;
+	}
+    }
+    return FALSE;
+}
+
+void TempScreenSaverMonitor::updateAll()
+{
+    int mode = QPEApplication::Enable;
+    if ( sStatus[0].count() ) {
+	mode = QPEApplication::Disable;
+    } else if ( sStatus[1].count() ) {
+	mode = QPEApplication::DisableLightOff;
+    } else if ( sStatus[2].count() ) {
+	mode = QPEApplication::DisableSuspend;
+    } 
+
+    if ( mode != currentMode ) {
+#ifdef QTOPIA_MAX_SCREEN_DISABLE_TIME
+	if ( currentMode == QPEApplication::Enable) {
+	    int tid = timerValue();
+	    if ( tid )
+		timerId = startTimer( tid * 1000 );
+	} else if ( mode == QPEApplication::Enable ) {
+	    killTimer(timerId);
+	}
+#endif
+	currentMode = mode;
+	QCopEnvelope("QPE/System", "setScreenSaverMode(int)") << mode;
+    }
+}
+
+void TempScreenSaverMonitor::applicationTerminated(int pid)
+{
+    if ( removeOld(pid) )
+	updateAll();
+}
+
+int TempScreenSaverMonitor::timerValue()
+{
+    int tid = 0;
+#ifdef QTOPIA_MAX_SCREEN_DISABLE_TIME
+    tid = QTOPIA_MAX_SCREEN_DISABLE_TIME;
+
+    char *env = getenv("QTOPIA_DISABLED_APM_TIMEOUT");
+    if ( !env ) 
+	return tid;
+
+    QString strEnv = env;
+    bool ok = FALSE;
+    int envTime = strEnv.toInt(&ok);
+
+    if ( ok ) {
+	if ( envTime < 0 )
+	    return 0;
+	else if ( envTime <= QTOPIA_MIN_SCREEN_DISABLE_TIME )
+	    return tid;
+	else 
+	    return envTime;
+    }
+#endif
+
+    return tid;
+}
+
+void TempScreenSaverMonitor::timerEvent(QTimerEvent *t)
+{
+#ifdef QTOPIA_MAX_SCREEN_DISABLE_TIME
+    if ( timerId && (t->timerId() == timerId) ) {
+	
+	/*  Clean up	*/
+	killTimer(timerId);
+	currentMode = QPEApplication::Enable;
+	QCopEnvelope("QPE/System", "setScreenSaverMode(int)") << currentMode;
+	
+	// signal starts on a merry-go-round, which ends up in Desktop::togglePower()
+	emit forceSuspend();
+	// if we have apm we are asleep at this point, next line will be executed when we
+	// awake from suspend.
+	if ( QFile::exists( "/proc/apm" ) ) {
+	    QTime t;
+	    t = t.addSecs( timerValue() );
+	    QString str =  tr("<qt>The running applications disabled the screen saver for more than the allowed time (%1).<p>The system was forced to suspend</p></qt>").arg( t.toString() );
+	    QMessageBox::information(0, tr("Forced suspend"), str);
+	}
+	
+	// Reset all requests.
+	for (int i = 0; i < 3; i++)
+	    sStatus[i].clear();
+
+	updateAll();
+    }
+#endif
+}
+

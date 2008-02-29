@@ -23,9 +23,7 @@
 #include <qstringlist.h>
 
 QWidget * ConversionInterface::create (QWidget *parent) {
-    if ( !input )
-	input = new FormConversion(parent,"Conversion",0);
-    return input;
+    return new FormConversion(parent,"Conversion",0);
 }
 
 #ifndef QT_NO_COMPONENT

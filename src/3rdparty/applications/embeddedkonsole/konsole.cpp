@@ -104,17 +104,17 @@ public:
 static const char *commonCmds[] =
 {
     "ls ", // I left this here, cause it looks better than the first alpha
-    "cardctl eject",
-    "cat ",
+    "cardctl eject", // No tr
+    "cat ", // No tr
     "cd ",
     "chmod ",
     "cp ",
     "dc ",
     "df ",
     "dmesg",
-    "echo ",
-    "find ",
-    "free",
+    "echo ", // No tr
+    "find ", // No tr
+    "free", // No tr
     "grep ",
     "ifconfig ",
     "ipkg ",
@@ -123,13 +123,13 @@ static const char *commonCmds[] =
     "nc localhost 7776",
     "nc localhost 7777",
     "nslookup ",
-    "ping ",
+    "ping ", // No tr
     "ps aux",
     "pwd ",
     "rm ",
     "rmdir ",
-    "route ",
-    "set ",
+    "route ", // No tr
+    "set ", // No tr
     "traceroute",
 
 /*
@@ -156,7 +156,7 @@ static const char *commonCmds[] =
     "netstat",
 */
 
-    "exit",
+    "exit", // No tr
     NULL
 };
 
@@ -239,37 +239,37 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   bool listHidden;
   cfg.setGroup("Menubar");
   if( cfg.readEntry("Hidden","FALSE") == "TRUE")  {
-      configMenu->insertItem("Show command list");
+      configMenu->insertItem(tr("Show command list"));
       listHidden=TRUE;
   } else {
-      configMenu->insertItem("Hide command list");
+      configMenu->insertItem(tr("Hide command list"));
       listHidden=FALSE;
   }
 
   cfg.setGroup("Tabs");
   tmp=cfg.readEntry("Position","Bottom");
-  if(tmp=="Top") {
+  if(tmp=="Top") { // No tr
       tab->setTabPosition(QTabWidget::Top);
-      configMenu->insertItem("Tabs on Bottom");
+      configMenu->insertItem(tr("Tabs on Bottom"));
   } else {
       tab->setTabPosition(QTabWidget::Bottom);
-      configMenu->insertItem("Tabs on Top");
+      configMenu->insertItem(tr("Tabs on Top"));
   }
   configMenu->insertSeparator(2);
 
-  colorMenu->insertItem("Green on Black");
-  colorMenu->insertItem("Black on White");
-  colorMenu->insertItem("White on Black");
-  colorMenu->insertItem("Black on Transparent");
-  colorMenu->insertItem("Black on Red");
-  colorMenu->insertItem("Red on Black");
-  colorMenu->insertItem("Green on Yellow");
-  colorMenu->insertItem("Blue on Magenta");
-  colorMenu->insertItem("Magenta on Blue");
-  colorMenu->insertItem("Cyan on White");
-  colorMenu->insertItem("White on Cyan");
-  colorMenu->insertItem("Blue on Black");
-  configMenu->insertItem("Colors",colorMenu);
+  colorMenu->insertItem(tr("Green on Black"));
+  colorMenu->insertItem(tr("Black on White"));
+  colorMenu->insertItem(tr("White on Black"));
+  colorMenu->insertItem(tr("Black on Transparent"));
+  colorMenu->insertItem(tr("Black on Red"));
+  colorMenu->insertItem(tr("Red on Black"));
+  colorMenu->insertItem(tr("Green on Yellow"));
+  colorMenu->insertItem(tr("Blue on Magenta"));
+  colorMenu->insertItem(tr("Magenta on Blue"));
+  colorMenu->insertItem(tr("Cyan on White"));
+  colorMenu->insertItem(tr("White on Cyan"));
+  colorMenu->insertItem(tr("Blue on Black"));
+  configMenu->insertItem(tr("Colors"),colorMenu);
 
   connect( fontList, SIGNAL( activated(int) ), this, SLOT( fontChanged(int) ));
   connect( configMenu, SIGNAL( activated(int) ), this, SLOT( configMenuSelected(int) ));
@@ -310,7 +310,7 @@ void Konsole::init(const char* _pgm, QStrList & _args)
 
   if( listHidden) 
       secondToolBar->hide();
-  configMenu->insertItem( "Edit Command List");
+  configMenu->insertItem(tr("Edit Command List"));
 
   cfg.setGroup("Commands");
   commonCombo->setInsertionPolicy(QComboBox::AtCurrent);
@@ -343,6 +343,14 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   if (currentSize != size())
      defaultSize = size();
 
+  if(cfg.readEntry("EditEnabled","FALSE")=="TRUE") {
+      configMenu->setItemChecked(-20,TRUE);
+      commonCombo->setEditable( TRUE );
+  } else {
+      configMenu->setItemChecked(-20,FALSE);
+      commonCombo->setEditable( FALSE );
+  }
+  configMenu->setItemEnabled(-20,!secondToolBar->isHidden());
 }
 
 void Konsole::show()
@@ -646,14 +654,18 @@ void Konsole::colorMenuSelected(int iD)
             colorMenu->setItemChecked(-11,TRUE);
         }
         if(iD==-12) {// Blue,  Magenta
-            foreground.setRgb(0x18,0xB2,0xB2);
-            background.setRgb(0x18,0x18,0xB2);
+//            foreground.setRgb(0x18,0xB2,0xB2);
+//            background.setRgb(0x18,0x18,0xB2);
+	    foreground.setRgb(0x18,0x18,0xB2);
+            background.setRgb(0xB2,0x00,0xB2);
             cfg.writeEntry("Schema","12");
             colorMenu->setItemChecked(-12,TRUE);
         }
         if(iD==-13) {// Magenta, Blue
-            foreground.setRgb(0x18,0x18,0xB2);
-            background.setRgb(0x18,0xB2,0xB2);
+//            foreground.setRgb(0x18,0x18,0xB2);
+//            background.setRgb(0x18,0xB2,0xB2);
+            foreground.setRgb(0xB2,0x00,0xB2);
+            background.setRgb(0x18,0x18,0xB2);
             cfg.writeEntry("Schema","13");
             colorMenu->setItemChecked(-13,TRUE);
         }
@@ -703,35 +715,27 @@ void Konsole::configMenuSelected(int iD)
     if( iD  == -2) {
         if(!secondToolBar->isHidden()) {
             secondToolBar->hide();
-            configMenu->changeItem( iD,"Show Command List");
+            configMenu->changeItem( iD,tr("Show Command List"));
             cfg.writeEntry("Hidden","TRUE");
             configMenu->setItemEnabled(-20 ,FALSE);
         } else {
             secondToolBar->show();
-            configMenu->changeItem( iD,"Hide Command List");
+            configMenu->changeItem( iD,tr("Hide Command List"));
             cfg.writeEntry("Hidden","FALSE");
             configMenu->setItemEnabled(-20 ,TRUE);
-
-            if(cfg.readEntry("EditEnabled","FALSE")=="TRUE") {
-                configMenu->setItemChecked(-16,TRUE);
-                commonCombo->setEditable( TRUE );
-            } else {
-		configMenu->setItemChecked(-20,TRUE);
-                commonCombo->setEditable( FALSE );
-            }
         }
     }
     if( iD  == -3) {
         cfg.setGroup("Tabs");
         QString tmp=cfg.readEntry("Position","Top");
 
-        if(tmp=="Top") {
+        if(tmp=="Top") { // No tr
             tab->setTabPosition(QTabWidget::Bottom);
-            configMenu->changeItem( iD,"Tabs on Top");
+            configMenu->changeItem( iD,tr("Tabs on Top"));
             cfg.writeEntry("Position","Bottom");
         } else {
             tab->setTabPosition(QTabWidget::Top);
-            configMenu->changeItem( iD,"Tabs on Bottom");
+            configMenu->changeItem( iD,tr("Tabs on Bottom"));
             cfg.writeEntry("Position","Top");
         }
     }

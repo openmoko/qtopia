@@ -38,7 +38,9 @@ public:
     static int secsTo( const QDateTime &from, const QDateTime &to );
 
     static QCString toISO8601( const QDate & );
+    static QCString toISO8601( const QDate &, bool asUTC );
     static QCString toISO8601( const QDateTime & );
+    static QCString toISO8601( const QDateTime & , bool asUTC);
     static QDateTime fromISO8601( const QCString & );
 };
 

@@ -1,154 +1,214 @@
 <!DOCTYPE TS><TS>
 <context>
+    <name>Handwriting</name>
+    <message>
+        <source>[Esc]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Tab]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[BackSpace]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Return]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Uppercase]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Caps Lock]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Shortcut]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Punctuation]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Symbol]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[Extended]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Handwriting</source>
+        <translation type="unfinished">手書き</translation>
+    </message>
+    <message>
+        <source>Unnamed</source>
+        <comment>Character set name</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>HandwritingHelp</name>
     <message>
         <source>Handwriting Help</source>
-        <translation type="unfinished"></translation>
+        <translation>手書きヘルプ</translation>
     </message>
     <message>
         <source>&lt;ul&gt;&lt;li&gt;When you start to use the handwriting recogniser write slowly, accurately and firmly.&lt;li&gt;Use the guide lines when drawing your characters.&lt;li&gt;When drawing a character with multiple strokes, each successive stroke must be drawn before the grayed strokes are erased.&lt;li&gt;Practice your handwriting using the handwriting trainer.&lt;li&gt;When adding your own character templates make sure they are sufficiently different from other characters&apos; templates.&lt;/ul&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;ul&gt;&lt;li&gt;手書き認識を使い始める際は、ゆっくりと正確にしっかりと書いてください。&lt;li&gt;文字を書く場合はガイドラインを使用してください。&lt;li&gt;画数が複数の文字を書く場合には、グレーになっている画が消える前に、それぞれの画を書いてください。&lt;li&gt;手書きトレーナーを使って手書きの使い方を練習してください。&lt;li&gt;独自の文字テンプレートを新に追加する場合は、既存の他の文字テンプレートと十分に違いがあるか確認してください。&lt;/ul&gt;</translation>
     </message>
     <message>
         <source>Tips</source>
-        <translation type="unfinished"></translation>
+        <translation>ヒント</translation>
     </message>
     <message>
         <source>Trainer</source>
-        <translation type="unfinished"></translation>
+        <translation>トレーナー</translation>
     </message>
 </context>
 <context>
     <name>HandwritingTrainer</name>
     <message>
         <source>Select a reference character from the list.  Practice writing in the area on the right.</source>
-        <translation type="unfinished"></translation>
+        <translation>一覧から参照文字を選択する。右の区域で書く練習をします。。</translation>
     </message>
     <message>
         <source>No match</source>
-        <translation type="unfinished"></translation>
+        <translation>合致なし</translation>
     </message>
     <message>
         <source>Matched: </source>
-        <translation type="unfinished"></translation>
+        <translation>合致:</translation>
     </message>
     <message>
         <source>Similar to: </source>
-        <translation type="unfinished"></translation>
+        <translation>類似:</translation>
     </message>
     <message>
         <source>%1%</source>
-        <translation type="unfinished"></translation>
+        <translation>%1%</translation>
     </message>
 </context>
 <context>
     <name>InputMethods</name>
     <message>
         <source>Handwriting</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">手書き</translation>
     </message>
 </context>
 <context>
     <name>QIMPenEdit</name>
     <message>
         <source>New...</source>
-        <translation type="unfinished"></translation>
+        <translation>新規...</translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>追加</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>削除</translation>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>デフォルト</translation>
     </message>
     <message>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>クリア</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取り消し</translation>
     </message>
 </context>
 <context>
     <name>QIMPenInput</name>
     <message>
         <source>Shortcut</source>
-        <translation type="unfinished"></translation>
+        <translation>ショートカット</translation>
     </message>
 </context>
 <context>
     <name>QIMPenInputCharDlg</name>
     <message>
         <source>Enter new character</source>
-        <translation type="unfinished"></translation>
+        <translation>新規文字を入力</translation>
     </message>
     <message>
         <source>Character:</source>
-        <translation type="unfinished"></translation>
+        <translation>文字:</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished">OK</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished">取り消し</translation>
     </message>
 </context>
 <context>
     <name>QIMPenPrefBase</name>
     <message>
         <source>Multi-stroke character timeout:</source>
-        <translation type="unfinished"></translation>
+        <translation>複数画の文字時間切れ：</translation>
     </message>
     <message>
         <source>ms</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ms [unknown, need explanation]</translation>
     </message>
     <message>
         <source>Input areas displayed</source>
-        <translation type="unfinished"></translation>
+        <translation>入力領域が表示されました</translation>
     </message>
     <message>
         <source>Upper and lower case areas</source>
-        <translation type="unfinished"></translation>
+        <translation>大文字領域と小文字領域</translation>
     </message>
     <message>
         <source>Lower case (toggle Upper case)</source>
-        <translation type="unfinished"></translation>
+        <translation>小文字(大文字と切り替え)</translation>
     </message>
     <message>
         <source>Pen Input</source>
-        <translation type="unfinished"></translation>
+        <translation>ペン入力</translation>
     </message>
 </context>
 <context>
     <name>QIMPenSetup</name>
     <message>
         <source>Setup Handwriting Input</source>
-        <translation type="unfinished"></translation>
+        <translation>手書き入力の設定</translation>
     </message>
     <message>
         <source>Character Profile:</source>
-        <translation type="unfinished"></translation>
+        <translation>文字のプロファイル：</translation>
     </message>
     <message>
         <source>Preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>環境設定</translation>
     </message>
     <message>
         <source>Customize</source>
-        <translation type="unfinished"></translation>
+        <translation>カスタマイズ</translation>
     </message>
     <message>
         <source>%1 ms</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 ms [unkown, need explanation]</translation>
     </message>
     <message>
         <source>Out of space</source>
-        <translation type="unfinished"></translation>
+        <translation>空き容量がありません</translation>
     </message>
     <message>
         <source>Unable to save information.
@@ -156,7 +216,11 @@ Free up some space
 and try again.
 
 Quit anyway?</source>
-        <translation type="unfinished"></translation>
+        <translation>情報を保存できません。
+空き容量を確保して
+やり直してください。
+
+このまま中止しますか？</translation>
     </message>
 </context>
 </TS>

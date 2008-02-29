@@ -165,6 +165,11 @@ DatebookPlugin::~DatebookPlugin()
     delete d;
 }
 
+QString DatebookPlugin::name() const
+{
+    return tr("Calendar");
+}
+
 QPixmap DatebookPlugin::icon() const
 {
     return Resource::loadPixmap("DateBook");
@@ -187,9 +192,9 @@ QString DatebookPlugin::html(uint charWidth, uint /* lineHeight */) const
     }
 
     if ( d->days == 1 ) {
-	status += tr(" today");
+	status = tr("%1 today","eg. You have 1 event").arg(status);
     } else {
-	status += tr(" over the next %1 days").arg( d->days);
+	status = tr("%1 over the next %2 days","eg. You have 5 events").arg(status).arg( d->days);
     }
 
     QString str;
@@ -202,20 +207,41 @@ QString DatebookPlugin::html(uint charWidth, uint /* lineHeight */) const
 	    ShortDateEvent t = d->events[i];
 
 	    QString when;
+	    QString startTime = TimeString::localHM(t.start.time());
+	    QString endTime = TimeString::localHM(t.end.time());
+	    QDate today = QDate::currentDate();
+	    QDate tomorrow = today.addDays(1);
+
 	    if ( t.start.date() == QDate::currentDate() ) {
 		if (t.allday) {
 		    when = tr("All day");
 		} else {
-		    when = tr("Starting ") + TimeString::timeString(t.start.time());
+		    // use different strings to keep things translatable
+		    if ( t.end.date() == today )
+			when = tr("%1 to %2").arg(startTime).arg(endTime);
+		    else if ( t.end.date() == tomorrow )
+			when = tr("%1 to tomorrow, %2").arg(startTime).arg(endTime);
+		    else {
+			// within the next week, use the day name
+			if (t.end.date() < today.addDays(6))
+			    when = tr("%1 to %2, %3","eg 12pm to mon, 1pm").arg(startTime).arg(t.end.date().dayName(t.end.date().dayOfWeek())).arg(endTime);
+			else {
+			    if (today.year() != t.end.date().year())
+				when = tr("%1 to %2 %3 %4, %5","eg 12pm to 1 feb 2015, 1pm").arg(startTime).arg(t.end.date().day()).arg(t.end.date().monthName(t.end.date().month())).arg(t.end.date().year()).arg(endTime);
+			    else
+				when = tr("%1 to %2 %3, %4","eg 12pm to 1 feb, 1pm").arg(startTime).arg(t.end.date().day()).arg(t.end.date().monthName(t.end.date().month())).arg(endTime);
+			}
+		    }
 		}
 	    } else if (t.repeating) {
-		when = TimeString::longDateString(t.start.date());
+		when = TimeString::localYMD(t.start.date());
 	    } else if ( t.end.date() == QDate::currentDate() ) {
-		when = tr("Ending ") + TimeString::timeString( t.end.time() );
+		when = tr("Ending %1").arg(endTime);
+	    // this case doesnt seem be included
 	    } else if ( t.start.date() > QDate::currentDate() ) {
-		when = TimeString::longDateString( t.start.date() );
+		when = TimeString::localYMD( t.start.date() );
 	    } else {	// Date within bounds
-		when = tr("Finishes ") + TimeString::longDateString( t.end.date() );
+		when = tr("Finishes %1","time").arg(TimeString::localYMD( t.end.date() ));
 	    }
 
 	    QString desc = t.description;

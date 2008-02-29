@@ -67,6 +67,18 @@ DateBookAccess::~DateBookAccess() {
 }
 
 /*!
+  If there exists an event with the uid \a u, return that event.
+  Returns a null event if otherwise.
+
+  If \a ok is non-null, *ok is set to TRUE if the event is
+  found, and FALSE if the event is not found.
+*/
+PimEvent DateBookAccess::eventForId(const QUuid &u, bool *ok) const
+{
+    return m_AccessPrivate->eventForId(u, ok);
+}
+
+/*!
   If supported will update \a event in the pim data.
 
   Updating events requires the Events service to be available.
@@ -122,7 +134,7 @@ void DateBookAccess::addEvent(const PimEvent& ev)
 bool DateBookAccess::editSupported() const
 {
 #ifdef Q_WS_QWS
-    return Service::list().contains("Events");
+    return Service::list().contains("Events"); // No tr
 #else
     return FALSE;
 #endif

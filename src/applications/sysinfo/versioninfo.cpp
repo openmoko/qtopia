@@ -56,7 +56,7 @@ VersionInfo::VersionInfo( QWidget *parent, const char *name, WFlags f )
 #ifdef QPE_VENDOR
     QString builder = QPE_VENDOR;
 #else
-    QString builder = "Unknown";
+    QString builder = "Trolltech"; // No tr
 #endif    
     palmtopVersionString += tr( "Compiled by: " ) + builder + "<p>";
     palmtopVersionString += tr( "Built on: " ) + __DATE__;

@@ -176,7 +176,7 @@ QDateTime TimeConversion::fromISO8601( const QCString &s )
 
     int tzoff = 0;
     bool inLocalTime = FALSE;
-    if ( timestr.find( 'z' ) == (int)timestr.length() - 1 )
+    if ( timestr.find( 'z', 0, TRUE ) == (int)timestr.length() - 1 )
 	// UTC
 	timestr = timestr.left( timestr.length() -1 );
     else {

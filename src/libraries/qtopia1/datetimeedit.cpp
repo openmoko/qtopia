@@ -20,6 +20,8 @@
 
 #include "datetimeedit.h"
 #include <qvalidator.h>
+#include <qapplication.h>
+#include <qpopupmenu.h>
 
 class TimeValidator : public QValidator
 {
@@ -43,7 +45,7 @@ public:
 	int count = 0;
 	int acc = 0;
 	while (i < (int)working.length()) {
-	    if (working[i].isSpace() && (count == 0 || count == 2)) {
+	    if (working[i].isSpace()) {
 		i++;
 		continue;
 	    }
@@ -122,7 +124,6 @@ public:
 QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
     : QSpinBox(parent, name)
 {
-    ampm = TRUE;
     setWrapping(TRUE);
 
     setMinValue(0);
@@ -135,12 +136,13 @@ QPETimeEdit::QPETimeEdit( QWidget *parent, const char *name)
     tv = new TimeValidator(this);
 
     setValidator(tv);
+
+    TimeString::connectChange(this,SLOT(clockChanged()) );
 }
 
 QPETimeEdit::QPETimeEdit( const QTime &dt, QWidget *parent,
 	const char *name ) : QSpinBox(parent, name)
 {
-    ampm = TRUE;
     setWrapping(TRUE);
 
     setMinValue(0);
@@ -157,6 +159,11 @@ QPETimeEdit::QPETimeEdit( const QTime &dt, QWidget *parent,
     setValidator(tv);
 }
 
+void QPETimeEdit::clockChanged()
+{
+    updateDisplay();
+}
+
 QPETimeEdit::~QPETimeEdit()
 {
 }
@@ -169,7 +176,7 @@ QString QPETimeEdit::mapValueToText(int v)
 
 
     QTime t(v / 60, v % 60);
-    return TimeString::timeString(t, ampm);
+    return TimeString::localHM(t);
 }
 
 int QPETimeEdit::mapTextToValue(bool *ok)
@@ -215,14 +222,6 @@ QTime QPETimeEdit::time( ) const
     return tm;
 }
 
-void QPETimeEdit::setClock(bool b)
-{
-    if (ampm == b)
-	return;
-    ampm = b;
-    updateDisplay();
-}
-
 void QPETimeEdit::stepUp()
 {
     int tmp = value();
@@ -245,45 +244,153 @@ void QPETimeEdit::stepDown()
     setValue(tmp);
 }
 
-//=======================================
 
-QPEDateEdit::QPEDateEdit( QWidget *parent, const char *name)
-    : QPEDateButton(parent, name)
+
+/*=====================================*/
+
+
+QPEDateEdit::QPEDateEdit( QWidget *parent, const char * name, bool longDate,
+			      bool allowNullDate )
+    :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate)
 {
-    connect(this, SIGNAL(dateSelected(const QDate &)),
-	    this, SLOT(selectDate(const QDate &)));
+    df = TimeString::currentDateFormat();
+    noneButton = 0;
+    init();
+    setLongFormat(longDate);
 }
 
-QPEDateEdit::QPEDateEdit( const QDate &dt, bool longDate, QWidget *parent,
-	const char *name)
-    : QPEDateButton( parent, name, longDate )
+QPEDateEdit::QPEDateEdit( const QDate &dt, QWidget *parent, const char * name, bool longDate,
+			      bool allowNullDate )
+    :QPushButton( parent, name ), longFmt(longDate), mAllowNullButton(allowNullDate)
 {
-    setDate(dt);
-    connect(this, SIGNAL(dateSelected(int, int, int)),
-	    this, SLOT(selectDate(int,int,int)));
+    currDate = dt;
+    noneButton = 0;
+    init();
+    setLongFormat(longDate);
 }
 
-QPEDateEdit::~QPEDateEdit(){}
-
-void QPEDateEdit::selectDate(const QDate &dt)
+void QPEDateEdit::clockChanged()
 {
-    emit valueChanged(dt);
+    df = TimeString::currentDateFormat();
+    updateButtonText();
 }
 
-void QPEDateEdit::setDate( const QDate &dt )
+void QPEDateEdit::setLongFormat( bool l )
 {
-    if (dt == date())
-	return;
-    QPEDateButton::setDate(dt.year(), dt.month(), dt.day());
+    longFmt = l;
+    updateButtonText();
 }
 
-//========================================================
+void QPEDateEdit::init()
+{
+    QPopupMenu *popup = new QPopupMenu( this );
+    monthView = new QPEDatePicker( popup, 0, TRUE);
+
+    // XXX WARNING DO NOT CHANGE THIS UNLESS....
+    // you test VERY carefully.  There has been
+    // three attempts to allow this to be changed after
+    // init, and all of them resulted in a host of wierd bugs.
+    // Resulting in having to roll back the change.
+    // Watch espcially for:
+    //    Focus bugs, whereby the keys don't do what they should
+    //                Until TAB is pressed, or you can't get to the
+    //                None Button.
+    //    Layout bugs, Make sure the button actually hides/shows,
+    //		      Both on the first show and later shows.
+    //	  Key bugs.  All these should work,
+    //		    Left,Right,Up,Down,Space.
+    // XXX
+    if (mAllowNullButton)  // set to 1 for show, 
+	noneButton = new QPushButton(tr("None"), popup);
+    // XXX WARNING See above.
+
+    //
+    // Geometry information for the QPEDatePicker widget is
+    // setup by the QPopupMenu (parent).  However at 176x220,
+    // the widget hangs off the side of the screen.  Force the
+    // widget to be bounded by the desktop width.
+    //
+    monthView->setMaximumWidth(qApp->desktop()->width());
+
+    popup->insertItem( monthView );
+
+    if (mAllowNullButton) {
+	popup->insertItem( noneButton );
+	connect(noneButton, SIGNAL( clicked() ), this, SLOT(setNull()));
+    }
+
+    connect( monthView, SIGNAL( dateClicked( const QDate &) ),
+	    this, SLOT( setDate( const QDate &) ) );
+    connect( monthView, SIGNAL( dateClicked( const QDate &) ),
+	    this, SIGNAL( valueChanged( const QDate &) ) );
+    TimeString::connectChange(this,SLOT(clockChanged()));
+    setPopup( popup );
+    popup->setFocusPolicy(NoFocus);
+    setDate( QDate::currentDate() );
+    setSizePolicy( QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed) );
+}
+
+bool QPEDateEdit::allowNullDate() const
+{
+    return mAllowNullButton;
+}
+
+void QPEDateEdit::setWeekStartsMonday( bool b )
+{
+    weekStartsMonday = b;
+    monthView->setWeekStartsMonday( weekStartsMonday );
+}
+
+void QPEDateEdit::setNull()
+{
+    popup()->close();
+    setDate( QDate() );
+    emit valueChanged( QDate() );
+}
+
+void QPEDateEdit::updateButtonText()
+{
+    if ( currDate.isValid() ) {
+#if defined(_WS_QWS_)
+	setText( longFmt ? TimeString::longDateString(currDate,df) : TimeString::dateString(currDate,df) );
+#else
+	//setText( longFmt ? currDate.toString( "ddd MMMM d yy" ) : currDate.toString("dd/MM/yyyy"));
+	setText( longFmt ? currDate.toString( "ddd MMMM d yy" ) : currDate.toString(Qt::LocalDate));
+#endif
+	monthView->setDate( currDate.year(), currDate.month(), currDate.day() );
+    }
+    else {
+	setText( tr("None") );
+    }
+}
+
+QDate QPEDateEdit::date() const
+{
+    return currDate;
+}
+
+void QPEDateEdit::setDate( const QDate &d )
+{
+    if ( d != currDate ) {
+	currDate = d;
+	updateButtonText();
+    }
+}
+
+void QPEDateEdit::setDateFormat( DateFormat f )
+{
+    df = f;
+    updateButtonText();
+}
+
+/*=====================================*/
+
 
 QPEDateTimeEdit::QPEDateTimeEdit( QWidget *parent, const char *name)
     : QHBox(parent, name)
 {
-    de = new QPEDateEdit(this, "date");
-    te = new QPETimeEdit(this, "time");
+    de = new QPEDateEdit(this, "date"); // No tr
+    te = new QPETimeEdit(this, "time"); // No tr
     connect(de, SIGNAL(valueChanged(const QDate &)),
 	    this, SLOT(setDate( const QDate &)));
     connect(te, SIGNAL(valueChanged(const QTime &)),
@@ -293,8 +400,8 @@ QPEDateTimeEdit::QPEDateTimeEdit( QWidget *parent, const char *name)
 QPEDateTimeEdit::QPEDateTimeEdit( const QDateTime &dt, QWidget *parent,
 	const char *name ) : QHBox(parent, name)
 {
-    de = new QPEDateEdit(dt.date(), FALSE, this, "date");
-    te = new QPETimeEdit(dt.time(), this, "time");
+    de = new QPEDateEdit(dt.date(), this, "date"); // No tr
+    te = new QPETimeEdit(dt.time(), this, "time"); // No tr
     connect(de, SIGNAL(valueChanged(const QDate &)),
 	    this, SLOT(setDate( const QDate &)));
     connect(te, SIGNAL(valueChanged(const QTime &)),
@@ -355,9 +462,4 @@ bool QPEDateTimeEdit::dateIsEnabled() const
 bool QPEDateTimeEdit::timeIsEnabled() const
 {
     return te->isEnabled();
-}
-
-void QPEDateTimeEdit::setClock(bool b)
-{
-    te->setClock(b);
 }

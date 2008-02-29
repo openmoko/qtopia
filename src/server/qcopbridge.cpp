@@ -88,9 +88,8 @@ void QCopBridge::newConnection( int socket )
     QCopBridgePI *pi = new QCopBridgePI( socket, this );
     openConnections.append( pi );
     connect ( pi, SIGNAL( connectionClosed( QCopBridgePI *) ), this, SLOT( connectionClosed( QCopBridgePI *) ) );
-#ifndef QT_NO_COP
-    QCopEnvelope( "QPE/System", "setScreenSaverMode(int)" ) << QPEApplication::DisableSuspend;
-#endif
+
+    QPEApplication::setTempScreenSaverMode( QPEApplication::DisableSuspend );
 
     if ( sendSync ) {
 	pi ->startSync();
@@ -102,9 +101,7 @@ void QCopBridge::connectionClosed( QCopBridgePI *pi )
 {
     openConnections.remove( pi );
     if ( openConnections.count() == 0 ) {
-#ifndef QT_NO_COP
-	QCopEnvelope( "QPE/System", "setScreenSaverMode(int)" ) << QPEApplication::Enable;
-#endif
+	QPEApplication::setTempScreenSaverMode( QPEApplication::Enable );
     }
 }
 
@@ -253,7 +250,7 @@ void QCopBridgePI::connectionClosed()
 
 void QCopBridgePI::sendDesktopMessage( const QString &msg )
 {
-    QString str = "CALL QPE/Desktop " + msg;
+    QString str = "CALL QPE/Desktop " + msg; // No tr
     send ( str );
 }
 

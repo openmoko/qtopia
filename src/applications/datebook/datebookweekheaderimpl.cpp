@@ -18,6 +18,7 @@
 **
 **********************************************************************/
 #include "datebookweekheaderimpl.h"
+#include <qtopia/timestring.h>
 #include <qlabel.h>
 #include <qspinbox.h>
 #include <qdatetime.h>
@@ -33,6 +34,7 @@ WeekViewHeader::WeekViewHeader( bool startOnMonday, QWidget* parent,
 {
     setBackgroundMode( PaletteButton );
     labelDate->setBackgroundMode( PaletteButton );
+    TimeString::connectChange( this, SLOT(timeStringChanged()) );
 }
 
 /*
@@ -41,6 +43,11 @@ WeekViewHeader::WeekViewHeader( bool startOnMonday, QWidget* parent,
 WeekViewHeader::~WeekViewHeader()
 {
     // no need to delete child widgets, Qt does it all for us
+}
+
+void  WeekViewHeader::keyPressEvent(QKeyEvent *e)
+{
+    e->ignore();
 }
 
 /*
@@ -88,17 +95,23 @@ void WeekViewHeader::setDate( int y, int w )
     spinWeek->setValue( w );
 
     QDate d = dateFromWeek( week, year, bStartOnMonday );
-
-    QString s = QString::number( d.day() ) + ". " + d.monthName( d.month() )
-		+ "-";
     QDate dend = d.addDays( 6 );
-    s += QString::number( dend.day() ) + ". " + dend.monthName( dend.month() );
+
+    QString s = tr("%1-%2","2 dates")
+	.arg(TimeString::localMD(d))
+	.arg(TimeString::localMD(dend));
+
     labelDate->setText( s );
 }
 
 void WeekViewHeader::setStartOfWeek( bool onMonday )
 {
     bStartOnMonday = onMonday;
+    setDate( year, week );
+}
+
+void WeekViewHeader::timeStringChanged()
+{
     setDate( year, week );
 }
 

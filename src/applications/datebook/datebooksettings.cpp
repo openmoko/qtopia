@@ -74,7 +74,7 @@ int DateBookSettings::startTime() const
 void DateBookSettings::setAlarmPreset( bool bAlarm, int presetTime )
 {
     chkAlarmPreset->setChecked( bAlarm );
-    if ( presetTime >=5 )
+    if ( presetTime >=0 )
 	spinPreset->setValue( presetTime );
 }
 

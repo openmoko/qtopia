@@ -2,12 +2,12 @@
 Actions = raiseToday();newEvent();newEvent(QDataTime,QDataTime,QString,QString);addEvent(PimEvent);removeEvent(PimEvent);updateEvent(PimEvent);showEvent(Quuid);showEvent(QUuid,QDate)
 Icon = DateBook
 Name = Calendar
-Name[de] = Termin kalender
-Name[hu] = Naptár
-Name[no] = Avtalebok
+Name[ja] = ???
 [newEvent()]
 Icon = DateBook
 Name = New event
+Name[ja] = ???
 [raiseToday()]
 Icon = today
 Name = Today's calendar
+Name[ja] = ???

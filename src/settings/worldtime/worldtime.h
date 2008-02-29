@@ -39,21 +39,21 @@ public:
 
 public slots:
     void beginNewTz();
-    void slotNewTz( const QString& strNewCountry, const QString& strNewCity );
-    void changeClock( bool newClock );
+    void slotNewTz( const QCString& zoneID);
 
 protected:
     void timerEvent( QTimerEvent* );
     void mousePressEvent( QMouseEvent* event );
 
+private slots:
+    void showTime();
+
 private:
-    void showTime( void );  // get and show the time for various places...
     void readInTimes( void );   // a method to get information from the config
+    void writeTimezoneChanges();
     QString strRealTz;  // save the TZ var
     QString nameRealTz; // and what it is called
-    QString strHome;    // the home variable...
     bool bAdded;        // a flag to indicate things have been added...
-    bool bWhichClock;
     int timerId;
     
     // a spot to hold the time zone for each city

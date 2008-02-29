@@ -47,6 +47,11 @@ public:
     bool recoverMemory();
 
     StartMenu *startMenu() const { return sm; }
+
+signals:
+    void forceSuspend();
+    void tabSelected(const QString&);
+
 public slots:
     void startWait();
     void stopWait(const QString&);

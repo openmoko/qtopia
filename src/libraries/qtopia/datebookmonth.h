@@ -29,7 +29,6 @@
 #include <qvaluelist.h>
 #include <qtable.h>
 #include <qpushbutton.h>
-
 #include "calendar.h"
 #include "timestring.h"
 

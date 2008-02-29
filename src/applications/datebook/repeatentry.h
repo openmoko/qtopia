@@ -56,6 +56,7 @@ private slots:
 private:
 
     void refreshLabels();
+    QString trOrdinal(int n) const;
 
     QButtonGroup *typeSelector;
     QSpinBox *freqSelector;
@@ -63,6 +64,7 @@ private:
     WeekGroup *weekGroup;
     QVButtonGroup *monthGroup;
 
+    QLabel *everyLabel;
     QLabel *typeLabel;
     RichLabel *descLabel;
 

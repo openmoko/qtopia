@@ -127,7 +127,7 @@ UIC	=	$(SYSCONF_UIC)
 
 ####### Target
 
-DESTDIR = $(QPEDIR)/lib$(PROJMAK)/
+DESTDIR = $(QPEDIR)/lib/
 VER_MAJ = 1
 VER_MIN = 5
 VER_PATCH = 2
@@ -194,6 +194,7 @@ HEADERS =	calendar.h \
 		qcopenvelope_qws.h \
 		power.h \
 		ir.h \
+		pluginloader_p.h \
 		qmemoryfile_p.h
 SOURCES =	calendar.cpp \
 		global.cpp \
@@ -251,6 +252,7 @@ SOURCES =	calendar.cpp \
 		qcopenvelope_qws.cpp \
 		power.cpp \
 		ir.cpp \
+		pluginloader_p.cpp \
 		qmemoryfile.cpp \
 		qmemoryfile_unix.cpp
 OBJECTS =	$(OBJECTS_DIR)/calendar.o \
@@ -309,6 +311,7 @@ OBJECTS =	$(OBJECTS_DIR)/calendar.o \
 		$(OBJECTS_DIR)/qcopenvelope_qws.o \
 		$(OBJECTS_DIR)/power.o \
 		$(OBJECTS_DIR)/ir.o \
+		$(OBJECTS_DIR)/pluginloader_p.o \
 		$(OBJECTS_DIR)/qmemoryfile.o \
 		$(OBJECTS_DIR)/qmemoryfile_unix.o \
 		$(OBJECTS_DIR)/passwordbase_p.o \
@@ -345,6 +348,7 @@ SRCMOC	=	$(MOC_DIR)/moc_menubutton.cpp \
 		$(MOC_DIR)/alarmserver.moc \
 		$(MOC_DIR)/password.moc \
 		$(MOC_DIR)/timestring.moc \
+		$(MOC_DIR)/categoryselect.moc \
 		$(MOC_DIR)/process_unix.moc \
 		$(MOC_DIR)/network.moc
 OBJMOC	=	$(OBJECTS_DIR)/moc_menubutton.o \
@@ -438,8 +442,7 @@ $(OBJECTS_DIR)/calendar.o: calendar.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/calendar.o calendar.cpp
 
 $(OBJECTS_DIR)/global.o: global.cpp \
-		$(MOC_DIR)/global.moc \
-		process.h
+		$(MOC_DIR)/global.moc
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/global.o global.cpp
 
 $(OBJECTS_DIR)/custom.o: custom.cpp \
@@ -518,7 +521,6 @@ $(OBJECTS_DIR)/resource.o: resource.cpp \
 
 $(OBJECTS_DIR)/qpeapplication.o: qpeapplication.cpp \
 		custom.h \
-		qlibrary.h \
 		qcopenvelope_qws.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
@@ -537,6 +539,8 @@ $(OBJECTS_DIR)/qpeapplication.o: qpeapplication.cpp \
 		resource.h \
 		qpestyle.h \
 		alarmserver.h \
+		pluginloader_p.h \
+		../qtopia1/pluginloader.h \
 		../qtopia1/qpe_show_dialog.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpeapplication.o qpeapplication.cpp
 
@@ -671,6 +675,7 @@ $(OBJECTS_DIR)/categoryedit_p.o: categoryedit_p.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryedit_p.o categoryedit_p.cpp
 
 $(OBJECTS_DIR)/categoryselect.o: categoryselect.cpp \
+		$(MOC_DIR)/categoryselect.moc \
 		categorywidget.h \
 		categoryselect.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryselect.o categoryselect.cpp
@@ -724,6 +729,8 @@ $(OBJECTS_DIR)/fontmanager.o: fontmanager.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fontmanager.o fontmanager.cpp
 
 $(OBJECTS_DIR)/fontdatabase.o: fontdatabase.cpp \
+		pluginloader_p.h \
+		../qtopia1/pluginloader.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
 		windowdecorationinterface.h \
@@ -738,11 +745,15 @@ $(OBJECTS_DIR)/qpedecoration_qws.o: qpedecoration_qws.cpp \
 		qpeapplication.h \
 		resource.h \
 		global.h \
-		qlibrary.h
+		qlibrary.h \
+		pluginloader_p.h \
+		../qtopia1/pluginloader.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpedecoration_qws.o qpedecoration_qws.cpp
 
 $(OBJECTS_DIR)/network.o: network.cpp \
-		$(MOC_DIR)/network.moc
+		$(MOC_DIR)/network.moc \
+		pluginloader_p.h \
+		../qtopia1/pluginloader.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/network.o network.cpp
 
 $(OBJECTS_DIR)/networkinterface.o: networkinterface.cpp \
@@ -766,6 +777,12 @@ $(OBJECTS_DIR)/ir.o: ir.cpp \
 		qcopenvelope_qws.h \
 		applnk.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ir.o ir.cpp
+
+$(OBJECTS_DIR)/pluginloader_p.o: pluginloader_p.cpp \
+		pluginloader_p.h \
+		../qtopia1/pluginloader.h \
+		../qtopia1/pluginloader.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pluginloader_p.o pluginloader_p.cpp
 
 $(OBJECTS_DIR)/qmemoryfile.o: qmemoryfile.cpp \
 		qmemoryfile_p.h
@@ -957,6 +974,9 @@ $(MOC_DIR)/password.moc: password.cpp
 $(MOC_DIR)/timestring.moc: timestring.cpp
 	$(MOC) timestring.cpp -o $(MOC_DIR)/timestring.moc
 
+$(MOC_DIR)/categoryselect.moc: categoryselect.cpp
+	$(MOC) categoryselect.cpp -o $(MOC_DIR)/categoryselect.moc
+
 $(MOC_DIR)/process_unix.moc: process_unix.cpp
 	$(MOC) process_unix.cpp -o $(MOC_DIR)/process_unix.moc
 
@@ -972,14 +992,14 @@ $(MOC_DIR)/moc_categoryeditbase_p.cpp: categoryeditbase_p.h
 
 
 lupdate:
-	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qtopia.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <qtopia.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qtopia.pro
 	$(QPEDIR)/bin/qtopia-linstall qtopia.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages

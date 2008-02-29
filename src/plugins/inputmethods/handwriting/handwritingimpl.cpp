@@ -64,7 +64,7 @@ HandwritingImpl::~HandwritingImpl()
 QWidget *HandwritingImpl::inputMethod( QWidget *parent, Qt::WFlags f )
 {
     if ( !input )
-	input = new QIMPenInput( parent, "Handwriting", f );
+	input = new QIMPenInput( parent, "Handwriting", f ); // No tr
     return input;
 }
 
@@ -83,7 +83,7 @@ QPixmap *HandwritingImpl::icon()
 
 QString HandwritingImpl::name()
 {
-    return qApp->translate( "InputMethods", "Handwriting" );
+    return qApp->translate( "Handwriting", "Handwriting" );
 }
 
 void HandwritingImpl::onKeyPress( QObject *receiver, const char *slot )

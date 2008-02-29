@@ -30,11 +30,10 @@ class PeriodView : public QWidget
 {
     Q_OBJECT
 public:
-    PeriodView( DateBookTable *datedb, bool ct, bool stm, 
+    PeriodView( DateBookTable *datedb, bool stm, 
 	    QWidget *parent = 0, const char *name = 0 );
 
     QDate currentDate() const { return cDate; }
-    bool isTwelveHour() const { return cType; }
     bool startsOnMonday() const { return bOnMonday; }
     int dayStarts() const { return sHour; }
 
@@ -43,7 +42,6 @@ public:
 
 public slots:
     virtual void selectDate(const QDate &);
-    virtual void setTwelveHour( bool );
     virtual void setStartOnMonday( bool );
     virtual void setDayStarts( int h );
 
@@ -58,7 +56,6 @@ signals:
 protected:
     DateBookTable *db;
     QDate cDate;
-    bool cType;
     bool bOnMonday;
     int sHour;
 };

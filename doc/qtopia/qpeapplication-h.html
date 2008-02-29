@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/qpeapplication.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp7953/qtopia/include/qtopia/qpeapplication.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -61,6 +61,7 @@ class QCopChannel;
 class QPEApplicationData;
 struct QWSEvent;
 struct QWSKeyEvent;
+class PluginLibraryManager;
 
 class QTOPIA_EXPORT QPEApplication : public QApplication
 {
@@ -90,14 +91,14 @@ public:
 	AlwaysOff,
 	AlwaysOn
     };
-    
+
     enum screenSaverHint {
 	Disable = 0,
 	DisableLightOff = 1,
 	DisableSuspend = 2,
 	Enable = 100
     };
-    
+
     static void setInputMethodHint( QWidget *, InputMethodHint );
     static InputMethodHint inputMethodHint( QWidget * );
 
@@ -105,6 +106,7 @@ public:
     void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
     static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
     static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
+    static void setTempScreenSaverMode(screenSaverHint);
 
     static void setKeepRunning();
     bool keepRunning() const;
@@ -125,12 +127,13 @@ signals:
     void flush();
     void reload();
     void linkChanged( const QString &amp;linkFile );
-    
+
 private slots:
     void systemMessage( const QCString &amp;msg, const QByteArray &amp;data );
     void pidMessage( const QCString &amp;msg, const QByteArray &amp;data );
     void removeSenderFromStylusDict();
     void hideOrQuit();
+    void pluginLibraryManager(PluginLibraryManager**);
 
 protected:
     bool qwsEventFilter( QWSEvent * );

@@ -143,7 +143,6 @@ QVector<QImage> Peg::specialPegs;
 
 void Peg::buildImages()
 {
-
     QImage pegs = Resource::loadImage("mindbreaker/pegs");
     int x = 0; 
     int y = 0;
@@ -352,7 +351,8 @@ MindBreakerBoard::MindBreakerBoard( QWidget *parent,
     connect(widthTimer, SIGNAL(timeout()), this, SLOT(doFixSize()) );
 
     setMaximumWidth( QMIN(qApp->desktop()->height(),qApp->desktop()->width()) );
-    readConfig(); // first read... to ensure initial labels and side look right.
+    //doFixSize(); // build images... needs to be done before reading config.
+    //readConfig(); // first read... to ensure initial labels and side look right.
 }
 
 void MindBreakerBoard::readConfig()
@@ -478,7 +478,7 @@ void MindBreakerBoard::doFixSize()
 
     setupBoardSize(s.width() - fw, s.height() - fw);
     canvas()->resize(s.width() - fw, s.height() - fw);
-    Peg::buildImages();
+    Peg::buildImages(); // must be done BEFORE any pegs are made
 
     QImage image = Resource::loadImage("mindbreaker/mindbreaker");
 
@@ -493,9 +493,6 @@ void MindBreakerBoard::doFixSize()
 
     titleImage = image.copy(x, y, title_width, title_height).
 		smoothScale( adjusted_title_width, adjusted_title_height);
-
-    Peg::buildImages(); // must be done BEFORE any pegs are made
-
     show();
 
     delete current_highlight;
@@ -765,9 +762,9 @@ void MindBreakerBoard::contentsMousePressEvent(QMouseEvent *e)
        got clicked */
     if (e->x() > adjusted_panel_width) {
         /* its a bin, but which bin */
-        if(e->y() > adjusted_board_height) 
-            return; // missed everything
         int bin = (e->y() + 2) / (adjusted_board_height / 6);
+	if (bin > 5)
+            return; // missed everything
 
         /* make new peg... set it moving */
         moving_pos = e->pos();

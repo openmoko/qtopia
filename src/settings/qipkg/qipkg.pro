@@ -2,10 +2,10 @@ TEMPLATE	= app
 CONFIG		+= qtopia warn_on release
 DESTDIR		= $(QPEDIR)/bin
 
-HEADERS		= packagemanager.h
-SOURCES		= packagemanager.cpp \
+HEADERS		= packagewizard.h
+SOURCES		= packagewizard.cpp \
 		  main.cpp
-INTERFACES	= packagemanagerbase.ui pkdesc.ui pkfind.ui pksettings.ui
+INTERFACES	= pkwizard.ui pkdesc.ui
 
 TARGET		= qipkg
 

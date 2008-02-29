@@ -152,7 +152,7 @@
 /*!
   \fn void PimTask::setStartedDate(const QDate &date)
 
-  Sets the tasks started date.
+  Sets the tasks to have started on \a date.
 
   \sa hasStartedDate(), startedDate()
 */
@@ -169,15 +169,9 @@
 /*!
   \fn void PimTask::setCompletedDate(const QDate &date)
 
-  Sets the tasks completed date.
+  Sets the tasks completed date to \a date.
 
   \sa isCompleted(), completedDate()
-*/
-
-/*!
-  \fn virtual int PimTask::endFieldMarker() const
-
-  \internal
 */
 
 /*!
@@ -206,6 +200,16 @@
   \value Normal
   \value Low
   \value VeryLow
+*/
+
+/*!
+  \enum PimTask::TaskFields
+  \internal
+*/
+
+/*!
+  \fn QMap<int,QString> PimTask::fields() const
+  \internal
 */
 
 /*!
@@ -245,7 +249,7 @@ PimTask::TaskStatus PimTask::status() const
 }
 
 /*!
-  Sets the \l TaskStatus of the task.
+  Sets the \l TaskStatus of the task to \a s.
 
   \sa status()
 */
@@ -277,17 +281,18 @@ uint PimTask::percentCompleted() const
 }
 
 /*!
-  Sets the tasks percent completed field.  Note that for values above 99 this
-  function will set the status to \l Completed.
+  Sets the tasks percent completed field to \a percent.
+  if \a percent is greater than 99 this function will also
+  set the status to Completed.
 
   \sa percentCompleted(), status()
 */
-void PimTask::setPercentCompleted( uint u )
+void PimTask::setPercentCompleted( uint percent )
 {
-    if ( u > 99 ) {
+    if ( percent > 99 ) {
 	setCompleted( TRUE );
     } else {
-	mPercentCompleted = u;
+	mPercentCompleted = percent;
     }
 }
 
@@ -343,11 +348,34 @@ static VObject *createVObject( const PimTask &t )
     VObject *task = safeAddProp( vcal, VCTodoProp );
 
     if ( t.hasDueDate() )
-	safeAddPropValue( task, VCDueProp, TimeConversion::toISO8601( t.dueDate() ) );
+	safeAddPropValue( task, VCDueProp, TimeConversion::toISO8601( t.dueDate(), FALSE ) );
     safeAddPropValue( task, VCDescriptionProp, t.description() );
-    if ( t.isCompleted() )
+    if ( t.isCompleted() ) {
+	// if we say its completed, then we have a completed date.
 	safeAddPropValue( task, VCStatusProp, "COMPLETED" );
+	safeAddPropValue( task, VCCompletedProp, 
+		TimeConversion::toISO8601( t.completedDate(), FALSE ) );
+    }
     safeAddPropValue( task, VCPriorityProp, QString::number( t.priority() ) );
+
+    // status *2 (enum && %)
+    // ^^ We don't match VCStatusProp and vCal doesn't support ::percent.
+
+    safeAddPropValue( task, "X-Qtopia-STATUS", QString::number( t.status() ));
+    safeAddPropValue( task, "X-Qtopia-PERCOMP", 
+	    QString::number( t.percentCompleted() ) );
+
+    if (t.hasStartedDate())
+    {
+	// ok, need to set this one too.
+	safeAddPropValue( task, "X-Qtopia-STARTED", 
+		TimeConversion::toISO8601( t.startedDate(), FALSE ) );
+    }
+
+    safeAddPropValue( task, VCAttachProp, t.notes());
+
+    // category missing XXX. 
+    // as list of ; separated strings, VCCategoriesProp.
 
     return vcal;
 }
@@ -390,22 +418,26 @@ static PimTask parseVObject( VObject *obj )
 	    if ( value == "COMPLETED" )
 		t.setCompleted( TRUE );
 	}
+	else if ( name == VCCompletedProp ) {
+	    t.setCompletedDate(
+		    TimeConversion::fromISO8601( QCString(value) ).date() );
+	}
 	else if ( name == VCPriorityProp ) {
 	    t.setPriority( (PimTask::PriorityValue) value.toInt() );
 	}
-#if 0
-	else {
-	    printf("Name: %s, value=%s\n", name.data(), vObjectStringZValue( o ) );
-	    VObjectIterator nit;
-	    initPropIterator( &nit, o );
-	    while( moreIteration( &nit ) ) {
-		VObject *o = nextVObject( &nit );
-		QCString name = vObjectName( o );
-		QString value = vObjectStringZValue( o );
-		printf(" subprop: %s = %s\n", name.data(), value.latin1() );
-	    }
+	else if (name == VCAttachProp ) { 
+	    t.setNotes(value);
 	}
-#endif
+	else if (name == "X-Qtopia-STATUS" ) { 
+	    t.setStatus( (PimTask::TaskStatus) value.toInt() );
+	}
+	else if (name == "X-Qtopia-PRECOMP" ) { 
+	    t.setPercentCompleted( value.toInt() );
+	}
+	else if (name == "X-Qtopia-STARTED" ) { 
+	    t.setStartedDate(
+		    TimeConversion::fromISO8601( QCString(value) ).date() );
+	}
     }
 
     return t;
@@ -623,11 +655,11 @@ PimTask::TaskStatus PimTask::xmlToStatus(const QString &s)
 {
     if ( s == "InProgress" )
 	return InProgress;
-    else if ( s == "Completed" )
+    else if ( s == "Completed" ) // No tr
 	return Completed;
-    else if ( s == "Waiting" )
+    else if ( s == "Waiting" ) // No tr
 	return Waiting;
-    else if ( s == "Deferred" )
+    else if ( s == "Deferred" ) // No tr
 	return Deferred;
     else
 	return NotStarted;
@@ -638,9 +670,9 @@ QString PimTask::statusToXml(TaskStatus status)
     switch( status ) {
 	default: return "NotStarted";
 	case InProgress: return "InProgress";
-    	case Completed: return "Completed";
-	case Waiting: return "Waiting";
-	case Deferred: return "Deferred";
+    	case Completed: return "Completed"; // No tr
+	case Waiting: return "Waiting"; // No tr
+	case Deferred: return "Deferred"; // No tr
     }
 }
 
@@ -688,7 +720,8 @@ QDataStream &operator<<( QDataStream &s, const PimTask &c )
 
 static const QtopiaPimMapEntry todolistentries[] = {
     { "HasDate", NULL, PimTask::HasDate, 0 },
-    { "Description", QT_TRANSLATE_NOOP("PimTask", "Description"), PimTask::Description, 50 },
+    { "Description", // No tr
+	    QT_TRANSLATE_NOOP("PimTask", "Description"), PimTask::Description, 50 },
     { "Priority", QT_TRANSLATE_NOOP("PimTask", "Priority"), PimTask::Priority, 0 },
     { "Completed", QT_TRANSLATE_NOOP("PimTask", "Completed"), PimTask::CompletedField, 0},
     { "PercentCompleted", QT_TRANSLATE_NOOP("PimTask", "Percent Completed"), PimTask::PercentCompleted, 0},
@@ -717,7 +750,7 @@ void PimTask::initMaps()
     delete uniquenessMapPtr;
     uniquenessMapPtr = new QMap<int, int>;
 
-    PimRecord::initMaps(todolistentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
+    PimRecord::initMaps("PimTask", todolistentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
 			*trFieldsMapPtr );
 }
 

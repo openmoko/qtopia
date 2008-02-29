@@ -2,18 +2,20 @@
 Actions = newTask();addTask(PimTask);removeTask(PimTask);updateTask(PimTask);showTask(QUuid)
 Icon = TodoList
 Name = Todo List
-Name[no]=Oppgaveliste
-Name[de]=Aufgabenliste
-Name[hu]=Feladatok
+Name[ja] = ???
 [newTask()]
 Icon = TodoList
 Name = New task in todo list
+Name[ja] = ???
 [addTask(PimTask)]
 Icon = TodoList
 Name = Add task to todo list
+Name[ja] = ???
 [removeTask(PimTask)]
 Icon = TodoList
 Name = Remove task from todo list
+Name[ja] = ???
 [updateTask(PimTask)]
 Icon = TodoList
 Name = Update task in todo list
+Name[ja] = ???

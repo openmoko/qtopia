@@ -10,27 +10,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Game</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Change Card Backs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Snap To Position</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;About</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -50,11 +30,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Settings</source>
+        <source>Turn Three Cards</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Turn Three Cards</source>
+        <source>&amp;Patience</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Freecell</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Play</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

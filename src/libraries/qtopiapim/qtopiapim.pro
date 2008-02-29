@@ -48,6 +48,7 @@ unixdesktop:LIBS += -lqd-qpe
 TARGET		    = qpepim
 qdesktop:TARGET	    = qd-qpepim
 DESTDIR		    = $(QPEDIR)/lib$(PROJMAK)
+win32:DLLDESTDIR = $(QPEDIR)/bin
 # This is set by configure$(QPEDIR).
 VERSION         = 1.6.0
 

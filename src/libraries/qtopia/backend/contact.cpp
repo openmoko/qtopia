@@ -822,7 +822,7 @@ void Contact::save( QString &buf ) const
     }
     buf += customToXml();
     if ( categories().count() > 0 )
-	buf += "Categories=\"" + idsToString( categories() ) + "\" ";
+	buf += "Categories=\"" + idsToString( categories() ) + "\" "; // No tr
     buf += "Uid=\"" + QString::number( uid() ) + "\" ";
     // You need to close this yourself
 }
@@ -835,16 +835,16 @@ QStringList Contact::fields()
 {
     QStringList list;
 
-    list.append( "Title" );  // Not Used!
+    list.append( "Title" );  // No tr; Not Used!
     list.append( "FirstName" );
     list.append( "MiddleName" );
     list.append( "LastName" );
-    list.append( "Suffix" );
+    list.append( "Suffix" ); // No tr
     list.append( "FileAs" );
 
     list.append( "JobTitle" );
-    list.append( "Department" );
-    list.append( "Company" );
+    list.append( "Department" ); // No tr
+    list.append( "Company" ); // No tr
     list.append( "BusinessPhone" );
     list.append( "BusinessFax" );
     list.append( "BusinessMobile" );
@@ -864,10 +864,10 @@ QStringList Contact::fields()
     list.append( "BusinessPager" );
     list.append( "BusinessWebPage" );
 
-    list.append( "Office" );
-    list.append( "Profession" );
-    list.append( "Assistant" );
-    list.append( "Manager" );
+    list.append( "Office" ); // No tr
+    list.append( "Profession" ); // No tr
+    list.append( "Assistant" ); // No tr
+    list.append( "Manager" ); // No tr
 
     list.append( "HomeStreet" );
     list.append( "HomeCity" );
@@ -876,15 +876,15 @@ QStringList Contact::fields()
     list.append( "HomeCountry" );
     list.append( "HomeWebPage" );
 
-    list.append( "Spouse" );
-    list.append( "Gender" );
-    list.append( "Birthday" );
-    list.append( "Anniversary" );
-    list.append( "Nickname" );
-    list.append( "Children" );
+    list.append( "Spouse" ); // No tr
+    list.append( "Gender" ); // No tr
+    list.append( "Birthday" ); // No tr
+    list.append( "Anniversary" ); // No tr
+    list.append( "Nickname" ); // No tr
+    list.append( "Children" ); // No tr
 
-    list.append( "Notes" );
-    list.append( "Groups" );
+    list.append( "Notes" ); // No tr
+    list.append( "Groups" ); // No tr
 
     return list;
 }

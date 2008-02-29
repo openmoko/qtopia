@@ -43,14 +43,14 @@ DateBookMonthHeader::DateBookMonthHeader( QWidget *parent, const char *name )
 
     begin = new QToolButton( this );
     begin->setFocusPolicy(NoFocus);
-    begin->setIconSet( qtopia_internal_loadIconSet( "start" ) );
+    begin->setIconSet( qtopia_internal_loadIconSet( "start" ) ); // No tr
     begin->setAutoRaise( TRUE );
     begin->setFixedSize( begin->sizeHint() );
     QWhatsThis::add( begin, tr("Show January in the selected year") );
 
     back = new QToolButton( this );
     back->setFocusPolicy(NoFocus);
-    back->setIconSet( qtopia_internal_loadIconSet( "back" ) );
+    back->setIconSet( qtopia_internal_loadIconSet( "back" ) ); // No tr
     back->setAutoRaise( TRUE );
     back->setFixedSize( back->sizeHint() );
     QWhatsThis::add( back, tr("Show the previous month") );
@@ -63,14 +63,14 @@ DateBookMonthHeader::DateBookMonthHeader( QWidget *parent, const char *name )
 
     next = new QToolButton( this );
     next->setFocusPolicy(NoFocus);
-    next->setIconSet( qtopia_internal_loadIconSet( "forward" ) );
+    next->setIconSet( qtopia_internal_loadIconSet( "forward" ) ); // No tr
     next->setAutoRaise( TRUE );
     next->setFixedSize( next->sizeHint() );
     QWhatsThis::add( next, tr("Show the next month") );
 
     end = new QToolButton( this );
     end->setFocusPolicy(NoFocus);
-    end->setIconSet( qtopia_internal_loadIconSet( "finish" ) );
+    end->setIconSet( qtopia_internal_loadIconSet( "finish" ) ); // No tr
     end->setAutoRaise( TRUE );
     end->setFixedSize( end->sizeHint() );
     QWhatsThis::add( end, tr("Show December in the selected year") );
@@ -737,8 +737,7 @@ void DateButton::setDate( QDate d )
 {
     currDate = d;
     setText( longFormat ? TimeString::longDateString( d, df ) :
-	     TimeString::shortDate( d, df ) ); 
-
+             TimeString::shortDate( d, df ) );
 }
 
 void DateButton::setDateFormat( ::DateFormat f )

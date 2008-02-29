@@ -92,6 +92,7 @@ public:
 
     virtual EventIteratorMachine *begin() const = 0;
 
+    virtual PrEvent eventForId( const QUuid &, bool *ok ) const = 0;
 signals:
     void eventsUpdated();
 

@@ -24,15 +24,17 @@
 #include <qapplication.h> 
 #include "config.h"
 
+#include <time.h>
 
-class TimeStringFormatKeeper : public QObject
+
+class TimeStringFormat : public QObject
 {
     Q_OBJECT
 public:
     static DateFormat currentFormat()
     {
 	if ( !self )
-	    self  = new TimeStringFormatKeeper;
+	    self  = new TimeStringFormat;
 	return self->format;
     }
 private slots:
@@ -41,10 +43,10 @@ private slots:
 	format = f;
     }
 private:
-    static TimeStringFormatKeeper *self;
+    static TimeStringFormat *self;
     DateFormat format;
 
-    TimeStringFormatKeeper()
+    TimeStringFormat()
 	: QObject( qApp )
     {
 	Config config("qpe");
@@ -58,7 +60,7 @@ private:
     }
 };
 
-TimeStringFormatKeeper *TimeStringFormatKeeper::self = 0;
+TimeStringFormat *TimeStringFormat::self = 0;
 
 QString DateFormat::toNumberString() const
 {
@@ -68,13 +70,13 @@ QString DateFormat::toNumberString() const
 	// switch on the relavent 3 bits.
 	switch((_shortOrder >> (i * 3)) & 0x0007) { 
 	    case 0x0001:
-		buf += QObject::tr( "D" );
+		buf += TimeStringFormat::tr( "D", "day in month" );
 		break;
 	    case 0x0002:
-		buf += QObject::tr( "M" );
+		buf += TimeStringFormat::tr( "M" );
 		break;
 	    case 0x0004:
-		buf += QObject::tr( "Y" );
+		buf += TimeStringFormat::tr( "Y" );
 		break;
 	}
 	if (i < 2)
@@ -91,7 +93,7 @@ QString DateFormat::toWordString() const
 	// switch on the relavent 3 bits.
 	switch((_longOrder >> (i * 3)) & 0x0007) { 
 	    case 0x0001:
-		buf += QObject::tr( "day" );
+		buf += TimeStringFormat::tr( "day", "in month" );
 		if (i < 2) { 
 		    if ((_shortOrder << ((i+1) * 3)) & 0x0007)
 			buf += ", ";
@@ -100,12 +102,12 @@ QString DateFormat::toWordString() const
 		}
 		break;
 	    case 0x0002:
-		buf += QObject::tr( "month" );
+		buf += TimeStringFormat::tr( "month" );
 		if (i < 2) 
 		    buf += " ";
 		break;
 	    case 0x0004:
-		buf += QObject::tr( "year" );
+		buf += TimeStringFormat::tr( "year" );
 		if (i < 2) 
 		    buf += ", ";
 		break;
@@ -150,64 +152,88 @@ QString DateFormat::numberDate(const QDate &d, int v) const
     return buf;
 }
 
+static QString dayname(const QDate& d, bool lng)
+{
+    char buffer[255];
+    struct tm tt;
+    int weekday = d.dayOfWeek();
+    memset( &tt, 0, sizeof( tm ) );
+    tt.tm_wday = ( weekday == 7 ) ? 0 : weekday;
+    if ( strftime( buffer, sizeof( buffer ), lng ? "%A" : "%a", &tt ) )
+	return QString::fromLocal8Bit( buffer );
+    else
+	return d.dayName(d.dayOfWeek());
+}
+
 QString DateFormat::wordDate(const QDate &d, int v) const
 {
-    QString buf = "";
     // for each part of the order
-    if (v & showWeekDay) {
-	QString weekDay = d.dayName(d.dayOfWeek());
-	if (!(v & longWord)) {
-	    weekDay = weekDay.left(3);
-	}
-	buf += weekDay;
-	if ((_longOrder & 0x0007) == 0x0002)
-	    buf += ' ';
-	else 
-	    buf += ", ";
-    }
+    QString weekDay;
+    if (v & showWeekDay)
+	weekDay = ::dayname(d,(v & longWord));
 
+    QString date="";
+    QString sep="";
     for (int i = 0; i < 3; i++) {
 	// switch on the relavent 3 bits.
-	switch((_longOrder >> (i * 3)) & 0x0007) { 
-	    case 0x0001:
-	      if (i==1) {
-		buf += QString().sprintf("%02d, ",d.day());
-	      } else {
-		buf += QString().sprintf("%2d",d.day());
-		if (separator()=='.') // 2002/1/11 
-		  buf += ". ";
+	int field = (_longOrder >> (i * 3)) & 0x0007;
+        if ( field && !date.isEmpty() )
+	    date += sep;
+	switch (field) {
+	    case 0x0001: // Day
+	        if (i==1) {
+		    date += QString().sprintf("%02d",d.day());
+		    sep = TimeStringFormat::tr(", ","day-date separator");
+	        } else {
+		    date += QString().sprintf("%2d",d.day());
+		    if (separator()=='.') // 2002/1/11 
+		        sep = ".";
 		    else 
-			buf += " ";
+		        sep = "";
+	            sep += TimeStringFormat::tr(" ","day-date separator");
 		}
 		break;
-	    case 0x0002:
+	    case 0x0002: // Month
 		{
-		    QString monthName = d.monthName(d.month());
-		    if (!(v & longWord)) {
-			monthName = monthName.left(3);
-		    }
-		    buf += monthName;
+		    QString monthName;
+		    char buffer[255];
+		    tm tt;
+		    memset( &tt, 0, sizeof( tm ) );
+		    tt.tm_mon = d.month() - 1;
+		    if ( strftime( buffer, sizeof( buffer ), (v & longWord) ? "%B" : "%b", &tt ) )
+			monthName = QString::fromLocal8Bit( buffer );
+		    else
+			monthName = d.monthName(d.month());
+		    date += monthName;
 		}
-		if (i < 2) 
-		    buf += " ";
+		sep = TimeStringFormat::tr(" ","month-date separator");
 		break;
-	    case 0x0004:
+	    case 0x0004: // Year
 		{
 		    int year = d.year();
 		    if (!(v & longNumber))
 			year = year % 100;
 
 		    if (year < 10)
-			buf += "0";
+			date += "0";
 
-		    buf += QString::number(year);
+		    date += QString::number(year);
 		}
-		if (i < 2) 
-		    buf += ", ";
+		sep = TimeStringFormat::tr(", ","year-date seperator");
 		break;
 	}
     }
-    return buf;
+
+    QString r = "";
+    if ( weekDay.isEmpty() )
+	r = date;
+    else if ((_longOrder & 0x0007) == 0x0002)
+	r = TimeStringFormat::tr("%1 %2","1=Monday 2=January 12").arg(weekDay).arg(date);
+    else if ( _longOrder )
+	r = TimeStringFormat::tr("%1, %2","1=Monday 2=12 January").arg(weekDay).arg(date);
+    else
+	r = weekDay;
+    return r;
 }
 
 #ifndef QT_NO_DATASTREAM
@@ -252,7 +278,7 @@ QString TimeString::shortDate( const QDate &d, DateFormat dtf )
 
 QString TimeString::dateString( const QDate &d, DateFormat dtf )
 {
-    return dtf.wordDate(d, DateFormat::longNumber | DateFormat::longWord);
+    return dtf.wordDate(d, DateFormat::longNumber);
 }
 
 
@@ -264,7 +290,7 @@ QString TimeString::longDateString( const QDate &d, DateFormat dtf )
 
 DateFormat TimeString::currentDateFormat()
 {
-    return TimeStringFormatKeeper::currentFormat();
+    return TimeStringFormat::currentFormat();
 }
 
 
@@ -314,28 +340,19 @@ QString TimeString::timeString( const QTime &t, bool ampm, bool seconds )
     if ( seconds )
 	argString = argString.arg( strSec );
     if ( hour >= 12 )
-	argString = argString.arg( QObject::tr("PM") );
+	argString = argString.arg( TimeStringFormat::tr("PM") );
     else
-	argString = argString.arg( QObject::tr("AM") );
+	argString = argString.arg( TimeStringFormat::tr("AM") );
     return argString;
 }
 
 QString TimeString::shortTime( bool ampm, bool seconds )
 {
-    static const char* const day[] = {
-	    QT_TRANSLATE_NOOP( "QObject", "Mon" ),
-	    QT_TRANSLATE_NOOP( "QObject", "Tue" ),
-	    QT_TRANSLATE_NOOP( "QObject", "Wed" ),
-	    QT_TRANSLATE_NOOP( "QObject", "Thu" ),
-	    QT_TRANSLATE_NOOP( "QObject", "Fri" ),
-	    QT_TRANSLATE_NOOP( "QObject", "Sat" ),
-	    QT_TRANSLATE_NOOP( "QObject", "Sun" )
-    };
     // just create a shorter time String
     QDateTime dtTmp = QDateTime::currentDateTime();
-    QString strTime;
-    strTime = QObject::tr( day[dtTmp.date().dayOfWeek()-1] ) + " " +
-    timeString( dtTmp.time(), ampm, seconds );
+    QString strTime = TimeStringFormat::tr( "%1 %2", "1=Monday 2=12:45" )
+	.arg(::dayname(dtTmp.date(),FALSE))
+	.arg(timeString( dtTmp.time(), ampm, seconds ));
     return strTime;
 }
 

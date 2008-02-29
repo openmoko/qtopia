@@ -42,7 +42,7 @@ const int endianTest = 1;
 			     (((l) & 0x000000ff) << 24))  : (l))
 
 KRFBLogin::KRFBLogin( KRFBConnection *con )
-  : QObject( con, "RFB login manager" )
+  : QObject( con, "RFB login manager" ) // No tr
 {
   assert( con );
   this->con = con;

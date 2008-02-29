@@ -20,6 +20,18 @@
 
 #include <qtopia/qpeapplication.h>
 
+#include <sys/types.h>
+
+#ifndef QT_NO_COP    
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+
+#ifndef Q_OS_WIN32
+#include <unistd.h>
+#else
+#include <process.h>
+#endif
+
 #include "qpe_show_dialog.cpp"
 
 void QPEApplication::showDialog( QDialog* d, bool nomax )
@@ -33,6 +45,14 @@ int QPEApplication::execDialog( QDialog* d, bool nomax )
     return d->exec();
 }
 
+void QPEApplication::setTempScreenSaverMode(screenSaverHint hint)
+{
+#ifndef QT_NO_COP    
+    int pid = ::getpid();
+    QCopEnvelope("QPE/System", "setTempScreenSaverMode(int,int)") << hint << pid;
+#endif
+}
+
 #ifdef Q_OS_WIN32
 /*!
   Provide minimal support for setting environment variables
@@ -41,7 +61,9 @@ int setenv(const char* name, const char* value, int overwrite)
 {
   QString msg(name);
   msg.append("=").append(value);
-  return _putenv(msg.local8Bit());
+  // put env requires ownership of the value and will free it
+  char * envValue = strdup(msg.local8Bit());
+  return _putenv(envValue);
 }
 
 /*

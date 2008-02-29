@@ -42,13 +42,13 @@ Access denied</source>
         <source>Mismatch: Retry new code</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Invalid: Retry new code</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SecurityBase</name>
-    <message>
-        <source>Security Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>Passcode</source>
         <translation type="unfinished"></translation>
@@ -99,6 +99,10 @@ Access denied</source>
     </message>
     <message>
         <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

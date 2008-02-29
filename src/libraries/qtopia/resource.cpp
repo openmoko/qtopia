@@ -175,7 +175,7 @@ QImage Resource::loadImage( const QString &name)
     if ( img.isNull() ) {
 	// No inlined image, try file
 	// For *_disabled images, only search for XPM and PNG
-	bool disabled = name[(int)name.length()-1]=='d' && name.right(9)=="_disabled";
+	bool disabled = name[(int)name.length()-1]=='d' && name.right(9)=="_disabled"; // No tr
 	if ( disabled )
 	    qpe_fast_findPixmap = TRUE;
 	QString f = Resource::findPixmap(name);

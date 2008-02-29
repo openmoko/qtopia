@@ -28,6 +28,7 @@
 #include <qtopia/pim/pimrecord.h>
 
 #include <qtopia/timeconversion.h>
+#include <qtopia/timezone.h>
 
 //#define EVENT_USE_CACHING
 
@@ -44,13 +45,10 @@ class PimEventPrivate;
 class QTOPIAPIM_EXPORT PimEvent : public PimRecord
 {
 public:
-    /*!
-      \internal
-    */
     enum EventFields {
 	Description = CommonFieldsEnd,
 	Location,
-	TimeZone,
+	StartTimeZone,
 	Notes,
 	StartDateTime,
 	EndDateTime,
@@ -95,12 +93,12 @@ public:
     QString description() const { return mDescription; }
     QString location() const { return mLocation; }
     QDateTime start() const { return mStart; }
-    QDateTime startInTZ( const QString & = QString::null ) const;
+    QDateTime startInCurrentTZ() const;
     QDateTime end() const { return mEnd; }
-    QDateTime endInTZ( const QString & = QString::null ) const;
+    QDateTime endInCurrentTZ( ) const;
     QString notes() const { return mNotes; }
-    QString timeZone() const;
-    QString endTimeZone() const { return mEndTimeZone; }
+    TimeZone timeZone() const;
+    TimeZone endTimeZone() const;
 
     bool hasAlarm() const { return mHasAlarm; }
     int alarmDelay() const { return mAlarmDelay; } // in minutes.
@@ -111,7 +109,7 @@ public:
     int frequency() const { return mFrequency; }
     int weekOffset() const;
     QDate repeatTill() const;
-    QDate repeatTillInTZ( const QString & = QString::null ) const;
+    QDate repeatTillInCurrentTZ( ) const;
     bool repeatForever() const;
     bool showOnNearest() const { return mShowOnNearest; }
     bool repeatOnWeekDay(int day) const;
@@ -136,7 +134,7 @@ public:
 
     bool isTravel() const
     {
-	return !mEndTimeZone.isEmpty() && !mTimeZone.isEmpty();
+	return mEndTimeZone.isValid() && mTimeZone.isValid();
     }
 
     void setDescription( const QString &s );
@@ -144,8 +142,8 @@ public:
     void setStart( const QDateTime &d );
     void setEnd( const QDateTime &e );
     void setNotes( const QString &n );
-    void setTimeZone( const QString & );
-    void setEndTimeZone( const QString & );
+    void setTimeZone( const TimeZone & );
+    void setEndTimeZone( const TimeZone & );
 
     void setAlarm( int minutes, SoundTypeChoice );
     void clearAlarm();
@@ -200,8 +198,8 @@ protected:
     QDateTime mStart;
     QDateTime mEnd;
     QString mNotes;
-    QString mTimeZone;
-    QString mEndTimeZone;
+    TimeZone mTimeZone;
+    TimeZone mEndTimeZone;
 
     bool mHasAlarm;
     int mAlarmDelay;
@@ -259,8 +257,8 @@ class QTOPIAPIM_EXPORT Occurrence
 	QDateTime start() const;
 	QDateTime end() const;
 
-	QDateTime startInTZ( const QString &zone = QString::null ) const;
-	QDateTime endInTZ( const QString &zone = QString::null ) const;
+	QDateTime startInCurrentTZ( ) const;
+	QDateTime endInCurrentTZ( ) const;
 
 	PimEvent event() const;
     private:

@@ -66,7 +66,7 @@ KVNC::KVNC( const char *name ) : QMainWindow( 0, name )
     fullscreen = false;
     isConnected = false;
 
-    canvas = new KRFBCanvas( this, "canvas" );
+    canvas = new KRFBCanvas( this, "canvas" ); // No tr
     setCentralWidget( canvas );
 
     connect( canvas->connection(), SIGNAL(statusChanged(const QString &)),

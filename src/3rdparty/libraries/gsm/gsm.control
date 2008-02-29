@@ -2,7 +2,8 @@ Files: lib/libgsm*
 Priority: optional
 Section: qpe/system
 Maintainer: Martin Jones <mjones@trolltech.com>
-Architecture: arm
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-9
 Description: GSM Audio library for Qtopia
  GSM library for Qtopia gsm audio plugin.

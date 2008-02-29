@@ -325,7 +325,7 @@
             </property>
         </widget>
         <widget>
-            <class>QPEDateButton</class>
+            <class>QPEDateEdit</class>
             <property stdset="1">
                 <name>name</name>
                 <cstring>dButton</cstring>
@@ -339,8 +339,8 @@
 </widget>
 <customwidgets>
     <customwidget>
-        <class>QPEDateButton</class>
-        <header location="global">qtopia/datepicker.h</header>
+        <class>QPEDateEdit</class>
+        <header location="global">qtopia/datetimeedit.h</header>
         <sizehint>
             <width>25</width>
             <height>20</height>
@@ -351,7 +351,7 @@
             <verdata>0</verdata>
         </sizepolicy>
         <pixmap>image2</pixmap>
-        <signal>dateSelected(QDate)</signal>
+        <signal>valueChanged(QDate)</signal>
         <slot access="public">setDate(QDate)</slot>
         <slot access="public">setWeekStartsMonday(int)</slot>
         <slot access="public">setDateFormat(DateFormat)</slot>

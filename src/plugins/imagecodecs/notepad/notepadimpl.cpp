@@ -83,6 +83,7 @@ static void write_npad_image(QImageIO* iio)
 */
 
 NotePadImpl::NotePadImpl()
+    : ref(0)
 {
 }
 

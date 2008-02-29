@@ -13,11 +13,11 @@
 <context>
     <name>RotationSettingsBase</name>
     <message>
-        <source>Rotation Settings</source>
+        <source>Rotation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;p&gt;The chosen rotation will only affect new applications.</source>
+        <source>&lt;p&gt;The chosen rotation will take affect immediately.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

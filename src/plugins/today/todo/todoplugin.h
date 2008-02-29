@@ -40,7 +40,7 @@ public:
     TodoPlugin(QObject *parent, const char *name);
     ~TodoPlugin();
 
-    QString name() const { return "TodoList plugin"; }
+    QString name() const;
     virtual QPixmap icon() const;
     
     virtual QString html(uint charWidth, uint lineHeight) const;

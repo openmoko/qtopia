@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>257</width>
+            <width>249</width>
             <height>362</height>
         </rect>
     </property>
@@ -141,114 +141,12 @@
             <grid>
                 <property stdset="1">
                     <name>margin</name>
-                    <number>6</number>
+                    <number>11</number>
                 </property>
                 <property stdset="1">
                     <name>spacing</name>
-                    <number>2</number>
+                    <number>6</number>
                 </property>
-                <widget row="1"  column="2" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_lightoff</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>suffix</name>
-                        <string> seconds</string>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="2"  column="2" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_suspend</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>suffix</name>
-                        <string> seconds</string>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="0"  column="2" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_dim</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>suffix</name>
-                        <string> seconds</string>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
                 <widget row="0"  column="0"  rowspan="1"  colspan="2" >
                     <class>QCheckBox</class>
                     <property stdset="1">
@@ -338,7 +236,130 @@
                         <cstring>screensaver_suspend</cstring>
                     </property>
                 </widget>
-                <widget row="3"  column="0"  rowspan="1"  colspan="3" >
+                <widget row="0"  column="2" >
+                    <class>QSpinBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>interval_dim</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>buttonSymbols</name>
+                        <enum>PlusMinus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>maxValue</name>
+                        <number>3600</number>
+                    </property>
+                    <property stdset="1">
+                        <name>minValue</name>
+                        <number>10</number>
+                    </property>
+                    <property stdset="1">
+                        <name>lineStep</name>
+                        <number>15</number>
+                    </property>
+                </widget>
+                <widget row="1"  column="2" >
+                    <class>QSpinBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>interval_lightoff</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>buttonSymbols</name>
+                        <enum>PlusMinus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>maxValue</name>
+                        <number>3600</number>
+                    </property>
+                    <property stdset="1">
+                        <name>minValue</name>
+                        <number>10</number>
+                    </property>
+                    <property stdset="1">
+                        <name>lineStep</name>
+                        <number>15</number>
+                    </property>
+                </widget>
+                <widget row="0"  column="3" >
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>TextLabel1</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>seconds</string>
+                    </property>
+                </widget>
+                <widget row="1"  column="3" >
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>TextLabel2</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>seconds</string>
+                    </property>
+                </widget>
+                <widget row="2"  column="2" >
+                    <class>QSpinBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>interval_suspend</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>buttonSymbols</name>
+                        <enum>PlusMinus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>maxValue</name>
+                        <number>3600</number>
+                    </property>
+                    <property stdset="1">
+                        <name>minValue</name>
+                        <number>10</number>
+                    </property>
+                    <property stdset="1">
+                        <name>lineStep</name>
+                        <number>15</number>
+                    </property>
+                </widget>
+                <widget row="2"  column="3" >
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>TextLabel3</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>seconds</string>
+                    </property>
+                </widget>
+                <widget row="3"  column="0"  rowspan="1"  colspan="4" >
                     <class>QCheckBox</class>
                     <property stdset="1">
                         <name>name</name>
@@ -573,12 +594,16 @@
     </connection>
 </connections>
 <tabstops>
-    <tabstop>auto_brightness</tabstop>
+    <tabstop>batteryButton</tabstop>
+    <tabstop>externalButton</tabstop>
     <tabstop>screensaver_dim</tabstop>
     <tabstop>interval_dim</tabstop>
     <tabstop>screensaver_lightoff</tabstop>
     <tabstop>interval_lightoff</tabstop>
+    <tabstop>screensaver_suspend</tabstop>
     <tabstop>interval_suspend</tabstop>
+    <tabstop>notnetworkedsuspend</tabstop>
     <tabstop>brightness</tabstop>
+    <tabstop>auto_brightness</tabstop>
 </tabstops>
 </UI>

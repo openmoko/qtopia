@@ -73,10 +73,6 @@ einen anderen Namen.</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>WEP authentication</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Key 1:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -93,18 +89,6 @@ einen anderen Namen.</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Passphrase</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No authentication</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>128 bit keys</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Network:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -118,6 +102,26 @@ einen anderen Namen.</translation>
     </message>
     <message>
         <source>Infrastructure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Passphrase:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>40 bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>128 bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>WEP:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

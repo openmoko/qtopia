@@ -17,8 +17,8 @@
 ** not clear to you.
 **
 **********************************************************************/
-#ifndef __CLIPBOARD_APPLET_H__
-#define __CLIPBOARD_APPLET_H__
+#ifndef __IRRECEIVER_APPLET_H__
+#define __IRRECEIVER_APPLET_H__
 
 #include <qtopia/accessory.h>
 
@@ -40,16 +40,11 @@ private slots:
     void obexMessage(const QCString&, const QByteArray&);
 
 private:
-    void setState(State);
-    void timerEvent(QTimerEvent*);
-    void service(const QString& command);
-
     Accessory* acc;
     int it[4];
-    int tid;
     State state;
 };
 
 
-#endif // __CLIPBOARD_APPLET_H__
+#endif // __IRRECEIVER_APPLET_H__
 

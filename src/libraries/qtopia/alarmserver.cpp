@@ -86,9 +86,10 @@ void setNearestTimerEvent()
     QListIterator<timerEventItem> it( timerEventList );
     if ( *it )
 	nearestTimerEvent = *it;
-    for ( ; *it; ++it )
+    for ( ; *it; ++it ) {
 	if ( (*it)->UTCtime < nearestTimerEvent->UTCtime )
 	    nearestTimerEvent = *it;
+    }
     if (nearestTimerEvent)
 	timerEventReceiver->resetTimer();
     else
@@ -112,7 +113,6 @@ static void saveState()
 	QDataStream ds( &savefile );
 
 	//save
-
 	QListIterator<timerEventItem> it( timerEventList );
 	for ( ; *it; ++it ) {
 	    ds << it.current()->UTCtime;
@@ -121,11 +121,9 @@ static void saveState()
 	    ds << it.current()->data;
 	}
 
-
 	savefile.close();
 	unlink( savefilename );
 	QDir d; d.rename(savefilename+".new",savefilename);
-
     }
 }
 
@@ -134,8 +132,7 @@ static void saveState()
  */
 void AlarmServer::initialize()
 {
-    //read autosave file and put events in timerEventList
-
+    // read autosave file and put events in timerEventList
     QString savefilename = Global::applicationFileName( "AlarmServer", "saveFile" );
 
     QFile savefile(savefilename);
@@ -163,7 +160,7 @@ static const char* atdir = "/var/spool/at/";
 
 static bool triggerAtd( bool writeHWClock = FALSE )
 {
-    QFile trigger(QString(atdir) + "trigger");
+    QFile trigger(QString(atdir) + "trigger"); // No tr
     if ( trigger.open(IO_WriteOnly|IO_Raw) ) {
 
 	const char* data =
@@ -263,7 +260,9 @@ void TimerReceiverObject::timerEvent( QTimerEvent * )
 	    e << TimeConversion::fromUTC( nearestTimerEvent->UTCtime )
 	      << nearestTimerEvent->data;
 #endif
-	    timerEventList.remove( nearestTimerEvent );
+	    timerEventList.removeRef( nearestTimerEvent );
+	    delete nearestTimerEvent;
+	    nearestTimerEvent = 0;
 	    needSave = TRUE;
 	}
         setNearestTimerEvent();
@@ -365,30 +364,37 @@ void AlarmServer::deleteAlarm (QDateTime when, const QCString& channel, const QC
 {
     if ( qApp->type() == QApplication::GuiServer) {
 	bool needSave = FALSE;
-	if ( timerEventReceiver != NULL ) {
+	if ( timerEventReceiver ) {
 	    timerEventReceiver->killTimers();
 
 	    // iterate over the list of events
 	    QListIterator<timerEventItem> it( timerEventList );
 	    time_t deleteTime = TimeConversion::toUTC( when );
 	    bool updatenearest = FALSE;
-	    for ( ; *it; ) {
+	    while ( *it ) {
+		timerEventItem *event = *it;
+		++it;
 		// if its a match, delete it
-		if ( ( (*it)->UTCtime == deleteTime || when.isNull() )
-		    && ( channel.isNull() || (*it)->channel == channel )
-		    && ( message.isNull() || (*it)->message == message )
-		    && ( data==-1 || (*it)->data == data ) )
+		if ( ( event->UTCtime == deleteTime || when.isNull() )
+		    && ( channel.isNull() || event->channel == channel )
+		    && ( message.isNull() || event->message == message )
+		    && ( data==-1 || event->data == data ) )
 		{
 		    // if it's first, then we need to update the timer
-		    timerEventList.remove(*it);
-		    if ( (*it) == nearestTimerEvent )
+		    if ( event == nearestTimerEvent ) {
 			updatenearest = TRUE;
+			nearestTimerEvent = 0;
+		    }
+		    timerEventList.removeRef(event);
+		    delete event;
 		    needSave = TRUE;
-		} else
-		    ++it;
+		}
 	    }
+
 	    if ( updatenearest )
 		setNearestTimerEvent();
+	    else if ( nearestTimerEvent )
+		timerEventReceiver->resetTimer();
 	}
 	if ( needSave )
 	    saveState();

@@ -218,22 +218,30 @@ void Security::changePassCode()
     QString new1;
     QString new2;
     bool    mismatch = FALSE;
+    bool    valid = TRUE;
 
     do {
 	if (mismatch) {
 	    new1 = enterPassCode(tr("Mismatch: Retry new code"));
+	} else if (!valid) {
+	    new1 = enterPassCode(tr("Invalid: Retry new code"));
 	} else {
 	    new1 = enterPassCode(tr("Enter new passcode"));
 	}
 	if ( new1.isNull() )
 	    return;
-	new2 = enterPassCode(tr("Re-enter new passcode"));
-	if ( new2.isNull() )
-	    return;
+	if (new1.isEmpty()) {
+	    valid = FALSE;
+	} else {
+	    new2 = enterPassCode(tr("Re-enter new passcode"));
+	    if ( new2.isNull() )
+		return;
 
-	mismatch = new1 != new2;
+	    valid = !new2.isEmpty();
+	    mismatch = new1 != new2;
+	}
 
-    } while (new1 != new2);
+    } while (mismatch || !valid);
 
     passcode = new1;
     updateGUI();

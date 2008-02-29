@@ -11,13 +11,13 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>244</width>
+            <width>240</width>
             <height>286</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Taskbar Settings</string>
+        <string>Taskbar</string>
     </property>
     <property>
         <name>layoutMargin</name>

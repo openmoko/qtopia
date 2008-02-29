@@ -642,7 +642,7 @@ int QSimpleTextCodec::heuristicNameMatch(const char* hint) const
 	if( i ) return i;
     } else if (( hint[0]=='m' ) && ( QCString(hint) == "microsoft-cp1251" ))
          return QTextCodec::heuristicNameMatch("cp1251");
-    else if (( hint[0]=='w' ) && ( QCString(hint) == "windows-1251" ))
+    else if (( hint[0]=='w' ) && ( QCString(hint) == "windows-1251" )) // No tr
          return QTextCodec::heuristicNameMatch("cp1251")-1;
     return QTextCodec::heuristicNameMatch(hint);
 }
@@ -672,6 +672,7 @@ int QSimpleTextCodec::heuristicContentMatch(const char* chars, int len) const
 
 
 Simple8Impl::Simple8Impl()
+    : ref(0)
 {
 }
 
@@ -721,6 +722,7 @@ QTextCodec *Simple8Impl::createForMib( int mib )
 }
 
 
+#ifndef QT_NO_COMPONENT
 QRESULT Simple8Impl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
 {
     *iface = 0;
@@ -738,3 +740,4 @@ Q_EXPORT_INTERFACE()
 {
     Q_CREATE_INSTANCE( Simple8Impl )
 }
+#endif

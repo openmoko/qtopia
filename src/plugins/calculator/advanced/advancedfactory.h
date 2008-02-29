@@ -27,7 +27,7 @@
 class AdvancedInterface : public CalculatorInterface
 {
 public:
-    AdvancedInterface():CalculatorInterface(){input = 0;};
+    AdvancedInterface():CalculatorInterface(){};
     virtual ~AdvancedInterface(){};
 
 #ifndef QT_NO_COMPONENT
@@ -36,10 +36,9 @@ public:
 #endif
 
     QWidget * create(QWidget *);
-    const char * pluginName() { return "Advanced"; };
+    const char * pluginName() { return "Scientific"; };
 
 private:
-    FormAdvanced *input;
     ulong ref;
 };
 
